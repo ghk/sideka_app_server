@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+sideka_app_server/__init__.py
+sideka_app_server.egg-info/PKG-INFO
+sideka_app_server.egg-info/SOURCES.txt
+sideka_app_server.egg-info/dependency_links.txt
+sideka_app_server.egg-info/entry_points.txt
+sideka_app_server.egg-info/not-zip-safe
+sideka_app_server.egg-info/top_level.txt
