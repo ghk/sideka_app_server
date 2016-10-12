@@ -41,7 +41,7 @@ def login():
 				if opt is not None:
 					desa_name = opt[0]
 
-			token = os.urandom(64).encode('base64')
+			token = os.urandom(64).encode('hex')
 			cur.execute("INSERT INTO sd_tokens VALUES ('%s', %d, %d, now())"  % (token, user[0], desa_id))
 			mysql.connection.commit()
 
