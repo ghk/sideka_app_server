@@ -66,7 +66,7 @@ def post_content(desa_id, content_type, content_subtype=None):
 	success = False
 	user_id = get_auth(desa_id, cur)
 
-	if user_id is not None:
+	if user_id is not None and content_subtype != "subtypes":
 		timestamp = request.json["timestamp"]
 		print request.data	
 		cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
@@ -75,6 +75,24 @@ def post_content(desa_id, content_type, content_subtype=None):
 
 	cur.close()
 	return jsonify({'success': success, 'user_id': user_id})
+
+@app.route('/content/<int:desa_id>/<content_type>/subtypes', methods=["GET"])
+def get_content_subtype(desa_id, content_type):
+	cur = mysql.connection.cursor()
+	user_id = get_auth(desa_id, cur)
+	result = None
+	success = False
+
+	if user_id is not None:
+		query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
+		cur.execute(query, (desa_id, content_type))
+		content = list(cur.fetchall())
+		subtypes = [c[0] for c in content]
+		success = True
+		cur.close()
+		return jsonify(subtypes)
+	cur.close()
+	return jsonify({}), 400
 
 @app.route('/content/<int:desa_id>/<content_type>', methods=["GET"])
 @app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
@@ -98,6 +116,7 @@ def get_content(desa_id, content_type, content_subtype=None):
 			return jsonify(result)
 	cur.close()
 	return jsonify({}), 400
+
 
 
 
