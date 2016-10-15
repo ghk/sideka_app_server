@@ -60,7 +60,8 @@ def get_auth(desa_id, cur):
 	return None
 
 @app.route('/content/<int:desa_id>/<content_type>', methods=["POST"])
-def post_content(desa_id, content_type):
+@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
+def post_content(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	success = False
 	user_id = get_auth(desa_id, cur)
@@ -68,7 +69,7 @@ def post_content(desa_id, content_type):
 	if user_id is not None:
 		timestamp = request.json["timestamp"]
 		print request.data	
-		cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, now(), %s)",   (desa_id, content_type, request.data, timestamp, user_id))
+		cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 		mysql.connection.commit()
 		success = True
 
@@ -76,7 +77,8 @@ def post_content(desa_id, content_type):
 	return jsonify({'success': success, 'user_id': user_id})
 
 @app.route('/content/<int:desa_id>/<content_type>', methods=["GET"])
-def get_content(desa_id, content_type):
+@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
+def get_content(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	user_id = get_auth(desa_id, cur)
 	result = None
@@ -84,7 +86,10 @@ def get_content(desa_id, content_type):
 
 	if user_id is not None:
 		timestamp = int(request.args.get('timestamp', "0"))
-		cur.execute("SELECT content from sd_contents where desa_id = %s and timestamp > %s order by timestamp desc",   (desa_id, timestamp))
+		query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
+		if content_subtype is None:
+			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
+		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
 		content = cur.fetchone()
 		if content is not None:
 			success = True
