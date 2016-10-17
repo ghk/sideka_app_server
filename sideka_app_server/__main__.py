@@ -52,7 +52,7 @@ def login():
 def get_auth(desa_id, cur):
 	token = request.headers.get('X-Auth-Token', None)
 	if token is not None:
-		cur.execute("SELECT user_id FROM sd_tokens where token = %s or desa_id = %s", (token, desa_id))
+		cur.execute("SELECT user_id FROM sd_tokens where token = %s and desa_id = %s", (token, desa_id))
 		user = cur.fetchone()
 		if user is not None:
 			return user[0]
