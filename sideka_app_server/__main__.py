@@ -1,6 +1,8 @@
 from flask import Flask, request,jsonify
 from flask_mysqldb import MySQL
+from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
+import MySQLdb
 import os
 import json
 
@@ -117,9 +119,20 @@ def get_content(desa_id, content_type, content_subtype=None):
 	cur.close()
 	return jsonify({}), 400
 
+@app.route('/desa', methods=["GET"])
+@cross_origin()
+def get_all_desa():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 
+	query = "SELECT * from sd_desa"
+	cur.execute(query)
+	desa = list(cur.fetchall())
+	success = True
+	cur.close()
+
+	return jsonify(desa)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, port=5001)
 
