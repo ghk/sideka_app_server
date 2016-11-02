@@ -19,40 +19,51 @@ phasher = PasswordHash(8, True)
 @app.route('/login', methods=["POST"])
 def login():
 	login = request.json
-	print login
-
 	cur = mysql.connection.cursor()
-	cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (login["user"], login["user"]))
-	user = cur.fetchone()
+	try:
+		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (login["user"], login["user"]))
+		user = cur.fetchone()
 
-	success = False
-	token = None
-	desa_id = 0
-	desa_name = None
+		success = False
+		token = None
+		desa_id = 0
+		desa_name = None
 
-	if user is not None:
-		success = phasher.check_password(login["password"], user[1])
+		if user is not None:
+			success = phasher.check_password(login["password"], user[1])
 
-		if success: 
-			cur.execute("SELECT meta_value FROM wp_usermeta where user_id = %d and meta_key = 'primary_blog'" % user[0])
-			primary_blog = cur.fetchone()
-			if primary_blog is not None:
-				desa_id = int(primary_blog[0])
-				cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % desa_id)
-				opt = cur.fetchone()
-				if opt is not None:
-					desa_name = opt[0]
+			if success: 
+				cur.execute("SELECT meta_value FROM wp_usermeta where user_id = %d and meta_key = 'primary_blog'" % user[0])
+				primary_blog = cur.fetchone()
+				if primary_blog is not None:
+					desa_id = int(primary_blog[0])
+					cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % desa_id)
+					opt = cur.fetchone()
+					if opt is not None:
+						desa_name = opt[0]
 
-			token = os.urandom(64).encode('hex')
-			cur.execute("INSERT INTO sd_tokens VALUES ('%s', %d, %d, now())"  % (token, user[0], desa_id))
-			mysql.connection.commit()
+				token = os.urandom(64).encode('hex')
+				cur.execute("INSERT INTO sd_tokens VALUES ('%s', %d, %d, now())"  % (token, user[0], desa_id))
+				mysql.connection.commit()
+		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user[0], 'user_nicename': user[2]})
+	finally:
+		cur.close();
 
-	cur.close();
 
-	return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user[0], 'user_nicename': user[2]})
+@app.route('/logout', methods=["GET"])
+def logout():
+	cur = mysql.connection.cursor()
+	try:
+		token = request.headers.get('X-Auth-Token', None)
+		cur.execute("DELETE FROM sd_tokens where token = %s", (token, ))
+		mysql.connection.commit()
+	finally:
+		cur.close();
+	return jsonify({'success': True})
 
 def get_auth(desa_id, cur):
 	token = request.headers.get('X-Auth-Token', None)
+	print token
 	if token is not None:
 		cur.execute("SELECT user_id FROM sd_tokens where token = %s and desa_id = %s", (token, desa_id))
 		user = cur.fetchone()
@@ -65,74 +76,82 @@ def get_auth(desa_id, cur):
 @app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
 def post_content(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
-	success = False
-	user_id = get_auth(desa_id, cur)
+	try:
+		success = False
+		user_id = get_auth(desa_id, cur)
+		print content_type
+		print content_subtype
+		print user_id
 
-	if user_id is not None and content_subtype != "subtypes":
-		timestamp = request.json["timestamp"]
-		print request.data	
-		cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
-		mysql.connection.commit()
-		success = True
+		if user_id is not None and content_subtype != "subtypes":
+			timestamp = request.json["timestamp"]
+			print request.data	
+			cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
+			mysql.connection.commit()
+			success = True
 
-	cur.close()
-	return jsonify({'success': success, 'user_id': user_id})
+		return jsonify({'success': success, 'user_id': user_id})
+	finally:
+		cur.close()
 
 @app.route('/content/<int:desa_id>/<content_type>/subtypes', methods=["GET"])
 def get_content_subtype(desa_id, content_type):
 	cur = mysql.connection.cursor()
-	user_id = get_auth(desa_id, cur)
-	result = None
-	success = False
+	try:
+		user_id = get_auth(desa_id, cur)
+		result = None
+		success = False
 
-	if user_id is not None:
-		query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
-		cur.execute(query, (desa_id, content_type))
-		content = list(cur.fetchall())
-		subtypes = [c[0] for c in content]
-		success = True
+		if user_id is not None:
+			query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
+			cur.execute(query, (desa_id, content_type))
+			content = list(cur.fetchall())
+			subtypes = [c[0] for c in content]
+			success = True
+			return jsonify(subtypes)
+		return jsonify({}), 400
+	finally:
 		cur.close()
-		return jsonify(subtypes)
-	cur.close()
-	return jsonify({}), 400
 
 @app.route('/content/<int:desa_id>/<content_type>', methods=["GET"])
 @app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
 def get_content(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
-	user_id = get_auth(desa_id, cur)
-	result = None
-	success = False
+	try:
+		user_id = get_auth(desa_id, cur)
+		result = None
+		success = False
 
-	if user_id is not None:
-		timestamp = int(request.args.get('timestamp', "0"))
-		query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
-		if content_subtype is None:
-			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
-		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
-		content = cur.fetchone()
-		if content is not None:
-			success = True
-			result = json.loads(content[0])
-			cur.close()
-			return jsonify(result)
-	cur.close()
-	return jsonify({}), 400
+		if user_id is not None:
+			timestamp = int(request.args.get('timestamp', "0"))
+			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
+			if content_subtype is None:
+				query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
+			cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
+			content = cur.fetchone()
+			if content is not None:
+				success = True
+				result = json.loads(content[0])
+				return jsonify(result)
+		return jsonify({}), 400
+	finally:
+		cur.close()
 
 @app.route('/desa', methods=["GET"])
 @cross_origin()
 def get_all_desa():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT * from sd_desa"
+		cur.execute(query)
+		desa = list(cur.fetchall())
+		success = True
 
-	query = "SELECT * from sd_desa"
-	cur.execute(query)
-	desa = list(cur.fetchall())
-	success = True
-	cur.close()
-
-	return jsonify(desa)
+		return jsonify(desa)
+	finally:
+		cur.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5000)
 
