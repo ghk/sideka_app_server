@@ -47,7 +47,7 @@ def login():
 						desa_name = opt[0]
 
 				token = os.urandom(64).encode('hex')
-				cur.execute("INSERT INTO sd_tokens VALUES ('%s', %d, %d, now())"  % (token, user[0], desa_id))
+				cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, login["info"]))
 				mysql.connection.commit()
 		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename})
 	finally:
@@ -65,7 +65,7 @@ def logout():
 		cur.close();
 	return jsonify({'success': True})
 
-@app.route('/check_auth<int:desa_id>', methods=["GET"])
+@app.route('/check_auth/<int:desa_id>', methods=["GET"])
 def check_auth(desa_id):
 	cur = mysql.connection.cursor()
 	try:
