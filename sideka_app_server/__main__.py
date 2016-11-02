@@ -28,11 +28,15 @@ def login():
 		token = None
 		desa_id = 0
 		desa_name = None
+		user_id = None
+		user_nicename = None
 
 		if user is not None:
 			success = phasher.check_password(login["password"], user[1])
 
 			if success: 
+				user_id = user[0]
+				user_nicename = user[2]
 				cur.execute("SELECT meta_value FROM wp_usermeta where user_id = %d and meta_key = 'primary_blog'" % user[0])
 				primary_blog = cur.fetchone()
 				if primary_blog is not None:
@@ -45,7 +49,7 @@ def login():
 				token = os.urandom(64).encode('hex')
 				cur.execute("INSERT INTO sd_tokens VALUES ('%s', %d, %d, now())"  % (token, user[0], desa_id))
 				mysql.connection.commit()
-		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user[0], 'user_nicename': user[2]})
+		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename})
 	finally:
 		cur.close();
 
@@ -60,6 +64,15 @@ def logout():
 	finally:
 		cur.close();
 	return jsonify({'success': True})
+
+@app.route('/check_auth<int:desa_id>', methods=["GET"])
+def check_auth(desa_id):
+	cur = mysql.connection.cursor()
+	try:
+		user_id = get_auth(desa_id, cur)
+		return jsonify({'user_id': user_id})
+	finally:
+		cur.close();
 
 def get_auth(desa_id, cur):
 	token = request.headers.get('X-Auth-Token', None)
@@ -79,18 +92,18 @@ def post_content(desa_id, content_type, content_subtype=None):
 	try:
 		success = False
 		user_id = get_auth(desa_id, cur)
-		print content_type
-		print content_subtype
-		print user_id
 
-		if user_id is not None and content_subtype != "subtypes":
+		if user_id is None:
+			return jsonify({'success': False}), 403
+
+		if content_subtype != "subtypes":
 			timestamp = request.json["timestamp"]
 			print request.data	
 			cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 			mysql.connection.commit()
 			success = True
 
-		return jsonify({'success': success, 'user_id': user_id})
+		return jsonify({'success': success})
 	finally:
 		cur.close()
 
@@ -99,17 +112,15 @@ def get_content_subtype(desa_id, content_type):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
-		result = None
-		success = False
 
-		if user_id is not None:
-			query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
-			cur.execute(query, (desa_id, content_type))
-			content = list(cur.fetchall())
-			subtypes = [c[0] for c in content]
-			success = True
-			return jsonify(subtypes)
-		return jsonify({}), 400
+		if user_id is None:
+			return jsonify({}), 403
+
+		query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
+		cur.execute(query, (desa_id, content_type))
+		content = list(cur.fetchall())
+		subtypes = [c[0] for c in content]
+		return jsonify(subtypes)
 	finally:
 		cur.close()
 
@@ -120,20 +131,23 @@ def get_content(desa_id, content_type, content_subtype=None):
 	try:
 		user_id = get_auth(desa_id, cur)
 		result = None
-		success = False
 
-		if user_id is not None:
-			timestamp = int(request.args.get('timestamp', "0"))
-			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
-			if content_subtype is None:
-				query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
-			cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
-			content = cur.fetchone()
-			if content is not None:
-				success = True
-				result = json.loads(content[0])
-				return jsonify(result)
-		return jsonify({}), 400
+		if user_id is None:
+			return jsonify({}), 403
+
+		timestamp = int(request.args.get('timestamp', "0"))
+		query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
+		if content_subtype is None:
+			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
+		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
+
+		content = cur.fetchone()
+		if content is None:
+			return jsonify({}), 404
+
+		result = json.loads(content[0])
+		return jsonify(result)
+
 	finally:
 		cur.close()
 
@@ -145,13 +159,11 @@ def get_all_desa():
 		query = "SELECT * from sd_desa"
 		cur.execute(query)
 		desa = list(cur.fetchall())
-		success = True
-
 		return jsonify(desa)
 	finally:
 		cur.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
 
