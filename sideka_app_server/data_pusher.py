@@ -57,6 +57,8 @@ pusher_classes["keluarga"] = KeluargaPusher
 for c in contents:
 	print "------------------------------------------------------------"
 	domain = c["domain"]
+	if not domain:
+		continue
 	desa_slug = domain.split(".")[0]
 	print "%d %s %s: %s %s %d" % (c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
 	if not c["type"] in pusher_classes:

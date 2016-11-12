@@ -74,7 +74,7 @@ for c in contents:
 			r[3] = d[8:10]+"/"+d[5:7]+"/"+d[0:4]
 			print d
 			print r[3]
-		new_content = json.dumps(data)
+		new_content = json.dumps(content)
 		cur.execute("update sd_contents set content = %s where id = %s", (new_content, c["id"]))
 		db.commit()
 	except:

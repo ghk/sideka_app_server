@@ -15,7 +15,6 @@ class PendudukPusher(BasePusher):
 		super(PendudukPusher, self).__init__(desa_slug, ckan, d, desa_slug + "-kependudukan")
 		self.penduduk = self.data_as_dicts("penduduk")
 		print len(self.penduduk)
-		print self.penduduk[0]["nik"]
 
 	def sql_two_columns(self, columns, column_names):
 		results = list()
@@ -61,6 +60,7 @@ class PendudukPusher(BasePusher):
 			row["jenis_kelamin"] = jenkel
 			row["jumlah"] = len(list(group))
 			results.append(row)
+		print len(results)
 		return results
 
 	def pyramid(self):
