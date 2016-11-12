@@ -20,7 +20,7 @@ class ApbdesPusher(BasePusher):
 		records = self.apbdes
 		fields = []
 		for column in self.schema:
-			typ = "int" if column["type"] == "numeric" else "text"
+			typ = "text"
 			fields.append({"id": column["field"], "type": typ})
 		return self.ckan_push("APBDes "+self.subtyp, None, None, records, force_recreate=True, fields=fields)
 

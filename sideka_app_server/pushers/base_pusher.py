@@ -14,7 +14,7 @@ class BasePusher(object):
 		self.package_id = package_id
 		self.desa_name = d["desa"]
 
-		self.deserialized = json.loads(d["content"])
+		self.deserialized = json.loads(d["content"], encoding='ISO-8859-1')
 		self.data = self.deserialized["data"]
 		#print len(self.data)
 
