@@ -50,8 +50,12 @@ print len(contents)
 
 pusher_classes = {}
 pusher_classes["penduduk"] = PendudukPusher
+i = 0
 
 for c in contents:
+	i += 1
+	if i > 10:
+		break
 	print "------------------------------------------------------------"
 	domain = c["domain"]
 	desa_slug = domain.split(".")[0]
@@ -61,7 +65,8 @@ for c in contents:
 		continue
 	
 	try:
-		pusher = pusher_classes[c["type"]](desa_slug, ckan, c["content"], c["type"], c["subtype"])
+		pusher = pusher_classes[c["type"]](desa_slug, ckan, c)
+		pusher.setup()
 		pusher.push()
 	except Exception as e:
 		traceback.print_exc()

@@ -10,8 +10,8 @@ import demjson
 
 class PendudukPusher(BasePusher):
 
-	def __init__(self, desa_slug, ckan, json_content, typ, subtyp):
-		super(PendudukPusher, self).__init__(desa_slug, ckan, json_content, typ, subtyp, desa_slug + "-kependudukan")
+	def __init__(self, desa_slug, ckan, d):
+		super(PendudukPusher, self).__init__(desa_slug, ckan, d, desa_slug + "-kependudukan")
 		self.penduduk = self.data_as_dicts("penduduk")
 		print len(self.penduduk)
 		print self.penduduk[0]["nik"]
