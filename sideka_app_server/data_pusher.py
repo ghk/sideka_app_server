@@ -41,7 +41,7 @@ cur = db.cursor(MySQLdb.cursors.DictCursor)
 cur.execute("""
 SELECT * FROM sd_contents c 
 	left join sd_desa d on d.blog_id = c.desa_id
-	WHERE c.is_data_synchronized is null order by timestamp asc
+	WHERE c.date_opendata_synchronized is null order by timestamp asc
 """)
 
 contents = list(cur.fetchall())
