@@ -19,10 +19,17 @@ class BasePusher(object):
 		#print len(self.data)
 
 	
-	def ckan_push(self, name, columns, keys, records):
+	def ckan_push(self, name, columns, keys, records, delete_filters=None, force_recreate=False):
 		resources = self.ckan.action.package_show(id=self.package_id)["resources"]
 		for resource in resources:
 			if "name" in resource and resource["name"] == name:
+				if force_recreate:
+					print "Recreate, deleting old resource"
+					self.ckan.action.resource_delete(id=resource["id"])
+					break
+				if delete_filters is not None:
+					print "Upsert delete previous"
+					self.ckan.action.datastore_delete(resource_id=resource["id"], filters=delete_filters)
 				print "Upsert"
 				self.ckan.action.datastore_upsert(resource_id=resource["id"], records=records)
 				return resource
