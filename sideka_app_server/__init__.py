@@ -99,7 +99,7 @@ def post_content(desa_id, content_type, content_subtype=None):
 		if content_subtype != "subtypes":
 			timestamp = request.json["timestamp"]
 			print request.data	
-			cur.execute("INSERT INTO sd_contents VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
+			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 			mysql.connection.commit()
 			success = True
 
