@@ -62,6 +62,7 @@ for c in contents:
 	
 	try:
 		pusher = pusher_classes[c["type"]](desa_slug, ckan, c["content"], c["type"], c["subtype"])
+		pusher.push()
 	except Exception as e:
 		traceback.print_exc()
 

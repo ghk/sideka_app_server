@@ -1,4 +1,6 @@
 import json
+import demjson
+import os
 
 class BasePusher(object):
 
@@ -15,15 +17,26 @@ class BasePusher(object):
 		print len(self.data)
 
 	def ckan_resource(self, name, keys, records):
-		resources = self.ckan.action.package_show(id=self.package_id)["resources"]
+		#resources = self.ckan.action.package_show(id=self.package_id)["resources"]
 		#todo find resource and cancel push if not exists
-		for resource in resources:
-			if "name" in resource and resource["name"] == name:
-				self.ckan.action.resource_delete(id=resource["id"])
-		return {'name': name, 'package_id': package_id}
+		#for resource in resources:
+			#if "name" in resource and resource["name"] == name:
+			#	self.ckan.action.resource_delete(id=resource["id"])
+		for rec in records:
+			print rec
+		return {'name': name, 'package_id': self.package_id}
 
 	
 	def ckan_push(self, name, columns, keys, records):
 		resource = self.ckan_resource(name, columns, records)
-		res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys)
+		#res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys)
 		return resource
+
+	def data_as_dicts(self, schema_name):
+		schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schemas/"+schema_name+".json")
+		schema = None
+		with open(schema_file) as f:    
+		    schema = demjson.decode(f.read())
+		def to_dict(row):
+			return dict((schema[i]["field"], v) for i, v in enumerate(row))
+		return [to_dict(row) for row in self.data]

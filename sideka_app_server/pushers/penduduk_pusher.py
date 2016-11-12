@@ -12,10 +12,9 @@ class PendudukPusher(BasePusher):
 
 	def __init__(self, desa_slug, ckan, json_content, typ, subtyp):
 		super(PendudukPusher, self).__init__(desa_slug, ckan, json_content, typ, subtyp, desa_slug + "-kependudukan")
-		schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schemas/penduduk.json")
-		with open(schema_file) as f:    
-		    self.schema = demjson.decode(f.read())
-		print len(self.schema)
+		self.penduduk = self.data_as_dicts("penduduk")
+		print len(self.penduduk)
+		print self.penduduk[0]["nik"]
 
 	def sql_two_columns(self, columns, column_names):
 		results = list()
@@ -68,10 +67,10 @@ class PendudukPusher(BasePusher):
 
 
 	def push(self):
-		print self.two_columns('Pekerjaan Berdasarkan Jenis Kelamin', ['rk.deskripsi', 'rj.deskripsi'], ["pekerjaan", "jenis_kelamin"])
-		print self.two_columns('Agama Berdasarkan Jenis Kelamin', ['ra.deskripsi', 'rj.deskripsi'], ["agama", "jenis_kelamin"])
-		print self.two_columns('Pendidikan Berdasarkan Jenis Kelamin', ['rd.deskripsi', 'rj.deskripsi'], ["pendidikan", "jenis_kelamin"])
-		print self.two_columns('Golongan Darah Berdasarkan Jenis Kelamin', ['rg.deskripsi', 'rj.deskripsi'], ["golongan_darah", "jenis_kelamin"])
-		print self.two_columns('Status Kawin Berdasarkan Jenis Kelamin', ['rs.deskripsi', 'rj.deskripsi'], ["status_kawin", "jenis_kelamin"])
-		print self.pyramid()
+		print self.two_columns('Pekerjaan Berdasarkan Jenis Kelamin', ['pekerjaan', 'jenis_kelamin'], ["pekerjaan", "jenis_kelamin"])
+		print self.two_columns('Agama Berdasarkan Jenis Kelamin', ['agama', 'jenis_kelamin'], ["agama", "jenis_kelamin"])
+		print self.two_columns('Pendidikan Berdasarkan Jenis Kelamin', ['pendidikan', 'jenis_kelamin'], ["pendidikan", "jenis_kelamin"])
+		print self.two_columns('Golongan Darah Berdasarkan Jenis Kelamin', ['golongan_darah', 'jenis_kelamin'], ["golongan_darah", "jenis_kelamin"])
+		print self.two_columns('Status Kawin Berdasarkan Jenis Kelamin', ['status_kawin', 'jenis_kelamin'], ["status_kawin", "jenis_kelamin"])
+		#print self.pyramid()
 
