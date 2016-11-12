@@ -5,6 +5,7 @@ import os
 import types
 import sys
 import traceback
+import json
 from datetime import date
 import datetime
 from ckanapi import RemoteCKAN
@@ -32,9 +33,6 @@ db = MySQLdb.connect(host=conf.MYSQL_HOST,
                      passwd=conf.MYSQL_PASSWORD,
                      db=conf.MYSQL_DB)        
 
-#ckan =  RemoteCKAN("http://ckan.neon.microvac:5000", apikey="8306ed32-78f3-4f1a-b7e6-b56f9e4f91e4")     
-ckan =  RemoteCKAN(conf.CKAN_HOST, apikey=conf.CKAN_KEY)
-
 # you must create a Cursor object. It will let
 #  you execute all the queries you need
 cur = db.cursor(MySQLdb.cursors.DictCursor)
@@ -43,33 +41,43 @@ cur = db.cursor(MySQLdb.cursors.DictCursor)
 cur.execute("""
 SELECT * FROM sd_contents c 
 	left join sd_desa d on d.blog_id = c.desa_id
-	WHERE c.date_opendata_pushed is null order by timestamp asc
+	WHERE c.type = 'penduduk' and c.date_opendata_pushed is null
 """)
 
 contents = list(cur.fetchall())
-
 print len(contents)
 
-pusher_classes = {}
-pusher_classes["penduduk"] = PendudukPusher
-pusher_classes["keluarga"] = KeluargaPusher
 
+i = 0
 for c in contents:
-	print "------------------------------------------------------------"
-	domain = c["domain"]
-	desa_slug = domain.split(".")[0]
-	print "%d %s %s: %s %s %d" % (c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
-	if not c["type"] in pusher_classes:
-		print "no pusher for %s" % c["type"]
-		continue
-	
+	print i
+	i += 1
 	try:
-		pusher = pusher_classes[c["type"]](desa_slug, ckan, c)
-		pusher.setup()
-		pusher.push()
-		cur.execute("update sd_contents set date_opendata_pushed = %s where id = %s", (datetime.datetime.now(), c["id"]))
+		content = json.loads(c["content"])
+		data = content["data"]
+		if len(data) == 0:
+			continue
+		is_long_date = False
+		for r in data:
+			print r[3]
+			if not r[3]:
+				continue
+			if len(r[3]) > 10:
+				is_long_date = True
+				break
+		if not is_long_date:
+			continue
+		for r in data:
+			if not r[3]:
+				continue
+			d = r[3]
+			r[3] = d[8:10]+"/"+d[5:7]+"/"+d[0:4]
+			print d
+			print r[3]
+		new_content = json.dumps(data)
+		cur.execute("update sd_contents set content = %s where id = %s", (new_content, c["id"]))
 		db.commit()
-	except Exception as e:
+	except:
 		traceback.print_exc()
 
 
