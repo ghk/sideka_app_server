@@ -1,0 +1,35 @@
+ [
+    {
+        header: 'Kode Rekening',
+        field: 'kode_rekening', 
+        type: 'text',
+        width: 100,
+    },
+    {
+        header: 'Uraian',
+        field: 'uraian', 
+        type: 'text',
+        width: 450,
+    },
+    {
+        header: 'Anggaran',
+        field: 'anggaran', 
+        type: 'numeric',
+        width: 220,
+        format: '0,0',
+        language: 'id-ID' ,
+        
+    },
+    {
+        header: 'Keterangan',
+        field: 'keterangan', 
+        type: 'text',
+        width: 200,
+    },
+    {
+        header: 'Kategori',
+        field: 'kategori', 
+        type: 'dropdown',
+        source: ['', 'Kesehatan', 'Infrastruktur', 'Ekonomi', 'Pendidikan', 'Kantor Desa', 'Belanja Pegawai']
+    },
+]

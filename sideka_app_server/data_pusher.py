@@ -3,9 +3,11 @@ import itertools
 import csv
 import os
 import types
+import sys
+import traceback
 from datetime import date
 from ckanapi import RemoteCKAN
-from penduduk_pusher import PendudukPusher
+from pushers.penduduk_pusher import PendudukPusher
 
 def open_cfg(filename):
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
@@ -46,13 +48,22 @@ contents = list(cur.fetchall())
 
 print len(contents)
 
-for content in contents:
-	domain = content["domain"]
+pusher_classes = {}
+pusher_classes["penduduk"] = PendudukPusher
+
+for c in contents:
+	print "------------------------------------------------------------"
+	domain = c["domain"]
 	desa_slug = domain.split(".")[0]
-	print desa_slug
-	print "%d %s: %s %s %d" % (content["desa_id"], content["desa"], content["type"], content["subtype"], content["timestamp"])
-	penduduk_pusher = PendudukPusher(desa_slug, ckan, content["content"])
-	print penduduk_pusher
+	print "%d %s %s: %s %s %d" % (c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
+	if not c["type"] in pusher_classes:
+		print "no pusher for %s" % c["type"]
+		continue
+	
+	try:
+		pusher = pusher_classes[c["type"]](desa_slug, ckan, c["content"], c["type"], c["subtype"])
+	except Exception as e:
+		traceback.print_exc()
 
 
 db.close()
