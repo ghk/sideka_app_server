@@ -63,7 +63,7 @@ for c in contents:
 		print "no domain %d" % c["desa_id"]
 		continue
 	desa_slug = domain.split(".")[0]
-	print "%d %s %s: %s %s %d" % (c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
+	print "%d - %d %s %s: %s %s %d" % (c["id"], c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
 	if not c["type"] in pusher_classes:
 		print "no pusher for %s" % c["type"]
 		continue
