@@ -8,6 +8,7 @@ import traceback
 from datetime import date
 from ckanapi import RemoteCKAN
 from pushers.penduduk_pusher import PendudukPusher
+from pushers.keluarga_pusher import KeluargaPusher
 
 def open_cfg(filename):
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
@@ -49,13 +50,11 @@ contents = list(cur.fetchall())
 print len(contents)
 
 pusher_classes = {}
-pusher_classes["penduduk"] = PendudukPusher
+#pusher_classes["penduduk"] = PendudukPusher
+pusher_classes["keluarga"] = KeluargaPusher
 i = 0
 
 for c in contents:
-	i += 1
-	if i > 10:
-		break
 	print "------------------------------------------------------------"
 	domain = c["domain"]
 	desa_slug = domain.split(".")[0]
@@ -64,6 +63,9 @@ for c in contents:
 		print "no pusher for %s" % c["type"]
 		continue
 	
+	i += 1
+	if i > 3:
+		break
 	try:
 		pusher = pusher_classes[c["type"]](desa_slug, ckan, c)
 		pusher.setup()
