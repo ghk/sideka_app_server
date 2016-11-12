@@ -8,9 +8,6 @@ import traceback
 import json
 from datetime import date
 import datetime
-from ckanapi import RemoteCKAN
-from pushers.penduduk_pusher import PendudukPusher
-from pushers.keluarga_pusher import KeluargaPusher
 
 def open_cfg(filename):
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
