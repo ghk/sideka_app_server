@@ -10,6 +10,7 @@ import datetime
 from ckanapi import RemoteCKAN
 from pushers.penduduk_pusher import PendudukPusher
 from pushers.keluarga_pusher import KeluargaPusher
+from pushers.apbdes_pusher import ApbdesPusher
 
 def open_cfg(filename):
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
@@ -43,7 +44,7 @@ cur = db.cursor(MySQLdb.cursors.DictCursor)
 cur.execute("""
 SELECT * FROM sd_contents c 
 	left join sd_desa d on d.blog_id = c.desa_id
-	WHERE c.date_opendata_pushed is null order by timestamp asc
+	WHERE c.opendata_date_pushed is null and c.opendata_push_error is null order by timestamp asc
 """)
 
 contents = list(cur.fetchall())
@@ -53,11 +54,13 @@ print len(contents)
 pusher_classes = {}
 pusher_classes["penduduk"] = PendudukPusher
 pusher_classes["keluarga"] = KeluargaPusher
+pusher_classes["apbdes"] = ApbdesPusher
 
 for c in contents:
 	print "------------------------------------------------------------"
 	domain = c["domain"]
 	if not domain:
+		print "no domain %d" % c["desa_id"]
 		continue
 	desa_slug = domain.split(".")[0]
 	print "%d %s %s: %s %s %d" % (c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
@@ -69,10 +72,12 @@ for c in contents:
 		pusher = pusher_classes[c["type"]](desa_slug, ckan, c)
 		pusher.setup()
 		pusher.push()
-		cur.execute("update sd_contents set date_opendata_pushed = %s where id = %s", (datetime.datetime.now(), c["id"]))
+		cur.execute("update sd_contents set opendata_date_pushed = %s where id = %s", (datetime.datetime.now(), c["id"]))
 		db.commit()
 	except Exception as e:
 		traceback.print_exc()
+		cur.execute("update sd_contents set opendata_push_error = %s where id = %s", (str(e), c["id"]))
+		db.commit()
 
 
 db.close()

@@ -19,7 +19,7 @@ class BasePusher(object):
 		#print len(self.data)
 
 	
-	def ckan_push(self, name, columns, keys, records, delete_filters=None, force_recreate=False):
+	def ckan_push(self, name, columns, keys, records, delete_filters=None, force_recreate=False, fields=None):
 		resources = self.ckan.action.package_show(id=self.package_id)["resources"]
 		for resource in resources:
 			if "name" in resource and resource["name"] == name:
@@ -35,7 +35,10 @@ class BasePusher(object):
 				return resource
 		print "Create"
 		resource = {'name': name, 'package_id': self.package_id}
-		res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys)
+		if fields is not None:
+			res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys, fields=fields)
+		else:
+			res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys)
 		return res
 
 	def data_as_dicts(self, schema_name):
@@ -43,6 +46,7 @@ class BasePusher(object):
 		schema = None
 		with open(schema_file) as f:    
 		    schema = demjson.decode(f.read())
+		self.schema = schema
 		def to_dict(row):
 			return dict((schema[i]["field"], v) for i, v in enumerate(row))
 		return [to_dict(row) for row in self.data]
@@ -60,3 +64,9 @@ class BasePusher(object):
 			print "Creating package: %s %s" % (package, self.desa_name)
 			print self.ckan.action.package_create(id=package, name=package, title="Kependudukan Desa "+self.desa_name, owner_org=self.desa_slug)
 			
+		package = self.desa_slug + "-keuangan"
+		try:
+			self.ckan.action.package_show(id=package)
+		except NotFound:
+			print "Creating package: %s %s" % (package, self.desa_name)
+			print self.ckan.action.package_create(id=package, name=package, title="Keuangan Desa "+self.desa_name, owner_org=self.desa_slug)
