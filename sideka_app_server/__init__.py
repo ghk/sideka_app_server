@@ -5,6 +5,7 @@ from phpass import PasswordHash
 import MySQLdb
 import os
 import json
+import time
 
 
 app = Flask(__name__)
@@ -97,8 +98,12 @@ def post_content(desa_id, content_type, content_subtype=None):
 			return jsonify({'success': False}), 403
 
 		if content_subtype != "subtypes":
-			timestamp = request.json["timestamp"]
-			print request.data	
+			timestamp = int(request.json["timestamp"])
+			server_timestamp = int(time.time() * 1000)
+			print "%d - %d = %d" % (timestamp, server_timestamp, timestamp - server_timestamp)
+			if timestamp > server_timestamp or timestamp <= 0:
+				print "reseting to server timestamp, diff: %d" % server_timestamp - timestamp
+				timestamp = server_timestamp
 			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 			mysql.connection.commit()
 			success = True
