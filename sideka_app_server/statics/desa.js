@@ -45,14 +45,20 @@ var columns = [
 	header: 'Propinsi',
 	readOnly: true,
       },
+      {	
+	data: 'sekdes',
+	header: 'Nama Sekdes',
+      },
+      {	
+	data: 'kades',
+	header: 'Nama Kades',
+      },
     ];
 $.getJSON("/api/desa", function(desas){
 	var container = document.getElementById('sheet');
 
 	var hot = new Handsontable(container, {
 	  data: desas,
-	  minSpareCols: 1,
-	  minSpareRows: 1,
 	  columns: columns,
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),

@@ -19,7 +19,11 @@ phasher = PasswordHash(8, True)
 
 @app.route('/')
 def index():
-	return render_template('monitor.html')
+	return render_template('desa.html')
+
+@app.route('/contents')
+def contents():
+	return render_template('contents.html')
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
@@ -34,6 +38,17 @@ def get_all_desa():
 		cur.execute(query)
 		desa = list(cur.fetchall())
 		return jsonify(desa)
+	finally:
+		cur.close()
+
+@app.route('/api/contents', methods=["GET"])
+def get_contents():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT sd_contents.id, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by order by date_created desc limit 1000"
+		cur.execute(query)
+		contents = list(cur.fetchall())
+		return jsonify(contents)
 	finally:
 		cur.close()
 
