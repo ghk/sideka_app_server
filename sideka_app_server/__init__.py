@@ -102,7 +102,7 @@ def post_content(desa_id, content_type, content_subtype=None):
 			server_timestamp = int(time.time() * 1000)
 			print "%d - %d = %d" % (timestamp, server_timestamp, timestamp - server_timestamp)
 			if timestamp > server_timestamp or timestamp <= 0:
-				print "reseting to server timestamp, diff: %d" % server_timestamp - timestamp
+				print "reseting to server timestamp, diff: %d" % (server_timestamp - timestamp)
 				timestamp = server_timestamp
 			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 			mysql.connection.commit()
