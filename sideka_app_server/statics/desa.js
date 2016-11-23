@@ -8,7 +8,7 @@ function makeLinkRenderer(link, text){
 var columns = [
       {
 	data: 'blog_id',
-	header: 'ID',
+	header: 'Wordpress ID',
 	renderer: makeLinkRenderer(v => "https://sideka.id/wp-admin/network/site-info.php?id="+v, v => v),
 	readOnly: true,
       },
