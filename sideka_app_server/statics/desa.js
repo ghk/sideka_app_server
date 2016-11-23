@@ -1,7 +1,15 @@
+function makeLinkRenderer(link, text){
+	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
+		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
+		return td;
+	}
+}
+
 var columns = [
       {
 	data: 'blog_id',
 	header: 'ID',
+	renderer: makeLinkRenderer(v => "https://sideka.id/wp-admin/network/site-info.php?id="+v, v => v),
 	readOnly: true,
       },
       {
@@ -11,11 +19,8 @@ var columns = [
       {
 	data: 'domain',
 	header: 'Domain',
+	renderer: makeLinkRenderer(v => "http://"+v, v => v),
 	readOnly: true,
-      },
-      {	
-	data: 'desa',
-	header: 'Desa',
       },
       {
 	data: 'latitude',
@@ -28,6 +33,11 @@ var columns = [
 	header: 'Longitude',
 	format: '0.0000000',
 	type: 'numeric',
+      },
+      {	
+	data: 'desa',
+	header: 'Desa',
+	readOnly: true,
       },
       {	
 	data: 'kecamatan',
@@ -84,4 +94,11 @@ $.getJSON("/api/desa", function(desas){
 	  },
 	});
 	setTimeout(()=> hot.render(), 0);
+});
+
+$("#btn-update-from-code").click(function(){
+	console.log("updating");
+	$.post("/api/update_desa_from_code", function(){
+		location.reload();
+	});
 });

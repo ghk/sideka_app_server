@@ -1,5 +1,8 @@
 function find(){
 	var query = $("#input-finder").val();
+	if(!$("#is-full-search")[0].checked){
+		query = "%25"+query+"%25";
+	}
 	$("#result-finder tbody").html("");
 	$.getJSON("/api/find_all_desa?q="+query, function(desas){
 		desas.forEach(function(desa){

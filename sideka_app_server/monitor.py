@@ -67,6 +67,31 @@ def update_desa():
 	finally:
 		cur.close()
 
+@app.route('/api/update_desa_from_code', methods=["POST"])
+def update_desa_from_code():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = """
+		update
+		sd_desa d
+	left join  sd_all_desa desa on d.kode = desa.region_code
+	left join  sd_all_desa kec on desa.parent_code = kec.region_code
+	left join  sd_all_desa kab on kec.parent_code = kab.region_code
+	left join  sd_all_desa prop on kab.parent_code = prop.region_code
+		set d.desa = desa.region_name,
+			d.kecamatan = kec.region_name,
+			d.kabupaten = kab.region_name,
+			d.propinsi = prop.region_name
+	where trim(coalesce(d.kode, '')) <> ''
+		"""
+		cur.execute(query)
+		mysql.connection.commit()
+		return jsonify({'success': True})
+	finally:
+		cur.close()
+
+
+
 @app.route('/api/contents', methods=["GET"])
 def get_contents():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
@@ -80,7 +105,7 @@ def get_contents():
 
 @app.route('/api/find_all_desa', methods=["GET"])
 def find_all_desa():
-	q = '%' + str(request.args.get('q')).lower() + '%'
+	q = str(request.args.get('q')).lower() 
 	print q
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
