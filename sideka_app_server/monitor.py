@@ -45,6 +45,28 @@ def get_all_desa():
 	finally:
 		cur.close()
 
+@app.route('/api/desa', methods=["POST"])
+def update_desa():
+	blog_id = int(request.form.get('blog_id'))
+	column = str(request.form.get('column'))
+	value = str(request.form.get('value'))
+	print blog_id, column, value
+	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades"];
+	if column not in allowedColumns:
+		return
+
+	if column in ["latitude", "longitude"]:
+		value = float(value)
+
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "UPDATE sd_desa set "+column+" = %s where blog_id = %s"
+		cur.execute(query, (value, blog_id))
+		mysql.connection.commit()
+		return jsonify({'success': True})
+	finally:
+		cur.close()
+
 @app.route('/api/contents', methods=["GET"])
 def get_contents():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)

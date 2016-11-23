@@ -7,7 +7,6 @@ var columns = [
       {
 	data: 'kode',
 	header: 'Kode',
-	readOnly: true,
       },
       {
 	data: 'domain',
@@ -62,6 +61,27 @@ $.getJSON("/api/desa", function(desas){
 	  columns: columns,
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),
+          afterChange: function(changes, source){
+		if(source != "loadData"){
+			changes.forEach(function(change){
+				var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades"];
+				var column = change[1];	
+				var value = change[3];
+				var prevvalue = change[2];
+				var id = hot.getDataAtCell(change[0], 0);
+				if(id && allowedColumns.indexOf(column) >= 0 && prevvalue != value){
+					$("#notification").html("Menyimpan...").show();
+					$.post( "/api/desa", { blog_id: id, column: column, value: value})
+					  .done(function( data ) {
+						$("#notification").html("Penyimpanan Berhasil");
+						setTimeout(function(){
+							$("#notification").hide();
+						}, 1000);
+					  });
+				}
+			});
+		}		
+	  },
 	});
 	setTimeout(()=> hot.render(), 0);
 });
