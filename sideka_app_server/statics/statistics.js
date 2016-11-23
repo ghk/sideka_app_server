@@ -12,6 +12,7 @@ var columns = [
       {
 	data: 'domain',
 	header: 'Domain',
+	renderer: makeLinkRenderer(v => "http://"+v, v => v),
       },
       {	
 	data: 'blog.last_post',
