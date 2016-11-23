@@ -1,7 +1,14 @@
+function makeLinkRenderer(link, text){
+	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
+		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
+		return td;
+	}
+}
 var columns = [
       {
 	data: 'id',
 	header: 'ID',
+	renderer: makeLinkRenderer(v => "/contents/"+v, v => v),
       },
       {
 	data: 'desa_id',

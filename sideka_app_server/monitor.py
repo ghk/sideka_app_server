@@ -6,6 +6,7 @@ import MySQLdb
 import os
 import json
 import time
+import datetime
 
 
 app = Flask(__name__, static_url_path='')
@@ -23,11 +24,30 @@ def index():
 
 @app.route('/contents')
 def contents():
-	return render_template('contents.html', active='contents')
+	return render_template('contents.html', active='contents', now = datetime.datetime.now())
 
 @app.route('/code_finder')
 def code_finder():
 	return render_template('code_finder.html', active='code_finder')
+
+@app.route('/contents/<int:content_id>')
+def contents_single(content_id):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT desa_id, subtype, type, content from sd_contents where id = %s"
+		cur.execute(query, (content_id,))
+		result = cur.fetchone()
+		content = result["content"]
+		typ = result["type"]
+		subtyp = result["subtype"]
+		desa_id = result["desa_id"]
+		schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "schemas/"+typ+".json")
+		print schema_file
+		with open(schema_file, 'r') as myfile:
+		    schema=myfile.read()
+		return render_template('contents_single.html', active='contents', content=content, schema=schema, subtyp=subtyp, typ=typ, desa_id = desa_id)
+	finally:
+		cur.close()
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
