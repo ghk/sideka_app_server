@@ -5,7 +5,7 @@ var columns = [
       },
       {
 	data: 'desa_id',
-	header: 'Kode',
+	header: 'ID Desa',
       },
       {
 	data: 'desa',
@@ -53,4 +53,5 @@ $.getJSON("/api/contents", function(data){
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),
 	});
+	setTimeout(()=> hot.render(), 0);
 });

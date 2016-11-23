@@ -63,4 +63,5 @@ $.getJSON("/api/desa", function(desas){
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),
 	});
+	setTimeout(()=> hot.render(), 0);
 });

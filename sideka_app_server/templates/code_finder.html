@@ -1,0 +1,21 @@
+{% extends "monitor.html" %}
+{% block body %}
+	<form id="form-finder">
+	<input type="text" id="input-finder" style="width: 300px; margin: 0 20px 20px;">
+	</form>
+	<div id="sheet"></div>
+	<table class="table table-condensed table-bordered table-striped" id="result-finder">
+		<thead>
+			<tr>
+				<th>Kode</th>
+				<th>Desa</th>
+				<th>Kecamatan</th>
+				<th>Kabupaten</th>
+				<th>Propinsi</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<script src="/statics/code_finder.js"></script>
+{% endblock %}
