@@ -75,7 +75,7 @@ def update_desa():
 	column = str(request.form.get('column'))
 	value = str(request.form.get('value'))
 	print blog_id, column, value
-	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades"];
+	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping"];
 	if column not in allowedColumns:
 		return
 

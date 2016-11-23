@@ -62,6 +62,10 @@ var columns = [
 	data: 'kades',
 	header: 'Nama Kades',
       },
+      {	
+	data: 'pendamping',
+	header: 'Pendamping',
+      },
     ];
 $.getJSON("/api/desa", function(desas){
 	var container = document.getElementById('sheet');
@@ -69,12 +73,14 @@ $.getJSON("/api/desa", function(desas){
 	var hot = new Handsontable(container, {
 	  data: desas,
 	  columns: columns,
+	  columnSorting: true,
+	  sortIndicator: true,
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),
           afterChange: function(changes, source){
 		if(source != "loadData"){
 			changes.forEach(function(change){
-				var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades"];
+				var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping"];
 				var column = change[1];	
 				var value = change[3];
 				var prevvalue = change[2];
