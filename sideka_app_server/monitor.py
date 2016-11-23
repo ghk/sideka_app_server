@@ -19,7 +19,11 @@ phasher = PasswordHash(8, True)
 
 
 @app.route('/')
-def index():
+def statistics():
+	return render_template('statistics.html', active='statistics')
+
+@app.route('/desa')
+def desa():
 	return render_template('desa.html', active='desa')
 
 @app.route('/contents')
@@ -120,6 +124,17 @@ def get_contents():
 		cur.execute(query)
 		contents = list(cur.fetchall())
 		return jsonify(contents)
+	finally:
+		cur.close()
+
+@app.route('/api/statistics', methods=["GET"])
+def get_statistics():
+	cur = mysql.connection.cursor()
+	try:
+		query = "SELECT statistics from sd_statistics"
+		cur.execute(query)
+		results = [json.loads(c[0]) for c in cur.fetchall()]
+		return jsonify(results)
 	finally:
 		cur.close()
 
