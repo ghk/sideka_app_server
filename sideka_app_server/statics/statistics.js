@@ -39,6 +39,10 @@ var columns = [
 	header: '# Penduduk',
       },
       {	
+	data: 'penduduk.quality',
+	header: 'Penduduk Quality',
+      },
+      {	
 	data: 'apbdes.last_modified',
 	header: 'APBDes Last Modified',
       },
