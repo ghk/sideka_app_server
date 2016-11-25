@@ -29,13 +29,18 @@ def send_statics(path):
 
 
 
-@app.route('/api/statistics', methods=["GET"])
+@app.route('/api/statistics')
 def get_statistics():
+	def combine(row):
+		res = json.loads(row[0])
+		res["pendamping"] = row[1]
+		return res
+
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT statistics from sd_statistics"
+		query = "SELECT s.statistics, d.pendamping from sd_statistics s left join sd_desa d on s.blog_id = d.blog_id"
 		cur.execute(query)
-		results = [json.loads(c[0]) for c in cur.fetchall()]
+		results = [combine(c) for c in cur.fetchall()]
 		return jsonify(results)
 	finally:
 		cur.close()
