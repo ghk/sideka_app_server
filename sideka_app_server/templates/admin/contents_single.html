@@ -1,4 +1,4 @@
-{% extends "monitor.html" %}
+{% extends "admin/admin.html" %}
 {% block body %}
 	<div>Desa ID: {{desa_id}}, Type: {{typ}}, Sub Type: {{subtyp}}</div>
 	<br />
@@ -7,5 +7,5 @@
 		var content = {{content | safe}};
 		var schema = {{schema | safe}};
 	</script>
-	<script src="/statics/contents_single.js"></script>
+	<script src="/statics/admin/contents_single.js"></script>
 {% endblock %}

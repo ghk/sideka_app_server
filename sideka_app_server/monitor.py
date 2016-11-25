@@ -20,112 +20,14 @@ phasher = PasswordHash(8, True)
 
 @app.route('/')
 def statistics():
-	return render_template('statistics.html', active='statistics')
+	return render_template('monitor/statistics.html', active='statistics')
 
-@app.route('/desa')
-def desa():
-	return render_template('desa.html', active='desa')
-
-@app.route('/contents')
-def contents():
-	return render_template('contents.html', active='contents', now = datetime.datetime.now())
-
-@app.route('/code_finder')
-def code_finder():
-	return render_template('code_finder.html', active='code_finder')
-
-@app.route('/contents/<int:content_id>')
-def contents_single(content_id):
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "SELECT desa_id, subtype, type, content from sd_contents where id = %s"
-		cur.execute(query, (content_id,))
-		result = cur.fetchone()
-		content = result["content"]
-		typ = result["type"]
-		subtyp = result["subtype"]
-		desa_id = result["desa_id"]
-		schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "schemas/"+typ+".json")
-		print schema_file
-		with open(schema_file, 'r') as myfile:
-		    schema=myfile.read()
-		return render_template('contents_single.html', active='contents', content=content, schema=schema, subtyp=subtyp, typ=typ, desa_id = desa_id)
-	finally:
-		cur.close()
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
 	return send_from_directory('statics', path)
 
 
-@app.route('/api/desa', methods=["GET"])
-def get_all_desa():
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "SELECT * from sd_desa"
-		cur.execute(query)
-		desa = list(cur.fetchall())
-		return jsonify(desa)
-	finally:
-		cur.close()
-
-@app.route('/api/desa', methods=["POST"])
-def update_desa():
-	blog_id = int(request.form.get('blog_id'))
-	column = str(request.form.get('column'))
-	value = str(request.form.get('value'))
-	print blog_id, column, value
-	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping"];
-	if column not in allowedColumns:
-		return
-
-	if column in ["latitude", "longitude"]:
-		value = float(value)
-
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "UPDATE sd_desa set "+column+" = %s where blog_id = %s"
-		cur.execute(query, (value, blog_id))
-		mysql.connection.commit()
-		return jsonify({'success': True})
-	finally:
-		cur.close()
-
-@app.route('/api/update_desa_from_code', methods=["POST"])
-def update_desa_from_code():
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = """
-		update
-		sd_desa d
-	left join  sd_all_desa desa on d.kode = desa.region_code
-	left join  sd_all_desa kec on desa.parent_code = kec.region_code
-	left join  sd_all_desa kab on kec.parent_code = kab.region_code
-	left join  sd_all_desa prop on kab.parent_code = prop.region_code
-		set d.desa = desa.region_name,
-			d.kecamatan = kec.region_name,
-			d.kabupaten = kab.region_name,
-			d.propinsi = prop.region_name
-	where trim(coalesce(d.kode, '')) <> ''
-		"""
-		cur.execute(query)
-		mysql.connection.commit()
-		return jsonify({'success': True})
-	finally:
-		cur.close()
-
-
-
-@app.route('/api/contents', methods=["GET"])
-def get_contents():
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "SELECT sd_contents.id, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by order by date_created desc limit 1000"
-		cur.execute(query)
-		contents = list(cur.fetchall())
-		return jsonify(contents)
-	finally:
-		cur.close()
 
 @app.route('/api/statistics', methods=["GET"])
 def get_statistics():
@@ -134,19 +36,6 @@ def get_statistics():
 		query = "SELECT statistics from sd_statistics"
 		cur.execute(query)
 		results = [json.loads(c[0]) for c in cur.fetchall()]
-		return jsonify(results)
-	finally:
-		cur.close()
-
-@app.route('/api/find_all_desa', methods=["GET"])
-def find_all_desa():
-	q = str(request.args.get('q')).lower() 
-	print q
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "SELECT d.region_code, d.region_name as desa, kec.region_name as kecamatan, kab.region_name as kabupaten, prop.region_name as propinsi from sd_all_desa d left join sd_all_desa kec on d.parent_code = kec.region_code left join sd_all_desa kab on kec.parent_code = kab.region_code left join sd_all_desa prop on kab.parent_code = prop.region_code where lower(d.region_name) like %s and d.depth = 4 limit 100"
-		cur.execute(query, (q,))
-		results = list(cur.fetchall())
 		return jsonify(results)
 	finally:
 		cur.close()
