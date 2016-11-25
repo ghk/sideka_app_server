@@ -94,6 +94,13 @@ def open_cfg(filename):
 		raise
 	return d
 
+def get_word_list():
+	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wordlist.txt")
+	with open(filename) as f:
+		return set(f.read().splitlines())
+
+word_list = get_word_list()
+
 def query_single(cur, query, column, var=None):
 	if var is None:
 		cur.execute(query) 
@@ -141,7 +148,8 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["domain"] = domain
 	result["title"] = post["post_title"]
 	result["date"] = str(post["post_date_gmt"])
-
+	result["kbbi"] = len(list(w for w in words if w.lower().strip() in word_list))
+	
 	return result
 
 

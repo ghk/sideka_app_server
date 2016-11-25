@@ -6,17 +6,21 @@ function makeLinkRenderer(link, text){
 }
 var columns = [
       {
-	data: 'blog_id',
-	header: 'Wordpress ID',
-      },
-      {
 	data: 'domain',
 	header: 'Domain',
 	renderer: makeLinkRenderer(v => "http://"+v, v => v),
       },
       {	
+	data: 'has_thumbnail',
+	header: 'Image?',
+      },
+      {	
 	data: 'words',
 	header: '# Words',
+      },
+      {	
+	data: 'kbbi',
+	header: '# KBBI Words',
       },
       {
 	data: 'sentences',
