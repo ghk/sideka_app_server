@@ -22,11 +22,14 @@ phasher = PasswordHash(8, True)
 def statistics():
 	return render_template('monitor/statistics.html', active='statistics')
 
+@app.route('/posts')
+def post_scores():
+	return render_template('monitor/post_scores.html', active='post_scores')
+
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
 	return send_from_directory('statics', path)
-
 
 
 @app.route('/api/statistics')
@@ -41,6 +44,17 @@ def get_statistics():
 		query = "SELECT s.statistics, d.pendamping from sd_statistics s left join sd_desa d on s.blog_id = d.blog_id"
 		cur.execute(query)
 		results = [combine(c) for c in cur.fetchall()]
+		return jsonify(results)
+	finally:
+		cur.close()
+
+@app.route('/api/post_scores')
+def get_post_scores():
+	cur = mysql.connection.cursor()
+	try:
+		query = "SELECT score from sd_post_scores"
+		cur.execute(query)
+		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)
 	finally:
 		cur.close()
