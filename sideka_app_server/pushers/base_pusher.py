@@ -31,6 +31,7 @@ class BasePusher(object):
 					print "Upsert delete previous"
 					self.ckan.action.datastore_delete(resource_id=resource["id"], filters=delete_filters)
 				print "Upsert"
+				print records
 				self.ckan.action.datastore_upsert(resource_id=resource["id"], records=records)
 				return resource
 		print "Create"
@@ -48,7 +49,7 @@ class BasePusher(object):
 		    schema = demjson.decode(f.read())
 		self.schema = schema
 		def to_dict(row):
-			return dict((schema[i]["field"], v) for i, v in enumerate(row))
+			return dict((schema[i]["field"], v) for i, v in enumerate(row) if i < len(schema))
 		return [to_dict(row) for row in self.data]
 
 	def setup(self):

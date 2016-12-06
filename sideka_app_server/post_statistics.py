@@ -141,7 +141,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	metas = list(cur.fetchall())
 
 	result["has_thumbnail"] = len(list(m for m in metas if m["meta_key"] == "_thumbnail_id")) > 0
-	result["paragraphs"] = paragraphs
+	result["paragraphs"] = 1 if paragraphs == 0 else paragraphs
 	result["words"] = len(words)
 	result["sentences"] = len(sentences)
 	result["url"] = post["guid"]
@@ -149,6 +149,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["title"] = post["post_title"]
 	result["date"] = str(post["post_date_gmt"])
 	result["kbbi"] = len(list(w for w in words if w.lower().strip() in word_list))
+	result["kbbi_percentage"] = result["kbbi"] / float(result["words"]) if result["words"] != 0 else 0
 	
 	return result
 

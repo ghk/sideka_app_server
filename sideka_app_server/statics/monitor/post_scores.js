@@ -22,6 +22,10 @@ var columns = [
 	data: 'kbbi',
 	header: '# KBBI Words',
       },
+      {	
+	data: 'kbbi_percentage',
+	header: '% KBBI',
+      },
       {
 	data: 'sentences',
 	header: '# Sentences',

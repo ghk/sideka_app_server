@@ -18,7 +18,7 @@ class PendudukPusher(BasePusher):
 
 	def sql_two_columns(self, columns, column_names):
 		results = list()
-		keyfunc = lambda r: (r[columns[0]], r[columns[1]])
+		keyfunc = lambda r: (r[columns[0]] if columns[0] in r else None, r[columns[1]] if columns[1] in r else None)
 		for key, group in itertools.groupby(sorted(self.penduduk,key=keyfunc), keyfunc):
 			c1, c2 = key
 			row = {}

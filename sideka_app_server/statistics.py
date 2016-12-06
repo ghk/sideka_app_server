@@ -76,7 +76,7 @@ def get_apbdes_statistics(cur, desa_id):
 	query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = 'apbdes' order by timestamp desc"
 	cur.execute(query, (desa_id,))
 	content = list(cur.fetchall())
-	subtypes = set(c["subtype"][0:4] for c in content)
+	subtypes = set(c["subtype"][0:4] for c in content if c["subtype"] is not None)
 	result["count"] = len(subtypes)
 
 	cur.execute("select content, timestamp, date_created from sd_contents where desa_id = %s and type = 'apbdes' order by timestamp desc", (desa_id,)) 
