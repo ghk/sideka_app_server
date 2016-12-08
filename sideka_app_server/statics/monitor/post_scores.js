@@ -4,11 +4,27 @@ function makeLinkRenderer(link, text){
 		return td;
 	}
 }
+function postRenderer(instance, td, row, col, prop, value, cellProperties) {
+	var r = instance.getDataAtRow(row);
+	td.innerHTML = "<a href='"+r[10]+"'>"+value+"</a>";
+	return td;
+}
 var columns = [
       {
 	data: 'domain',
 	header: 'Domain',
 	renderer: makeLinkRenderer(v => "http://"+v, v => v),
+      },
+      {	
+	data: 'score',
+	header: 'Score',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {	
+	data: 'title',
+	header: 'Title',
+	renderer: postRenderer,
       },
       {	
 	data: 'has_thumbnail',
@@ -38,14 +54,10 @@ var columns = [
 	data: 'date',
 	header: 'Date',
       },
-      {	
-	data: 'title',
-	header: 'Title',
-      },
-      {	
+      {
 	data: 'url',
 	header: 'URL',
-	renderer: makeLinkRenderer(v => v, v => v),
+	renderer: function(a, td){return td;},
       },
     ];
 columns.forEach(c => {

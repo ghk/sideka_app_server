@@ -26,6 +26,10 @@ def statistics():
 def post_scores():
 	return render_template('monitor/post_scores.html', active='post_scores')
 
+@app.route('/apbdes')
+def apbdes_scores():
+	return render_template('monitor/apbdes_scores.html', active='apbdes_scores')
+
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
@@ -53,6 +57,17 @@ def get_post_scores():
 	cur = mysql.connection.cursor()
 	try:
 		query = "SELECT score from sd_post_scores"
+		cur.execute(query)
+		results = [json.loads(c[0]) for c in cur.fetchall()]
+		return jsonify(results)
+	finally:
+		cur.close()
+
+@app.route('/api/apbdes_scores')
+def get_apbdes_scores():
+	cur = mysql.connection.cursor()
+	try:
+		query = "SELECT score from sd_apbdes_scores"
 		cur.execute(query)
 		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)

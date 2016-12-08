@@ -101,29 +101,15 @@ def get_word_list():
 
 word_list = get_word_list()
 
-def query_single(cur, query, column, var=None):
-	if var is None:
-		cur.execute(query) 
-	else:
-		cur.execute(query, var) 
-	one =  cur.fetchone()
-	return one[column] if one is not None else None
+def get_scale(value, maximum):
+	if not isinstance(value, (int, long, float)):
+		value = 0
+	if value > maximum:
+		value = maximum
+	if value < 0:
+		value = 0
+	return float(value) / float(maximum)
 
-def get_blog_statistics(cur, desa_id):
-	print desa_id
-	result = {}
-	last_post = query_single(cur, "select max(post_date_gmt) as max from wp_%d_posts where post_status = 'publish' and post_type = 'post'" % desa_id, "max")
-	if last_post is not None:
-		result["last_post"] = str(last_post)
-		result["last_post_str"] = str(datetime.now() - last_post)
-	maximum = datetime.now() - timedelta(hours = 24)
-	query ="select count(*) as count from wp_"+str(desa_id)+"_posts where post_status = 'publish' and post_type = 'post' and post_date_gmt > %s";
-	result["count_24h"] = query_single(cur, query,  "count", (maximum,))
-	maximum = datetime.now() - timedelta(weeks = 1)
-	result["count_1w"] = query_single(cur, query,  "count", (maximum,))
-	maximum = datetime.now() - timedelta(days = 30)
-	result["count_30d"] = query_single(cur, query,  "count", (maximum,))
-	return result
 
 def get_post_scores(cur, desa_id, domain, post_id):
 	result = {}
@@ -150,6 +136,12 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["date"] = str(post["post_date_gmt"])
 	result["kbbi"] = len(list(w for w in words if w.lower().strip() in word_list))
 	result["kbbi_percentage"] = result["kbbi"] / float(result["words"]) if result["words"] != 0 else 0
+
+	result["score_thumbnail"] = get_scale(1 if result["has_thumbnail"] else 0, 1)
+	result["score_kbbi"] = result["kbbi_percentage"]
+	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)
+	result["score_sentences"] = get_scale(result["sentences"], 20)
+	result["score"] = 0.3 * result["score_thumbnail"] + 0.25 * result["score_kbbi"] + 0.25 * result["score_paragraphs"] +  0.2 * result["score_sentences"]
 	
 	return result
 
@@ -166,7 +158,7 @@ if __name__ == "__main__":
 	desas = list(cur.fetchall())
 	for desa in desas:
 		print desa["blog_id"]
-		query = "select ID from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
+		query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
 		cur.execute(query)
 		posts = list(cur.fetchall())
 		for post in posts:
@@ -174,7 +166,7 @@ if __name__ == "__main__":
 				scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
 				s = json.dumps(scores)
 				print s
-				cur.execute("REPLACE into sd_post_scores (blog_id, post_id, score) values(%s, %s, %s)", (desa["blog_id"], post["ID"], s))
+				cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
 			except Exception as e:
 				traceback.print_exc()
 				

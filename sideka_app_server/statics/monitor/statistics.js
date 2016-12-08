@@ -4,11 +4,25 @@ function makeLinkRenderer(link, text){
 		return td;
 	}
 }
+
+var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+	var args = [instance, td, row, col, prop, value * 100, cellProperties];
+	var bg = "red";
+	var color = "white";
+	if (value > 0.4){
+		bg = "yellow";
+		color = "black";
+	}
+	if (value > 0.7){
+		bg = "green";
+		color = "white";
+	}
+
+	Handsontable.renderers.NumericRenderer.apply(this, args);
+	td.style.backgroundColor = bg;
+	td.style.color = color;
+};
 var columns = [
-      {
-	data: 'blog_id',
-	header: 'Wordpress ID',
-      },
       {
 	data: 'domain',
 	header: 'Domain',
@@ -17,6 +31,63 @@ var columns = [
       {
 	data: 'pendamping',
 	header: 'Pendamping',
+      },
+      {
+	data: 'blog.score',
+	header: 'Berita',
+	type: 'numeric',
+	format: '0.00',
+	renderer: scoreRenderer
+      },
+      {
+	data: 'penduduk.score',
+	header: 'Penduduk',
+	type: 'numeric',
+	format: '0.00',
+	renderer: scoreRenderer
+      },
+      {
+	data: 'apbdes.score',
+	header: 'Anggaran',
+	type: 'numeric',
+	format: '0.00',
+	renderer: scoreRenderer
+      },
+      {
+	data: 'blog.score_quality',
+	header: 'B. Qlt',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {
+	data: 'blog.score_frequency',
+	header: 'B. Freq',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {
+	data: 'penduduk.score_quality',
+	header: 'P. Qlt',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {
+	data: 'penduduk.score_quantity',
+	header: 'P. Qty',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {
+	data: 'apbdes.score_quality',
+	header: 'A. Qlt',
+	type: 'numeric',
+	format: '0.00',
+      },
+      {
+	data: 'apbdes.score_quantity',
+	header: 'A. Qty',
+	type: 'numeric',
+	format: '0.00',
       },
       {	
 	data: 'blog.last_post',
@@ -41,10 +112,6 @@ var columns = [
       {	
 	data: 'penduduk.count',
 	header: '# Penduduk',
-      },
-      {	
-	data: 'penduduk.quality',
-	header: 'Penduduk Quality',
       },
       {	
 	data: 'apbdes.last_modified',
