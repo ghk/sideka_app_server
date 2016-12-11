@@ -5,6 +5,7 @@ from phpass import PasswordHash
 import MySQLdb
 import os
 import json
+import urllib
 import time
 import datetime
 
@@ -124,6 +125,37 @@ def update_sd_desa():
 		cur.execute(query)
 		mysql.connection.commit()
 		return jsonify({'success': True})
+	finally:
+		cur.close()
+
+@app.route('/api/geocode_empty_latlong', methods=["POST"])
+def geocode_empty_latlong():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = """
+			select blog_id, desa, kecamatan, kabupaten from sd_desa where latitude is null and longitude is null and (kode is not null and kode <> '')
+		"""
+		cur.execute(query)
+		desas = list(cur.fetchall())
+		results = []
+		for desa in desas:
+			address = (desa['desa']+', '+desa['kecamatan']+", "+desa['kabupaten']).replace(' ', '+')
+			url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyATCm-ki0JV9hjtjQXOKvqwlMaBWpYByEc" % address
+			results.append(url)
+			response = urllib.urlopen(url)
+			data = json.loads(response.read())
+			if data["status"] == "OK":
+				result = data["results"][0]
+				latitude = result["geometry"]["location"]["lat"]
+				longitude = result["geometry"]["location"]["lng"]
+				query = """
+					UPDATE sd_desa set latitude = %s, longitude = %s where blog_id = %s
+				"""
+				cur.execute(query, (latitude, longitude, desa['blog_id']))
+				mysql.connection.commit()
+			else:
+				results.append("%s: not found" % (address,))
+		return jsonify(results)
 	finally:
 		cur.close()
 
