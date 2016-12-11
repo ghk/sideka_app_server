@@ -110,6 +110,22 @@ def update_desa_from_code():
 	finally:
 		cur.close()
 
+@app.route('/api/update_sd_desa', methods=["POST"])
+def update_sd_desa():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = """
+			INSERT INTO sd_desa (blog_id, domain) SELECT blog_id, domain FROM wp_blogs WHERE blog_id > (select max(blog_id) from sd_desa)
+		"""
+		cur.execute(query)
+		query = """
+			UPDATE sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id set d.domain = b.domain
+		"""
+		cur.execute(query)
+		mysql.connection.commit()
+		return jsonify({'success': True})
+	finally:
+		cur.close()
 
 
 @app.route('/api/contents', methods=["GET"])

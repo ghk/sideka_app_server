@@ -108,3 +108,10 @@ $("#btn-update-from-code").click(function(){
 		location.reload();
 	});
 });
+
+$("#btn-update-sd-desa").click(function(){
+	console.log("updating");
+	$.post("/api/update_sd_desa", function(){
+		location.reload();
+	});
+});
