@@ -35,7 +35,7 @@ def login():
 		if user is not None:
 			success = phasher.check_password(login["password"], user[1])
 
-			if success: 
+			if success:
 				user_id = user[0]
 				user_nicename = user[2]
 				cur.execute("SELECT meta_value FROM wp_usermeta where user_id = %d and meta_key = 'primary_blog'" % user[0])
@@ -50,10 +50,19 @@ def login():
 				token = os.urandom(64).encode('hex')
 				cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, login["info"]))
 				mysql.connection.commit()
+				logs(user_id, desa_id, token, "login", None, None)
 		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename})
 	finally:
 		cur.close();
 
+def logs(user_id, desa_id, token, action, content_type, content_subtype):
+	if(token==""):
+		token = request.headers.get('X-Auth-Token', None)
+	cur = mysql.connection.cursor()
+	print content_type
+	cur.execute("INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype) VALUES (%s, %s, now(), %s, %s, %s, %s)",   (user_id, desa_id, token, action, content_type, content_subtype))
+	mysql.connection.commit()
+	cur.close();
 
 @app.route('/logout', methods=["GET"])
 def logout():
@@ -106,8 +115,9 @@ def post_content(desa_id, content_type, content_subtype=None):
 				timestamp = server_timestamp
 			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
 			mysql.connection.commit()
-			success = True
+			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
 
+			success = True
 		return jsonify({'success': success})
 	finally:
 		cur.close()
@@ -145,11 +155,11 @@ def get_content(desa_id, content_type, content_subtype=None):
 		if content_subtype is None:
 			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
 		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
-
 		content = cur.fetchone()
 		if content is None:
 			return jsonify({}), 404
 
+		logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
 		result = json.loads(content[0])
 		return jsonify(result)
 
@@ -171,4 +181,3 @@ def get_all_desa():
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
-
