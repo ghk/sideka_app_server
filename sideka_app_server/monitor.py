@@ -45,7 +45,10 @@ def get_statistics():
 
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT s.statistics, d.pendamping from sd_statistics s left join sd_desa d on s.blog_id = d.blog_id"
+		query = "SELECT s.statistics, d.pendamping FROM sd_statistics s \
+				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) \
+				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"
+
 		cur.execute(query)
 		results = [combine(c) for c in cur.fetchall()]
 		return jsonify(results)
@@ -76,4 +79,3 @@ def get_apbdes_scores():
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["MONITOR_PORT"])
-

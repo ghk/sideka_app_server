@@ -25,9 +25,9 @@ def open_cfg(filename):
 
 def query_single(cur, query, column, var=None):
 	if var is None:
-		cur.execute(query) 
+		cur.execute(query)
 	else:
-		cur.execute(query, var) 
+		cur.execute(query, var)
 	one =  cur.fetchone()
 	return one[column] if one is not None else None
 
@@ -72,7 +72,7 @@ def get_blog_statistics(cur, desa_id):
 		result["score_quality"] = 0
 
 	result["score"] = 0.6 * result["score_quality"]  + 0.4 * result["score_frequency"]
-		
+
 
 	return result
 
@@ -85,11 +85,11 @@ def quality(row):
 		if column is not None and column != "":
 			result += 1
 	return result
-		
+
 
 def get_penduduk_statistics(cur, desa_id):
 	result = {}
-	cur.execute("select content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penduduk' order by timestamp desc", (desa_id,)) 
+	cur.execute("select content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penduduk' order by timestamp desc", (desa_id,))
 	one =  cur.fetchone()
 	result["score_quantity"] = 0
 	result["score_quality"] = 0
@@ -121,7 +121,7 @@ def get_apbdes_statistics(cur, desa_id):
 	subtypes = set(c["subtype"][0:4] for c in content if c["subtype"] is not None)
 	result["count"] = len(subtypes)
 
-	cur.execute("select content, timestamp, date_created from sd_contents where desa_id = %s and type = 'apbdes' order by timestamp desc", (desa_id,)) 
+	cur.execute("select content, timestamp, date_created from sd_contents where desa_id = %s and type = 'apbdes' order by timestamp desc", (desa_id,))
 	one =  cur.fetchone()
 	result["score_last_modified"] = 0
 	if one is not None:
@@ -129,7 +129,7 @@ def get_apbdes_statistics(cur, desa_id):
 		result["last_modified_str"] = str(datetime.now() - one["date_created"])
 		result["score_last_modified"] = get_scale(90 - (datetime.now() - one["date_created"]).days, 90)
 
-	cur.execute("select blog_id, subtype, score from sd_apbdes_scores where blog_id = %s", (desa_id,)) 
+	cur.execute("select blog_id, subtype, score from sd_apbdes_scores where blog_id = %s", (desa_id,))
 	apbdeses = cur.fetchall()
 	result["score_quantity"] = get_scale(len(apbdeses), 3)
 
@@ -157,10 +157,10 @@ def get_statistics(cur, desa_id):
 
 if __name__ == "__main__":
 	conf = open_cfg('app.cfg')
-	db = MySQLdb.connect(host=conf.MYSQL_HOST,    
-			     user=conf.MYSQL_USER,      
+	db = MySQLdb.connect(host=conf.MYSQL_HOST,
+			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,
-			     db=conf.MYSQL_DB)        
+			     db=conf.MYSQL_DB)
 	cur = db.cursor(MySQLdb.cursors.DictCursor)
 	query = "select blog_id, domain from sd_desa"
 	cur.execute(query)
@@ -172,6 +172,6 @@ if __name__ == "__main__":
 		statistics = json.dumps(stats)
 		print "%d - %s" % (desa["blog_id"], desa["domain"])
 		print statistics
-		cur.execute("REPLACE into sd_statistics (blog_id, statistics) values(%s, %s)", (desa["blog_id"], statistics))
+		cur.execute("INSERT into sd_statistics (blog_id, statistics, date) VALUES (%s, %s, now())", (desa["blog_id"], statistics))
 		db.commit()
 	db.close()
