@@ -1,0 +1,14 @@
+{% extends "monitor/monitor.html" %}
+{% block body %}
+<div style="width:75%;">
+        <canvas id="canvas"></canvas>
+    </div>
+<br / >
+<div id="sheet"></div>
+<script>
+		var content = {{content | safe}};
+</script>
+
+<script src="/statics/monitor/chart_statistic.js"></script>
+<script src="/statics/monitor/table_statistics.js"></script>
+{% endblock %}

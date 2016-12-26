@@ -22,7 +22,27 @@ phasher = PasswordHash(8, True)
 def statistics():
 	return render_template('monitor/statistics.html', active='statistics')
 
-@app.route('/posts')
+@app.route('/chart/<int:blog_id>')
+def statistic_single(blog_id):
+	def comb(row):
+		res = json.loads(row[0])
+		res["date"] = str(row[1])
+		return res
+	cur = mysql.connection.cursor()
+
+	try:
+		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s";
+		cur.execute(query, (blog_id,))
+		contents = []
+		for c in cur.fetchall():
+			contents.append(comb(c))
+		content = json.dumps(contents)
+		return render_template('monitor/chart_statistic.html', active='statistics', content=content)
+	finally:
+		cur.close()
+
+
+@app.route('/posts/')
 def post_scores():
 	return render_template('monitor/post_scores.html', active='post_scores')
 
@@ -39,13 +59,13 @@ def send_statics(path):
 @app.route('/api/statistics')
 def get_statistics():
 	def combine(row):
-		res = json.loads(row[0])
-		res["pendamping"] = row[1]
+		res = json.loads(row[1])
+		res["pendamping"] = row[2]
 		return res
 
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT s.statistics, d.pendamping FROM sd_statistics s \
+		query = "SELECT s.blog_id, s.statistics, d.pendamping FROM sd_statistics s \
 				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) \
 				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"
 

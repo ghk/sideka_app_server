@@ -24,19 +24,17 @@ var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties
 };
 
 var columns = [
-		{
-	data: 'blog_id',
-	header: 'Wordpress Id',
-	renderer: makeLinkRenderer(v => "/chart/"+v, v => v),
-		},
+    {
+  data: 'date',
+  header: 'Date Statistic',
+	type: 'date',
+  dateFormat: 'MM/DD/YYYY',
+  correctFormat: true,
+    },
 		{
 	data: 'domain',
 	header: 'Domain',
 	renderer: makeLinkRenderer(v => "http://"+v, v => v),
-      },
-      {
-	data: 'pendamping',
-	header: 'Pendamping',
       },
       {
 	data: 'blog.score',
@@ -131,17 +129,15 @@ var columns = [
 columns.forEach(c => {
 	c.readOnly = true;
 });
-$.getJSON("/api/statistics", function(data){
-	var container = document.getElementById('sheet');
 
-	var hot = new Handsontable(container, {
-	  data: data,
-	  columns: columns,
-          columnSorting: true,
-          sortIndicator: true,
-	  rowHeaders: true,
-	  colHeaders: columns.map(c => c.header),
-	});
-	console.log(data);
-	setTimeout(()=> hot.render(), 0);
+var container = document.getElementById('sheet');
+
+var hot = new Handsontable(container, {
+  data: content,
+  columns: columns,
+        columnSorting: true,
+        sortIndicator: true,
+  rowHeaders: true,
+  colHeaders: columns.map(c => c.header),
 });
+setTimeout(()=> hot.render(), 0);
