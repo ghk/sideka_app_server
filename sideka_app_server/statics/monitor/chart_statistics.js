@@ -1,13 +1,15 @@
 var  chartColors = {
     	red: 'rgb(255, 99, 132)',
     	blue: 'rgb(54, 162, 235)',
-    	purple: 'rgb(153, 102, 255)'
+    	yellow: 'rgb(255, 205, 86)',
 };
+
 var convertDate = function(date){
   var value = new Date(date)
   var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear();
 }
+
 var config = {
     type: 'line',
     data: {
@@ -21,8 +23,8 @@ var config = {
         }, {
             label: "Penduduk",
             fill: false,
-            backgroundColor: chartColors.purple,
-            borderColor: chartColors.purple,
+            backgroundColor: chartColors.yellow,
+            borderColor: chartColors.yellow,
             data: content.map(c => parseInt(c.penduduk.score * 100)),
         },{
           label: "Anggaran",

@@ -142,6 +142,5 @@ $.getJSON("/api/statistics", function(data){
 	  rowHeaders: true,
 	  colHeaders: columns.map(c => c.header),
 	});
-	console.log(data);
 	setTimeout(()=> hot.render(), 0);
 });

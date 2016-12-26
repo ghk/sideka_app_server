@@ -31,13 +31,13 @@ def statistic_single(blog_id):
 	cur = mysql.connection.cursor()
 
 	try:
-		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s";
+		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date ASC";
 		cur.execute(query, (blog_id,))
 		contents = []
 		for c in cur.fetchall():
 			contents.append(comb(c))
 		content = json.dumps(contents)
-		return render_template('monitor/chart_statistic.html', active='statistics', content=content)
+		return render_template('monitor/statistic_single.html', active='statistics', content=content)
 	finally:
 		cur.close()
 
