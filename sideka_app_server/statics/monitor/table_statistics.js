@@ -130,10 +130,16 @@ columns.forEach(c => {
 	c.readOnly = true;
 });
 
+var sortContent = function(){
+	var result = content.sort((a,b)=> {
+		return new Date(b.date) - new Date(a.date)
+	});
+	return result
+ }
 var container = document.getElementById('sheet');
 
 var hot = new Handsontable(container, {
-  data: content,
+  data: sortContent(),
   columns: columns,
         columnSorting: true,
         sortIndicator: true,

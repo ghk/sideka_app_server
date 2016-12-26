@@ -31,7 +31,7 @@ def statistic_single(blog_id):
 	cur = mysql.connection.cursor()
 
 	try:
-		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date ASC";
+		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
 		cur.execute(query, (blog_id,))
 		contents = []
 		for c in cur.fetchall():
@@ -79,7 +79,7 @@ def get_statistics():
 def get_post_scores():
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT score from sd_post_scores"
+		query = "SELECT score from sd_post_scores ORDER BY post_date desc"
 		cur.execute(query)
 		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)
