@@ -22,7 +22,7 @@ phasher = PasswordHash(8, True)
 def statistics():
 	return render_template('monitor/statistics.html', active='statistics')
 
-@app.route('/chart/<int:blog_id>')
+@app.route('/statistic/<int:blog_id>')
 def statistic_single(blog_id):
 	def comb(row):
 		res = json.loads(row[0])
@@ -33,10 +33,10 @@ def statistic_single(blog_id):
 	try:
 		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
 		cur.execute(query, (blog_id,))
-		contents = []
+		result = []
 		for c in cur.fetchall():
-			contents.append(comb(c))
-		content = json.dumps(contents)
+			result.append(comb(c))
+		content = json.dumps(result)
 		return render_template('monitor/statistic_single.html', active='statistics', content=content)
 	finally:
 		cur.close()

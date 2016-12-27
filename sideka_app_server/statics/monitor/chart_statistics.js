@@ -18,20 +18,20 @@ var config = {
             label: "Berita",
             backgroundColor: chartColors.red,
             borderColor: chartColors.red,
-            data: content.map(c => parseInt(c.blog.score * 100)),
+            data: content.map(c => (c.blog.score * 100).toFixed(2)),
             fill: false,
         }, {
             label: "Penduduk",
             fill: false,
             backgroundColor: chartColors.yellow,
             borderColor: chartColors.yellow,
-            data: content.map(c => parseInt(c.penduduk.score * 100)),
+            data: content.map(c => (c.penduduk.score * 100).toFixed(2)),
         },{
           label: "Anggaran",
           fill: false,
           backgroundColor: chartColors.blue,
           borderColor: chartColors.blue,
-          data: content.map(c => parseInt(c.apbdes.score * 100)),
+          data: content.map(c => (c.apbdes.score * 100).toFixed(2)),
         }
       ]
     },
