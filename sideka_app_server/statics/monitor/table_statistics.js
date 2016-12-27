@@ -136,6 +136,7 @@ var sortContent = function(){
 	});
 	return result
  }
+ 
 var container = document.getElementById('sheet');
 
 var hot = new Handsontable(container, {

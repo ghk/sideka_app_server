@@ -172,6 +172,6 @@ if __name__ == "__main__":
 		statistics = json.dumps(stats)
 		print "%d - %s" % (desa["blog_id"], desa["domain"])
 		print statistics
-		cur.execute("INSERT into sd_statistics (blog_id, statistics, date) VALUES (%s, %s, now())", (desa["blog_id"], statistics))
+		cur.execute("REPLACE into sd_statistics (blog_id, statistics, date) VALUES (%s, %s, now())", (desa["blog_id"], statistics))
 		db.commit()
 	db.close()
