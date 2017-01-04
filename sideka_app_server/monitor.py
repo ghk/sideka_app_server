@@ -50,6 +50,10 @@ def post_scores():
 def apbdes_scores():
 	return render_template('monitor/apbdes_scores.html', active='apbdes_scores')
 
+@app.route('/maps')
+def statistics_maps():
+	return render_template('monitor/statistics_maps.html', active='statistics_maps')
+
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
@@ -61,11 +65,13 @@ def get_statistics():
 	def combine(row):
 		res = json.loads(row[1])
 		res["pendamping"] = row[2]
+		res["latitude"] = row[3]
+		res["longitude"] = row[4]
 		return res
 
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT s.blog_id, s.statistics, d.pendamping FROM sd_statistics s \
+		query = "SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s \
 				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) \
 				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"
 

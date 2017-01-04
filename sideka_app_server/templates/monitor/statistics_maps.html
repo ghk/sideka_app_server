@@ -1,0 +1,19 @@
+{% extends "monitor/monitor.html" %}
+{% block body %}  
+  <div ng-app="app" ng-controller="locatorController as vm">     
+    <div class="col-md-2 pull-right"> 
+        <select name="contentSelected" id="contentSelected" ng-model="contentSelected" class="form-control" ng-change="changeContent(contentSelected)">
+            <option value="blog_score">Berita</option>
+            <option value="penduduk_score">Kependudukan</option>
+            <option value="apbdes_score">APBDes</option>
+        </select>
+    </div>
+    <br />
+    <div style="height: 800px">
+        <ng-map zoom="5"center="[-2.604236, 116.499023]">
+            <marker ng-repeat="marker in vm.markers" position=[[marker.pos]] title=[[marker.domain]] icon="/statics/contents/icons/number_[[marker.icon]].png"></marker>
+        </ng-map>         
+    </div>
+  </div>  
+  <script src="/statics/monitor/statistics_maps.js"></script>
+{% endblock %}
