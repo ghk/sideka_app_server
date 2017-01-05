@@ -1,0 +1,25 @@
+canvas{	
+    -moz-user-select: none; 
+    -webkit-user-select: none; 
+    -ms-user-select: none; 
+    }
+.hot{
+    height: 800px;
+    width: 100%;
+    overflow: hidden;
+} 
+.handsontable{
+    height: 800px;
+    width: 100%;
+    overflow: hidden;
+} 
+.htRowHeaders {
+    height: 800px;
+    width: 100%;
+    overflow: hidden;
+}
+.htColumnHeaders{
+    height: 800px;
+    width: 100%;
+    overflow: hidden;
+}

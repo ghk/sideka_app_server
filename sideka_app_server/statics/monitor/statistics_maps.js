@@ -34,8 +34,6 @@ app.controller('locatorController', function($scope, $http, $timeout, $location)
       thisCtrl[index].icon = value;
     });
     ctrl.markers = thisCtrl;
-    return
-    
+    return   
   }  
-
 });

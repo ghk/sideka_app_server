@@ -1,14 +1,39 @@
 {% extends "monitor/monitor.html" %}
 {% block body %}
-<div style="width:75%;">
-  <canvas id="canvas"></canvas>
-</div>
-<br />
-<div id="sheet"></div>
-<script>
-		var content = {{content | safe}};
-</script>
+    <div class="md-card">
+    <div class="md-card-toolbar">
+        <div class="md-card-toolbar-actions">
+            <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
+        </div>
+        <h3 class="md-card-toolbar-heading-text">
+            Statistics Maps
+        </h3>
+    </div>
+    <div class="md-card-content">
+        <div style="width:100%;height: 50%">
+            <canvas id="canvas"></canvas>
+        </div>           
+    </div>
+    </div>
 
-<script src="/statics/monitor/chart_statistics.js"></script>
-<script src="/statics/monitor/table_statistics.js"></script>
+    <div class="md-card">
+    <div class="md-card-toolbar">
+        <div class="md-card-toolbar-actions">
+            <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
+        </div>
+        <h3 class="md-card-toolbar-heading-text">
+            Statistics Maps
+        </h3>
+    </div>
+    <div class="md-card-content">
+        <div id="sheet"></div>             
+    </div>
+    </div>
+
+    <script>
+            var content = {{content | safe}};
+    </script>
+
+    <script src="/statics/monitor/chart_statistics.js"></script>
+    <script src="/statics/monitor/table_statistics.js"></script>
 {% endblock %}
