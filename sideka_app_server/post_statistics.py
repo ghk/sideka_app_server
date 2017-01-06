@@ -12,7 +12,7 @@ from ckanapi import RemoteCKAN
 from HTMLParser import HTMLParser, HTMLParseError
 from htmlentitydefs import name2codepoint
 import re
-
+from utils import open_cfg
 import sys  
 
 reload(sys)  
@@ -80,19 +80,6 @@ def html_to_text(html):
     return parser
 
 
-def open_cfg(filename):
-	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
-	d = types.ModuleType('config')
-	d.__file__ = filename
-	try:
-		with open(filename) as config_file:
-			exec(compile(config_file.read(), filename, 'exec'), d.__dict__)
-	except IOError as e:
-		if silent and e.errno in (errno.ENOENT, errno.EISDIR):
-			return False
-		e.strerror = 'Unable to load configuration file (%s)' % e.strerror
-		raise
-	return d
 
 def get_word_list():
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "wordlist.txt")

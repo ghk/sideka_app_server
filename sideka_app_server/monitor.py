@@ -71,9 +71,9 @@ def get_statistics():
 
 	cur = mysql.connection.cursor()
 	try:
-		query = "SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s \
-				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) \
-				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"
+		query = """SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s 
+				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
+				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"""
 
 		cur.execute(query)
 		results = [combine(c) for c in cur.fetchall()]

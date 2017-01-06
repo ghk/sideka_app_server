@@ -4,15 +4,28 @@ app.config(['$interpolateProvider', function ($interpolateProvider) {
     $interpolateProvider.endSymbol(']]');
   }]);
 
-app.controller('locatorController', function($scope, $http, $timeout, $location) {
-  var ctrl = this;
-  ctrl.markers =[];
-  $scope.contentSelected = "blog_score";  
+app.controller('locatorController', function($scope, $http, $timeout, $location,NgMap) {
+  var vm = this;
+  var markers = [];
+  vm.markers =[];  
+  $scope.currentVal= "blog_score";
 
+  NgMap.getMap().then(function(map) {
+      vm.map = map;
+    });
+
+  vm.showDetail = function(e, marker,index) {
+    vm.marker = marker;
+    vm.map.showInfoWindow('info', index);
+  };
+  vm.hideDetail = function() {
+    vm.map.hideInfoWindow('info');
+  };
+  
   $http.get('/api/statistics').then(function(response){
       var data = response.data;      
       angular.forEach(data, function(value) {
-        ctrl.markers.push({
+        markers.push({
           id:value.blog_id, 
           domain: value.domain,
           pos: [value.latitude, value.longitude],
@@ -21,19 +34,17 @@ app.controller('locatorController', function($scope, $http, $timeout, $location)
           penduduk_score: (value.penduduk.score*100).toFixed(0),
           icon: (value.blog.score*100).toFixed(0)
         })
+        vm.markers = markers;
       })        
   });
-  
-  $scope.changeContent = function(contentSelected){
-    var score;
-    var thisCtrl = ctrl.markers;
-    ctrl.markers = [];
 
-    score = thisCtrl.map(p => p.icon =p[contentSelected]);
+  $scope.changeContent = function(contentClicked){
+    var temp = markers;
+    vm.markers = [];
+    score = markers.map(p => p.icon =p[contentClicked]);
     score.forEach((value,index) =>{
-      thisCtrl[index].icon = value;
+      temp[index].icon = value;
     });
-    ctrl.markers = thisCtrl;
-    return   
+    vm.markers = temp;
   }  
 });

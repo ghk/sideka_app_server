@@ -7,16 +7,32 @@
                     <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
                 </div>
                 <h3 class="md-card-toolbar-heading-text">
-                    <i data-uk-button-radio="{target:'.md-btn'}">
-                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave">Berita</button>
-                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave">Penduduk</button>
-                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave">APBDes</button>
-                    </i>
+                    <div data-uk-button-radio="{target:'.md-btn'}">
+                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='blog_score'}"  ng-click="changeContent('blog_score')">Berita</button>
+                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='penduduk_score'}" ng-click="changeContent('penduduk_score')">Penduduk</button>
+                        <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='apbdes_score'}" ng-click="changeContent('apbdes_score')">APBDes</button>
+                    </div>
                 </h3>
             </div>
             <div class="md-card-content"style="height: 800px">
-                <ng-map zoom="5"center="[-2.604236, 116.499023]" style="width:100%;height:100%;" default-style="false">
-                    <marker ng-repeat="marker in vm.markers" position=[[marker.pos]] title=[[marker.domain]] icon="/statics/content/icons/number/number_[[marker.icon]].png"></marker>
+                <ng-map zoom="5"center="[-2.604236, 116.499023]" style="width:100%;height:100%;">
+                    <custom-marker 
+                        ng-repeat="marker in vm.markers track by $index" 
+                        id=[[$index]] 
+                        position=[[marker.pos]]
+                        on-click="vm.showDetail(marker,$index)">
+                        <div>
+                            <img src="/statics/content/icons/number/number_[[marker.icon]].png">
+                        </div>                    
+                    </custom-marker>
+                    <info-window id="info">
+                        <div ng-non-bindable="">
+                            domain: [[vm.marker.domain]]<br/>
+                            Position 1: [[vm.marker.pos]]<br/>
+                            Lat: [[anchor.getPosition().lat()]]<br/>
+                            Lng: [[anchor.getPosition().lng()]]<br/>
+                        </div>
+                    </info-window>                    
                 </ng-map>             
             </div>
         </div>
