@@ -18,9 +18,9 @@
                 <ng-map zoom="5"center="[-2.604236, 116.499023]" style="width:100%;height:100%;">
                     <custom-marker 
                         ng-repeat="marker in vm.markers track by $index" 
-                        id=[[$index]] 
+                        id="desa-[[$index]]" 
                         position=[[marker.pos]]
-                        on-click="vm.showDetail(marker,$index)">
+                        on-click="vm.showDetail(marker,'desa-'+$index)">
                         <div>
                             <img src="/statics/content/icons/number/number_[[marker.icon]].png">
                         </div>                    
@@ -28,9 +28,6 @@
                     <info-window id="info">
                         <div ng-non-bindable="">
                             domain: [[vm.marker.domain]]<br/>
-                            Position 1: [[vm.marker.pos]]<br/>
-                            Lat: [[anchor.getPosition().lat()]]<br/>
-                            Lng: [[anchor.getPosition().lng()]]<br/>
                         </div>
                     </info-window>                    
                 </ng-map>             
