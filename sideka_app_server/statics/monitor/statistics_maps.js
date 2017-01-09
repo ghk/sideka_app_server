@@ -47,7 +47,7 @@ app.controller('locatorController', function($scope, $http, $timeout, $location,
     var temp = markers;
     vm.markers = [];
     markers.forEach((value,index) =>{
-      temp[index].icon = value;
+      temp[index].icon = value[contentClicked];
     });
     vm.markers = temp;
   }  
