@@ -14,23 +14,25 @@
                     </div>
                 </h3>
             </div>
-            <div class="md-card-content"style="height: 800px">
-                <ng-map zoom="5"center="[-2.604236, 116.499023]" style="width:100%;height:100%;">
-                    <custom-marker 
-                        ng-repeat="marker in vm.markers track by $index" 
-                        id="desa-[[$index]]" 
-                        position=[[marker.pos]]
-                        on-click="vm.showDetail(marker,'desa-'+$index)">
-                        <div>
-                            <img src="/statics/content/icons/number/number_[[marker.icon]].png">
-                        </div>                    
-                    </custom-marker>
-                    <info-window id="info">
-                        <div ng-non-bindable="">
-                            domain: [[vm.marker.domain]]<br/>
-                        </div>
-                    </info-window>                    
-                </ng-map>             
+            <div class="md-card-content">
+                <div style="height: 700px; width: 100%">
+                    <ng-map zoom="5"center="[-2.604236, 116.499023]" style="width:100%;height:100%;">
+                        <custom-marker 
+                            ng-repeat="marker in vm.markers track by $index" 
+                            id="desa-[[$index]]" 
+                            position=[[marker.pos]]
+                            on-click="vm.showDetail(marker,'desa-'+$index)">
+                            <div>
+                                <img src="/statics/content/icons/number/number_[[marker.icon]].png">
+                            </div>                    
+                        </custom-marker>
+                        <info-window id="info">
+                            <div ng-non-bindable="">
+                                domain: <a href="" ng-click="newTab(vm.marker.domain)">[[vm.marker.domain]]</a><br/>
+                            </div>
+                        </info-window>                    
+                    </ng-map>    
+                </div>         
             </div>
         </div>
     </div>

@@ -4,7 +4,7 @@ app.config(['$interpolateProvider', function ($interpolateProvider) {
     $interpolateProvider.endSymbol(']]');
   }]);
 
-app.controller('locatorController', function($scope, $http, $timeout, $location,NgMap) {
+app.controller('locatorController', function($scope, $http, $timeout, $location,NgMap, $window) {
   var vm = this;
   var markers = [];
   vm.markers =[];  
@@ -18,10 +18,15 @@ app.controller('locatorController', function($scope, $http, $timeout, $location,
     vm.marker = marker;
     vm.map.showInfoWindow('info', index);
   };
+
   vm.hideDetail = function() {
     vm.map.hideInfoWindow('info');
   };
   
+  $scope.newTab = function(url){    
+      $window.open("http://"+url,"_blank")
+  }
+
   $http.get('/api/statistics').then(function(response){
       var data = response.data;      
       angular.forEach(data, function(value) {
@@ -41,8 +46,7 @@ app.controller('locatorController', function($scope, $http, $timeout, $location,
   $scope.changeContent = function(contentClicked){
     var temp = markers;
     vm.markers = [];
-    score = markers.map(p => p.icon =p[contentClicked]);
-    score.forEach((value,index) =>{
+    markers.forEach((value,index) =>{
       temp[index].icon = value;
     });
     vm.markers = temp;
