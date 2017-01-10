@@ -1,4 +1,8 @@
-from flask import Flask, request,jsonify, render_template, send_from_directory
+from flask import Flask, request,jsonify, render_template, send_from_directory, redirect, url_for
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user, UserMixin
+from flask_wtf import Form
+from wtforms import TextField, PasswordField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
@@ -8,18 +12,98 @@ import json
 import urllib
 import time
 import datetime
+import logging
 
 
 app = Flask(__name__, static_url_path='')
 mysql = MySQL(app)
 
+class LoginForm(Form):
+    username = TextField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
 # MySQL configurations
 app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
+app.secret_key = 'microvac'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "users.login"
+
+
+class User(UserMixin):
+	pass
+
+
+@login_manager.user_loader
+def user_loader(email):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
+	user = cur.fetchone()
+	success = False
+	if user is not None:
+		userMix = User()
+		userMix.id = email
+		return userMix
+	else:
+		return
+
+@login_manager.request_loader
+def request_loader(request):
+	email = request.form.get('email')
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
+		user = cur.fetchone()
+		success = False
+		if user is not None:
+			userMix = User()
+			userMix.id = email
+			success = phasher.check_password(request.form['pw'], user['user_pass'])
+			if success:
+				userMix.is_authenticated = success
+				return userMix
+		else:
+			return
+	finally:
+		cur.close()
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+        email = request.form['email']
+
+        try:
+            cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
+            user = cur.fetchone()
+            success = False
+            if user is not None:
+				success = phasher.check_password(request.form['pw'], user['user_pass'])
+				if success:
+					usermix = User()
+					usermix.id = email
+					login_user(usermix)
+					redirect('/')
+        finally:
+    		cur.close();
+
+    return render_template('admin/login.html')
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
 
 
 @app.route('/')
+@login_required
 def desa():
 	return render_template('admin/desa.html', active='desa')
 
@@ -184,7 +268,7 @@ def get_statistics():
 
 @app.route('/api/find_all_desa', methods=["GET"])
 def find_all_desa():
-	q = str(request.args.get('q')).lower() 
+	q = str(request.args.get('q')).lower()
 	print q
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -197,4 +281,3 @@ def find_all_desa():
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["ADMIN_PORT"])
-
