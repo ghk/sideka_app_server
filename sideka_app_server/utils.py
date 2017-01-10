@@ -1,3 +1,12 @@
+import MySQLdb
+import itertools
+import csv
+import os
+import types
+import sys
+import traceback
+import json
+
 def open_cfg(filename):
 	filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
 	d = types.ModuleType('config')
