@@ -35,13 +35,18 @@ login_manager.login_view = "users.login"
 class User(UserMixin):
 	pass
 
+def check_account(email):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
+		user = cur.fetchone()
+		return user
+	finally:
+		pass	
 
 @login_manager.user_loader
 def user_loader(email):
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
-	user = cur.fetchone()
-	success = False
+	user = check_account(email)
 	if user is not None:
 		userMix = User()
 		userMix.id = email
@@ -52,42 +57,28 @@ def user_loader(email):
 @login_manager.request_loader
 def request_loader(request):
 	email = request.form.get('email')
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
-		user = cur.fetchone()
-		success = False
-		if user is not None:
-			userMix = User()
-			userMix.id = email
-			success = phasher.check_password(request.form['pw'], user['user_pass'])
-			if success:
-				userMix.is_authenticated = success
-				return userMix
-		else:
-			return
-	finally:
-		cur.close()
-
+	user = check_account(email)
+	success = False
+	if user is not None:
+		userMix = User()
+		userMix.id = email
+		userMix.is_authenticated = phasher.check_password(request.form['pw'], user['user_pass'])
+		return userMix
+	else:
+		return
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-        email = request.form['email']
-
-        try:
-            cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (email, email))
-            user = cur.fetchone()
-            success = False
-            if user is not None:
-				success = phasher.check_password(request.form['pw'], user['user_pass'])
-				if success:
-					usermix = User()
-					usermix.id = email
-					login_user(usermix)
-					redirect('/')
-        finally:
-    		cur.close();
+    if request.method == 'POST':   
+		email = request.form.get('email')     
+		user = check_account(email)
+		success = False
+		if user is not None:
+			success = phasher.check_password(request.form['pw'], user['user_pass'])
+			if success:
+				usermix = User()
+				usermix.id = email
+				login_user(usermix)
+				return redirect('/')
 
     return render_template('admin/login.html')
 
