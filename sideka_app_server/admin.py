@@ -62,8 +62,12 @@ def request_loader(request):
 	if user is not None:
 		userMix = User()
 		userMix.id = email
-		userMix.is_authenticated = phasher.check_password(request.form['pw'], user['user_pass'])
-		return userMix
+		success = phasher.check_password(request.form['pw'], user['user_pass'])
+		if success:
+			userMix.is_authenticated = success
+			return userMix
+		else:
+			return
 	else:
 		return
 @app.route('/login', methods=['GET', 'POST'])
@@ -79,9 +83,7 @@ def login():
 				usermix.id = email
 				login_user(usermix)
 				return redirect('/')
-
     return render_template('admin/login.html')
-
 
 @app.route('/logout')
 def logout():
