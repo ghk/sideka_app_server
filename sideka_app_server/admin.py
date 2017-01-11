@@ -13,19 +13,16 @@ import urllib
 import time
 import datetime
 import logging
+from utils import open_cfg
 
 
 app = Flask(__name__, static_url_path='')
 mysql = MySQL(app)
-
-class LoginForm(Form):
-    username = TextField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
 # MySQL configurations
 app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
-app.secret_key = 'microvac'
+app.secret_key = app.config["SECRET_KEY"]
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -46,14 +43,10 @@ def check_account(email):
 
 @login_manager.user_loader
 def user_loader(email):
-	user = check_account(email)
-	if user is not None:
-		userMix = User()
-		userMix.id = email
-		return userMix
-	else:
-		return
-
+	userMix = User()
+	userMix.id = email
+	return userMix
+	
 @login_manager.request_loader
 def request_loader(request):
 	email = request.form.get('email')
