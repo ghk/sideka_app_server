@@ -1,4 +1,5 @@
-from flask import Flask, request,jsonify, render_template, send_from_directory
+from flask import Flask, request,jsonify, render_template, send_from_directory, redirect, url_for
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user, UserMixin
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
@@ -8,30 +9,109 @@ import json
 import urllib
 import time
 import datetime
+import logging
+from utils import open_cfg
+import re
 
 
 app = Flask(__name__, static_url_path='')
 mysql = MySQL(app)
-
 # MySQL configurations
 app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
+app.secret_key = app.config["SECRET_KEY"]
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "users.login"
+
+class User(UserMixin):
+	pass
+
+def get_user_by_nickname(nickname):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT ID, user_pass from wp_users where user_login = %s"
+		cur.execute(query, (nickname,))
+		user = cur.fetchone()
+		return user
+	finally:
+		cur.close()
+
+def get_superadmin_user():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		cur.execute("SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'site_admins'")
+		user = cur.fetchone()
+		result = re.findall(r'"([^"]*)"', str(user['meta_value']))
+		return result
+	finally:
+		cur.close
+
+@login_manager.user_loader
+def user_loader(nickname):
+	userMix = User()
+	userMix.id = nickname
+	return userMix
+	
+@login_manager.request_loader
+def request_loader(request):
+	nickname = request.form.get('nickname')
+	superadminUsers = get_superadmin_user()
+	if nickname in superadminUsers:		
+		success = False	
+		userMix = User()
+		userMix.id = nickname
+		user = get_user_by_nickname(nickname)
+		success = phasher.check_password(request.form['pw'], user['user_pass'])
+		if success:
+			userMix.is_authenticated = success		
+	return
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':   
+		nickname = request.form.get('nickname')   		
+		superadminUsers = get_superadmin_user()
+		if nickname in superadminUsers:
+			success = False
+			user = get_user_by_nickname(nickname)			
+			success = phasher.check_password(request.form['pw'], user['user_pass'])
+			if success:
+				usermix = User()
+				usermix.id = nickname
+				login_user(usermix)
+				return redirect('/')
+    return render_template('admin/login.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
 
 @app.route('/')
+@login_required
 def desa():
+	users = get_superadmin_user()
 	return render_template('admin/desa.html', active='desa')
 
 @app.route('/contents')
+@login_required
 def contents():
 	return render_template('admin/contents.html', active='contents', now = datetime.datetime.now())
 
 @app.route('/code_finder')
+@login_required
 def code_finder():
 	return render_template('admin/code_finder.html', active='code_finder')
 
 @app.route('/contents/<int:content_id>')
+@login_required
 def contents_single(content_id):
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -56,6 +136,7 @@ def send_statics(path):
 
 
 @app.route('/api/desa', methods=["GET"])
+@login_required
 def get_all_desa():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -67,6 +148,7 @@ def get_all_desa():
 		cur.close()
 
 @app.route('/api/desa', methods=["POST"])
+@login_required
 def update_desa():
 	blog_id = int(request.form.get('blog_id'))
 	column = str(request.form.get('column'))
@@ -89,6 +171,7 @@ def update_desa():
 		cur.close()
 
 @app.route('/api/update_desa_from_code', methods=["POST"])
+@login_required
 def update_desa_from_code():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -112,6 +195,7 @@ def update_desa_from_code():
 		cur.close()
 
 @app.route('/api/update_sd_desa', methods=["POST"])
+@login_required
 def update_sd_desa():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -129,6 +213,7 @@ def update_sd_desa():
 		cur.close()
 
 @app.route('/api/geocode_empty_latlong', methods=["POST"])
+@login_required
 def geocode_empty_latlong():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -161,6 +246,7 @@ def geocode_empty_latlong():
 
 
 @app.route('/api/contents', methods=["GET"])
+@login_required
 def get_contents():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -172,6 +258,7 @@ def get_contents():
 		cur.close()
 
 @app.route('/api/statistics', methods=["GET"])
+@login_required
 def get_statistics():
 	cur = mysql.connection.cursor()
 	try:
@@ -183,8 +270,9 @@ def get_statistics():
 		cur.close()
 
 @app.route('/api/find_all_desa', methods=["GET"])
+@login_required
 def find_all_desa():
-	q = str(request.args.get('q')).lower() 
+	q = str(request.args.get('q')).lower()
 	print q
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
@@ -197,4 +285,3 @@ def find_all_desa():
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["ADMIN_PORT"])
-

@@ -2,14 +2,19 @@
 <head>
 	<title>Sideka Admin</title>
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />	
 </head>
 <body>
 	<br />
 	<ul class="nav nav-tabs">
-	  <li role="presentation" class="{{ 'active' if active == 'desa' else ''}}"><a href="/">Daftar Desa</a></li>
-	  <li role="presentation" class="{{ 'active' if active == 'contents' else ''}}"><a href="/contents">Daftar Content</a></li>
-	  <li role="presentation" class="{{ 'active' if active == 'code_finder' else ''}}"><a href="/code_finder">Cari Kode Desa</a></li>
+		<li role="presentation" class="{{ 'active' if active == 'desa' else ''}}"><a href="/">Daftar Desa</a></li>
+		<li role="presentation" class="{{ 'active' if active == 'contents' else ''}}"><a href="/contents">Daftar Content</a></li>
+		<li role="presentation" class="{{ 'active' if active == 'code_finder' else ''}}"><a href="/code_finder">Cari Kode Desa</a></li>
+		<li style="float:right;line-height:34px;" role="presentation"> 
+			<a href="/logout" class="btn" role="button">
+				<span class="glyphicon glyphicon-log-out"></span> Logout
+			</a>
+		</li>	
 	</ul>
 	<br />
 	<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
