@@ -1,5 +1,8 @@
 from flask import Flask, request,jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user, UserMixin
+from phpserialize import *
+from StringIO import StringIO
+from collections import OrderedDict
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
@@ -44,10 +47,14 @@ def get_superadmin_user():
 	try:
 		cur.execute("SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'site_admins'")
 		user = cur.fetchone()
-		result = re.findall(r'"([^"]*)"', str(user['meta_value']))
+		result = dict_to_list(loads(loads(dumps(user['meta_value']))))
 		return result
 	finally:
 		cur.close
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
 
 @login_manager.user_loader
 def user_loader(nickname):
@@ -69,9 +76,15 @@ def request_loader(request):
 			userMix.is_authenticated = success		
 	return
 
+@app.route('/')
+@login_required
+def desa():
+	users = get_superadmin_user()
+	return render_template('admin/desa.html', active='desa')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':   
+	if request.method == 'POST':   
 		nickname = request.form.get('nickname')   		
 		superadminUsers = get_superadmin_user()
 		if nickname in superadminUsers:
@@ -83,22 +96,12 @@ def login():
 				usermix.id = nickname
 				login_user(usermix)
 				return redirect('/')
-    return render_template('admin/login.html')
+	return render_template('admin/login.html')
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return redirect(url_for('login'))
-
-@app.route('/')
-@login_required
-def desa():
-	users = get_superadmin_user()
-	return render_template('admin/desa.html', active='desa')
 
 @app.route('/contents')
 @login_required
