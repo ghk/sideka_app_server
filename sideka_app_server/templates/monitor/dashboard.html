@@ -89,7 +89,13 @@
                         </custom-marker>
                         <info-window id="info">
                             <div ng-non-bindable="">
-                                domain: <a href="" ng-click="newTab(vm.marker.domain)">[[vm.marker.domain]]</a><br/>
+                                Desa <a href="" ng-click="newTab('/statistic/'+vm.marker.id)">[[vm.marker.desa]]</a>
+				<br/>
+				Berita: [[vm.marker.blog_score]]
+				<br/>
+				Kependudukan: [[vm.marker.penduduk_score]]
+				<br/>
+				Keuangan: [[vm.marker.apbdes_score]]
                             </div>
                         </info-window>                    
                     </ng-map>    
