@@ -6,7 +6,7 @@ var convertDate = function(date){
 
 $.getJSON("/api/dashboard", function(data){
 	var weekly = ["desa", "post", "penduduk", "apbdes"]
-	var fill = ["#8bc34a", "#d84315", "#d1e4f6", "#5d4037"];
+	var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 	for (var i = 0; i < weekly.length; i++){
 		var current = weekly[i];
 		$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
