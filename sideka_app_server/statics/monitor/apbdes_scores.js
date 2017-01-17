@@ -42,7 +42,7 @@ $.getJSON("/api/apbdes_scores", function(data){
 	var container = document.getElementById('sheet');
 
 	var hot = new Handsontable(container, {
-	  data: data,
+	  data: data.filter(d => d.pendapatan && d.belanja),
 	  columns: columns,
           columnSorting: true,
           sortIndicator: true,

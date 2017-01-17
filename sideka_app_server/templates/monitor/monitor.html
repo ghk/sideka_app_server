@@ -15,11 +15,17 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />
 		
+<style>
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+</style>
+
 </head>
 <body class=" sidebar_main_open sidebar_main_swipe">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>		
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.js"></script>
+<!--
+-->
     
 
     <!-- main header -->
@@ -56,10 +62,17 @@
 
         <div class="menu_section">
             <ul>
-                <li title="Statistik" class="{{ 'current_section' if active == 'statistics' else ''}}">
+                <li title="Dashboard" class="{{ 'current_section' if active == 'dashboard' else ''}}">
                     <a href="/">
+                        <span class="menu_icon"><i class="material-icons"></i></span>
+                        <span class="menu_title">Dashboard</span>
+                    </a>
+
+                </li>
+                <li title="Statistik" class="{{ 'current_section' if active == 'statistics' else ''}}">
+                    <a href="/statistics">
                         <span class="menu_icon"><i class="material-icons">timeline</i></span>
-                        <span class="menu_title">Overall</span>
+                        <span class="menu_title">Kualitas Data</span>
                     </a>
 
                 </li>
@@ -73,13 +86,7 @@
                 <li title="Statistik Apbdes" class="{{ 'current_section' if active == 'apbdes_scores' else ''}}">
                     <a href="/apbdes">
                         <span class="menu_icon"><i class="material-icons">&#xE53E;</i></span>
-                        <span class="menu_title">Apbdes</span>
-                    </a>
-                </li>
-								 <li title="Staistik Maps" class="{{ 'current_section' if active == 'statistics_maps' else ''}}">
-                    <a href="/maps">
-                        <span class="menu_icon"><i class="material-icons">map</i></span>
-                        <span class="menu_title">Peta</span>
+                        <span class="menu_title">APBDes</span>
                     </a>
                 </li>
             </ul>
@@ -93,9 +100,20 @@
         </div>
     </div>   
     	
-	<script src="{{ url_for('static', filename='statics/content/js/common.min.js')}}"></script>    
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/id.js"></script>
+	<script src="/statics/content/js/jquery.bez.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+	<script src="/statics/content/js/jquery.scrollbar.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.4.1/velocity.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.5/waves.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.20/autosize.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/screenfull.js/3.0.2/screenfull.min.js"></script>
+	<script src="{{ url_for('static', filename='/statics/content/js/altair_admin_common.js')}}"></script>
 	<script src="{{ url_for('static', filename='/statics/content/js/uikit_custom.min.js')}}"></script>
-	<script src="{{ url_for('static', filename='/statics/content/js/altair_admin_common.min.js')}}"></script>
+<!--
+	<script src="{{ url_for('static', filename='statics/content/js/common.min.js')}}"></script>    
+-->
     
 </body>
 </html>

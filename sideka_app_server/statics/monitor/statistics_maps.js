@@ -4,10 +4,41 @@ app.config(['$interpolateProvider', function ($interpolateProvider) {
     $interpolateProvider.endSymbol(']]');
   }]);
 
-app.controller('locatorController', function($scope, $http, $timeout, $location,NgMap, $window) {
+app.controller('locatorController', function($scope, $http, NgMap, $window) {
   var vm = this;
-  var markers = [];
-  vm.markers =[];  
+  vm.markers =[];   
+      $scope.styles = [
+	{ stylers: [
+	]},{
+	    elementType:'labels',
+	    stylers:[
+		{visibility:'off'}
+	]},{
+	    featureType:'water',
+	    stylers:[
+		{color:'#efefef'}
+	]}, {
+	    featureType: "landscape",
+	    elementType: "all",
+	    stylers: [
+		{ "color": "#4A9470" }
+	]}, {
+	    "featureType": "road",
+	    "stylers": [
+		{ "lightness": 33 }
+	]}, {
+	    featureType: "administrative.country",
+	    elementType: "geometry.stroke",
+	    stylers: [
+		{ visibility: "on" },
+		{ "color": "#000000" }
+	]}, {
+	    "featureType": "poi",
+	    "elementType": "geometry",
+	    "stylers": [
+		{ "color": "#4A9470" }
+	]}
+    ];
   $scope.currentVal= "blog_score";
 
   NgMap.getMap().then(function(map) {
@@ -24,29 +55,32 @@ app.controller('locatorController', function($scope, $http, $timeout, $location,
   };
   
   $scope.newTab = function(url){    
-      $window.open("http://"+url,"_blank")
+      $window.open(url,"_blank")
   }
 
   $http.get('/api/statistics').then(function(response){
       var data = response.data;      
-      angular.forEach(data, function(value) {
+      var markers = [];
+      for(var i = 0; i < data.length; i++){
+	var value = data[i];
         markers.push({
           id:value.blog_id, 
           domain: value.domain,
+	  desa: value.domain,
           pos: [value.latitude, value.longitude],
           blog_score: (value.blog.score*100).toFixed(0),
           apbdes_score: (value.apbdes.score*100).toFixed(0),
           penduduk_score: (value.penduduk.score*100).toFixed(0),
           icon: (value.blog.score*100).toFixed(0)
         })
-        vm.markers = markers;
-      })        
+      }
+      vm.markers = markers;
   });
 
   $scope.changeContent = function(contentClicked){
-    var temp = markers;
+    var temp = vm.markers;
     vm.markers = [];
-    markers.forEach((value,index) =>{
+    temp.forEach((value,index) =>{
       temp[index].icon = value[contentClicked];
     });
     vm.markers = temp;
