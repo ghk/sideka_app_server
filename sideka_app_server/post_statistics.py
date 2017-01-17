@@ -9,11 +9,12 @@ import json
 from datetime import datetime, timedelta
 from ckanapi import RemoteCKAN
 
+from bs4  import BeautifulSoup
 from HTMLParser import HTMLParser, HTMLParseError
 from htmlentitydefs import name2codepoint
 import re
 from utils import open_cfg
-import sys  
+import sys
 
 reload(sys)  
 sys.setdefaultencoding('utf8')
@@ -97,6 +98,90 @@ def get_scale(value, maximum):
 		value = 0
 	return float(value) / float(maximum)
 
+def check_uper_lower_case(words):
+	lower_case = [word for word in words if word.islower()]
+	upper_case = [word for word in words if word.isupper()]
+	is_upper = [word for word in words if not word.islower() and not word.isupper()]	
+	return is_upper, lower_case, upper_case
+
+def get_score_case(x, y, z):
+	Max = len(x)
+	score = 0
+	if len(y) > Max:
+		score = 0.02
+	if len(z) > Max:
+		score = 0.03
+	else:
+		score = 0.05
+	return score
+
+def get_score_title(text):
+	percentage = 0.1
+	title = list(t for t in text.split() if t.split() != "")
+	#print title
+	score = 0.0	
+	if len(title) >= 4 and len(title) <= 14:
+		score = 0.05
+	else:
+		score = 0.01
+	up_case, low_case, is_case = check_uper_lower_case(title)
+	score_case = get_score_case(up_case, low_case, is_case)
+	return (score + score_case) / percentage
+
+
+def get_score_sentences(text):	
+	score = 0
+	sum_words = 0
+	percentage = 0.3 #30 %
+	sentences = list(t for t in re.split(r'[.!?\n]+', text) if t.split() != "")
+	for text in sentences:
+		words = list(t for t in text.split() if t.split() != "")
+		sum_words +=len(words)
+	mean_words = sum_words / len(sentences)
+	if 8 <= mean_words <= 11:
+		score = 0.3 
+	if 12 <= mean_words <= 17:
+		score = 0.2
+	if  18 <= mean_words <= 25:
+		score = 0.1
+	if mean_words > 25:
+		score =  0.05
+	return float(score / percentage)
+
+def score_resolution_caption(captions):
+	score = 0
+	for caption in captions:
+		try:
+			image = BeautifulSoup(str(caption),'html.parser')
+			width =  int(image.img["width"])
+			if 400 <= width <= 800:
+				score = 0.05
+			else:
+				score = 0.02
+		except:
+			print "error"
+			pass
+	return score
+
+def get_score_caption(text):
+	percentage = 0.15
+	try: 
+		score = 0
+		content = text.replace("[","<").replace("]",">")
+		soup = BeautifulSoup(content, 'html.parser')
+		result_caption =  soup.find_all('caption')
+		if len(result_caption) >= 1:
+			score += 0.05			
+			if len(result_caption) > 1:
+				score += 0.05
+			else:
+				score += 0.05
+			score_caption = score_resolution_caption(result_caption)	
+			score += score_caption		
+		return score / percentage
+	except:
+		pass
+	
 
 def get_post_scores(cur, desa_id, domain, post_id):
 	result = {}
@@ -105,6 +190,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	post = cur.fetchone()
 	parser = html_to_text(post["post_content"])
 	text = parser.get_text()
+	
 	paragraphs = parser.paragraphs
 	words = list(t for t in text.split() if t.split() != "")
 	sentences = list(t for t in re.split(r'[.!?\n]+', text) if t.split() != "")
@@ -123,13 +209,17 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["date"] = str(post["post_date_gmt"])
 	result["kbbi"] = len(list(w for w in words if w.lower().strip() in word_list))
 	result["kbbi_percentage"] = result["kbbi"] / float(result["words"]) if result["words"] != 0 else 0
+	
+	result["score_title"] = get_score_title(post["post_title"])	
+	result["score_sentences"] = get_score_sentences(text)
+	result["score_caption"] = get_score_caption(post["post_content"])
 
 	result["score_thumbnail"] = get_scale(1 if result["has_thumbnail"] else 0, 1)
 	result["score_kbbi"] = result["kbbi_percentage"]
 	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)
-	result["score_sentences"] = get_scale(result["sentences"], 20)
-	result["score"] = 0.3 * result["score_thumbnail"] + 0.25 * result["score_kbbi"] + 0.25 * result["score_paragraphs"] +  0.2 * result["score_sentences"]
 	
+	result["score"] = 0.2 * result["score_thumbnail"] + 0.2 * result["score_kbbi"] + 0.2 * result["score_paragraphs"] +  0.15 * result["score_sentences"] + 0.1 * result["score_title"] + 0.15 * result["score_caption"] 
+	print "skor akhir =",result["score"]
 	return result
 
 
