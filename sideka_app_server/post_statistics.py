@@ -108,80 +108,84 @@ def get_score_case(x, y, z):
 	Max = len(x)
 	score = 0
 	if len(y) > Max:
-		score = 0.02
+		score = 0.2
 	if len(z) > Max:
-		score = 0.03
+		score = 0.3
 	else:
-		score = 0.05
+		score = 0.5
 	return score
 
 def get_score_title(text):
-	percentage = 0.1
 	title = list(t for t in text.split() if t.split() != "")
-	#print title
 	score = 0.0	
 	if len(title) >= 4 and len(title) <= 14:
-		score = 0.05
+		score = 0.5
 	else:
-		score = 0.01
+		score = 0.2
 	up_case, low_case, is_case = check_uper_lower_case(title)
 	score_case = get_score_case(up_case, low_case, is_case)
-	return (score + score_case) / percentage
+	return score + score_case
 
 
 def get_score_sentences(text):	
 	score = 0
 	sum_words = 0
-	percentage = 0.3 #30 %
 	sentences = list(t for t in re.split(r'[.!?\n]+', text) if t.split() != "")
 	for text in sentences:
 		words = list(t for t in text.split() if t.split() != "")
 		sum_words +=len(words)
 	mean_words = sum_words / len(sentences)
 	if 8 <= mean_words <= 11:
-		score = 0.3 
+		score = 1
 	if 12 <= mean_words <= 17:
-		score = 0.2
+		score = 0.8
 	if  18 <= mean_words <= 25:
-		score = 0.1
+		score = 0.6
 	if mean_words > 25:
-		score =  0.05
-	return float(score / percentage)
+		score =  0.4
+	return score
 
-def score_resolution_caption(captions):
+def get_score_resolution(img):
 	score = 0
-	for caption in captions:
-		try:
-			image = BeautifulSoup(str(caption),'html.parser')
-			width =  int(image.img["width"])
-			if 400 <= width <= 800:
-				score = 0.05
-			else:
-				score = 0.02
-		except:
-			print "error"
-			pass
+	try:
+		image = BeautifulSoup(str(img),'html.parser')
+		resolution =  max(int(image.img["width"]),int((image.img["width"])))
+		if 300 <= resolution <= 800:
+			score = 0.3
+		if resolution < 400:
+			score = 0.1
+		if resolution > 800:
+			score = 0.2
+	except:
+		pass
 	return score
 
 def get_score_caption(text):
-	percentage = 0.15
+	score = 0
 	try: 
-		score = 0
+		score_caption = 0
+		score_resolution = 0
 		content = text.replace("[","<").replace("]",">")
 		soup = BeautifulSoup(content, 'html.parser')
-		result_caption =  soup.find_all('caption')
-		if len(result_caption) >= 1:
-			score += 0.05			
-			if len(result_caption) > 1:
-				score += 0.05
-			else:
-				score += 0.05
-			score_caption = score_resolution_caption(result_caption)	
-			score += score_caption		
-		return score / percentage
+		result_img_caption =  [a.img for a in soup.find_all('caption')]
+		result_img = soup.find_all('img')
+		if len(result_img) == 1:
+			score += 0.1
+		if len(result_img) > 1:
+			score += 0.4
+		
+		for img in result_img:
+			score_resolution += get_score_resolution(img)
+			if img in result_img_caption:
+				score_caption += 0.3
+		
+		mean_score_caption = score_caption / len(result_img_caption)
+		mean_score_resolution = score_resolution / len(result_img)
+		score = score + mean_score_caption + mean_score_caption
+
 	except:
-		pass
-	
+		pass	
+	return score
 
 def get_post_scores(cur, desa_id, domain, post_id):
 	result = {}
@@ -195,7 +199,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	words = list(t for t in text.split() if t.split() != "")
 	sentences = list(t for t in re.split(r'[.!?\n]+', text) if t.split() != "")
 	print sentences
-
+	
 	cur.execute("select * from wp_"+str(desa_id)+"_postmeta where post_id = %s", (post_id,))
 	metas = list(cur.fetchall())
 
@@ -213,13 +217,13 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["score_title"] = get_score_title(post["post_title"])	
 	result["score_sentences"] = get_score_sentences(text)
 	result["score_caption"] = get_score_caption(post["post_content"])
-
+	
 	result["score_thumbnail"] = get_scale(1 if result["has_thumbnail"] else 0, 1)
 	result["score_kbbi"] = result["kbbi_percentage"]
-	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)
+	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)	
 	
 	result["score"] = 0.2 * result["score_thumbnail"] + 0.2 * result["score_kbbi"] + 0.2 * result["score_paragraphs"] +  0.15 * result["score_sentences"] + 0.1 * result["score_title"] + 0.15 * result["score_caption"] 
-	print "skor akhir =",result["score"]
+		
 	return result
 
 
@@ -234,7 +238,7 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		print desa["blog_id"]
+		print desa["blog_id"]		
 		query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
 		cur.execute(query)
 		posts = list(cur.fetchall())
@@ -258,7 +262,7 @@ if __name__ == "___main__":
 			     db=conf.MYSQL_DB)        
 	cur = db.cursor(MySQLdb.cursors.DictCursor)
 	#scores = get_post_scores(cur, 5, 55)
-	scores = get_post_scores(cur, 6, "bokor", 452)
-	print scores
+	scores = get_post_scores(cur, 4, "leu", 351)
+	#print scores
 	db.commit()
 	db.close()
