@@ -52,7 +52,7 @@ var config = {
         },
         scales: {
             xAxes: [{
-                display: true,
+                display: false,
                 scaleLabel: {
                     display: true,
                     labelString: 'Date'

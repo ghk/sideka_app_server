@@ -80,7 +80,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
   $scope.changeContent = function(contentClicked){
     var temp = vm.markers;
     vm.markers = [];
-    temp.forEach((value,index) =>{
+    temp.forEach(function(value,index){
       temp[index].icon = value[contentClicked];
     });
     vm.markers = temp;

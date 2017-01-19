@@ -27,17 +27,19 @@ var columns = [
 		{
 	data: 'blog_id',
 	header: 'Wordpress Id',
-	renderer: makeLinkRenderer(v => "/statistic/"+v, v => v),
+	renderer: makeLinkRenderer(function(v){ return  "/statistic/"+v }, function(v) {return v; }),
 		},
 		{
 	data: 'domain',
 	header: 'Domain',
-	renderer: makeLinkRenderer(v => "http://"+v, v => v),
+	renderer: makeLinkRenderer(function(v){ return  "http://"+v }, function(v) {return v; }),
       },
+/*
       {
 	data: 'pendamping',
 	header: 'Pendamping',
       },
+*/
       {
 	data: 'blog.score',
 	header: 'Berita',
@@ -128,7 +130,7 @@ var columns = [
 	header: '# APBDes',
       },
     ];
-columns.forEach(c => {
+columns.forEach(function(c) {
 	c.readOnly = true;
 });
 $.getJSON("/api/statistics", function(data){
@@ -140,7 +142,7 @@ $.getJSON("/api/statistics", function(data){
           columnSorting: true,
           sortIndicator: true,
 	  rowHeaders: true,
-	  colHeaders: columns.map(c => c.header),
+	  colHeaders: columns.map(function(c) { return c.header; }),
 	});
-	setTimeout(()=> hot.render(), 0);
+	setTimeout(function(){ hot.render() }, 0);
 });
