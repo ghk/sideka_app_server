@@ -165,6 +165,9 @@ def get_score_caption(text):
 	try: 
 		score_caption = 0
 		score_resolution = 0
+		result_img_caption = 0
+		mean_score_resolution = 0
+		mean_score_caption = 0
 		content = text.replace("[","<").replace("]",">")
 		soup = BeautifulSoup(content, 'html.parser')
 		result_img_caption =  [a.img for a in soup.find_all('caption')]
@@ -178,10 +181,10 @@ def get_score_caption(text):
 			score_resolution += get_score_resolution(img)
 			if img in result_img_caption:
 				score_caption += 0.3
-		
-		mean_score_caption = score_caption / len(result_img_caption)
-		mean_score_resolution = score_resolution / len(result_img)
-		score = score + mean_score_caption + mean_score_caption
+		mean_score_resolution = score_resolution / len(result_img)			
+		if len(result_img_caption) != 0:
+			mean_score_caption = score_caption / len(result_img_caption)
+		score = score + mean_score_caption + mean_score_resolution
 
 	except:
 		pass	
