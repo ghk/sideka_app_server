@@ -98,33 +98,27 @@ def get_scale(value, maximum):
 		value = 0
 	return float(value) / float(maximum)
 
-def check_uper_lower_case(words):
+def check_upper_lower_case(words):
 	lower_case = [word for word in words if word.islower()]
 	upper_case = [word for word in words if word.isupper()]
 	is_upper = [word for word in words if not word.islower() and not word.isupper()]	
 	return is_upper, lower_case, upper_case
-
-def get_score_case(x, y, z):
-	Max = len(x)
-	score = 0
-	if len(y) > Max:
-		score = 0.2
-	if len(z) > Max:
-		score = 0.3
-	else:
-		score = 0.5
-	return score
-
+	
 def get_score_title(text):
 	title = list(t for t in text.split() if t.split() != "")
 	score = 0.0	
 	if len(title) >= 4 and len(title) <= 14:
-		score = 0.5
+		score += 0.5
 	else:
-		score = 0.2
-	up_case, low_case, is_case = check_uper_lower_case(title)
-	score_case = get_score_case(up_case, low_case, is_case)
-	return score + score_case
+		score += 0.2
+	up_case, low_case, is_case = check_upper_lower_case(title)
+	if len(low_case) > len(up_case):
+		score += 0.2
+	if len(is_case) > len(up_case):
+		score += 0.3
+	else:
+		score += 0.5
+	return score
 
 
 def get_score_sentences(text):	
@@ -145,49 +139,40 @@ def get_score_sentences(text):
 		score =  0.4
 	return score
 
-def get_score_resolution(img):
-	score = 0
-	try:
-		image = BeautifulSoup(str(img),'html.parser')
-		resolution =  max(int(image.img["width"]),int((image.img["width"])))
-		if 300 <= resolution <= 800:
-			score = 0.3
-		if resolution < 400:
-			score = 0.1
-		if resolution > 800:
-			score = 0.2
-	except:
-		pass
-	return score
+def get_max_resolution(img):
+	image = BeautifulSoup(str(img),'html.parser')
+	resolution =  max(int(image.img["width"]),int((image.img["width"])))
+	return resolution
 
-def get_score_caption(text):
+def get_score_caption(post_content):
 	score = 0
-	try: 
-		score_caption = 0
-		score_resolution = 0
-		result_img_caption = 0
-		mean_score_resolution = 0
-		mean_score_caption = 0
-		content = text.replace("[","<").replace("]",">")
-		soup = BeautifulSoup(content, 'html.parser')
-		result_img_caption =  [a.img for a in soup.find_all('caption')]
-		result_img = soup.find_all('img')
+	mean_score_caption = 0
+	mean_score_resolution = 0
+	score_resolution = 0
+	score_caption = 0
+	content = post_content.replace("[","<").replace("]",">")
+	soup = BeautifulSoup(content, 'html.parser')
+	result_img_caption =  [a.img for a in soup.find_all('caption')]			
+	result_img = soup.find_all('img')	
+	if result_img:
 		if len(result_img) == 1:
 			score += 0.1
 		if len(result_img) > 1:
 			score += 0.4
-		
 		for img in result_img:
-			score_resolution += get_score_resolution(img)
+			resolution = get_max_resolution;
+			if 300 <= resolution <= 800:
+				score_resolution += 0.3
+			if resolution < 400:
+				score_resolution += 0.1
+			if resolution > 800:
+				score_resolution += 0.2
 			if img in result_img_caption:
 				score_caption += 0.3
-		mean_score_resolution = score_resolution / len(result_img)			
 		if len(result_img_caption) != 0:
 			mean_score_caption = score_caption / len(result_img_caption)
+		mean_score_resolution = score_resolution / len(result_img)
 		score = score + mean_score_caption + mean_score_resolution
-
-	except:
-		pass	
 	return score
 
 def get_post_scores(cur, desa_id, domain, post_id):
@@ -224,9 +209,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["score_thumbnail"] = get_scale(1 if result["has_thumbnail"] else 0, 1)
 	result["score_kbbi"] = result["kbbi_percentage"]
 	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)	
-	
 	result["score"] = 0.2 * result["score_thumbnail"] + 0.2 * result["score_kbbi"] + 0.2 * result["score_paragraphs"] +  0.15 * result["score_sentences"] + 0.1 * result["score_title"] + 0.15 * result["score_caption"] 
-		
 	return result
 
 
@@ -241,7 +224,7 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		print desa["blog_id"]		
+		print desa["blog_id"]
 		query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
 		cur.execute(query)
 		posts = list(cur.fetchall())

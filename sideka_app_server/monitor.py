@@ -151,18 +151,35 @@ def get_dashboard_data():
 	finally:
 		cur.close()
 
-@app.route('/api/post_scores')
+@app.route('/api/post_scores',  methods=["GET"])
 def get_post_scores():
 	cur = mysql.connection.cursor()
+	keywords = request.args.get('keywords')
+	page = int(request.args.get('pagebegin'))
+	item_per_page = int(request.args.get('itemperpage'))
+	offset = 0
+	if int(page) >1:
+		offset = (int(page) - 1) * item_per_page	
 	try:
-		query = "SELECT score from sd_post_scores ORDER BY post_date desc"
-		cur.execute(query)
+		query = "SELECT score from sd_post_scores ORDER BY post_date desc limit %s, %s"
+		cur.execute(query,(offset,item_per_page))
 		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)
 	finally:
 		cur.close()
+		
+@app.route('/api/count_post_scores')
+def get_count_post_scores():
+	cur = mysql.connection.cursor()
+	try:
+		query = "SELECT count(*) from sd_post_scores"
+		cur.execute(query)
+		results = cur.fetchone()[0]
+		return str(results)
+	finally:
+		cur.close()
 
-@app.route('/api/apbdes_scores')
+@app.route('/api/apbdes_scores',)
 def get_apbdes_scores():
 	cur = mysql.connection.cursor()
 	try:
