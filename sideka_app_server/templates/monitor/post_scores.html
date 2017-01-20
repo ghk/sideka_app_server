@@ -1,6 +1,11 @@
 {% extends "monitor/monitor.html" %}
 {% block body %}
 <div ng-app="app" ng-controller="PostCtrl as postCtrl">
+<style>
+	[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+	display: none !important;
+	}
+</style>
 	<div class="md-card" >
 		<div class="md-card-toolbar">
 			<div class="md-card-toolbar-actions">
@@ -16,7 +21,7 @@
 		</div>
 		<div class="md-card-content">
 			<div class="uk-overflow-container">
-				<table class="uk-table uk-table-hover">
+				<table class="uk-table uk-table-hover uk-text-nowrap">
 					<thead>
 						<tr>
 							<th ng-repeat="header in headers">[[header]]</th>
@@ -25,16 +30,19 @@
 					<tbody>
 					<tr dir-paginate="data in dataTables | itemsPerPage: itemPerPage" total-items="totalItems" current-page="currentPage">
 						<td><a href="http://[[data.domain]]">[[data.domain]]</a></td>
-						<td>[[data.score*100 | number:2]]</td>
-						<td>[[data.title]]</td>
+						<td class="uk-text-center" ng-init="score = data.score*100">
+							<span ng-class="score < 40 ? 'uk-badge uk-badge-danger' : (score < 70 ? 'uk-badge uk-badge-warning' : 'uk-badge uk-badge-success')">
+									[[ score| number:2]]
+							</span>
+						</td>
+						<td><a href="[[data.url]]"> [[data.title | limitTo: 60]][[data.title.length > 60 ? ' [...]' : '']]</a></td>
 						<td>[[data.has_thumbnail]]</td>
 						<td>[[data.words]]</td>
 						<td>[[data.kbbi]]</td>
 						<td>[[data.kbbi_percentage*100 | number:2]]%</td>
 						<td>[[data.sentences]]</td>
 						<td>[[data.paragraphs]]</td>
-						<td>[[data.date]]</td>
-						<td><a href="[[data.url]]">[[data.url]]</a></td>
+						<td><span ng-bind="formatDate(data.date) |  date:'dd/MMM/yyyy'"></span></td>
 					</tr>
 					</tbody>
 				</table>
