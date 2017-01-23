@@ -140,8 +140,12 @@ def get_score_sentences(text):
 	return score
 
 def get_max_resolution(img):
-	image = BeautifulSoup(str(img),'html.parser')
-	resolution =  max(int(image.img["width"]),int((image.img["width"])))
+	resolution = 0
+	try:
+		image = BeautifulSoup(str(img),'html.parser')
+		resolution =  max(int(image.img["width"]),int((image.img["width"])))
+	except:
+		pass
 	return resolution
 
 def get_score_caption(post_content):
@@ -160,7 +164,7 @@ def get_score_caption(post_content):
 		if len(result_img) > 1:
 			score += 0.4
 		for img in result_img:
-			resolution = get_max_resolution;
+			resolution = get_max_resolution(img);
 			if 300 <= resolution <= 800:
 				score_resolution += 0.3
 			if resolution < 400:
@@ -175,6 +179,29 @@ def get_score_caption(post_content):
 		score = score + mean_score_caption + mean_score_resolution
 	return score
 
+def get_score_paraghraphs(post_content):
+	sum_scores_per_paragraph = 0
+	mean_scores = 0	
+	soup = BeautifulSoup(str(post_content), 'html.parser')
+	paraghraps = soup.find_all('p')
+	if len(paraghraps) != 0:
+		for paragraph in paraghraps:
+			text = ""
+			try:
+				soup = BeautifulSoup(str(paragraph), 'html.parser')
+				text = soup.text 
+				sentences = len([t for t in re.split(r'[.!?\n]+', text) if t.split() != ""]) -1
+				if sentences < 3 :
+					sum_scores_per_paragraph += 0.2
+				if 3 <= sentences <= 6:
+					sum_scores_per_paragraph += 1
+				else:
+					sum_scores_per_paragraph += 0.5		
+			except:
+				pass			
+		mean_scores = sum_scores_per_paragraph / len(paraghraps)
+	return mean_scores
+
 def get_post_scores(cur, desa_id, domain, post_id):
 	result = {}
 
@@ -186,7 +213,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	paragraphs = parser.paragraphs
 	words = list(t for t in text.split() if t.split() != "")
 	sentences = list(t for t in re.split(r'[.!?\n]+', text) if t.split() != "")
-	print sentences
+	#print sentences
 	
 	cur.execute("select * from wp_"+str(desa_id)+"_postmeta where post_id = %s", (post_id,))
 	metas = list(cur.fetchall())
@@ -198,6 +225,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["url"] = post["guid"]
 	result["domain"] = domain
 	result["title"] = post["post_title"]
+	print post["post_title"]
 	result["date"] = str(post["post_date_gmt"])
 	result["kbbi"] = len(list(w for w in words if w.lower().strip() in word_list))
 	result["kbbi_percentage"] = result["kbbi"] / float(result["words"]) if result["words"] != 0 else 0
@@ -205,11 +233,14 @@ def get_post_scores(cur, desa_id, domain, post_id):
 	result["score_title"] = get_score_title(post["post_title"])	
 	result["score_sentences"] = get_score_sentences(text)
 	result["score_caption"] = get_score_caption(post["post_content"])
+	result["score_paragraphs"] = get_score_paraghraphs(post["post_content"])
 	
 	result["score_thumbnail"] = get_scale(1 if result["has_thumbnail"] else 0, 1)
 	result["score_kbbi"] = result["kbbi_percentage"]
-	result["score_paragraphs"] = get_scale(result["paragraphs"], 4)	
+	print "score_title: ", result["score_title"], " score_sentences: ", result["score_sentences"], " score_caption: ", result["score_caption"], " score_paragraphs: ", result["score_paragraphs"]
 	result["score"] = 0.2 * result["score_thumbnail"] + 0.2 * result["score_kbbi"] + 0.2 * result["score_paragraphs"] +  0.15 * result["score_sentences"] + 0.1 * result["score_title"] + 0.15 * result["score_caption"] 
+	print "skor akhir = ", result["score"]
+	print
 	return result
 
 
@@ -224,20 +255,20 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		print desa["blog_id"]
-		query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
-		cur.execute(query)
-		posts = list(cur.fetchall())
-		for post in posts:
-			try:
-				scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
-				s = json.dumps(scores)
-				print s
-				cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
-			except Exception as e:
-				traceback.print_exc()
-				
-		db.commit()
+		if desa["blog_id"] == 4 or desa["blog_id"] == 6:
+			query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
+			cur.execute(query)
+			posts = list(cur.fetchall())
+			for post in posts:
+				try:
+					scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
+					s = json.dumps(scores)
+					#print s
+					cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
+				except Exception as e:
+					traceback.print_exc()
+					
+			db.commit()
 	db.close()
 
 if __name__ == "___main__":
