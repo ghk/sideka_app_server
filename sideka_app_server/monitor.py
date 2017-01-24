@@ -44,6 +44,16 @@ def statistic_single(blog_id):
 	finally:
 		cur.close()
 
+@app.route('/statistic/posts/<int:blog_id>')
+def statistic_single_posts(blog_id):
+	cur = mysql.connection.cursor()
+	try:
+		query = "select score from sd_post_scores s where s.blog_id = %s";
+		cur.execute(query, (blog_id,))
+		content = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
+		return render_template('monitor/statistics_single_posts.html', active='statistics', content=content)
+	finally:
+		cur.close()
 
 @app.route('/posts/')
 def post_scores():

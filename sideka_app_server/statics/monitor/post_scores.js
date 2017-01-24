@@ -10,7 +10,7 @@ app.controller('PostCtrl', function($scope, $http) {
 	$scope.keyWords = "";
 	$scope.totalItems = 0;
 	$scope.dataTables = [];
-	$scope.headers = ['Domain', 'Score', 'Title', 'Image?', '# Words', '# KBBI Words', '% KBBI','# Sentences', '# Paragraphs', 'Date']
+	$scope.headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
 	get_all_post("",1)
 	
 	
@@ -26,6 +26,7 @@ app.controller('PostCtrl', function($scope, $http) {
 		}); 
 		$http.get('/api/post_scores?keywords='+keyWords+"&pagebegin="+pageBegin+"&itemperpage="+$scope.itemPerPage).then(function(response){
 			$scope.dataTables = response.data;
+			console.log(response.data)
 		}); 
 	}
 

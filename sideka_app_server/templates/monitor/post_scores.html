@@ -32,12 +32,15 @@
 							</span>
 						</td>
 						<td><a href="[[data.url]]"> [[data.title | limitTo: 50]][[data.title.length > 50 ? ' [...]' : '']]</a></td>
-						<td>[[data.has_thumbnail]]</td>
-						<td>[[data.words]]</td>
 						<td>[[data.kbbi]]</td>
-						<td>[[data.kbbi_percentage*100 | number:2]]%</td>
 						<td>[[data.sentences]]</td>
 						<td>[[data.paragraphs]]</td>
+						<td>[[data.has_thumbnail*20 | number:2]]</td>						
+						<td>[[data.score_title*10 | number:2]]</td>
+						<td>[[data.score_caption*15 | number:2]]</td>
+						<td>[[data.kbbi_percentage*20 | number:2]]</td>
+						<td>[[data.score_sentences*15 | number:2]]</td>
+						<td>[[data.score_paragraphs*20 | number:2]]</td>
 						<td><span ng-bind="formatDate(data.date) |  date:'dd/MMM/yyyy'"></span></td>
 					</tr>
 					</tbody>

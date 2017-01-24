@@ -27,7 +27,7 @@ var columns = [
 		{
 	data: 'blog_id',
 	header: 'Wordpress Id',
-	renderer: makeLinkRenderer(function(v){ return  "/statistic/"+v }, function(v) {return v; }),
+	renderer: makeLinkRenderer(function(v){ return  "/statistic/posts/"+v }, function(v) {return v; }),
 		},
 		{
 	data: 'domain',
