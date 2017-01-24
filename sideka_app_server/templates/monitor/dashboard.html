@@ -68,7 +68,7 @@
                 </div>
                 <h3 class="md-card-toolbar-heading-text">
                     <div data-uk-button-radio="{target:'.md-btn'}">
-		    Kualitas Data: &nbsp; &nbsp; &nbsp;
+		    			Kualitas Data: &nbsp; &nbsp; &nbsp;
                         <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='blog_score'}"  ng-click="changeContent('blog_score')">Berita</button>
                         <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='penduduk_score'}" ng-click="changeContent('penduduk_score')">Kependudukan</button>
                         <button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" ng-class="{'uk-active':currentVal=='apbdes_score'}" ng-click="changeContent('apbdes_score')">Keuangan</button>
@@ -90,12 +90,12 @@
                         <info-window id="info">
                             <div ng-non-bindable="">
                                 Desa <a href="" ng-click="newTab('/statistic/'+vm.marker.id)">[[vm.marker.desa]]</a>
-				<br/>
-				Berita: [[vm.marker.blog_score]]
-				<br/>
-				Kependudukan: [[vm.marker.penduduk_score]]
-				<br/>
-				Keuangan: [[vm.marker.apbdes_score]]
+								<br/>
+								Berita: [[vm.marker.blog_score]]
+								<br/>
+								Kependudukan: [[vm.marker.penduduk_score]]
+								<br/>
+								Keuangan: [[vm.marker.apbdes_score]]
                             </div>
                         </info-window>                    
                     </ng-map>    
