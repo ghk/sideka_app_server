@@ -182,6 +182,7 @@ def get_score_caption(post_content):
 def get_score_paraghraphs(post_content):
 	sum_scores_per_paragraph = 0
 	mean_scores = 0	
+	length_score = 0
 	soup = BeautifulSoup(str(post_content), 'html.parser')
 	paraghraps = soup.find_all('p')
 	if len(paraghraps) != 0:
@@ -192,14 +193,21 @@ def get_score_paraghraphs(post_content):
 				text = soup.text 
 				sentences = len([t for t in re.split(r'[.!?\n]+', text) if t.split() != ""]) -1
 				if sentences < 3 :
-					sum_scores_per_paragraph += 0.2
+					sum_scores_per_paragraph += 0.1
 				if 3 <= sentences <= 6:
-					sum_scores_per_paragraph += 1
+					sum_scores_per_paragraph += 0.5
 				else:
-					sum_scores_per_paragraph += 0.5		
+					sum_scores_per_paragraph += 0.3	
 			except:
-				pass			
+				pass
+		
+		if len(paraghraps) < 3:
+			length_score = 0.1
+		else:
+			length_score = 0.5
+
 		mean_scores = sum_scores_per_paragraph / len(paraghraps)
+		mean_scores+=length_score
 	return mean_scores
 
 def get_post_scores(cur, desa_id, domain, post_id):
