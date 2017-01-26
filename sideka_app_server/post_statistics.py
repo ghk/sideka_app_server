@@ -199,16 +199,14 @@ def get_score_paraghraphs(post_content):
 				else:
 					sum_scores_per_paragraph += 0.3	
 			except:
-				pass
-		
-		if len(paraghraps) < 3:
-			length_score = 0.1
-		else:
-			length_score = 0.5
-
+				pass		
 		mean_scores = sum_scores_per_paragraph / len(paraghraps)
-		mean_scores+=length_score
-	return mean_scores
+		
+	if len(paraghraps) < 3:
+			length_score = 0.2
+	else:
+		length_score = 0.5
+	return mean_scores + length_score
 
 def get_post_scores(cur, desa_id, domain, post_id):
 	result = {}
