@@ -31,27 +31,30 @@ def statistic_single(blog_id):
 		res = json.loads(row[0])
 		res["date"] = str(row[1])
 		return res
-	cur = mysql.connection.cursor()
+	def to_json(col):
+		result={}
+		result["desa"] = col[0]
+		result["kecamatan"] = col[1]
+		result["kabupaten"] = col[2]
+		result["propinsi"] = col[3]
+		return json.dumps(result)
 
-	try:
-		query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
-		cur.execute(query, (blog_id,))
-		result = []
-		for c in cur.fetchall():
-			result.append(comb(c))
-		content = json.dumps(result)
-		return render_template('monitor/statistic_single.html', active='statistics', content=content)
-	finally:
-		cur.close()
-
-@app.route('/statistic/posts/<int:blog_id>')
-def statistic_single_posts(blog_id):
 	cur = mysql.connection.cursor()
+	
 	try:
-		query = "select score from sd_post_scores s where s.blog_id = %s";
-		cur.execute(query, (blog_id,))
-		content = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
-		return render_template('monitor/statistics_single_posts.html', active='statistics', content=content)
+		daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
+		post_query = "select score from sd_post_scores p where p.blog_id = %s ORDER BY p.post_date desc";
+		desa_query = "select desa, kecamatan, kabupaten, propinsi from sd_desa d where d.blog_id = %s"
+
+		cur.execute(daily_query, (blog_id,))
+		content_daily = json.dumps([comb(c) for c in cur.fetchall()])
+		
+		cur.execute(post_query, (blog_id,))
+		content_post = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
+
+		cur.execute(desa_query, (blog_id,))
+		info = to_json(cur.fetchone())
+		return render_template('monitor/statistic_single.html', active='statistics', content_daily=content_daily, content_post = content_post, info = info)
 	finally:
 		cur.close()
 

@@ -1,5 +1,6 @@
 {% extends "monitor/monitor.html" %}
 {% block body %}
+    <h3 class="heading_b uk-margin-bottom" id="info_desa"></h3>
     <div class="md-card">
     <div class="md-card-toolbar">
         <div class="md-card-toolbar-actions">
@@ -15,15 +16,84 @@
         </div>           
     </div>
     </div>
-
     <div class="md-card">
-    <div class="md-card-content">
-        <div id="sheet"></div>             
-    </div>
+        <div class="md-card-content">
+            <ul class="uk-subnav uk-subnav-pill uk-margin-bottom" data-uk-switcher="{connect:'#switch-table', animation: 'slide-left'}">
+                <li class="uk-active"><a href="#">Score Harian</a></li>
+                <li><a href="#">Score Berita</a></li>
+            </ul>
+            <ul id="switch-table" class="uk-switcher">
+                <li>
+                    <div class="md-card uk-margin-medium-bottom">
+                        <div class="md-card-content">
+                            <div class="uk-overflow-container">
+                                <table class="uk-table uk-text-nowrap uk-table-hover" id="table_daily">
+                                    <thead>
+                                        <tr>
+                                            <th>Domain</th>
+                                            <th>Berita</th>
+                                            <th>Penduduk</th>
+                                            <th>Anggaran</th>
+                                            <th>B.Qlt</th>
+                                            <th>B.Freq</th>
+                                            <th>P.Qlt</th>
+                                            <th>P.Qty</th>
+                                            <th>A.Qlt</th>
+                                            <th>A.Qty</th>
+                                            <th>Last Post</th>
+                                            <th>#Post 1D</th>
+                                            <th>#Post 1W</th>
+                                            <th>#Post 30D</th>
+                                            <th>Penduduk last Modified</th>
+                                            <th>#Penduduk</th>
+                                            <th>Apbdes Last Modified</th>
+                                            <th>#Apbdes</th>
+                                        </tr>
+                                    </thead>                                    
+                                    <tbody>                                   
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="md-card uk-margin-medium-bottom">
+                        <div class="md-card-content">
+                            <div class="uk-overflow-container">
+                                <table class="uk-table uk-text-nowrap uk-table-hover" id="table_post">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Domain</th>
+                                            <th>Judul</th>
+                                            <th>Score</th>
+                                            <th>#KBBI</th>
+                                            <th>#Kalimat</th>
+                                            <th>#Paragraph</th>
+                                            <th>%Gambar Utama</th>
+                                            <th>%Judul</th>
+                                            <th>%KBBI</th>
+                                            <th>%Foto & Caption</th>
+                                            <th>%Kalimat</th>
+                                            <th>%Paragraph</th>
+                                        </tr>
+                                    </thead>                                    
+                                    <tbody>                                   
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <script>
-            var content = {{content | safe}};
+            var content_daily = {{content_daily | safe}};
+            var content_post = {{content_post | safe}};
+            var info = {{info | safe}};
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.js"></script>

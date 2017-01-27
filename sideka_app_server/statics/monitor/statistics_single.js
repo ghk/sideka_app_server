@@ -13,25 +13,25 @@ var convertDate = function(date){
 var config = {
     type: 'line',
     data: {
-        labels: content.map(d => convertDate(d.date)),
+        labels: content_daily.map(d => convertDate(d.date)),
         datasets: [{
             label: "Berita",
             backgroundColor: chartColors.red,
             borderColor: chartColors.red,
-            data: content.map(c => (c.blog.score * 100).toFixed(2)),
+            data: content_daily.map(c => (c.blog.score * 100).toFixed(2)),
             fill: false,
         }, {
             label: "Penduduk",
             fill: false,
             backgroundColor: chartColors.yellow,
             borderColor: chartColors.yellow,
-            data: content.map(c => (c.penduduk.score * 100).toFixed(2)),
+            data: content_daily.map(c => (c.penduduk.score * 100).toFixed(2)),
         },{
           label: "Anggaran",
           fill: false,
           backgroundColor: chartColors.blue,
           borderColor: chartColors.blue,
-          data: content.map(c => (c.apbdes.score * 100).toFixed(2)),
+          data: content_daily.map(c => (c.apbdes.score * 100).toFixed(2)),
         }
       ]
     },
@@ -93,137 +93,13 @@ var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties
 	td.style.backgroundColor = bg;
 	td.style.color = color;
 };
+var convertDate
 
-var columns = [
-    {
-  data: 'date',
-  header: 'Tanggal',
-	type: 'date',
-  dateFormat: 'MM/DD/YYYY',
-  correctFormat: true,
-    },
-		{
-	data: 'domain',
-	header: 'Domain',
-	renderer: makeLinkRenderer(v => "http://"+v, v => v),
-      },
-      {
-	data: 'blog.score',
-	header: 'Berita',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'penduduk.score',
-	header: 'Penduduk',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'apbdes.score',
-	header: 'Anggaran',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'blog.score_quality',
-	header: 'B. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'blog.score_frequency',
-	header: 'B. Freq',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'penduduk.score_quality',
-	header: 'P. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'penduduk.score_quantity',
-	header: 'P. Qty',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'apbdes.score_quality',
-	header: 'A. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'apbdes.score_quantity',
-	header: 'A. Qty',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'blog.last_post',
-	header: 'Last Post',
-      },
-      {
-	data: 'blog.count_24h',
-	header: '#Post 1D',
-      },
-      {
-	data: 'blog.count_1w',
-	header: '#Post 1W',
-      },
-      {
-	data: 'blog.count_30d',
-	header: '#Post 30D',
-      },
-      {
-	data: 'penduduk.last_modified',
-	header: 'Penduduk Last Modified',
-      },
-      {
-	data: 'penduduk.count',
-	header: '# Penduduk',
-      },
-      {
-	data: 'apbdes.last_modified',
-	header: 'APBDes Last Modified',
-      },
-      {
-	data: 'apbdes.count',
-	header: '# APBDes',
-      },
-    ];
-columns.forEach(c => {
-	c.readOnly = true;
-});
 
-var sortContent = function(){
-	var result = content.sort((a,b)=> {
-		return new Date(b.date) - new Date(a.date)
-	});
-	return result
- }
- 
+window.onload = function() {  
+    $('#info_desa').text('Desa '+info.desa+', Kecamatan '+info.kecamatan+', Kabupaten '+info.kabupaten)
 
-window.onload = function() {
     var canvas = document.getElementById('canvas');
-    var container = document.getElementById('sheet');
-    console.log(content)
-
-    var hot = new Handsontable(container, {
-        data: sortContent(),
-        columns: columns,
-        columnSorting: true,
-        sortIndicator: true,
-        rowHeaders: true,
-        colHeaders: columns.map(c => c.header),
-    });
-    setTimeout(()=> hot.render(), 0);
-
     if (canvas.getContext){
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = 'black';
@@ -231,4 +107,47 @@ window.onload = function() {
         ctx.fillText('Quick Brown Fox', 0, 26);
     }
     window.myLine = new Chart(ctx, config);
+
+    var tbody = $('#table_daily tbody');
+    $.each(content_daily,function(idx,content){
+        var tr = $('<tr>');
+        $('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
+        $('<td>').html(content.blog.score.toFixed(2)).appendTo(tr);
+        $('<td>').html(content.penduduk.score.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.apbdes.score.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.blog.score_quality.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.blog.score_frequency.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.penduduk.score_quality.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.penduduk.score_quantity.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.apbdes.score_quality.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.apbdes.score_quantity.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.blog.last_post).appendTo(tr)
+        $('<td>').html(content.blog.count_24h).appendTo(tr)
+        $('<td>').html(content.blog.count_1w).appendTo(tr)
+        $('<td>').html(content.blog.count_30d).appendTo(tr)
+        $('<td>').html(content.penduduk.last_modified).appendTo(tr)
+        $('<td>').html(content.penduduk.count).appendTo(tr)
+        $('<td>').html(content.apbdes.last_modified).appendTo(tr)
+        $('<td>').html(content.apbdes.count).appendTo(tr)
+        tbody.append(tr);
+    })
+
+    var tbody = $('#table_post tbody');
+    $.each(content_post,function(idx,content){
+        var tr = $('<tr>');
+        $('<td>').html(convertDate(content.date)).appendTo(tr);
+        $('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
+        $('<td>').html('<a href="'+content.url+'">'+content.title+'</a>').appendTo(tr)
+        $('<td>').html((content.score*100).toFixed(2)).appendTo(tr)
+        $('<td>').html(content.kbbi).appendTo(tr)
+        $('<td>').html(content.sentences).appendTo(tr)
+        $('<td>').html(content.paragraphs).appendTo(tr)
+        $('<td>').html((content.score_thumbnail*20)).appendTo(tr)
+        $('<td>').html((content.score_title*10).toFixed(2)).appendTo(tr)
+        $('<td>').html((content.score_kbbi*20).toFixed(2)).appendTo(tr)
+        $('<td>').html((content.score_caption*15).toFixed(2)).appendTo(tr)
+        $('<td>').html((content.score_sentences*15).toFixed(2)).appendTo(tr)
+        $('<td>').html((content.score_paragraphs*20).toFixed(2)).appendTo(tr)
+        tbody.append(tr);
+    })
 };

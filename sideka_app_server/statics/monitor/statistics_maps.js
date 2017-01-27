@@ -66,7 +66,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
         markers.push({
           id:value.blog_id, 
           domain: value.domain,
-	  desa: value.domain,
+	      desa: value.domain,
           pos: [value.latitude, value.longitude],
           blog_score: (value.blog.score*100).toFixed(0),
           apbdes_score: (value.apbdes.score*100).toFixed(0),
