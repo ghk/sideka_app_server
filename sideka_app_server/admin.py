@@ -113,6 +113,11 @@ def contents():
 def code_finder():
 	return render_template('admin/code_finder.html', active='code_finder')
 
+@app.route('/user_supradesa')
+@login_required
+def admin_district():
+	return render_template('admin/user_supradesa.html', active='user_supradesa')
+
 @app.route('/contents/<int:content_id>')
 @login_required
 def contents_single(content_id):
