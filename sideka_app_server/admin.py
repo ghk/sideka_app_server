@@ -115,7 +115,7 @@ def code_finder():
 
 @app.route('/user_supradesa')
 @login_required
-def admin_district():
+def user_supradesa():
 	return render_template('admin/user_supradesa.html', active='user_supradesa')
 
 @app.route('/contents/<int:content_id>')
@@ -290,6 +290,56 @@ def find_all_desa():
 		return jsonify(results)
 	finally:
 		cur.close()
+@app.route('/api/users_supradesa', methods=["GET"])
+@login_required
+def get_user_supradesa():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "select * from sd_users_supradesa"
+		cur.execute(query)
+		results = list(cur.fetchall())
+		return jsonify(results)
+	finally:
+		cur.close()
+
+@app.route('/api/update_users_supradesa', methods=["POST"])
+@login_required
+def update_user_supradesa():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	data = json.loads(request.form.get("data"))
+	def get_blogs(region_prefix):
+		query = """ select d.blog_id from sd_all_desa ad_1
+					inner join sd_all_desa ad_2
+					on ad_2.parent_code = ad_1.region_code
+					inner join sd_desa d
+					on d.kode = ad_2.region_code
+					where ad_1.parent_code = %s
+					order by d.blog_id
+				"""
+		cur.execute(query, (region_prefix,))
+		result = list(cur.fetchall())
+		print "masuk sini",result
+		return result
+	try:
+		for row in data:
+			if row["username"] == None or row["region_prefix"] == None:
+				return "failed"
+
+			query = "select ID from wp_users where user_login = %s"
+			cur.execute(query, (row["username"],))	
+			user = cur.fetchone()
+			if user == None:
+				return "failed"
+				
+			query = "REPLACE into sd_users_supradesa (username, region_prefix) VALUES (%s,%s)"
+			cur.execute(query, (row["username"],row["region_prefix"]))
+			mysql.connection.commit()
+	finally:
+		cur.close()
+
+	return "success"
+		
+
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["ADMIN_PORT"])

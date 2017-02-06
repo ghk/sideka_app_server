@@ -115,6 +115,7 @@ $("#btn-update-sd-desa").click(function(){
 		location.reload();
 	});
 });
+
 $("#btn-geocode-empty-latlong").click(function(){
 	console.log("updating");
 	$.post("/api/geocode_empty_latlong", function(){
