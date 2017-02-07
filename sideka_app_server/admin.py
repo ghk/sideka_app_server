@@ -302,42 +302,86 @@ def get_user_supradesa():
 	finally:
 		cur.close()
 
-@app.route('/api/update_users_supradesa', methods=["POST"])
-@login_required
-def update_user_supradesa():
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	data = json.loads(request.form.get("data"))
-	def get_blogs(region_prefix):
-		query = """ select d.blog_id from sd_all_desa ad_1
-					inner join sd_all_desa ad_2
-					on ad_2.parent_code = ad_1.region_code
-					inner join sd_desa d
-					on d.kode = ad_2.region_code
-					where ad_1.parent_code = %s
-					order by d.blog_id
-				"""
-		cur.execute(query, (region_prefix,))
-		result = list(cur.fetchall())
-		print "masuk sini",result
-		return result
-	try:
-		for row in data:
-			if row["username"] == None or row["region_prefix"] == None:
-				return "failed"
 
-			query = "select ID from wp_users where user_login = %s"
-			cur.execute(query, (row["username"],))	
-			user = cur.fetchone()
-			if user == None:
-				return "failed"
-				
-			query = "REPLACE into sd_users_supradesa (username, region_prefix) VALUES (%s,%s)"
-			cur.execute(query, (row["username"],row["region_prefix"]))
-			mysql.connection.commit()
+def remove_capabilities_and_userlevel(user_id):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		capabilities = '%'+ '_capabilities'
+		user_level = '%'+ '_user_level'
+		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
+		cur.execute(query,(capabilities,str(user_id)))
+		
+		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
+		cur.execute(query,(user_level,str(user_id)))
+		mysql.connection.commit()	
 	finally:
 		cur.close()
 
-	return "success"
+@app.route('/api/update_users_supradesa', methods=["POST"])
+@login_required
+def update_user_supradesa():	
+	data = json.loads(request.form.get("data"))
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+
+	def get_blogs(region_prefix):
+		query = "SELECT blog_id FROM sd_desa WHERE kode like %s"
+		cur.execute(query, (region_prefix + '.%',))
+		result = list(cur.fetchall())
+		return result	
+	try:
+		for row in data:
+			if row["username"] == None or row["region_prefix"] == None:
+				continue
+
+			query = "SELECT ID FROM wp_users WHERE user_login = %s"
+			cur.execute(query, (row["username"],))	
+			user = cur.fetchone()
+			if user == None:
+				continue
+
+			query = "SELECT * FROM sd_users_supradesa WHERE username = %s and region_prefix = %s"
+			cur.execute(query, (row["username"],row["region_prefix"]))
+			same = cur.fetchone()
+			if same != None:
+				continue
+
+			query = "REPLACE INTO sd_users_supradesa (username, region_prefix) VALUES (%s,%s)"
+			cur.execute(query, (row["username"],row["region_prefix"]))
+			mysql.connection.commit()
+			remove_capabilities_and_userlevel(user["ID"])
+
+			blogs_id = get_blogs(row["region_prefix"])
+			for blog_id in blogs_id:
+				capabilities = ('wp_'+str(blog_id["blog_id"])+'_capabilities')
+				user_level = ('wp_'+str(blog_id["blog_id"])+'_user_level')
+				query = """INSERT INTO wp_usermeta (user_id, meta_key,meta_value) VALUES (%s, %s,'a:1:{s:13:"administrator";b:1;}'), (%s, %s,'10')"""
+				cur.execute(query, (user["ID"],capabilities,user["ID"],user_level))
+				mysql.connection.commit()		
+					
+		return jsonify({'success': True})
+	finally:
+		cur.close()
+
+@app.route('/api/remove_users_supradesa', methods=["POST"])
+@login_required
+def remove_user_supradesa():
+	username = json.loads(request.form.get("data"))
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		print username[0]
+		query = "DELETE FROM sd_users_supradesa WHERE username = %s"
+		cur.execute(query, (username[0],))
+		mysql.connection.commit()
+
+		query = "SELECT ID from wp_users WHERE user_login = %s"
+		cur.execute(query, (username[0],))
+		user = cur.fetchone()
+		remove_capabilities_and_userlevel(user["ID"])
+
+		return jsonify({'success': True})
+	finally:
+		cur.close
+
 		
 
 

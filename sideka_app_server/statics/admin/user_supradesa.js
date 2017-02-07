@@ -16,6 +16,7 @@ $.getJSON("/api/users_supradesa", function(data){
         columns: columns,
         rowHeaders: true,
         colHeaders: columns.map(c => c.header),
+        outsideClickDeselects: false,
     });
     setTimeout(()=> hot.render(), 0);
 });
@@ -26,9 +27,16 @@ $( "#insertRow" ).click(function() {
     hot.render();
 });
 
+$("#removeRow").click(function(){
+	var selected = hot.getSelected();
+    $.post( "/api/remove_users_supradesa", {data:JSON.stringify(hot.getDataAtRow(selected[0]))}, function(){
+		location.reload();
+	});
+});
+
 $("#apply").click(function(){
 	var data = hot.getSourceData();
-    console.log(data)
-	$.post( "/api/update_users_supradesa", {data:JSON.stringify(data)})
-    .done(function(){location.reload()});
+    $.post( "/api/update_users_supradesa", {data:JSON.stringify(data)}, function(){
+		location.reload();
+	});
 });
