@@ -4,13 +4,21 @@ var columns = [
 	header: 'Username',
       },
       {
-	data: 'region_prefix',
-	header: 'Kode Region',
+	data: 'id_supradesa',
+	header: 'ID Supradesa',
+      },
+      {
+	data: 'level',
+	header: 'Level',
+    type: 'dropdown',
+    source: ['administrator','editor','author','contributor','subscriber'],
+    width: 130,
       },
     ];
 var container = document.getElementById('sheet');
 var hot;                    
 $.getJSON("/api/users_supradesa", function(data){
+    if (data.length < 1) data ={};
     hot = new Handsontable(container, {
         data: data,
         columns: columns,
@@ -29,7 +37,7 @@ $( "#insertRow" ).click(function() {
 
 $("#removeRow").click(function(){
 	var selected = hot.getSelected();
-    $.post( "/api/remove_users_supradesa", {data:JSON.stringify(hot.getDataAtRow(selected[0]))}, function(){
+    $.post( "/api/remove_users_supradesa", {data:JSON.stringify(hot.getSourceDataAtRow(selected[0]))}, function(){
 		location.reload();
 	});
 });
