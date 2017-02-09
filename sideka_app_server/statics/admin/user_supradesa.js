@@ -1,11 +1,19 @@
-var columns = [
+var container = document.getElementById('sheet');
+var hot;   
+var region; 
+$.getJSON("/api/get_region", function(response_region){
+    region = response_region;
+    console.log()
+    var columns = [
      {
 	data: 'username',
 	header: 'Username',
       },
       {
 	data: 'id_supradesa',
-	header: 'ID Supradesa',
+	header: 'Kabupaten',
+    type: 'dropdown',
+    source: region.map(c=>c.region_code),
       },
       {
 	data: 'level',
@@ -15,19 +23,30 @@ var columns = [
     width: 130,
       },
     ];
-var container = document.getElementById('sheet');
-var hot;                    
-$.getJSON("/api/users_supradesa", function(data){
-    if (data.length < 1) data ={};
-    hot = new Handsontable(container, {
-        data: data,
-        columns: columns,
-        rowHeaders: true,
-        colHeaders: columns.map(c => c.header),
-        outsideClickDeselects: false,
+           
+    $.getJSON("/api/users_supradesa", function(response){        
+        var data;
+        if (response.length < 1)        
+            data = {};
+        else{
+            data = response.map(function(value){
+                value.id_supradesa = region.filter(c => c.id_supradesa == value.id_supradesa).map(c=> c.region_code)[0]
+                return value
+            })
+        }
+        
+        hot = new Handsontable(container, {
+            data: data,
+            columns: columns,
+            rowHeaders: true,
+            colHeaders: columns.map(c => c.header),
+            outsideClickDeselects: false,
+        });
+        setTimeout(()=> hot.render(), 0);
     });
-    setTimeout(()=> hot.render(), 0);
-});
+})
+
+
 
 $( "#insertRow" ).click(function() {
     hot.alter("insert_row", 10);
@@ -37,13 +56,23 @@ $( "#insertRow" ).click(function() {
 
 $("#removeRow").click(function(){
 	var selected = hot.getSelected();
-    $.post( "/api/remove_users_supradesa", {data:JSON.stringify(hot.getSourceDataAtRow(selected[0]))}, function(){
+    var data = hot.getSourceDataAtRow(selected[0]);
+    var result = function(){
+        data.id_supradesa = region.filter(c => c.region_code == data.id_supradesa).map(c=> c.id_supradesa)[0]
+        return data
+    }
+    $.post( "/api/remove_users_supradesa", {data:JSON.stringify(result())}, function(){
 		location.reload();
 	});
 });
 
 $("#apply").click(function(){
-	var data = hot.getSourceData();
+    var source = hot.getSourceData();
+	var data = source;
+    var results = data.map(function(value){
+        value.id_supradesa = region.filter(c => c.region_code == value.id_supradesa).map(c=> c.id_supradesa)[0]
+        return value
+    })
     $.post( "/api/update_users_supradesa", {data:JSON.stringify(data)}, function(){
 		location.reload();
 	});

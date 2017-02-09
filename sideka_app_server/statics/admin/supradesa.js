@@ -51,13 +51,14 @@ $( "#insertRow" ).click(function() {
 
 $("#removeRow").click(function(){
 	var selected = hot.getSelected();
-    $.post( "/api/remove_supradesa", {data:JSON.stringify(hot.getDataAtRow(selected[0]))}, function(){
+    $.post( "/api/remove_supradesa", {data:JSON.stringify(hot.getSourceDataAtRow(selected[0]))}, function(){
 		location.reload();
 	});
 });
 
 $("#save").click(function(){
-	var data = hot.getSourceData();
+      var data = hot.getSourceData();
+
     $.post( "/api/save_supradesa", {data:JSON.stringify(data)}, function(){
 		location.reload();
 	});

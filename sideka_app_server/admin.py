@@ -47,11 +47,29 @@ def get_superadmin_user():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
 		cur.execute("SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'site_admins'")
-		user = cur.fetchone()
-		users = loads(user["meta_value"],array_hook=OrderedDict)
+		result = cur.fetchone()
+		users = loads(result["meta_value"],array_hook=OrderedDict)
 		return users.values()
 	finally:
 		cur.close
+
+def remove_capabilities_and_userlevel(user_id):
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		capabilities = '%'+ '_capabilities'
+		user_level = '%'+ '_user_level'
+		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
+		cur.execute(query,(capabilities,str(user_id)))
+
+		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
+		cur.execute(query,(user_level,str(user_id)))
+		mysql.connection.commit()
+	finally:
+		cur.close()
+def normalize(row, keys):
+	for key in row.keys():
+		keys[key] = row[key]
+	return keys
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
@@ -62,19 +80,19 @@ def user_loader(nickname):
 	userMix = User()
 	userMix.id = nickname
 	return userMix
-	
+
 @login_manager.request_loader
 def request_loader(request):
 	nickname = request.form.get('nickname')
 	superadminUsers = get_superadmin_user()
-	if nickname in superadminUsers:		
-		success = False	
+	if nickname in superadminUsers:
+		success = False
 		userMix = User()
 		userMix.id = nickname
 		user = get_user_by_nickname(nickname)
 		success = phasher.check_password(request.form['pw'], user['user_pass'])
 		if success:
-			userMix.is_authenticated = success		
+			userMix.is_authenticated = success
 	return
 
 @app.route('/')
@@ -85,12 +103,12 @@ def desa():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-	if request.method == 'POST':   
-		nickname = request.form.get('nickname')   		
+	if request.method == 'POST':
+		nickname = request.form.get('nickname')
 		superadminUsers = get_superadmin_user()
 		if nickname in superadminUsers:
 			success = False
-			user = get_user_by_nickname(nickname)			
+			user = get_user_by_nickname(nickname)
 			success = phasher.check_password(request.form['pw'], user['user_pass'])
 			if success:
 				usermix = User()
@@ -309,70 +327,56 @@ def get_user_supradesa():
 	finally:
 		cur.close()
 
-
-def remove_capabilities_and_userlevel(user_id):
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		capabilities = '%'+ '_capabilities'
-		user_level = '%'+ '_user_level'
-		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-		cur.execute(query,(capabilities,str(user_id)))
-		
-		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-		cur.execute(query,(user_level,str(user_id)))
-		mysql.connection.commit()	
-	finally:
-		cur.close()
-
 @app.route('/api/update_users_supradesa', methods=["POST"])
 @login_required
-def update_user_supradesa():	
+def update_user_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	
-	def get_blogs(region_prefix):
-		query = "SELECT blog_id FROM sd_desa WHERE kode like %s"
-		cur.execute(query, (region_prefix + '.%',))
-		result = list(cur.fetchall())
-		return result	
+	keys={'username':None,'id_supradesa':None,'level':None}
 	try:
-		for row in data:
-			if row["username"] == None or row["id_supradesa"] == None:
+		for values in data:
+			print values
+			row = normalize(values,keys)
+			if row["username"]==None or row["id_supradesa"]==None:
 				continue
 
 			query = "SELECT ID FROM wp_users WHERE user_login = %s"
-			cur.execute(query, (row["username"],))	
+			cur.execute(query, (row["username"],))
 			user = cur.fetchone()
 			if user == None:
 				continue
 
 			query = "SELECT * FROM sd_users_supradesa WHERE username = %s and id_supradesa = %s"
-			cur.execute(query, (row["username"],row["id_supradesa"]))
+			cur.execute(query, (row["username"],row["id_supradesa"],))
 			same = cur.fetchone()
 			if same != None:
 				continue
 
 			query = "SELECT region_code FROM sd_supradesa WHERE id = %s"
-			cur.execute(query, (row["id_supradesa"]))
+			cur.execute(query, (row["id_supradesa"],))
 			code = cur.fetchone()
-			if code != None:
-				query = "REPLACE INTO sd_users_supradesa (username, id_supradesa,level) VALUES (%s,%s,%s)"
-				cur.execute(query, (row["username"],row["id_supradesa"],row["level"]))
+			if code == None:
+				continue
+				
+			query = "REPLACE INTO sd_users_supradesa (username, id_supradesa,level) VALUES (%s,%s,%s)"
+			cur.execute(query, (row["username"],row["id_supradesa"],row["level"]))
+			mysql.connection.commit()
+			remove_capabilities_and_userlevel(user["ID"],)
+
+			query = "SELECT blog_id FROM sd_desa WHERE kode like %s"
+			cur.execute(query, (code["region_code"] + '.%',),)
+			blogs_id = list(cur.fetchall())
+			for blog_id in blogs_id:
+				role = {"administrator":"10","editor":"7","author":"2","contributor":"1","subscriber":"0"}
+				capabilities = ('wp_'+str(blog_id["blog_id"])+'_capabilities')
+				user_level = ('wp_'+str(blog_id["blog_id"])+'_user_level')
+				level_value = role[row["level"]]
+				role = dumps({row["level"]:1})
+
+				query = """INSERT INTO wp_usermeta (user_id, meta_key,meta_value) VALUES (%s, %s,%s), (%s, %s,%s)"""
+				cur.execute(query, (user["ID"],capabilities,role,user["ID"],user_level,level_value))
 				mysql.connection.commit()
-				remove_capabilities_and_userlevel(user["ID"])
 
-				blogs_id = get_blogs(code["region_code"])
-				for blog_id in blogs_id:					
-					role = {"administrator":"10","editor":"7","author":"2","contributor":"1","subscriber":"0"}					
-					capabilities = ('wp_'+str(blog_id["blog_id"])+'_capabilities')
-					user_level = ('wp_'+str(blog_id["blog_id"])+'_user_level')
-					level_value = role[row["level"]]
-					role = dumps({row["level"]:1})
-
-					query = """INSERT INTO wp_usermeta (user_id, meta_key,meta_value) VALUES (%s, %s,%s), (%s, %s,%s)"""
-					cur.execute(query, (user["ID"],capabilities,role,user["ID"],user_level,level_value))
-					mysql.connection.commit()
-					
 		return jsonify({'success': True})
 	finally:
 		cur.close()
@@ -383,9 +387,9 @@ def remove_user_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
-		
+
 		query = "DELETE FROM sd_users_supradesa WHERE username = %s and id_supradesa = %s"
-		cur.execute(query, (data["username"],data["id_supradesa"]))
+		cur.execute(query, (data["username"],data["id_supradesa"],))
 		mysql.connection.commit()
 
 		query = "SELECT ID from wp_users WHERE user_login = %s"
@@ -397,12 +401,24 @@ def remove_user_supradesa():
 	finally:
 		cur.close
 
+@app.route('/api/get_region', methods=["GET"])
+@login_required
+def get_region():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT region_code, id as id_supradesa FROM sd_supradesa"
+		cur.execute(query)
+		result = jsonify(cur.fetchall())
+		return result
+	finally:
+		cur.close()
+
 @app.route('/api/supradesa', methods=["GET"])
 @login_required
 def get_supradesa():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
-		query = "select * from sd_supradesa"
+		query = "SELECT * FROM sd_supradesa"
 		cur.execute(query)
 		result = jsonify(cur.fetchall())
 		return result
@@ -414,29 +430,31 @@ def get_supradesa():
 def save_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	keys={'id':None,'region_code':None,'flag':None,'name':None,'blog_agregate':None,'username':None,'password':None}
 	try:
 		for row in data:
-			query = "REPLACE INTO sd_supradesa (region_code,flag,name,blog_agregate,username,password) VALUES (%s,%s,%s,%s,%s) WHERE id = %s"
-			cur.execute(query,(row["region_code"],row["flag"],row["blog_agregate"],row["username"],row["password"],row["id"]))
+			if row == {}:
+				continue
+			result = normalize(row,keys)
+			query = "REPLACE INTO sd_supradesa (id,region_code,flag,name,blog_agregate,username,password) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+			cur.execute(query,(result["id"],result["region_code"],result["flag"],result["name"],result["blog_agregate"],result["username"],result["password"]))
 			mysql.connection.commit()
-
-				#result = jsonify(cur.fetchall())
 		return jsonify({'success': True})
 	finally:
 		cur.close()
-		
+
 @app.route('/api/remove_supradesa', methods=["POST"])
 @login_required
 def remove_supradesa():
+	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
-		query = "REPLACE INTO sd_supradesa"
-		cur.execute(query)
-		result = jsonify(cur.fetchall())
-		return result
+		query = "DELETE FROM sd_supradesa WHERE id= %s"
+		cur.execute(query, (data["id"],))
+		mysql.connection.commit()
+		return jsonify({'success': True})
 	finally:
-		cur.close()
-		
+		cur.close
 
 
 if __name__ == '__main__':
