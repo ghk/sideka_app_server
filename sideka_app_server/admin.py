@@ -59,10 +59,10 @@ def remove_capabilities_and_userlevel(user_id):
 		capabilities = '%'+ '_capabilities'
 		user_level = '%'+ '_user_level'
 		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-		cur.execute(query,(capabilities,str(user_id)))
+		cur.execute(query,(capabilities,str(user_id),))
 
 		query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-		cur.execute(query,(user_level,str(user_id)))
+		cur.execute(query,(user_level,str(user_id),))
 		mysql.connection.commit()
 	finally:
 		cur.close()
@@ -449,6 +449,16 @@ def remove_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
+		query = "SELECT u.ID FROM sd_users_supradesa us INNER JOIN wp_users u ON u.user_login = us.username WHERE us.id_supradesa = %s"
+		cur.execute(query, (data["id"],))
+		user = cur.fetchone()
+		if user != None:
+			print "user ada"
+			remove_capabilities_and_userlevel(user["ID"])
+			query = "DELETE FROM sd_users_supradesa WHERE id_supradesa = %s"
+			cur.execute(query, (data["id"],))
+			mysql.connection.commit()
+
 		query = "DELETE FROM sd_supradesa WHERE id= %s"
 		cur.execute(query, (data["id"],))
 		mysql.connection.commit()

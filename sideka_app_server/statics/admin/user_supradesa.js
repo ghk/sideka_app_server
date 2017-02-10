@@ -11,7 +11,7 @@ $.getJSON("/api/get_region", function(response_region){
       },
       {
 	data: 'id_supradesa',
-	header: 'Kabupaten',
+	header: 'Region Code',
     type: 'dropdown',
     source: region.map(c=>c.region_code),
       },
