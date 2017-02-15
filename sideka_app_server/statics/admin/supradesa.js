@@ -58,8 +58,7 @@ $("#removeRow").click(function(){
 
 $("#save").click(function(){
       var data = hot.getSourceData();
-
-    $.post( "/api/save_supradesa", {data:JSON.stringify(data)}, function(){
+      $.post( "/api/save_supradesa", {data:JSON.stringify(data)}, function(){
 		location.reload();
 	});
 });

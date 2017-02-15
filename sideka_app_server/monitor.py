@@ -116,7 +116,7 @@ def get_dashboard_data():
 		for i in range(5):
 			start =  0 - i - 1
 			end = 0 - i 
-
+			
 			cur.execute(desa_query % (end,))
 			weekly_desa.append(cur.fetchone()[0])
 
@@ -199,6 +199,41 @@ def get_apbdes_scores():
 		query = "SELECT score from sd_apbdes_scores"
 		cur.execute(query)
 		results = [json.loads(c[0]) for c in cur.fetchall()]
+		return jsonify(results)
+	finally:
+		cur.close()
+
+@app.route('/api/apbdes_scores',)
+def get_supradesa():
+	cur = mysql.connection.cursor()
+	try:
+		query = "SELECT * from sd_supradesa where region_code is not null"
+		cur.execute(query)
+		results = [json.loads(c[0]) for c in cur.fetchall()]
+		return jsonify(results)
+	finally:
+		cur.close()
+	
+@app.route('/api/panel_desa',)
+def get_():
+	cur = mysql.connection.cursor()
+	try:
+		desa_query = "select count(*) from sd_desa d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);"
+		sideka_domain = []
+		desa_domain = []
+		results = {}
+		for i in range(5):
+			end = 0 - i 			
+			domain = '%.sideka.id'
+			cur.execute(desa_query , (domain,end,))
+			sideka_domain.append(cur.fetchone()[0])	
+
+			domain = '%.desa.id'
+			cur.execute(desa_query , (domain,end,))
+			desa_domain.append(cur.fetchone()[0])	
+		
+		results["sideka_domain"] = sideka_domain
+		results["desa_domain"] = desa_domain
 		return jsonify(results)
 	finally:
 		cur.close()

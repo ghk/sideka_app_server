@@ -2,14 +2,24 @@
 {% block body %}
 <div class="uk-grid uk-grid-width-large-1-4 uk-grid-width-medium-1-2 uk-grid-medium" data-uk-grid-margin="">
 	<div id="weekly-desa" class="uk-row-first" style="">
-	    <div class="md-card">
-			<div class="md-card-content">
-				<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
-				<span class="uk-text-muted uk-text-small">Desa Terdaftar</span>
-				<h2 class="uk-margin-remove"><span class="count"></span></h2>
-			</div>			
-	    </div>
+		<div class="md-card md-card-fullscreen-activate">
+			<div class="md-card-fullscreen-hide">
+				<div class="md-card-content">
+					<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
+					<span class="uk-text-muted uk-text-small">Desa Terdaftar</span>
+					<h2 class="uk-margin-remove"><span class="count"></span></h2>
+				</div>
+			</div>
+			<div class="md-card-fullscreen-content">
+				<h4 class="heading_a uk-margin-bottom">Desa Terdaftar</h4>
+				<div style="height:400px;width:100%">
+					<canvas id="desa-graph"></canvas>
+				</div>
+
+			</div>
+		</div>
 	</div>
+
 	<div id="weekly-post" style="">
 	    <div class="md-card">
 		<div class="md-card-content">
