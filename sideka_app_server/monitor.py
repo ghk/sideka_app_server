@@ -129,6 +129,7 @@ def get_dashboard_data():
 			weekly_apbdes.append(len(list(filter(lambda s: s["apbdes"]["score"] > 0.6, stats))))
 
 		weekly = {}
+		print "weekly_desa",weekly_desa
 		weekly["desa"] = weekly_desa
 		weekly["post"] = weekly_posts
 		weekly["penduduk"] = weekly_penduduk
@@ -214,16 +215,18 @@ def get_supradesa():
 	finally:
 		cur.close()
 	
-@app.route('/api/panel_desa',)
+@app.route('/api/panel_desa')
 def get_():
 	cur = mysql.connection.cursor()
+	panel_clicked = request.args.get('panel_clicked')
 	try:
 		desa_query = "select count(*) from sd_desa d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);"
 		sideka_domain = []
 		desa_domain = []
 		results = {}
 		for i in range(5):
-			end = 0 - i 			
+			end = 0 - i 		
+
 			domain = '%.sideka.id'
 			cur.execute(desa_query , (domain,end,))
 			sideka_domain.append(cur.fetchone()[0])	
@@ -231,6 +234,7 @@ def get_():
 			domain = '%.desa.id'
 			cur.execute(desa_query , (domain,end,))
 			desa_domain.append(cur.fetchone()[0])	
+		
 		
 		results["sideka_domain"] = sideka_domain
 		results["desa_domain"] = desa_domain
