@@ -97,13 +97,15 @@ def get_statistics():
 	finally:
 		cur.close()
 
-@app.route('/api/dashboard')
+@app.route('/api/dashboard', methods=['GET'])
 def get_dashboard_data():
 	def combine(row):
 		res = json.loads(row[1])
 		res["blog_id"] = row[0]
 		return res
 	results = {}
+	selected = str(request.args.get('selected'))
+	print selected
 	cur = mysql.connection.cursor()
 	try:
 		weekly_desa = []
@@ -203,22 +205,10 @@ def get_apbdes_scores():
 		return jsonify(results)
 	finally:
 		cur.close()
-
-@app.route('/api/apbdes_scores',)
-def get_supradesa():
-	cur = mysql.connection.cursor()
-	try:
-		query = "SELECT * from sd_supradesa where region_code is not null"
-		cur.execute(query)
-		results = [json.loads(c[0]) for c in cur.fetchall()]
-		return jsonify(results)
-	finally:
-		cur.close()
 	
-@app.route('/api/panel_desa')
-def get_():
+@app.route('/api/domain_weekly')
+def get_domain_weekly():
 	cur = mysql.connection.cursor()
-	panel_clicked = request.args.get('panel_clicked')
 	try:
 		desa_query = "select count(*) from sd_desa d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);"
 		sideka_domain = []
@@ -238,6 +228,17 @@ def get_():
 		
 		results["sideka_domain"] = sideka_domain
 		results["desa_domain"] = desa_domain
+		return jsonify(results)
+	finally:
+		cur.close()
+
+@app.route('/api/supradesa')
+def get_supradesa():
+	selected = str(request.args.get('selected'))
+	cur = mysql.connection.cursor()
+	try:
+		cur.execute("select region_code, flag from sd_supradesa")
+		results = cur.fetchall()
 		return jsonify(results)
 	finally:
 		cur.close()

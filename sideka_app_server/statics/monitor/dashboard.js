@@ -1,11 +1,13 @@
 var dataDashboard;
+var charts = [];
+
 var convertDate = function(date){
   var value = new Date(parseInt(date)*1000)
   var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear().toString().substr(2,2);
 }
 
-var labels_xAxes = function(){
+var labelsxAxes = function(){
 	var result = [];
 	for(var i=1;i <= 5;i++){
 		result.push('Minggu Ke-'+i)
@@ -13,11 +15,98 @@ var labels_xAxes = function(){
 	return result;
 }
 
-var graphContent = function(panel_clicked,data){
+var changeSelected = function(optionSelected){	
+	$.getJSON("/api/dashboard?selected="+optionSelected, function(data){
+		dataDashboard = data;
+		var weekly = ["desa", "post", "penduduk", "apbdes"]
+		var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
+		
+		if(charts.length === 0){
+			for(var i=0; i<weekly.length; i++){
+				var current = weekly[i];
+				charts.push($("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]})); 
+			}
+		}
+		
+
+		for (var i = 0; i < weekly.length; i++){
+			var current = weekly[i];
+			var chart =  charts[i];
+
+			$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
+			$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));
+			
+			chart.change();
+		
+		}
+		var configDaily = {
+			type: 'line',
+			data: {
+			labels: data.daily.label.map(convertDate),
+			datasets: [{
+				label: "Berita Harian",
+				backgroundColor: fill[1],
+				borderColor: fill[1],
+				data: data.daily.post,
+				fill: false,
+			}, {
+				label: "Kependudukan",
+				fill: false,
+				backgroundColor: fill[2],
+				borderColor: fill[2],
+				data: data.daily.penduduk,
+			},{
+				label: "Keuangan",
+				fill: false,
+				backgroundColor: fill[3],
+				borderColor: fill[3],
+				data: data.daily.apbdes,
+			}
+			]
+			},
+			options: {
+			responsive: true,
+			maintainAspectRatio:false,
+			tooltips: {
+				position: 'nearest',
+				mode: 'index',
+				intersect: false,
+			},
+			hover: {
+				mode: 'nearest',
+				intersect: true
+			},
+			scales: {
+				xAxes: [{
+				display: false			
+				}],
+				yAxes: [{
+				display: true,
+				scaleLabel: {
+					display: true,
+					labelString: '#Aktifitas'
+				}
+				}]
+			}
+			}
+		};
+
+		var canvas = document.getElementById('daily-graph');
+
+		if (canvas.getContext){
+			var ctx = canvas.getContext('2d');
+			ctx.fillStyle = 'black';
+			ctx.font = '26px Arial';
+			ctx.fillText('Quick Brown Fox', 0, 26);
+		}
+		new Chart(ctx, configDaily);
+	});
+}
+
+var panelClicked = function(panel_clicked,data){
 	var datasets = [];
 	var labelString = "";
 	var canvas;
-	console.log(panel_clicked)
 	switch(panel_clicked){
 		case "panel_desa":
 			canvas = document.getElementById('desa-graph');									
@@ -70,12 +159,11 @@ var graphContent = function(panel_clicked,data){
 					data: dataDashboard["weekly"]["apbdes"].reverse(),						
 			})
 			break;
-
 	}		
-	var config_panel = {
+	var configPanel = {
 		type: 'bar',
 		data: {
-			labels: labels_xAxes(),
+			labels: labelsxAxes(),
 			datasets: datasets,
 		},
 		options: {
@@ -104,89 +192,41 @@ var graphContent = function(panel_clicked,data){
 		ctx.font = '26px Arial';
 		ctx.fillText('Quick Brown Fox', 0, 26);
 	}
-	new Chart(ctx, config_panel);
-};
+	new Chart(ctx, configPanel);
+}
 
 $('[id="panel-graph"]').click(function(){
+	var optionSelected = $( "#region-code-select option:selected" ).val();
+
 	var value= $(this).attr('value');
 	if (value == 'panel_desa'){
-		$.getJSON( "/api/panel_desa", function(data){
-			graphContent(value,data);
+		$.getJSON( "/api/panel_desa?selected="+optionSelected, function(data){
+			panelClicked(value,data)
 		})
 	}else{
-		graphContent(value,"");
+		panelClicked(value,"");
 	}
 });
 
-$.getJSON("/api/dashboard", function(data){
-	dataDashboard = data;
-	var weekly = ["desa", "post", "penduduk", "apbdes"]
-	var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
-	for (var i = 0; i < weekly.length; i++){
-		var current = weekly[i];
-		$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
-		$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));
-		$("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]});
-	}
-	var config_daily = {
-	    type: 'line',
-	    data: {
-		labels: data.daily.label.map(convertDate),
-		datasets: [{
-		    label: "Berita Harian",
-		    backgroundColor: fill[1],
-		    borderColor: fill[1],
-		    data: data.daily.post,
-		    fill: false,
-		}, {
-		    label: "Kependudukan",
-		    fill: false,
-		    backgroundColor: fill[2],
-		    borderColor: fill[2],
-		    data: data.daily.penduduk,
-		},{
-		    label: "Keuangan",
-		    fill: false,
-		    backgroundColor: fill[3],
-		    borderColor: fill[3],
-		    data: data.daily.apbdes,
-		}
-	      ]
-	    },
-	    options: {
-		responsive: true,
-		maintainAspectRatio:false,
-		tooltips: {
-			position: 'nearest',
-			mode: 'index',
-			intersect: false,
-		},
-		hover: {
-		    mode: 'nearest',
-		    intersect: true
-		},
-		scales: {
-		    xAxes: [{
-			display: false			
-		    }],
-		    yAxes: [{
-			display: true,
-			scaleLabel: {
-			    display: true,
-			    labelString: '#Aktifitas'
-			}
-		    }]
-		}
-	    }
-	};
+changeSelected("");
 
-	var canvas = document.getElementById('daily-graph');
+$.getJSON("/api/supradesa",function(data){
+	$("#top_bar").removeClass("hidden")
+	$.each(data, function (i, item) {
+		var value;
+		if(item[0] != null || item[0] != null && item[1] != null){
+			value = item[0]
+		}else if(item[0] == null && item[1] != null){
+			value = item[1]
+		}
+		$('#region-code-select').append($('<option>', { 
+			value: value,
+			text : value
+		}));
+	});
+});
 
-	if (canvas.getContext){
-		var ctx = canvas.getContext('2d');
-		ctx.fillStyle = 'black';
-		ctx.font = '26px Arial';
-		ctx.fillText('Quick Brown Fox', 0, 26);
-	}
-	new Chart(ctx, config_daily);
+$('#region-code-select').change(function(){
+	var value = $(this).val();
+	changeSelected(value);
 });
