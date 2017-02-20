@@ -22,7 +22,7 @@ def get_sd_desa_query(id_supradesa):
 	cur = mysql.connection.cursor()
 	try:
 		if id_supradesa == "null" or id_supradesa == None:
-			return "select * from sd_desa"
+			return "true"
 
 		query= "select * from sd_supradesa where id = %s"
 		cur.execute(query,(id_supradesa,))
@@ -31,9 +31,9 @@ def get_sd_desa_query(id_supradesa):
 		results = dict(zip(header,values))
 		
 		if results["region_code"] is not  None:
-			query_sd_desa = "select sd.* from sd_desa sd where sd.kode like '{0}.%%'".format(results["region_code"])
+			query_sd_desa = "d.kode like '{0}.%%'".format(results["region_code"])
 		elif results["flag"] is not None and results["region_code"] == None:
-			query_sd_desa = "select sd.* from sd_desa sd where {0} = true".format(results["flag"])
+			query_sd_desa = "{0} = true".format(results["flag"])
 		return query_sd_desa
 	finally:
 		cur.close()
@@ -133,9 +133,9 @@ def get_dashboard_data():
 		weekly_posts = []
 		weekly_penduduk = []
 		weekly_apbdes = []
-		desa_query = "select count(*) from ({0}) as d inner join wp_blogs b on d.blog_id = b.blog_id where b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);".format(query_sd_desa)
-		post_query = "select count(distinct(blog_id)) from sd_post_scores where post_date > ADDDATE(NOW(), INTERVAL %d WEEK) and post_date < ADDDATE(NOW(), INTERVAL %d WEEK);";
-		stats_query = "select blog_id, statistics from sd_statistics where date =  ADDDATE((select max(date) from sd_statistics), INTERVAL %d WEEK);"
+		desa_query = "select count(*) from sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id where {0} and b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);".format(query_sd_desa)
+		post_query = "select count(distinct(ps.blog_id)) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL %d WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL %d WEEK);".format(query_sd_desa)
+		stats_query = "select s.blog_id, statistics from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL %d WEEK);".format(query_sd_desa)
 		for i in range(5):
 			start =  0 - i - 1
 			end = 0 - i 
@@ -159,11 +159,11 @@ def get_dashboard_data():
 		results["weekly"] = weekly
 
 		daily = {}
-		cur.execute("select unix_timestamp(date(post_date)), count(*) from sd_post_scores where post_date is not null GROUP BY date(post_date)")
+		cur.execute("select unix_timestamp(date(ps.post_date)), count(*) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date is not null GROUP BY date(ps.post_date)".format(query_sd_desa))
 		daily["post"] =  dict(cur.fetchall())
-		cur.execute("select unix_timestamp(date(date_accessed)), count(*) from sd_logs where date_accessed is not null and action = 'save_content' and type='penduduk' GROUP BY date(date_accessed)")
+		cur.execute("select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='penduduk' GROUP BY date(date_accessed)".format(query_sd_desa))
 		daily["penduduk"] =  dict(cur.fetchall())
-		cur.execute("select unix_timestamp(date(date_accessed)), count(*) from sd_logs where date_accessed is not null and action = 'save_content' and type='apbdes' GROUP BY date(date_accessed)")
+		cur.execute("select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='apbdes' GROUP BY date(date_accessed)".format(query_sd_desa))
 		daily["apbdes"] =  dict(cur.fetchall())
 		
 		def get_daily(typ, time):
@@ -233,7 +233,7 @@ def get_domain_weekly():
 	cur = mysql.connection.cursor()
 	try:
 		
-		desa_query = "select count(*) from({0}) as d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);".format(query_sd_desa)
+		desa_query = "select count(*) from sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id where {0} and d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);".format(query_sd_desa)
 		sideka_domain = []
 		desa_domain = []
 		results = {}

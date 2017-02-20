@@ -18,9 +18,7 @@ var labelsxAxes = function(){
 var changeSelected = function(selected){	
 	if (selected == "") selected = "{}"
 	var valueSelected = JSON.parse(selected);
-	console.log(valueSelected)
 	$.getJSON("/api/dashboard?id_supradesa="+valueSelected, function(data){
-		console.log(data)
 		dataDashboard = data;
 		var weekly = ["desa", "post", "penduduk", "apbdes"]
 		var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
@@ -31,41 +29,37 @@ var changeSelected = function(selected){
 				charts.push($("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]})); 
 			}
 		}	
-
 		for (var i = 0; i < weekly.length; i++){
 			var current = weekly[i];
 			var chart =  charts[i];
-
-			$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
-			$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));
 			
-			chart.change();
-		
+			$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
+			$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));			
+			chart.change();		
 		}
 		var configDaily = {
 			type: 'line',
 			data: {
-			labels: data.daily.label.map(convertDate),
-			datasets: [{
-				label: "Berita Harian",
-				backgroundColor: fill[1],
-				borderColor: fill[1],
-				data: data.daily.post,
-				fill: false,
-			}, {
-				label: "Kependudukan",
-				fill: false,
-				backgroundColor: fill[2],
-				borderColor: fill[2],
-				data: data.daily.penduduk,
-			},{
-				label: "Keuangan",
-				fill: false,
-				backgroundColor: fill[3],
-				borderColor: fill[3],
-				data: data.daily.apbdes,
-			}
-			]
+				labels: data.daily.label.map(convertDate),
+				datasets: [{
+					label: "Berita Harian",
+					backgroundColor: fill[1],
+					borderColor: fill[1],
+					data: data.daily.post,
+					fill: false,
+				}, {
+					label: "Kependudukan",
+					fill: false,
+					backgroundColor: fill[2],
+					borderColor: fill[2],
+					data: data.daily.penduduk,
+				},{
+					label: "Keuangan",
+					fill: false,
+					backgroundColor: fill[3],
+					borderColor: fill[3],
+					data: data.daily.apbdes,
+				}]
 			},
 			options: {
 			responsive: true,
@@ -78,7 +72,7 @@ var changeSelected = function(selected){
 			hover: {
 				mode: 'nearest',
 				intersect: true
-			},
+			}, 
 			scales: {
 				xAxes: [{
 				display: false			
@@ -95,7 +89,6 @@ var changeSelected = function(selected){
 		};
 
 		var canvas = document.getElementById('daily-graph');
-
 		if (canvas.getContext){
 			var ctx = canvas.getContext('2d');
 			ctx.fillStyle = 'black';
@@ -164,7 +157,7 @@ var panelClicked = function(panel_clicked,data){
 			break;
 	}		
 	var configPanel = {
-		type: 'bar',
+		type: 'line',
 		data: {
 			labels: labelsxAxes(),
 			datasets: datasets,
@@ -201,7 +194,6 @@ var panelClicked = function(panel_clicked,data){
 $('[id="panel-graph"]').click(function(){
 	var optionSelected = $( "#region-code-select option:selected" ).val();
 	if (optionSelected == "") optionSelected = "{}"
-	console.log(optionSelected)
 	var valueSelected = JSON.parse(optionSelected);
 
 	var valuePanel = $(this).attr('value');
