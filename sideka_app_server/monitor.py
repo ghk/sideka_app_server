@@ -1,5 +1,6 @@
 from flask import Flask, request,jsonify, render_template, send_from_directory
 from flask_mysqldb import MySQL
+from phpserialize import *
 from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
 import MySQLdb
@@ -17,6 +18,26 @@ app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
 
+def get_sd_desa_query(id_supradesa):
+	cur = mysql.connection.cursor()
+	try:
+		if id_supradesa == "null" or id_supradesa == None:
+			return "select * from sd_desa"
+
+		query= "select * from sd_supradesa where id = %s"
+		cur.execute(query,(id_supradesa,))
+		values = cur.fetchone()
+		header = [column[0] for column in cur.description]
+		results = dict(zip(header,values))
+		
+		if results["region_code"] is not  None:
+			query_sd_desa = "select sd.* from sd_desa sd where sd.kode like '{0}.%%'".format(results["region_code"])
+		elif results["flag"] is not None and results["region_code"] == None:
+			query_sd_desa = "select sd.* from sd_desa sd where {0} = true".format(results["flag"])
+		return query_sd_desa
+	finally:
+		cur.close()
+		
 @app.route('/')
 def dashboard():
 	return render_template('monitor/dashboard.html', active='dashboard')
@@ -104,15 +125,15 @@ def get_dashboard_data():
 		res["blog_id"] = row[0]
 		return res
 	results = {}
-	selected = str(request.args.get('selected'))
-	print selected
+	id_supradesa = request.args.get('id_supradesa')	
+	query_sd_desa = get_sd_desa_query(id_supradesa)
 	cur = mysql.connection.cursor()
 	try:
 		weekly_desa = []
 		weekly_posts = []
 		weekly_penduduk = []
 		weekly_apbdes = []
-		desa_query = "select count(*) from sd_desa d inner join wp_blogs b on d.blog_id = b.blog_id where b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);"
+		desa_query = "select count(*) from ({0}) as d inner join wp_blogs b on d.blog_id = b.blog_id where b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);".format(query_sd_desa)
 		post_query = "select count(distinct(blog_id)) from sd_post_scores where post_date > ADDDATE(NOW(), INTERVAL %d WEEK) and post_date < ADDDATE(NOW(), INTERVAL %d WEEK);";
 		stats_query = "select blog_id, statistics from sd_statistics where date =  ADDDATE((select max(date) from sd_statistics), INTERVAL %d WEEK);"
 		for i in range(5):
@@ -131,7 +152,6 @@ def get_dashboard_data():
 			weekly_apbdes.append(len(list(filter(lambda s: s["apbdes"]["score"] > 0.6, stats))))
 
 		weekly = {}
-		print "weekly_desa",weekly_desa
 		weekly["desa"] = weekly_desa
 		weekly["post"] = weekly_posts
 		weekly["penduduk"] = weekly_penduduk
@@ -206,11 +226,14 @@ def get_apbdes_scores():
 	finally:
 		cur.close()
 	
-@app.route('/api/domain_weekly')
-def get_domain_weekly():
+@app.route('/api/domain_weekly',methods=["GET"])
+def get_domain_weekly():	
+	id_supradesa = str(request.args.get('id_supradesa'))
+	query_sd_desa = get_sd_desa_query(id_supradesa)
 	cur = mysql.connection.cursor()
 	try:
-		desa_query = "select count(*) from sd_desa d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);"
+		
+		desa_query = "select count(*) from({0}) as d inner join wp_blogs b on d.blog_id = b.blog_id where d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);".format(query_sd_desa)
 		sideka_domain = []
 		desa_domain = []
 		results = {}
@@ -218,11 +241,11 @@ def get_domain_weekly():
 			end = 0 - i 		
 
 			domain = '%.sideka.id'
-			cur.execute(desa_query , (domain,end,))
+			cur.execute(desa_query , (domain,end))
 			sideka_domain.append(cur.fetchone()[0])	
 
 			domain = '%.desa.id'
-			cur.execute(desa_query , (domain,end,))
+			cur.execute(desa_query , (domain,end))
 			desa_domain.append(cur.fetchone()[0])	
 		
 		
@@ -233,12 +256,13 @@ def get_domain_weekly():
 		cur.close()
 
 @app.route('/api/supradesa')
-def get_supradesa():
-	selected = str(request.args.get('selected'))
+def get_supradesa():	
 	cur = mysql.connection.cursor()
+	results= []
 	try:
-		cur.execute("select region_code, flag from sd_supradesa")
-		results = cur.fetchall()
+		cur.execute("select id,region_code, flag from sd_supradesa")
+		header = [column[0] for column in cur.description]
+		for values in cur.fetchall(): results.append(dict(zip(header, values)))
 		return jsonify(results)
 	finally:
 		cur.close()

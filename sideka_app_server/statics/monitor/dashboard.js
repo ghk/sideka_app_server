@@ -15,8 +15,12 @@ var labelsxAxes = function(){
 	return result;
 }
 
-var changeSelected = function(optionSelected){	
-	$.getJSON("/api/dashboard?selected="+optionSelected, function(data){
+var changeSelected = function(selected){	
+	if (selected == "") selected = "{}"
+	var valueSelected = JSON.parse(selected);
+	console.log(valueSelected)
+	$.getJSON("/api/dashboard?id_supradesa="+valueSelected, function(data){
+		console.log(data)
 		dataDashboard = data;
 		var weekly = ["desa", "post", "penduduk", "apbdes"]
 		var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
@@ -26,8 +30,7 @@ var changeSelected = function(optionSelected){
 				var current = weekly[i];
 				charts.push($("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]})); 
 			}
-		}
-		
+		}	
 
 		for (var i = 0; i < weekly.length; i++){
 			var current = weekly[i];
@@ -197,31 +200,34 @@ var panelClicked = function(panel_clicked,data){
 
 $('[id="panel-graph"]').click(function(){
 	var optionSelected = $( "#region-code-select option:selected" ).val();
+	if (optionSelected == "") optionSelected = "{}"
+	console.log(optionSelected)
+	var valueSelected = JSON.parse(optionSelected);
 
-	var value= $(this).attr('value');
-	if (value == 'panel_desa'){
-		$.getJSON( "/api/panel_desa?selected="+optionSelected, function(data){
-			panelClicked(value,data)
+	var valuePanel = $(this).attr('value');
+	if (valuePanel == 'panel_desa'){
+		$.getJSON( "/api/domain_weekly?id_supradesa="+valueSelected, function(data){
+			panelClicked(valuePanel,data)
 		})
 	}else{
-		panelClicked(value,"");
+		panelClicked(valuePanel,"");
 	}
 });
 
-changeSelected("");
+changeSelected(null);
 
 $.getJSON("/api/supradesa",function(data){
 	$("#top_bar").removeClass("hidden")
 	$.each(data, function (i, item) {
-		var value;
-		if(item[0] != null || item[0] != null && item[1] != null){
-			value = item[0]
-		}else if(item[0] == null && item[1] != null){
-			value = item[1]
+		var text;
+		if(item.region_code != null || item.region_code != null && item.flag != null){			
+			text = item.region_code;
+		}else if(item.region_code == null && item.flag != null){			
+			text = item.flag;
 		}
 		$('#region-code-select').append($('<option>', { 
-			value: value,
-			text : value
+			value: item.id,
+			text : text
 		}));
 	});
 });
