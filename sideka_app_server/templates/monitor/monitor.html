@@ -34,7 +34,17 @@
                     <span class="sSwitchIcon"></span>
                 </a>
 
-                 <div class="uk-navbar-flip">
+                <div class="uk-navbar-flip-left">
+                    <ul class="uk-navbar-nav user_actions">
+                        <li>
+                            <select id="region-code-select" class="hidden">
+                                <option value="null" selected="selected">All</option>
+                            </select>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="uk-navbar-flip">
                     <ul class="uk-navbar-nav user_actions">
                         <li><a href="#" id="full_screen_toggle" class="user_action_icon uk-visible-large"><i class="material-icons md-24 md-light">&#xE5D0;</i></a></li>
                     </ul>
@@ -84,23 +94,6 @@
         </div>
     </aside><!-- main sidebar end -->
     
-    <div id="top_bar" class="hidden">
-        <div class="md-top-bar">
-            <div class="uk-clearfix">
-                <div class="md-top-bar-actions-left">
-                    <div class="md-card-toolbar-heading-text">
-                    <div class="uk-button uk-button-default uk-form-select " data-uk-form-select>
-                    <span></span>
-                    <select id="region-code-select">
-                        <option value="null" selected="selected">All</option>
-                    </select>
-                    </div>
-                </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="page_content">
         <div id="page_content_inner">
 		{% block body %}{% endblock %}

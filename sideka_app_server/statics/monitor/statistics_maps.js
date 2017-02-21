@@ -57,25 +57,32 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
   $scope.newTab = function(url){    
       $window.open(url,"_blank")
   }
-
-  $http.get('/api/statistics').then(function(response){
-      var data = response.data;      
-      var markers = [];
-      for(var i = 0; i < data.length; i++){
-	var value = data[i];
-        markers.push({
-          id:value.blog_id, 
-          domain: value.domain,
-	      desa: value.domain,
-          pos: [value.latitude, value.longitude],
-          blog_score: (value.blog.score*100).toFixed(0),
-          apbdes_score: (value.apbdes.score*100).toFixed(0),
-          penduduk_score: (value.penduduk.score*100).toFixed(0),
-          icon: (value.blog.score*100).toFixed(0)
-        })
-      }
-      vm.markers = markers;
+  $('#region-code-select').change(function(){
+      var value = $(this).val();
+      changeSelected(value)
   });
+
+  var changeSelected = function(valueSelected){
+    $http.get('/api/statistics?id_supradesa='+valueSelected).then(function(response){
+        var data = response.data;      
+        var markers = [];
+        for(var i = 0; i < data.length; i++){
+        var value = data[i];
+            markers.push({
+            id:value.blog_id, 
+            domain: value.domain,
+            desa: value.domain,
+            pos: [value.latitude, value.longitude],
+            blog_score: (value.blog.score*100).toFixed(0),
+            apbdes_score: (value.apbdes.score*100).toFixed(0),
+            penduduk_score: (value.penduduk.score*100).toFixed(0),
+            icon: (value.blog.score*100).toFixed(0)
+            })
+        }
+        vm.markers = markers;
+    });
+  }
+  changeSelected(null)
 
   $scope.changeContent = function(contentClicked){
     var temp = vm.markers;

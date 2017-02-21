@@ -37,7 +37,7 @@ var config = {
     },
     options: {
         responsive: true,
-	maintainAspectRatio: false,
+	    maintainAspectRatio: false,
         title:{
             display:false,
             text:'Statistik'

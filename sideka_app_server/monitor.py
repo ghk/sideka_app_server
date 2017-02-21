@@ -52,16 +52,7 @@ def statistic_single(blog_id):
 		res = json.loads(row[0])
 		res["date"] = str(row[1])
 		return res
-	def to_json(col):
-		result={}
-		result["desa"] = col[0]
-		result["kecamatan"] = col[1]
-		result["kabupaten"] = col[2]
-		result["propinsi"] = col[3]
-		return json.dumps(result)
-
-	cur = mysql.connection.cursor()
-	
+	cur = mysql.connection.cursor()	
 	try:
 		daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
 		post_query = "select score from sd_post_scores p where p.blog_id = %s ORDER BY p.post_date desc";
@@ -74,7 +65,9 @@ def statistic_single(blog_id):
 		content_post = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
 
 		cur.execute(desa_query, (blog_id,))
-		info = to_json(cur.fetchone())
+		values = cur.fetchone()
+		header = [column[0] for column in cur.description]
+		info = json.dumps(dict(zip(header,values)))
 		return render_template('monitor/statistic_single.html', active='statistics', content_daily=content_daily, content_post = content_post, info = info)
 	finally:
 		cur.close()
@@ -97,7 +90,7 @@ def send_statics(path):
 	return send_from_directory('statics', path)
 
 
-@app.route('/api/statistics')
+@app.route('/api/statistics', methods=['GET'])
 def get_statistics():
 	def combine(row):
 		res = json.loads(row[1])
@@ -105,12 +98,12 @@ def get_statistics():
 		res["latitude"] = row[3]
 		res["longitude"] = row[4]
 		return res
-
+	id_supradesa = request.args.get('id_supradesa')	
+	query_sd_desa = get_sd_desa_query(id_supradesa)
 	cur = mysql.connection.cursor()
 	try:
-		query = """SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s 
-				 INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
-				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id"""
+		query = """SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
+				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
 
 		cur.execute(query)
 		results = [combine(c) for c in cur.fetchall()]
