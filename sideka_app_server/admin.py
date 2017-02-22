@@ -332,12 +332,12 @@ def get_user_supradesa():
 def update_user_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	keys={'username':None,'id_supradesa':None,'level':None}
+	keys={'username':None,'supradesa_id':None,'level':None}
 	try:
 		for values in data:
 			print values
 			row = normalize(values,keys)
-			if row["username"]==None or row["id_supradesa"]==None:
+			if row["username"]==None or row["supradesa_id"]==None:
 				continue
 
 			query = "SELECT ID FROM wp_users WHERE user_login = %s"
@@ -346,20 +346,20 @@ def update_user_supradesa():
 			if user == None:
 				continue
 
-			query = "SELECT * FROM sd_users_supradesa WHERE username = %s and id_supradesa = %s"
-			cur.execute(query, (row["username"],row["id_supradesa"],))
+			query = "SELECT * FROM sd_users_supradesa WHERE username = %s and supradesa_id = %s"
+			cur.execute(query, (row["username"],row["supradesa_id"],))
 			same = cur.fetchone()
 			if same != None:
 				continue
 
 			query = "SELECT region_code FROM sd_supradesa WHERE id = %s"
-			cur.execute(query, (row["id_supradesa"],))
+			cur.execute(query, (row["supradesa_id"],))
 			code = cur.fetchone()
 			if code == None:
 				continue
 				
-			query = "REPLACE INTO sd_users_supradesa (username, id_supradesa,level) VALUES (%s,%s,%s)"
-			cur.execute(query, (row["username"],row["id_supradesa"],row["level"]))
+			query = "REPLACE INTO sd_users_supradesa (username, supradesa_id,level) VALUES (%s,%s,%s)"
+			cur.execute(query, (row["username"],row["supradesa_id"],row["level"]))
 			mysql.connection.commit()
 			remove_capabilities_and_userlevel(user["ID"],)
 
@@ -388,8 +388,8 @@ def remove_user_supradesa():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
 
-		query = "DELETE FROM sd_users_supradesa WHERE username = %s and id_supradesa = %s"
-		cur.execute(query, (data["username"],data["id_supradesa"],))
+		query = "DELETE FROM sd_users_supradesa WHERE username = %s and supradesa_id = %s"
+		cur.execute(query, (data["username"],data["supradesa_id"],))
 		mysql.connection.commit()
 
 		query = "SELECT ID from wp_users WHERE user_login = %s"
@@ -406,7 +406,7 @@ def remove_user_supradesa():
 def get_region():
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
-		query = "SELECT region_code, id as id_supradesa FROM sd_supradesa"
+		query = "SELECT region_code, id as supradesa_id FROM sd_supradesa"
 		cur.execute(query)
 		result = jsonify(cur.fetchall())
 		return result
@@ -449,13 +449,13 @@ def remove_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
-		query = "SELECT u.ID FROM sd_users_supradesa us INNER JOIN wp_users u ON u.user_login = us.username WHERE us.id_supradesa = %s"
+		query = "SELECT u.ID FROM sd_users_supradesa us INNER JOIN wp_users u ON u.user_login = us.username WHERE us.supradesa_id = %s"
 		cur.execute(query, (data["id"],))
 		user = cur.fetchone()
 		if user != None:
 			print "user ada"
 			remove_capabilities_and_userlevel(user["ID"])
-			query = "DELETE FROM sd_users_supradesa WHERE id_supradesa = %s"
+			query = "DELETE FROM sd_users_supradesa WHERE supradesa_id = %s"
 			cur.execute(query, (data["id"],))
 			mysql.connection.commit()
 

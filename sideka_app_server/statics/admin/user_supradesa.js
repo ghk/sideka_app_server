@@ -10,7 +10,7 @@ $.getJSON("/api/get_region", function(response_region){
 	header: 'Username',
       },
       {
-	data: 'id_supradesa',
+	data: 'supradesa_id',
 	header: 'Region Code',
     type: 'dropdown',
     source: region.map(c=>c.region_code),
@@ -30,7 +30,7 @@ $.getJSON("/api/get_region", function(response_region){
             data = {};
         else{
             data = response.map(function(value){
-                value.id_supradesa = region.filter(c => c.id_supradesa == value.id_supradesa).map(c=> c.region_code)[0]
+                value.supradesa_id = region.filter(c => c.supradesa_id == value.supradesa_id).map(c=> c.region_code)[0]
                 return value
             })
         }
@@ -58,7 +58,7 @@ $("#removeRow").click(function(){
 	var selected = hot.getSelected();
     var data = hot.getSourceDataAtRow(selected[0]);
     var result = function(){
-        data.id_supradesa = region.filter(c => c.region_code == data.id_supradesa).map(c=> c.id_supradesa)[0]
+        data.supradesa_id = region.filter(c => c.region_code == data.supradesa_id).map(c=> c.supradesa_id)[0]
         return data
     }
     $.post( "/api/remove_users_supradesa", {data:JSON.stringify(result())}, function(){
@@ -70,7 +70,7 @@ $("#apply").click(function(){
     var source = hot.getSourceData();
 	var data = source;
     var results = data.map(function(value){
-        value.id_supradesa = region.filter(c => c.region_code == value.id_supradesa).map(c=> c.id_supradesa)[0]
+        value.supradesa_id = region.filter(c => c.region_code == value.supradesa_id).map(c=> c.supradesa_id)[0]
         return value
     })
     $.post( "/api/update_users_supradesa", {data:JSON.stringify(data)}, function(){

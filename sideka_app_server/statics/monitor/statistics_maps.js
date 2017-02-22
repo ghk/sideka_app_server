@@ -57,13 +57,13 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
   $scope.newTab = function(url){    
       $window.open(url,"_blank")
   }
-  $('#region-code-select').change(function(){
+  $('#select-supradesa').change(function(){
       var value = $(this).val();
       changeSelected(value)
   });
 
   var changeSelected = function(valueSelected){
-    $http.get('/api/statistics?id_supradesa='+valueSelected).then(function(response){
+    $http.get('/api/statistics?supradesa_id='+valueSelected).then(function(response){
         var data = response.data;      
         var markers = [];
         for(var i = 0; i < data.length; i++){

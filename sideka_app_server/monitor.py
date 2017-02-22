@@ -17,14 +17,14 @@ app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
 
-def get_sd_desa_query(id_supradesa):
+def get_sd_desa_query(supradesa_id):
 	cur = mysql.connection.cursor()
 	try:
-		if id_supradesa == "null" or id_supradesa == None:
+		if supradesa_id == "null" or supradesa_id == None:
 			return "true"
 
 		query= "select * from sd_supradesa where id = %s"
-		cur.execute(query,(id_supradesa,))
+		cur.execute(query,(supradesa_id,))
 		values = cur.fetchone()
 		header = [column[0] for column in cur.description]
 		results = dict(zip(header,values))
@@ -97,8 +97,8 @@ def get_statistics():
 		res["latitude"] = row[3]
 		res["longitude"] = row[4]
 		return res
-	id_supradesa = request.args.get('id_supradesa')	
-	query_sd_desa = get_sd_desa_query(id_supradesa)
+	supradesa_id = request.args.get('supradesa_id')	
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	cur = mysql.connection.cursor()
 	try:
 		query = """SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
@@ -117,8 +117,8 @@ def get_dashboard_data():
 		res["blog_id"] = row[0]
 		return res
 	results = {}
-	id_supradesa = request.args.get('id_supradesa')	
-	query_sd_desa = get_sd_desa_query(id_supradesa)
+	supradesa_id = request.args.get('supradesa_id')	
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	cur = mysql.connection.cursor()
 	try:
 		weekly_desa = []
@@ -220,8 +220,8 @@ def get_apbdes_scores():
 	
 @app.route('/api/domain_weekly',methods=["GET"])
 def get_domain_weekly():	
-	id_supradesa = str(request.args.get('id_supradesa'))
-	query_sd_desa = get_sd_desa_query(id_supradesa)
+	supradesa_id = str(request.args.get('supradesa_id'))
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	cur = mysql.connection.cursor()
 	try:
 		
