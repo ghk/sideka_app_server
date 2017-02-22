@@ -92,7 +92,6 @@ var configPanel = {
 
 var canvasDaily = document.getElementById('daily-graph');
 var dailyGraph = new Chart(getCtx(canvasDaily), configDaily);
-
 var canvasDesa = document.getElementById('desa-graph')
 var desaGraph = new Chart(getCtx(canvasDesa),configPanel)
 var canvasapbdes = document.getElementById('apbdes-graph');
@@ -101,7 +100,9 @@ var canvasPost = document.getElementById('post-graph');
 var postGraph = new Chart(getCtx(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
 var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel)
+
 var changeSelected = function(selected){	
+	if(!selected)selected = null;
 	$.getJSON("/api/dashboard?supradesa_id="+selected, function(data){
 		dataDashboard = data;		
 		console.log(data)
@@ -229,7 +230,7 @@ var panelClicked = function(panel_clicked,data){
 }
 
 $('[id="panel-graph"]').click(function(){
-	var selected = $( "#region-code-select option:selected" ).val();
+	var selected = $( "#select-supradesa option:selected" ).val();
 	var valuePanel = $(this).attr('value');
 	if (valuePanel == 'panel_desa'){
 		$.getJSON( "/api/domain_weekly?supradesa_id="+selected, function(data){
