@@ -25,31 +25,11 @@ var getCtx = function(canvas){
 var dataDashboard, chartsPeity = [];
 var weekly = ["desa", "post", "penduduk", "apbdes"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
-var datasetsDaily = [{
-			label: "Berita Harian",
-			backgroundColor: fill[1],
-			borderColor: fill[1],
-			data: [],
-			fill: false,
-		}, {
-			label: "Kependudukan",
-			fill: false,
-			backgroundColor: fill[2],
-			borderColor: fill[2],
-			data: [],
-		},{
-			label: "Keuangan",
-			fill: false,
-			backgroundColor: fill[3],
-			borderColor: fill[3],
-			data: [],
-		}]
-
-var config = {
+var configDaily = {
 	type: 'line',
 	data: {
 		labels: [],
-		datasets: []
+		datasets: [],
 	},
 	options: {
 	responsive: true,
@@ -77,20 +57,50 @@ var config = {
 	}
 	}
 };
+var configPanel = {
+	type: 'line',
+	data: {
+		labels: labels(),
+		datasets: [],
+	},
+	options: {
+	responsive: true,
+	maintainAspectRatio:false,
+	tooltips: {
+		position: 'nearest',
+		mode: 'index',
+		intersect: false,
+	},
+	hover: {
+		mode: 'nearest',
+		intersect: true
+	}, 
+	scales: {
+		xAxes: [{
+		display: false			
+		}],
+		yAxes: [{
+		display: true,
+		scaleLabel: {
+			display: true,
+			labelString: 'Jumlah Desa'
+		}
+		}]
+	}
+	}
+};
 
 var canvasDaily = document.getElementById('daily-graph');
-var ctxDaily = getCtx(canvasDaily)
-config.data.datasets = datasetsDaily;
-var chartDaily = new Chart(ctxDaily, config);
+var dailyGraph = new Chart(getCtx(canvasDaily), configDaily);
 
 var canvasDesa = document.getElementById('desa-graph')
-var desaChart = new Chart(getCtx(canvasDesa),config)
+var desaGraph = new Chart(getCtx(canvasDesa),configPanel)
 var canvasapbdes = document.getElementById('apbdes-graph');
-var apbdesChart = new Chart(getCtx(canvasapbdes),config)
+var apbdesGraph = new Chart(getCtx(canvasapbdes),configPanel)
 var canvasPost = document.getElementById('post-graph');
-var postChart = new Chart(getCtx(canvasPost),config)
+var postGraph = new Chart(getCtx(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
-var pendudukChart = new Chart(getCtx(canvasPenduduk),config)
+var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel)
 
 
 var changeSelected = function(selected){	
@@ -110,12 +120,31 @@ var changeSelected = function(selected){
 			$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));			
 			chart.change();		
 		}
+		dailyGraph.data.labels =[];
+		dailyGraph.data.datasets = [];
+		dailyGraph.update();
 
-		chartDaily.data.labels = data.daily.label.map(convertDate);
-		chartDaily.data.datasets[0].data = data.daily.post;
-		chartDaily.data.datasets[1].data = data.daily.penduduk;
-		chartDaily.data.datasets[2].data = data.daily.apbdes;	
-		chartDaily.update();
+		dailyGraph.data.labels = data.daily.label.map(convertDate);
+		dailyGraph.data.datasets.push({
+				label: "Berita Harian",
+				backgroundColor: fill[1],
+				borderColor: fill[1],
+				data: data.daily.post,
+				fill: false,
+			}, {
+				label: "Kependudukan",
+				fill: false,
+				backgroundColor: fill[2],
+				borderColor: fill[2],
+				data: data.daily.penduduk,
+			},{
+				label: "Keuangan",
+				fill: false,
+				backgroundColor: fill[3],
+				borderColor: fill[3],
+				data: data.daily.apbdes,
+			})
+		dailyGraph.update();
 	});
 }
 changeSelected(null);
@@ -127,15 +156,10 @@ $('#region-code-select').change(function(){
 
 var panelClicked = function(panel_clicked,data){
 	switch(panel_clicked){
-		case "panel_desa":
-			desaChart.data.labels = []
-			desaChart.data.datasets = []			
-			desaChart.update();	
-
-			for(label in labels()){
-				desaChart.data.labels.push(label);	
-			}				
-			desaChart.data.datasets.push({
+		case "panel_desa":		
+			desaGraph.data.datasets=[]	
+			desaGraph.update();				
+			desaGraph.data.datasets.push({
 				label: 'Desa Berdomain "sideka.id"',
 				backgroundColor: "#8bc34a",
 				borderColor: "#8bc34a",
@@ -151,8 +175,7 @@ var panelClicked = function(panel_clicked,data){
 				fill:false
 				
 			})
-			desaChart.update();
-			desaChart.render();
+			desaGraph.update();
 			var tbody = $('#table-domain-weekly tbody');
 			$.each(data.sideka_domain,function(idx,content){
 				var tr = $('<tr>');
@@ -164,13 +187,10 @@ var panelClicked = function(panel_clicked,data){
 			})
 			break;
 		case "panel_post":
-			postChart.data.labels = []
-			postChart.data.datasets = []			
-			postChart.update();	
-
-			for(label in labels())
-				postChart.data.labels.push(label);					
-			postChart.data.datasets.push({
+			postGraph.data.datasets = []			
+			postGraph.update();	
+							
+			postGraph.data.datasets.push({
 				label: "Desa Berberita Seminggu",
 				backgroundColor: "#d84315",
 				borderColor: "#d84315",
@@ -178,17 +198,12 @@ var panelClicked = function(panel_clicked,data){
 				data: dataDashboard["weekly"]["post"].reverse(),			
 				fill:false			
 			})
-			postChart.update();
-			postChart.render();
+			postGraph.update();
 			break;
 		case "panel_penduduk":
-			pendudukChart.data.labels = []
-			pendudukChart.data.datasets = []			
-			pendudukChart.update();	
-
-			for(label in labels())
-				pendudukChart.data.labels.push(label);					
-			pendudukChart.data.datasets.push({
+			pendudukGraph.data.datasets = []			
+			pendudukGraph.update();					
+			pendudukGraph.data.datasets.push({
 				label: "Desa Berdata Penduduk",
 				backgroundColor: "#2196f3",
 				borderColor: "#2196f3",
@@ -196,17 +211,12 @@ var panelClicked = function(panel_clicked,data){
 				data: dataDashboard["weekly"]["penduduk"].reverse(),
 				fill:false						
 			})
-			pendudukChart.update();
-			pendudukChart.render();
+			pendudukGraph.update();
 			break;
 		case "panel_apbdes":
-			apbdesChart.data.labels = []
-			apbdesChart.data.datasets = []			
-			apbdesChart.update();	
-
-			for(label in labels())
-				apbdesChart.data.labels.push(label);					
-			apbdesChart.data.datasets.push({
+			apbdesGraph.data.datasets = []			
+			apbdesGraph.update();						
+			apbdesGraph.data.datasets.push({
 				label: "Desa Berdata Keuangan",
 				backgroundColor: "#ffa000",
 				borderColor: "#ffa000",
@@ -214,8 +224,7 @@ var panelClicked = function(panel_clicked,data){
 				data: dataDashboard["weekly"]["apbdes"].reverse(),	
 				fill:false					
 			})
-			apbdesChart.update();
-			apbdesChart.render();
+			apbdesGraph.update();
 			break;
 	}	
 }
@@ -231,8 +240,6 @@ $('[id="panel-graph"]').click(function(){
 		panelClicked(valuePanel,"");
 	}
 });
-
-
 
 $.getJSON("/api/supradesa",function(data){
 	$("#region-code-select").removeClass("hidden")

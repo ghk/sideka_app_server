@@ -1,6 +1,5 @@
 from flask import Flask, request,jsonify, render_template, send_from_directory
 from flask_mysqldb import MySQL
-from phpserialize import *
 from flask_cors import CORS, cross_origin
 from phpass import PasswordHash
 import MySQLdb
