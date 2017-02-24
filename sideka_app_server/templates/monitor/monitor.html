@@ -37,13 +37,14 @@
                 <div class="uk-navbar-flip-left">
                     <ul class="uk-navbar-nav user_actions">
                         <li>
-                            <select id="select-supradesa" class="hidden">
-                                <option value="null" selected="selected">All</option>
-                            </select>
+                            <form class="uk-form">
+                                <select id="select-supradesa" class="uk-form-width-medium" style="margin:10px; padding: 5px;">
+                                    <option value="null">All</option>
+                                </select>  
+                            </form>
                         </li>
                     </ul>
                 </div>
-
                 <div class="uk-navbar-flip">
                     <ul class="uk-navbar-nav user_actions">
                         <li><a href="#" id="full_screen_toggle" class="user_action_icon uk-visible-large"><i class="material-icons md-24 md-light">&#xE5D0;</i></a></li>
@@ -99,6 +100,20 @@
 		{% block body %}{% endblock %}
         </div>
     </div>   
+    <script type="text/javascript">
+        $.getJSON("/api/supradesa",function(data){
+            $.each(data, function (i, item) {
+                $('#select-supradesa').append($('<option>', { 
+                    value: item.id,
+                    text : item.name
+                }));
+            });
+        });
+        $('#select-supradesa').change(function(){
+             var selected = $( "#select-supradesa option:selected" ).val();
+             $( "#select-supradesa option:selected" ).val(selected);
+        });
+    </script>
     
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/id.js"></script>

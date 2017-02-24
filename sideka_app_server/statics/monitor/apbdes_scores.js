@@ -37,16 +37,25 @@ var columns = [
 columns.forEach(function(c) {
 	c.readOnly = true;
 });
-$.getJSON("/api/apbdes_scores", function(data){
-	var container = document.getElementById('sheet');
+var changeSelected = function(){
+	var supradesa_id = $( "#select-supradesa option:selected" ).val();
 
-	var hot = new Handsontable(container, {
-	  data: data.filter(function(d) { return d.pendapatan && d.belanja; }),
-	  columns: columns,
-          columnSorting: true,
-          sortIndicator: true,
-	  rowHeaders: true,
-	  colHeaders: columns.map(function(c) {return c.header;}),
+	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesa_id, function(data){
+		var container = document.getElementById('sheet');
+
+		var hot = new Handsontable(container, {
+		data: data.filter(function(d) { return d.pendapatan && d.belanja; }),
+		columns: columns,
+		columnSorting: true,
+		sortIndicator: true,
+		rowHeaders: true,
+		colHeaders: columns.map(function(c) {return c.header;}),
+		});
+		setTimeout(function(){ hot.render()}, 0);
 	});
-	setTimeout(function(){ hot.render()}, 0);
+}
+changeSelected();
+$('#select-supradesa').change(function(){
+	var value = $(this).val();
+	changeSelected(value)
 });

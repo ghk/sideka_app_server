@@ -77,7 +77,10 @@ var configPanel = {
 	}, 
 	scales: {
 		xAxes: [{
-		display: false			
+			display: true,
+			scaleLabel: {
+				display: true,
+			}
 		}],
 		yAxes: [{
 		display: true,
@@ -179,7 +182,7 @@ var panelClicked = function(panel_clicked,data){
 			var tbody = $('#table-domain-weekly tbody');
 			$.each(data.sideka_domain,function(idx,content){
 				var tr = $('<tr>');
-				$('<td>').html(idx+1).appendTo(tr)
+				$('<td>').html("Ke-"+(idx+1)).appendTo(tr)
 				$('<td>').html(data.sideka_domain[idx]).appendTo(tr)
 				$('<td>').html(data.desa_domain[idx]).appendTo(tr)
 				$('<td>').html(parseInt(data.sideka_domain[idx])+parseInt(data.desa_domain[idx])).appendTo(tr)
@@ -241,20 +244,8 @@ $('[id="panel-graph"]').click(function(){
 	}
 });
 
-$.getJSON("/api/supradesa",function(data){
-	$("#select-supradesa").removeClass("hidden")
-	$.each(data, function (i, item) {
-		var text;
-		if(item.region_code != null || item.region_code != null && item.flag != null){			
-			text = item.region_code;
-		}else if(item.region_code == null && item.flag != null){			
-			text = item.flag;
-		}
-		$('#select-supradesa').append($('<option>', { 
-			value: item.id,
-			text : text
-		}));
-	});
-});
+
+
+
 
 

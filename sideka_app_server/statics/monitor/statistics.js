@@ -133,16 +133,24 @@ var columns = [
 columns.forEach(function(c) {
 	c.readOnly = true;
 });
-$.getJSON("/api/statistics", function(data){
-	var container = document.getElementById('sheet');
+var changeSelected = function(){
+	var supradesa_id = $( "#select-supradesa option:selected" ).val();
+	$.getJSON("/api/statistics?supradesa_id="+supradesa_id, function(data){
+		var container = document.getElementById('sheet');
 
-	var hot = new Handsontable(container, {
-	  data: data,
-	  columns: columns,
-          columnSorting: true,
-          sortIndicator: true,
-	  rowHeaders: true,
-	  colHeaders: columns.map(function(c) { return c.header; }),
-	});
-	setTimeout(function(){ hot.render() }, 0);
+		var hot = new Handsontable(container, {
+		data: data,
+		columns: columns,
+		columnSorting: true,
+		sortIndicator: true,
+		rowHeaders: true,
+		colHeaders: columns.map(function(c) { return c.header; }),
+		});
+		setTimeout(function(){ hot.render() }, 0);
+	});	
+}
+changeSelected();
+$('#select-supradesa').change(function(){
+	var value = $(this).val();
+	changeSelected(value)
 });

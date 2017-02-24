@@ -19,8 +19,9 @@ phasher = PasswordHash(8, True)
 
 def get_sd_desa_query(supradesa_id):
 	cur = mysql.connection.cursor()
+	error_value = ["null","undefined",None]
 	try:
-		if supradesa_id == "null" or supradesa_id == None:
+		if supradesa_id in error_value:
 			return "true"
 
 		query= "select * from sd_supradesa where id = %s"
@@ -182,36 +183,41 @@ def get_dashboard_data():
 @app.route('/api/post_scores',  methods=["GET"])
 def get_post_scores():
 	cur = mysql.connection.cursor()
-	keywords = request.args.get('keywords')
 	page = int(request.args.get('pagebegin'))
 	item_per_page = int(request.args.get('itemperpage'))
+	supradesa_id = str(request.args.get('supradesa_id'))
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	offset = 0
 	if int(page) >1:
 		offset = (int(page) - 1) * item_per_page	
 	try:
-		query = "SELECT score from sd_post_scores ORDER BY post_date desc limit %s, %s"
+		query = "SELECT p.score from sd_post_scores p left join sd_desa d on p.blog_id = d.blog_id where {0} ORDER BY post_date desc limit %s, %s".format(query_sd_desa)
 		cur.execute(query,(offset,item_per_page))
 		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)
 	finally:
 		cur.close()
 		
-@app.route('/api/count_post_scores')
+@app.route('/api/count_post_scores',methods=["GET"])
 def get_count_post_scores():
 	cur = mysql.connection.cursor()
+	supradesa_id = str(request.args.get('supradesa_id'))
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	try:
-		query = "SELECT count(*) from sd_post_scores"
+		query = "SELECT count(*) from sd_post_scores p left join sd_desa d on p.blog_id = d.blog_id where {0}".format(query_sd_desa)
 		cur.execute(query)
 		results = cur.fetchone()[0]
 		return str(results)
 	finally:
 		cur.close()
 
-@app.route('/api/apbdes_scores',)
+@app.route('/api/apbdes_scores',methods=["GET"])
 def get_apbdes_scores():
 	cur = mysql.connection.cursor()
+	supradesa_id = str(request.args.get('supradesa_id'))
+	query_sd_desa = get_sd_desa_query(supradesa_id)
 	try:
-		query = "SELECT score from sd_apbdes_scores"
+		query = "SELECT a.score from sd_apbdes_scores a left join sd_desa d on d.blog_id = a.blog_id where {0}".format(query_sd_desa)
 		cur.execute(query)
 		results = [json.loads(c[0]) for c in cur.fetchall()]
 		return jsonify(results)
@@ -252,7 +258,7 @@ def get_supradesa():
 	cur = mysql.connection.cursor()
 	results= []
 	try:
-		cur.execute("select id,region_code, flag from sd_supradesa")
+		cur.execute("select id,region_code, flag, name from sd_supradesa")
 		header = [column[0] for column in cur.description]
 		for values in cur.fetchall(): results.append(dict(zip(header, values)))
 		return jsonify(results)

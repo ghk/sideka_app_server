@@ -7,26 +7,32 @@ app.config(['$interpolateProvider', function ($interpolateProvider) {
 app.controller('PostCtrl', function($scope, $http) {
 	$scope.currentPage = 1;
 	$scope.itemPerPage = 50;
-	$scope.keyWords = "";
 	$scope.totalItems = 0;
 	$scope.dataTables = [];
 	$scope.headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
-	get_all_post("",1)
+	get_all_post(1)
 	
 	
 	$scope.changePage = function(page) {
-		get_all_post("",page)		
+		get_all_post(page)		
 	};
  	$scope.formatDate = function(date){           
-          return new Date(date);
+        return new Date(date);
     };
-	function get_all_post(keyWords,pageBegin){
-		$http.get('/api/count_post_scores').then(function(response){
+
+	$('#select-supradesa').change(function(){
+		get_all_post(1);
+		
+	});
+
+	function get_all_post(pageBegin){
+		var supradesa_id = $( "#select-supradesa option:selected" ).val();
+
+		$http.get("/api/count_post_scores?supradesa_id="+supradesa_id).then(function(response){
 			$scope.totalItems = parseInt(response.data)
 		}); 
-		$http.get('/api/post_scores?keywords='+keyWords+"&pagebegin="+pageBegin+"&itemperpage="+$scope.itemPerPage).then(function(response){
+		$http.get("/api/post_scores?pagebegin="+pageBegin+"&itemperpage="+$scope.itemPerPage+"&supradesa_id="+supradesa_id).then(function(response){
 			$scope.dataTables = response.data;
-			console.log(response.data)
 		}); 
 	}
 
