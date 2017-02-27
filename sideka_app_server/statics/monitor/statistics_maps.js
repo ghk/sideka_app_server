@@ -57,6 +57,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
   $scope.newTab = function(url){    
       $window.open(url,"_blank")
   }
+
   $('#select-supradesa').change(function(){
       var value = $(this).val();
       changeSelected(value)
@@ -79,7 +80,11 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
             icon: (value.blog.score*100).toFixed(0)
             })
         }
-        vm.markers = markers;
+	setTimeout(function(){
+		$scope.$apply(function(){
+        		vm.markers = markers;
+		});
+	}, 1000);
     });
   }
   changeSelected(null)
