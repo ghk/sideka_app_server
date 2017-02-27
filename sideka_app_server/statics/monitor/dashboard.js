@@ -104,11 +104,10 @@ var postGraph = new Chart(getCtx(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
 var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel)
 
-var changeSelected = function(selected){	
-	if(!selected)selected = null;
-	$.getJSON("/api/dashboard?supradesa_id="+selected, function(data){
-		dataDashboard = data;		
-		console.log(data)
+var changeSelected = function(supradesa_id){
+	if(supradesa_id == "")supradesa_id=null;
+	$.getJSON("/api/dashboard?supradesa_id="+supradesa_id, function(data){
+		dataDashboard = data;	
 		if(chartsPeity.length === 0){
 			for(var i=0; i<weekly.length; i++){
 				var current = weekly[i];
@@ -150,10 +149,11 @@ var changeSelected = function(selected){
 		dailyGraph.update();
 	});
 }
-changeSelected(null);
+changeSelected(getCookie("supradesa_id"))
 
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
+	setCookie("supradesa_id", value, 1)
 	changeSelected(value);
 });
 

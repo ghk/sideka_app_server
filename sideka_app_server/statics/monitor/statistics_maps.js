@@ -59,12 +59,13 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
   }
 
   $('#select-supradesa').change(function(){
-      var value = $(this).val();
-      changeSelected(value)
+      var value = $(this).val();  
+      setCookie("supradesa_id", value, 1)//setCookie is taken from dashboard
+      changeSelected(value);
   });
 
-  var changeSelected = function(valueSelected){
-    $http.get('/api/statistics?supradesa_id='+valueSelected).then(function(response){
+  var changeSelected = function(supradesa_id){
+    $http.get('/api/statistics?supradesa_id='+supradesa_id).then(function(response){
         var data = response.data;      
         var markers = [];
         for(var i = 0; i < data.length; i++){
@@ -87,7 +88,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
 	}, 1000);
     });
   }
-  changeSelected(null)
+  changeSelected(getCookie("supradesa_id"))
 
   $scope.changeContent = function(contentClicked){
     var temp = vm.markers;

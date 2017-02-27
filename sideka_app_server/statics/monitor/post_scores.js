@@ -10,24 +10,25 @@ app.controller('PostCtrl', function($scope, $http) {
 	$scope.totalItems = 0;
 	$scope.dataTables = [];
 	$scope.headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
-	get_all_post(1)
+	var supradesa_id = $( "#select-supradesa option:selected" ).val();
+	get_all_post(1, getCookie("supradesa_id"))
 	
 	
 	$scope.changePage = function(page) {
-		get_all_post(page)		
+		get_all_post(page, supradesa_id)		
 	};
  	$scope.formatDate = function(date){           
         return new Date(date);
     };
 
-	$('#select-supradesa').change(function(){
-		get_all_post(1);
+	$('#select-supradesa').change(function(){	
+		var value = $( "#select-supradesa option:selected" ).val();
+		setCookie("supradesa_id", value, 1)
+		get_all_post(1, value);
 		
 	});
 
-	function get_all_post(pageBegin){
-		var supradesa_id = $( "#select-supradesa option:selected" ).val();
-
+	function get_all_post(pageBegin, supradesa_id){
 		$http.get("/api/count_post_scores?supradesa_id="+supradesa_id).then(function(response){
 			$scope.totalItems = parseInt(response.data)
 		}); 
