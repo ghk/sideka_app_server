@@ -27,6 +27,9 @@ def get_sd_desa_query(supradesa_id):
 		query= "select * from sd_supradesa where id = %s"
 		cur.execute(query,(supradesa_id,))
 		values = cur.fetchone()
+		if values is None:
+			return "true"
+			
 		header = [column[0] for column in cur.description]
 		results = dict(zip(header,values))
 		

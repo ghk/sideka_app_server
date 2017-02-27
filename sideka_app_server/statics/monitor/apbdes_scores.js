@@ -37,9 +37,7 @@ var columns = [
 columns.forEach(function(c) {
 	c.readOnly = true;
 });
-var changeSelected = function(){
-	var supradesa_id = $( "#select-supradesa option:selected" ).val();
-
+var changeSelected = function(supradesa_id){
 	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesa_id, function(data){
 		var container = document.getElementById('sheet');
 
@@ -54,8 +52,9 @@ var changeSelected = function(){
 		setTimeout(function(){ hot.render()}, 0);
 	});
 }
-changeSelected();
+changeSelected(getCookie("supradesa_id"));
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
+	setCookie("supradesa_id",value,1)
 	changeSelected(value)
 });

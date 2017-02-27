@@ -133,8 +133,7 @@ var columns = [
 columns.forEach(function(c) {
 	c.readOnly = true;
 });
-var changeSelected = function(){
-	var supradesa_id = $( "#select-supradesa option:selected" ).val();
+var changeSelected = function(supradesa_id){
 	$.getJSON("/api/statistics?supradesa_id="+supradesa_id, function(data){
 		var container = document.getElementById('sheet');
 
@@ -149,8 +148,9 @@ var changeSelected = function(){
 		setTimeout(function(){ hot.render() }, 0);
 	});	
 }
-changeSelected();
+changeSelected(getCookie("supradesa_id"));
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	changeSelected(value)
+	setCookie("supradesa_id",value,1)  //setCookie is taken from dashboard
+	changeSelected(value) 
 });

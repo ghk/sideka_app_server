@@ -16,10 +16,11 @@
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />
 </head>
 <body class=" sidebar_main_open sidebar_main_swipe">
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>		
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="/statics/monitor/monitor.js"></script>
 <!--
 -->
-    
+
 
     <!-- main header -->
     <header id="header_main">
@@ -100,20 +101,6 @@
 		{% block body %}{% endblock %}
         </div>
     </div>   
-    <script type="text/javascript">
-        $.getJSON("/api/supradesa",function(data){
-            $.each(data, function (i, item) {
-                $('#select-supradesa').append($('<option>', { 
-                    value: item.id,
-                    text : item.name
-                }));
-            });
-        });
-        $('#select-supradesa').change(function(){
-             var selected = $( "#select-supradesa option:selected" ).val();
-             $( "#select-supradesa option:selected" ).val(selected);
-        });
-    </script>
     
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/id.js"></script>
