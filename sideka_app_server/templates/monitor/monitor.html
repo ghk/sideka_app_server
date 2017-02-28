@@ -40,7 +40,7 @@
                         <li>
                             <form class="uk-form">
                                 <select id="select-supradesa" class="uk-form-width-medium" style="margin:10px; padding: 5px; background-color: #fff;">
-                                    <option value="null">All</option>
+                                    <option value="null">Semua Desa</option>
                                 </select>  
                             </form>
                         </li>
@@ -66,27 +66,27 @@
 
         <div class="menu_section">
             <ul>
-                <li title="Dashboard" class="{{ 'current_section' if active == 'dashboard' else ''}}">
+                <li id="dashboard" title="Dashboard" class="{{ 'current_section' if active == 'dashboard' else ''}}">
                     <a href="/">
                         <span class="menu_icon"><i class="material-icons"></i></span>
                         <span class="menu_title">Dashboard</span>
                     </a>
                 </li>
-                <li title="Statistik" class="{{ 'current_section' if active == 'statistics' else ''}}">
+                <li id="data-quality" title="Statistik" class="{{ 'current_section' if active == 'statistics' else ''}}">
                     <a href="/statistics">
                         <span class="menu_icon"><i class="material-icons">timeline</i></span>
                         <span class="menu_title">Kualitas Data</span>
                     </a>
 
                 </li>
-                <li title="Statistik Berita" class="{{ 'current_section' if active == 'post_scores' else ''}}">
+                <li id="posts-statistic" title="Statistik Berita" class="{{ 'current_section' if active == 'post_scores' else ''}}">
                     <a href="/posts">
                         <span class="menu_icon"><i class="material-icons">chrome_reader_mode</i></span>
                         <span class="menu_title">Berita</span>
                     </a>
 
                 </li>
-                <li title="Statistik Apbdes" class="{{ 'current_section' if active == 'apbdes_scores' else ''}}">
+                <li id="apbdes-statistic" title="Statistik Apbdes" class="{{ 'current_section' if active == 'apbdes_scores' else ''}}">
                     <a href="/apbdes">
                         <span class="menu_icon"><i class="material-icons">&#xE53E;</i></span>
                         <span class="menu_title">APBDes</span>

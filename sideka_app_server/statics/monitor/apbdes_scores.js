@@ -40,21 +40,20 @@ columns.forEach(function(c) {
 var changeSelected = function(supradesa_id){
 	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesa_id, function(data){
 		var container = document.getElementById('sheet');
-
 		var hot = new Handsontable(container, {
 		data: data.filter(function(d) { return d.pendapatan && d.belanja; }),
-		columns: columns,
-		columnSorting: true,
-		sortIndicator: true,
-		rowHeaders: true,
-		colHeaders: columns.map(function(c) {return c.header;}),
+			columns: columns,
+			columnSorting: true,
+			sortIndicator: true,
+			rowHeaders: true,
+			colHeaders: columns.map(function(c) {return c.header;}),
 		});
 		setTimeout(function(){ hot.render()}, 0);
 	});
 }
-changeSelected(getCookie("supradesa_id"));
+changeSelected(hashUrl());
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	setCookie("supradesa_id",value,1)
 	changeSelected(value)
+	changeUrl(value)
 });

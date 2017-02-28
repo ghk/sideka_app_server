@@ -149,12 +149,12 @@ var changeSelected = function(supradesa_id){
 		dailyGraph.update();
 	});
 }
-changeSelected(getCookie("supradesa_id"))
+changeSelected(hashUrl())
 
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	setCookie("supradesa_id", value, 1)
-	changeSelected(value);
+	changeSelected(value)
+	changeUrl(value)
 });
 
 var panelClicked = function(panel_clicked,data){

@@ -1,34 +1,43 @@
-var setCookie = function(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+var changeUrl = function(value){
+    var pathName = window.location.pathname;
+    var host = window.location.origin;
+    var newUrl = host+ pathName +"?id="+value;
+    var title = document.title
+    if(pathName == "/")
+        newUrl = host + "/home?id=" + value; 
+    changeUrlMenu(value);
+    window.history.pushState(null, title, newUrl);
 }
 
-var getCookie = function(cname) {
-    var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for(var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
+var hashUrl = function(){
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);    
+    var hash = hashes.split('=');
+    if(hash[0]=="id")
+        return hash[1];
+    return null;
+}
+
+var changeUrlMenu = function(supradesaId){
+    var idMEnu = ["dashboard","data-quality","posts-statistic","apbdes-statistic"];
+    var parser = document.createElement('a');
+    var oldUrl;
+    
+    for(var i=0;i<idMEnu.length;i++){
+        parser.href =  $("#"+idMEnu[i]+" a").attr("href")
+        oldUrl = parser.pathname;
+        if(oldUrl =="/")oldUrl+="home";
+        $("#"+idMEnu[i]+" a").attr("href",oldUrl+"?id="+supradesaId)
     }
-    return "";
 }
 
 $.getJSON("/api/supradesa",function(data){
-    var supradesa_id = getCookie("supradesa_id")   
-    if(supradesa_id == "") supradesa_id = "null";
-    $.each(data, function (i, item) {        
+    $.each(data, function (i, item) { 
         $('#select-supradesa').append($('<option>', { 
             value: item.id,
             text : item.name
         }));
     });
-    
-    $("#select-supradesa").val(supradesa_id);
+    var supradesaId = hashUrl();
+    $('#select-supradesa').val(String(supradesaId));
+    changeUrlMenu(supradesaId)
 });

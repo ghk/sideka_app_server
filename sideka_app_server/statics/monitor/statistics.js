@@ -148,9 +148,9 @@ var changeSelected = function(supradesa_id){
 		setTimeout(function(){ hot.render() }, 0);
 	});	
 }
-changeSelected(getCookie("supradesa_id"));
+changeSelected(hashUrl());
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	setCookie("supradesa_id",value,1)  //setCookie is taken from dashboard
-	changeSelected(value) 
+	changeSelected(value)
+	changeUrl(value) 
 });

@@ -60,7 +60,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
 
   $('#select-supradesa').change(function(){
       var value = $(this).val();  
-      setCookie("supradesa_id", value, 1)//setCookie is taken from dashboard
+      changeUrl(value);
       changeSelected(value);
   });
 
@@ -88,7 +88,7 @@ app.controller('locatorController', function($scope, $http, NgMap, $window) {
 	}, 1000);
     });
   }
-  changeSelected(getCookie("supradesa_id"))
+  changeSelected(hashUrl())
 
   $scope.changeContent = function(contentClicked){
     var temp = vm.markers;

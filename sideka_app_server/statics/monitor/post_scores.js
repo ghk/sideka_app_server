@@ -11,7 +11,7 @@ app.controller('PostCtrl', function($scope, $http) {
 	$scope.dataTables = [];
 	$scope.headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
 	var supradesa_id = $( "#select-supradesa option:selected" ).val();
-	get_all_post(1, getCookie("supradesa_id"))
+	get_all_post(1, hashUrl())
 	
 	
 	$scope.changePage = function(page) {
@@ -23,9 +23,8 @@ app.controller('PostCtrl', function($scope, $http) {
 
 	$('#select-supradesa').change(function(){	
 		var value = $( "#select-supradesa option:selected" ).val();
-		setCookie("supradesa_id", value, 1)
-		get_all_post(1, value);
-		
+		get_all_post(1, value);	
+		changeUrl(value)	
 	});
 
 	function get_all_post(pageBegin, supradesa_id){
