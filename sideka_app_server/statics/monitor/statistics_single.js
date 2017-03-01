@@ -108,7 +108,7 @@ window.onload = function() {
     }
     window.myLine = new Chart(ctx, config);
 
-    var tbody = $('#table_daily tbody');
+    var tbody = $('#table-daily tbody');
     $.each(content_daily,function(idx,content){
         var tr = $('<tr>');
         $('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
@@ -132,7 +132,7 @@ window.onload = function() {
         tbody.append(tr);
     })
 
-    var tbody = $('#table_post tbody');
+    var tbody = $('#table-post tbody');
     $.each(content_post,function(idx,content){
         var tr = $('<tr>');
         $('<td>').html(convertDate(content.date)).appendTo(tr);
