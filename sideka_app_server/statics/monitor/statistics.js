@@ -1,172 +1,5 @@
-/*
-function makeLinkRenderer(link, text){
-	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
-		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
-		return td;
-	}
-}
-
-var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties) {
-	var args = [instance, td, row, col, prop, value * 100, cellProperties];
-	var bg = "red";
-	var color = "white";
-	if (value > 0.4){
-		bg = "yellow";
-		color = "black";
-	}
-	if (value > 0.7){
-		bg = "green";
-		color = "white";
-	}
-
-	Handsontable.renderers.NumericRenderer.apply(this, args);
-	td.style.backgroundColor = bg;
-	td.style.color = color;
-};
-
-var columns = [
-		{
-	data: 'blog_id',
-	header: 'Wordpress Id',
-	renderer: makeLinkRenderer(function(v){ return  "/statistic/"+v }, function(v) {return v; }),
-		},
-		{
-	data: 'domain',
-	header: 'Domain',
-	renderer: makeLinkRenderer(function(v){ return  "http://"+v }, function(v) {return v; }),
-      },
-
-      {
-	data: 'pendamping',
-	header: 'Pendamping',
-      },
-
-      {
-	data: 'blog.score',
-	header: 'Berita',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'penduduk.score',
-	header: 'Penduduk',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'apbdes.score',
-	header: 'Anggaran',
-	type: 'numeric',
-	format: '0.00',
-	renderer: scoreRenderer
-      },
-      {
-	data: 'blog.score_quality',
-	header: 'B. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'blog.score_frequency',
-	header: 'B. Freq',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'penduduk.score_quality',
-	header: 'P. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'penduduk.score_quantity',
-	header: 'P. Qty',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'apbdes.score_quality',
-	header: 'A. Qlt',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'apbdes.score_quantity',
-	header: 'A. Qty',
-	type: 'numeric',
-	format: '0.00',
-      },
-      {
-	data: 'blog.last_post',
-	header: 'Last Post',
-      },
-      {
-	data: 'blog.count_24h',
-	header: '#Post 1D',
-      },
-      {
-	data: 'blog.count_1w',
-	header: '#Post 1W',
-      },
-      {
-	data: 'blog.count_30d',
-	header: '#Post 30D',
-      },
-      {
-	data: 'penduduk.last_modified',
-	header: 'Penduduk Last Modified',
-      },
-      {
-	data: 'penduduk.count',
-	header: '# Penduduk',
-      },
-      {
-	data: 'apbdes.last_modified',
-	header: 'APBDes Last Modified',
-      },
-      {
-	data: 'apbdes.count',
-	header: '# APBDes',
-      },
-    ];
-columns.forEach(function(c) {
-	c.readOnly = true;
-});
-var changeSelected = function(supradesa_id){
-	$.getJSON("/api/statistics?supradesa_id="+supradesa_id, function(data){
-		var container = document.getElementById('sheet');
-
-		var hot = new Handsontable(container, {
-		data: data,
-		columns: columns,
-		columnSorting: true,
-		sortIndicator: true,
-		rowHeaders: true,
-		colHeaders: columns.map(function(c) { return c.header; }),
-		});
-		setTimeout(function(){ hot.render() }, 0);
-	});	
-}
-
-changeSelected(hashUrl());
-$('#select-supradesa').change(function(){
-	var value = $(this).val();
-	changeSelected(value)
-	changeUrl(value) 
-});
-*/
-
-
-var convertDate = function(date){
-  var value = new Date(date)
-  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear();
-}
-
 var header = ['Wp Id','Domain','Berita', 'Penduduk','Anggaran','B. Qlt','B. Freq','P. Qlt', 'P. Qty', 
-		'A. Qlt','A. Qty','Last Post','#Post 1D', '#Post 1W', '#Post 30D','Penduduk Last Modified', '# Penduduk', 'APBDes Last Modified','# APBDes',]
+'A. Qlt','A. Qty','Last Post','#Post 1D', '#Post 1W', '#Post 30D','Penduduk Last Modified', '# Penduduk', 'APBDes Last Modified','# APBDes',]
 var applyHeaderandFooter =function(){
 	$('#table-data-quality thead > tr').remove()
 	var thead = $('#table-data-quality thead');
@@ -179,17 +12,14 @@ var applyHeaderandFooter =function(){
 
 var makeButtonScoring = function(score){
 	var classButton;
-	var buttonResult;
-	score *=100;
-	
+	score *=100;	
 	if(score < 40)
 		classButton= 'uk-badge uk-badge-danger';
 	else if(score < 70) 
 		classButton ='uk-badge uk-badge-warning'; 
 	else
-		classButton ='uk-badge uk-badge-success';
-	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
-	return buttonResult;
+		classButton ='uk-badge uk-badge-success';	
+	return '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';;
 }
 
 var changeSelected = function(supradesa_id){	
