@@ -1,29 +1,6 @@
 {% extends "monitor/monitor.html" %}
 {% block body %}
-<div class="md-card" >
-	<div class="md-card-toolbar">
-		<div class="md-card-toolbar-actions">
-			<form class="uk-form">
-				<fieldset data-uk-margin>
-					<i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
-				</fieldset>
-			</form>
-		</div>
-		<h3 class="md-card-toolbar-heading-text">
-			Score Berita
-		</h3>
-	</div>
-	<div class="md-card-content">
-		<div class="uk-overflow-container">
-			<table class="uk-table uk-text-nowrap uk-table-hover "  id="table-data-quality">
-				<thead>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</div>
-
-<script src="/statics/monitor/statistics.js"></script>	
+	<div id="sheet" ></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.js"></script>
+	<script src="/statics/monitor/statistics.js"></script>	
 {% endblock %}
