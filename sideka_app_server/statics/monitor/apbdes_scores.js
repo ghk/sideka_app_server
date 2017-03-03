@@ -8,35 +8,35 @@ var getSubtype=function(data){
 	return unique.sort();
 }
 var currencyConvert = function (n, currency) {
-    return currency + " " + n.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+    return currency + "\t " + n.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
 }
 
-var applyContent = function(data,subtype){
+var applyContent = function(data,subtypes){
 	$("#years-apbdes >li").remove();
 	$("#content-apbdes >li").remove();
 
-	for(var i=0;i < subtype.length;i++){
+	$.each(subtypes,function(idx, subtype){
 		var tableContent = $("#table-content").clone().removeClass("hidden");
 		var tbody = $("tbody", tableContent);
-		var dataFiltered = data.filter(c=>c.subtype == subtype[i])		
+		var dataFiltered = data.filter(c=>c.subtype == subtype)		
 		var li = $('<li>');
 
-		$('<a>').attr("href","").append(subtype[i]).appendTo(li)
-		if (i ==0)li.addClass("uk-active");
+		$('<a>').attr("href","").append(subtype).appendTo(li)
+		if (idx==0)li.addClass("uk-active");
 		$("#years-apbdes").append(li);			
-		$.each(dataFiltered,function(idx, row){
+		$.each(dataFiltered,function(i, content){
 			var tr = $('<tr>');
-			$('<td>').html('<a href="http://'+row.domain+'">'+row.domain+'</a>').appendTo(tr);
-			$('<td>').html(currencyConvert(row.pendapatan, "Rp")).appendTo(tr);
-			$('<td>').html(currencyConvert(row.belanja,"Rp")).appendTo(tr);
-			$('<td>').html(row.rows).appendTo(tr);
-			$('<td>').html(row.last_modified).appendTo(tr);
+			$('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
+			$('<td>').html(currencyConvert(content.pendapatan, "Rp")).appendTo(tr);
+			$('<td>').html(currencyConvert(content.belanja,"Rp")).appendTo(tr);
+			$('<td>').html(content.rows).appendTo(tr);
+			$('<td>').html(content.last_modified).appendTo(tr);
 			tbody.append(tr);
 		})	 
 		li = $('<li>').append(tableContent);
-		if(i==0)li.addClass("uk-active");
+		if(idx==0)li.addClass("uk-active");
 		$("#content-apbdes").append(li);
-	}	
+	})	
 }
 
 var changeSelected = function(supradesa_id){

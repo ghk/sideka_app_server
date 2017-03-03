@@ -15,9 +15,10 @@ var changeUrl = function(value){
 }
 
 var hashUrl = function(){
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);    
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);  
+    if (hashes.indexOf("#") > -1)hashes=hashes.substring(0,hashes.indexOf("#"));
     var hash = hashes.split('=');
-    if(hash[0]=="id")
+    if(hash[0]=="id")        
         return hash[1];
     return null;
 }

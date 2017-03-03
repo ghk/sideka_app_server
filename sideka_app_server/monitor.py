@@ -18,7 +18,7 @@ app.config.from_pyfile('app.cfg')
 phasher = PasswordHash(8, True)
 
 def get_sd_desa_query(args):	
-	supradesa_id = args.get("supradesa_id")
+	supradesa_id = str(args.get("supradesa_id"))
 	error_value = ["null","undefined",None]
 	cur = mysql.connection.cursor()
 	try:
@@ -186,10 +186,11 @@ def get_dashboard_data():
 @app.route('/api/post_scores',  methods=["GET"])
 def get_post_scores():
 	cur = mysql.connection.cursor()
-	page = int(request.args.get('pagebegin'))
+	page = request.args.get('pagebegin')
 	item_per_page = int(request.args.get('itemperpage'))
 	query_sd_desa = get_sd_desa_query(request.args)
 	offset = 0
+	if not page.isdigit():page=1
 	if int(page) >1:
 		offset = (int(page) - 1) * item_per_page	
 	try:
