@@ -53,7 +53,12 @@ var configDaily = {
 	}, 
 	scales: {
 		xAxes: [{
-		display: true			
+		display: true,
+		ticks: {
+          autoSkip: false,
+          maxRotation: 0,
+          minRotation: 0
+        }			
 		}],
 		yAxes: [{
 		display: true,
@@ -166,20 +171,28 @@ var panelClicked = function(panel_clicked,data){
 			desaGraph.data.datasets=[]	
 			desaGraph.update();				
 			desaGraph.data.datasets.push({
-				label: 'Desa Berdomain "sideka.id"',
+				label: 'Desa Terdaftar',
 				backgroundColor: "#8bc34a",
 				borderColor: "#8bc34a",
-				data: data.sideka_domain,
 				borderWidth: 1,
+				data: dataDashboard["weekly"]["desa"].reverse(),
 				fill:false
+				
 			},{
 				label: 'Desa Berdomain "desa.id"',
-				backgroundColor: "#81D4FA",
-				borderColor: "#81D4FA",
+				backgroundColor: "#9900cc",
+				borderColor: "#9900cc",
 				borderWidth: 1,
 				data: data.desa_domain,
 				fill:false
 				
+			},{
+				label: 'Desa Berdomain "sideka.id"',
+				backgroundColor: "#ffbb33",
+				borderColor: "#ffbb33",
+				data: data.sideka_domain,
+				borderWidth: 1,
+				fill:false
 			})
 			desaGraph.update();
 			var tbody = $('#table-domain-weekly tbody');
