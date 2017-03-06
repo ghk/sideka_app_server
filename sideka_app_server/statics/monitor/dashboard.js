@@ -19,7 +19,7 @@ var labels = function(){
 	for(var i=0;i<5;i++){	
 		result.push(moment().weekday(i*-7).format("DD MMM YYYY"))
 	}
-	result[0]=moment().format('[Hari ini,] dddd');
+	result[0]="Hari Ini"
 	return result.reverse();
 }
 
@@ -168,14 +168,15 @@ var changeSelected = function(supradesa_id){
 var panelClicked = function(panel_clicked,data){
 	switch(panel_clicked){
 		case "panel_desa":		
-			desaGraph.data.datasets=[]	
-			desaGraph.update();				
+			desaGraph.data.datasets=[];
+			desaGraph.update();		
+
 			desaGraph.data.datasets.push({
 				label: 'Desa Terdaftar',
 				backgroundColor: "#8bc34a",
 				borderColor: "#8bc34a",
 				borderWidth: 1,
-				data: dataDashboard["weekly"]["desa"].reverse(),
+				data: dataDashboard["weekly"]["desa"],
 				fill:false
 				
 			},{
@@ -195,6 +196,7 @@ var panelClicked = function(panel_clicked,data){
 				fill:false
 			})
 			desaGraph.update();
+			desaGraph.render();
 			var tbody = $('#table-domain-weekly tbody');
 			var week = labels().reverse();
 			$("tr",tbody).remove();
@@ -217,7 +219,7 @@ var panelClicked = function(panel_clicked,data){
 				backgroundColor: "#d84315",
 				borderColor: "#d84315",
 				borderWidth: 1,
-				data: dataDashboard["weekly"]["post"].reverse(),			
+				data: dataDashboard["weekly"]["post"],			
 				fill:false			
 			})
 			postGraph.update();
@@ -230,7 +232,7 @@ var panelClicked = function(panel_clicked,data){
 				backgroundColor: "#2196f3",
 				borderColor: "#2196f3",
 				borderWidth: 1,
-				data: dataDashboard["weekly"]["penduduk"].reverse(),
+				data: dataDashboard["weekly"]["penduduk"],
 				fill:false						
 			})
 			pendudukGraph.update();
@@ -243,7 +245,7 @@ var panelClicked = function(panel_clicked,data){
 				backgroundColor: "#ffa000",
 				borderColor: "#ffa000",
 				borderWidth: 1,
-				data: dataDashboard["weekly"]["apbdes"].reverse(),	
+				data: dataDashboard["weekly"]["apbdes"],	
 				fill:false					
 			})
 			apbdesGraph.update();
