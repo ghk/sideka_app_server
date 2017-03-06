@@ -162,8 +162,8 @@ def get_dashboard_data():
 				return daily[typ][time]
 			return 0
 		r = {"label":[], "post":[], "penduduk":[], "apbdes":[]}
-		for i in range(60):
-			d = datetime.datetime.today() - datetime.timedelta(days = 59 - i)
+		for i in range(63):
+			d = datetime.datetime.today() - datetime.timedelta(days = 62 - i)
 			d = datetime.datetime(d.year, d.month, d.day)
 			t = int(time.mktime(d.timetuple()))
 			r["label"].append(t)

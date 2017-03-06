@@ -3,18 +3,24 @@ var map, markers = [], dataStatistics;
 var weekly = ["desa", "post", "penduduk", "apbdes"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 
-var convertDate = function(date){
-  var value = new Date(parseInt(date)*1000)
-  var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear().toString().substr(2,2);
+var convertDate = function(data){
+	results = []
+	$.each(data,function(idx,timestamp){
+		results.push("")
+		if(idx%7 ==0 || idx == (data.length-1)){
+			results[idx] = (moment.unix(timestamp).format("DD MMM YYYY"));
+		}		
+	})
+	return results
 }
 
 var labels = function(){
 	var result = [];
-	for(var i=1;i <= 5;i++){
-		result.push('Minggu Ke-'+i)
+	for(var i=0;i<5;i++){	
+		result.push(moment().weekday(i*-7).format("DD MMM YYYY"))
 	}
-	return result;
+	result[0]=moment().format('[Hari ini,] dddd');
+	return result.reverse();
 }
 
 var getCtx = function(canvas){
@@ -26,6 +32,7 @@ var getCtx = function(canvas){
 		return ctx
 	}
 }
+
 var configDaily = {
 	type: 'line',
 	data: {
@@ -84,6 +91,9 @@ var configPanel = {
 			}
 		}],
 		yAxes: [{
+		ticks: {
+			beginAtZero: true
+		},
 		display: true,
 		scaleLabel: {
 			display: true,
@@ -126,7 +136,7 @@ var changeSelected = function(supradesa_id){
 		dailyGraph.data.datasets = [];
 		dailyGraph.update();
 
-		dailyGraph.data.labels = data.daily.label.map(convertDate);
+		dailyGraph.data.labels = convertDate(data.daily.label);
 		dailyGraph.data.datasets.push({
 				label: "Berita Harian",
 				backgroundColor: fill[1],
@@ -149,14 +159,6 @@ var changeSelected = function(supradesa_id){
 		dailyGraph.update();
 	});
 }
-
-$('#select-supradesa').change(function(){
-	var value = $(this).val();
-	changeSelected(value)
-	changeUrl(value)
-	deleteMarkers();	
-	getStatistics(hashUrl())
-});
 
 var panelClicked = function(panel_clicked,data){
 	switch(panel_clicked){
@@ -181,9 +183,12 @@ var panelClicked = function(panel_clicked,data){
 			})
 			desaGraph.update();
 			var tbody = $('#table-domain-weekly tbody');
+			var week = labels().reverse();
+			$("tr",tbody).remove();
+
 			$.each(data.sideka_domain,function(idx,content){
 				var tr = $('<tr>');
-				$('<td>').html("Ke-"+(idx+1)).appendTo(tr)
+				$('<td>').html(week[idx]).appendTo(tr)
 				$('<td>').html(data.sideka_domain[idx]).appendTo(tr)
 				$('<td>').html(data.desa_domain[idx]).appendTo(tr)
 				$('<td>').html(parseInt(data.sideka_domain[idx])+parseInt(data.desa_domain[idx])).appendTo(tr)
@@ -232,6 +237,14 @@ var panelClicked = function(panel_clicked,data){
 			break;
 	}	
 }
+
+$('#select-supradesa').change(function(){
+	var value = $(this).val();
+	changeSelected(value)
+	changeUrl(value)
+	deleteMarkers();	
+	getStatistics(hashUrl())
+});
 
 $('[id="panel-graph"]').click(function(){
 	var selected = $( "#select-supradesa option:selected" ).val();
