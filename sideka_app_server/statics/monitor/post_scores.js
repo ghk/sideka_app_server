@@ -1,6 +1,6 @@
 var currentPage = 1;itemPerPage = 50; totalItems = 0; dataTables = [];
 var headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
-var supradesa_id = $( "#select-supradesa option:selected" ).val();
+
 var applyHeader = function(){
 	var thead = $("#table-post-scores > thead");
 	var tr = $('<tr>')

@@ -1,3 +1,8 @@
+var dataDashboard, chartsPeity = [];
+var map, markers = [], dataStatistics;
+var weekly = ["desa", "post", "penduduk", "apbdes"]
+var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
+
 var convertDate = function(date){
   var value = new Date(parseInt(date)*1000)
   var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -17,14 +22,10 @@ var getCtx = function(canvas){
 		var ctx = canvas.getContext('2d');
 		ctx.fillStyle = 'black';
 		ctx.font = '26px Arial';
-		ctx.fillText('Quick Brown Fox', 0, 26);
+		ctx.fillText('0', 0, 26);
 		return ctx
 	}
 }
-
-var dataDashboard, chartsPeity = [];
-var weekly = ["desa", "post", "penduduk", "apbdes"]
-var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var configDaily = {
 	type: 'line',
 	data: {
@@ -45,7 +46,7 @@ var configDaily = {
 	}, 
 	scales: {
 		xAxes: [{
-		display: false			
+		display: true			
 		}],
 		yAxes: [{
 		display: true,
@@ -105,7 +106,6 @@ var canvasPenduduk = document.getElementById('penduduk-graph');
 var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel)
 
 var changeSelected = function(supradesa_id){
-	if(supradesa_id == "")supradesa_id=null;
 	$.getJSON("/api/dashboard?supradesa_id="+supradesa_id, function(data){
 		dataDashboard = data;	
 		if(chartsPeity.length === 0){
@@ -149,12 +149,13 @@ var changeSelected = function(supradesa_id){
 		dailyGraph.update();
 	});
 }
-changeSelected(hashUrl())
 
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
 	changeSelected(value)
 	changeUrl(value)
+	deleteMarkers();	
+	getStatistics(hashUrl())
 });
 
 var panelClicked = function(panel_clicked,data){
@@ -246,6 +247,85 @@ $('[id="panel-graph"]').click(function(){
 
 
 
+// Maps Configuration
+var getStatistics = function(supradesa_id){
+	initMaps();
+	$.getJSON('/api/statistics?supradesa_id='+supradesa_id, function(data){
+		var icon = "blog";
+		dataStatistics = data;	
+		$.each(data,function(idx,content){
+			if(content.latitude != null &&content.longitude)addMarker(content,icon);
+		})	
+	})
+}
 
+var initMaps = function(){
+	var center = {lat:-2.604236, lng: 116.499023};
+	map = new google.maps.Map(document.getElementById('map'), {
+		zoom: 5,
+		center: center,
+		mapTypeId: google.maps.MapTypeId.TERRAIN
+	});	  
+}
 
+var addMarker = function (content,icon) {
+	var host = window.location.origin;
+	var pathImage = "/statics/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
+	var loc = {lat: content.latitude,lng:content.longitude}
+	var marker = new google.maps.Marker({
+		position: loc,
+		map: map,
+		icon: host+pathImage
+	});
 
+	var content = 'Domain: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
+				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
+				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
+				  'Apbdes: '+(content.apbdes.score*100).toFixed(2);
+	var infowindow = new google.maps.InfoWindow();
+	google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
+		return function() {
+			infowindow.setContent(content);
+			infowindow.open(map,marker);
+		};
+	})(marker,content,infowindow));
+	markers.push(marker);
+}
+
+var buttonScoreClicked = function(clicked){
+	clearMarkers();
+	$.each(dataStatistics,function(idx, content){
+		if(content.latitude != null && content.longitude != null)addMarker(content,clicked);
+	})
+	
+}
+
+$('#button-score button').click(function(){
+	var value = $(this).val();
+	buttonScoreClicked(value)
+})
+
+var setMapOnAll = function(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
+
+var clearMarkers = function() {
+  setMapOnAll(null);
+}
+
+// Shows any markers currently in the array.
+var showMarkers =function() {
+  setMapOnAll(map);
+}
+
+var deleteMarkers =function() {
+  clearMarkers();
+  markers = [];
+}
+
+window.onload = function(){
+	changeSelected(hashUrl())
+	getStatistics(hashUrl())
+}

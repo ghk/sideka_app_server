@@ -85,11 +85,6 @@ def post_scores():
 def apbdes_scores():
 	return render_template('monitor/apbdes_scores.html', active='apbdes_scores')
 
-@app.route('/maps')
-def statistics_maps():
-	return render_template('monitor/statistics_maps.html', active='statistics_maps')
-
-
 @app.route('/statics/<path:path>')
 def send_statics(path):
 	return send_from_directory('statics', path)
@@ -167,8 +162,8 @@ def get_dashboard_data():
 				return daily[typ][time]
 			return 0
 		r = {"label":[], "post":[], "penduduk":[], "apbdes":[]}
-		for i in range(90):
-			d = datetime.datetime.today() - datetime.timedelta(days = 89 - i)
+		for i in range(60):
+			d = datetime.datetime.today() - datetime.timedelta(days = 59 - i)
 			d = datetime.datetime(d.year, d.month, d.day)
 			t = int(time.mktime(d.timetuple()))
 			r["label"].append(t)
