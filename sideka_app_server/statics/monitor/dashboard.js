@@ -307,6 +307,7 @@ function initMaps(supradesa_id){
 			zoom: zoom,
 			center: center,
 			mapTypeControl: false,
+			streetViewControl: false,
 			mapTypeId: google.maps.MapTypeId.TERRAIN
 		});	
 	})	  
