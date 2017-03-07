@@ -28,6 +28,18 @@ var columns = [
 	data: 'password',
 	header: 'Password',
       },
+      {
+	data: 'zoom',
+	header: 'Zoom',
+      },
+      {
+	data: 'latitude',
+	header: 'Latitude',
+      },
+      {
+	data: 'longitude',
+	header: 'Longitude',
+      },
     ];
 var container = document.getElementById('sheet');
 var hot;                    

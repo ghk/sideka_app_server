@@ -282,7 +282,7 @@ function panelClicked(panel_clicked,data){
 
 // Maps Configuration
 function getStatistics(supradesa_id){
-	initMaps();
+	initMaps(supradesa_id);
 	$.getJSON('/api/statistics?supradesa_id='+supradesa_id, function(data){
 		var icon = "blog";
 		dataStatistics = data;	
@@ -292,13 +292,20 @@ function getStatistics(supradesa_id){
 	})
 }
 
-function initMaps(){
+function initMaps(supradesa_id){
 	var center = {lat:-2.604236, lng: 116.499023};
-	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 5,
-		center: center,
-		mapTypeId: google.maps.MapTypeId.TERRAIN
-	});	  
+	var zoom = 5
+	$.getJSON( "/api/get_zoom?supradesa_id="+supradesa_id, function(data){	
+		if(data.latitude != null && data.zoom!= null){
+			center = {lat:data.latitude, lng:data.longitude};
+			zoom = data.zoom;
+		}
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: zoom,
+			center: center,
+			mapTypeId: google.maps.MapTypeId.TERRAIN
+		});	
+	})	  
 }
 
 function addMarker(content,icon) {
@@ -356,10 +363,10 @@ $('#button-score button').click(function(){
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
 	changeSelected(value)
-	changeUrl(value)
-	deleteMarkers();	
-	getStatistics(hashUrl())
-	dataPanel = {};
+	changeUrl(value)	
+	deleteMarkers();
+	getStatistics(value)	
+	dataPanel = {};	
 });
 
 $('[id="panel-graph"]').click(function(){

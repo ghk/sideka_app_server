@@ -260,6 +260,23 @@ def get_supradesa():
 	finally:
 		cur.close()
 
+@app.route('/api/get_zoom',methods=["GET"])
+def get_zoom():	
+	cur = mysql.connection.cursor()
+	supradesa_id = str(request.args.get("supradesa_id"))
+	results = {}
+	try:
+		query ="select zoom,latitude, longitude from sd_supradesa where id = %s"
+		cur.execute(query,(supradesa_id,))	
+		values = cur.fetchone() 
+		if values is None: 
+			return jsonify(results)
+		header = [column[0] for column in cur.description]
+		results = dict(zip(header, values))
+		return jsonify(results)
+	finally:
+		cur.close()
+
 @app.route('/api/panel_weekly')
 def get_weekly_panel():		
 	query_sd_desa = get_sd_desa_query(request.args)

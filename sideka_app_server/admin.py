@@ -430,14 +430,14 @@ def get_supradesa():
 def save_supradesa():
 	data = json.loads(request.form.get("data"))
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	keys={'id':None,'region_code':None,'flag':None,'name':None,'blog_agregate':None,'username':None,'password':None}
+	keys={'id':None,'region_code':None,'flag':None,'name':None,'blog_agregate':None,'username':None,'password':None,'zoom':None,'latitude':None,'longitude':None}
 	try:
 		for row in data:
 			if row == {}:
 				continue
 			result = normalize(row,keys)
-			query = "REPLACE INTO sd_supradesa (id,region_code,flag,name,blog_agregate,username,password) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-			cur.execute(query,(result["id"],result["region_code"],result["flag"],result["name"],result["blog_agregate"],result["username"],result["password"]))
+			query = "REPLACE INTO sd_supradesa (id,region_code,flag,name,blog_agregate,username,password,zoom,latitude,longitude) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+			cur.execute(query,(result["id"],result["region_code"],result["flag"],result["name"],result["blog_agregate"],result["username"],result["password"],result["zoom"],result["latitude"],result["longitude"]))
 			mysql.connection.commit()
 		return jsonify({'success': True})
 	finally:
