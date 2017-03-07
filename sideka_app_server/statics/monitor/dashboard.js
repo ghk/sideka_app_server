@@ -295,10 +295,13 @@ function getStatistics(supradesa_id){
 function initMaps(supradesa_id){
 	var center = {lat:-2.604236, lng: 116.499023};
 	var zoom = 5
-	$.getJSON( "/api/get_zoom?supradesa_id="+supradesa_id, function(data){	
-		if(data.latitude != null && data.zoom!= null){
-			center = {lat:data.latitude, lng:data.longitude};
-			zoom = data.zoom;
+	var errorValue = [0,null]
+	$.getJSON( "/api/get_zoom?supradesa_id="+supradesa_id, function(data){		
+		if(!$.isEmptyObject(data)){
+			if(!errorValue.includes(data.latitude)&&!errorValue.includes(data.longitude)){	
+				center = {lat:data.latitude, lng:data.longitude};
+				zoom = data.zoom;
+			}
 		}
 		map = new google.maps.Map(document.getElementById('map'), {
 			zoom: zoom,
@@ -317,7 +320,7 @@ function addMarker(content,icon) {
 		map: map,
 		icon: host+pathImage
 	});
-
+	
 	var content = 'Domain: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
