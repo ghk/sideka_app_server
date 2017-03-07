@@ -1,17 +1,18 @@
 var header = ['Domain','Tahun','Pendapatan', 'Belanja', '# Baris','Last Modified' ];
 
-var getSubtype=function(data){
+function getSubtype(data){
 	var unique=[];
 	data.map(function(c){
 		if(unique.indexOf(c.subtype)==-1 && c.subtype != "null")unique.push(c.subtype);		
 	});
 	return unique.sort();
 }
-var currencyConvert = function (n, currency) {
+
+function currencyConvert(n, currency) {
     return currency + "\t " + n.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
 }
 
-var applyContent = function(data,subtypes){
+function applyContent(data,subtypes){
 	$("#years-apbdes >li").remove();
 	$("#content-apbdes >li").remove();
 
@@ -39,17 +40,19 @@ var applyContent = function(data,subtypes){
 	})	
 }
 
-var changeSelected = function(supradesa_id){
+function changeSelected(supradesa_id){
 	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesa_id, function(data){
 		var subtype = getSubtype(data)
 		applyContent(data,subtype)
 	});
 }
 
-
-changeSelected(hashUrl());
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
 	changeSelected(value)
 	changeUrl(value)
 });
+
+window.onload = function(){
+	changeSelected(hashUrl());
+}

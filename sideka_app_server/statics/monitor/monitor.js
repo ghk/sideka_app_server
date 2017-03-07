@@ -1,4 +1,4 @@
-var changeUrl = function(value){
+function changeUrl(value){
     var pathName = window.location.pathname;
     var host = window.location.origin;
     var newUrl = host+ pathName +"?id="+value;
@@ -14,7 +14,7 @@ var changeUrl = function(value){
     window.history.pushState(null, title, newUrl);
 }
 
-var hashUrl = function(){
+function hashUrl(){
     var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);  
     if (hashes.indexOf("#") > -1)hashes=hashes.substring(0,hashes.indexOf("#"));
     var hash = hashes.split('=');
@@ -23,7 +23,7 @@ var hashUrl = function(){
     return null;
 }
 
-var changeUrlMenu = function(supradesaId){
+function changeUrlMenu(supradesaId){
     var idMEnu = ["dashboard","data-quality","posts-statistic","apbdes-statistic"];
     var parser = document.createElement('a');
     var oldPath;    

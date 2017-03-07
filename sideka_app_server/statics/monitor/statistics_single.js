@@ -4,12 +4,6 @@ var  chartColors = {
     	yellow: 'rgb(255, 205, 86)',
 };
 
-var convertDate = function(date){
-  var value = new Date(date)
-  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear();
-}
-
 var config = {
     type: 'line',
     data: {
@@ -69,6 +63,12 @@ var config = {
     }
 };
 
+function convertDate(date){
+  var value = new Date(date)
+  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear();
+}
+
 function makeLinkRenderer(link, text){
 	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
 		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
@@ -76,7 +76,7 @@ function makeLinkRenderer(link, text){
 	}
 }
 
-var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+function scoreRenderer(instance, td, row, col, prop, value, cellProperties) {
 	var args = [instance, td, row, col, prop, value * 100, cellProperties];
 	var bg = "red";
 	var color = "white";
@@ -93,8 +93,6 @@ var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties
 	td.style.backgroundColor = bg;
 	td.style.color = color;
 };
-var convertDate
-
 
 window.onload = function() {  
     $('#info_desa').text('Desa '+info.desa+', Kecamatan '+info.kecamatan+', Kabupaten '+info.kabupaten)

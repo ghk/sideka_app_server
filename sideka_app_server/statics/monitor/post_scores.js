@@ -1,7 +1,7 @@
 var currentPage = 1;itemPerPage = 50; totalItems = 0; dataTables = [];
 var headers = ['Domain', 'Score', 'Title','#KBBi','#Kalimat','#Paragraph', '% Gambar Utama','% Title', '% Foto&Caption', '% KBBI', '% Kalimat', '% Paragraph', 'Tanggal']
 
-var applyHeader = function(){
+function applyHeader(){
 	var thead = $("#table-post-scores > thead");
 	var tr = $('<tr>')
 	$("tr",thead).remove();
@@ -11,7 +11,7 @@ var applyHeader = function(){
 	thead.append(tr);
 }
 
-var makeButtonScoring = function(score){
+function makeButtonScoring(score){
  	var classButton;
  	var buttonResult;
  	score *=100;
@@ -25,7 +25,8 @@ var makeButtonScoring = function(score){
  	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
  	return buttonResult;
 }
-var pagination = function(page){
+
+function pagination(page){
 	$("#pagination >ul").remove()
 	$("#pagination").pagination({
         items: page,
@@ -38,7 +39,7 @@ var pagination = function(page){
     });
 }
 
-var applyContent = function(data){	
+function applyContent(data){	
 	var tbody = $("#table-post-scores > tbody");
 	var tr = $('<tr>')
 
@@ -61,12 +62,14 @@ var applyContent = function(data){
 		tbody.append(tr);	
 	})
 }
-var getCountPost = function(supradesa_id){
+
+function getCountPost(supradesa_id){
 	$.getJSON("/api/count_post_scores?supradesa_id="+supradesa_id, function(data){
 		pagination(data)
 	});
 }
-var getPost = function(pageBegin, supradesa_id){
+
+function getPost(pageBegin, supradesa_id){
 	$.getJSON("/api/post_scores?pagebegin="+pageBegin+"&itemperpage="+itemPerPage+"&supradesa_id="+supradesa_id, function(data){
 		applyContent(data)
 	}); 	
@@ -79,8 +82,10 @@ $('#select-supradesa').change(function(){
 	changeUrl(value);
 });
 
-var supradesa_id = hashUrl()
-applyHeader();
-getCountPost(supradesa_id);
-getPost(1,supradesa_id)
+window.onload = function(){
+	var supradesa_id = hashUrl()
+	applyHeader();
+	getCountPost(supradesa_id);
+	getPost(1,supradesa_id)
+}
 

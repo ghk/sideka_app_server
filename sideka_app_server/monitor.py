@@ -260,5 +260,37 @@ def get_supradesa():
 	finally:
 		cur.close()
 
+@app.route('/api/panel_weekly')
+def get_weekly_panel():		
+	query_sd_desa = get_sd_desa_query(request.args)
+	cur = mysql.connection.cursor()
+	results= {}
+	weekly_apbdes = []
+	weekly_penduduk = []
+	weekly_posts = []
+	
+	def combine(row):
+		res = json.loads(row[1])
+		res.update(dict(blog_id = row[0],desa=row[2],kecamatan=row[3],kabupaten=row[4],propinsi=row[5]))
+		return res
+	try:
+		
+		post_query = "select distinct d.* from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL -1 WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL 0 WEEK);".format(query_sd_desa)
+		stats_query = "select s.blog_id, statistics, d.desa, d.kecamatan, d.kabupaten, d.propinsi from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL 0 WEEK);".format(query_sd_desa)
+		
+		cur.execute(post_query)
+		header = [column[0] for column in cur.description]
+		values = cur.fetchall()
+		results["post"] = list(dict(zip(header,value)) for value in values)		
+
+		cur.execute(stats_query)
+		stats = [combine(c) for c in cur.fetchall()]
+		results["penduduk"] =list(filter(lambda s: s["penduduk"]["score"] > 0.6, stats))
+		results["apbdes"]= list(filter(lambda s: s["apbdes"]["score"] > 0.6, stats))
+		
+		return jsonify(results)
+	finally:
+		cur.close()
+
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["MONITOR_PORT"])

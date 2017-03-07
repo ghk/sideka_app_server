@@ -1,28 +1,3 @@
-function makeLinkRenderer(link, text){
-	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
-		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
-		return td;
-	}
-}
-
-var scoreRenderer = function(instance, td, row, col, prop, value, cellProperties) {
-	var args = [instance, td, row, col, prop, value * 100, cellProperties];
-	var bg = "red";
-	var color = "white";
-	if (value > 0.4){
-		bg = "yellow";
-		color = "black";
-	}
-	if (value > 0.7){
-		bg = "green";
-		color = "white";
-	}
-
-	Handsontable.renderers.NumericRenderer.apply(this, args);
-	td.style.backgroundColor = bg;
-	td.style.color = color;
-};
-
 var columns = [
 		{
 	data: 'blog_id',
@@ -133,7 +108,34 @@ var columns = [
 columns.forEach(function(c) {
 	c.readOnly = true;
 });
-var changeSelected = function(supradesa_id){
+
+function makeLinkRenderer(link, text){
+	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
+		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
+		return td;
+	}
+}
+
+function scoreRenderer(instance, td, row, col, prop, value, cellProperties) {
+	var args = [instance, td, row, col, prop, value * 100, cellProperties];
+	var bg = "red";
+	var color = "white";
+	if (value > 0.4){
+		bg = "yellow";
+		color = "black";
+	}
+	if (value > 0.7){
+		bg = "green";
+		color = "white";
+	}
+
+	Handsontable.renderers.NumericRenderer.apply(this, args);
+	td.style.backgroundColor = bg;
+	td.style.color = color;
+};
+
+
+function changeSelected(supradesa_id){
 	$.getJSON("/api/statistics?supradesa_id="+supradesa_id, function(data){
 		var container = document.getElementById('sheet');
 
@@ -148,9 +150,13 @@ var changeSelected = function(supradesa_id){
 		setTimeout(function(){ hot.render() }, 0);
 	});	
 }
-changeSelected(hashUrl());
+
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
 	changeSelected(value) 
 	changeUrl(value) 
 });
+
+window.onload = function(){
+	changeSelected(hashUrl());
+}

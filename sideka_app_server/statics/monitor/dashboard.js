@@ -1,38 +1,3 @@
-var dataDashboard, chartsPeity = [];
-var map, markers = [], dataStatistics;
-var weekly = ["desa", "post", "penduduk", "apbdes"]
-var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
-
-var convertDate = function(data){
-	results = []
-	$.each(data,function(idx,timestamp){
-		results.push("")
-		if(idx%7 ==0 || idx == (data.length-1)){
-			results[idx] = (moment.unix(timestamp).format("DD MMM YYYY"));
-		}		
-	})
-	return results
-}
-
-var labels = function(){
-	var result = [];
-	for(var i=0;i<5;i++){	
-		result.push(moment().weekday(i*-7).format("DD MMM YYYY"))
-	}
-	result[0]="Hari Ini"
-	return result.reverse();
-}
-
-var getCtx = function(canvas){
-	if (canvas.getContext){
-		var ctx = canvas.getContext('2d');
-		ctx.fillStyle = 'black';
-		ctx.font = '26px Arial';
-		ctx.fillText('0', 0, 26);
-		return ctx
-	}
-}
-
 var configDaily = {
 	type: 'line',
 	data: {
@@ -55,10 +20,10 @@ var configDaily = {
 		xAxes: [{
 		display: true,
 		ticks: {
-          autoSkip: false,
-          maxRotation: 0,
-          minRotation: 0
-        }			
+		autoSkip: false,
+		maxRotation: 0,
+		minRotation: 0
+		}			
 		}],
 		yAxes: [{
 		display: true,
@@ -70,6 +35,7 @@ var configDaily = {
 	}
 	}
 };
+
 var configPanel = {
 	type: 'line',
 	data: {
@@ -109,6 +75,9 @@ var configPanel = {
 	}
 };
 
+var dataDashboard, dataStatistics, dataPanel = {}, map, markers = [], chartsPeity = [] ;
+var weekly = ["desa", "post", "penduduk", "apbdes"]
+var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var canvasDaily = document.getElementById('daily-graph');
 var dailyGraph = new Chart(getCtx(canvasDaily), configDaily);
 var canvasDesa = document.getElementById('desa-graph')
@@ -118,9 +87,39 @@ var apbdesGraph = new Chart(getCtx(canvasapbdes),configPanel)
 var canvasPost = document.getElementById('post-graph');
 var postGraph = new Chart(getCtx(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
-var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel)
+var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel);
+	
+function convertDate(data){
+	results = []
+	$.each(data,function(idx,timestamp){
+		results.push("")
+		if(idx%7 ==0 || idx == (data.length-1)){
+			results[idx] = (moment.unix(timestamp).format("DD MMM YYYY"));
+		}		
+	})
+	return results
+}
 
-var changeSelected = function(supradesa_id){
+function labels (){
+	var result = [];
+	for(var i=0;i<5;i++){	
+		result.push(moment().weekday(i*-7).format("DD MMM YYYY"))
+	}
+	result[0]="Hari Ini"
+	return result.reverse();
+}
+
+function getCtx (canvas){
+	if (canvas.getContext){
+		var ctx = canvas.getContext('2d');
+		ctx.fillStyle = 'black';
+		ctx.font = '26px Arial';
+		ctx.fillText('0', 0, 26);
+		return ctx
+	}
+}
+
+function changeSelected(supradesa_id){
 	$.getJSON("/api/dashboard?supradesa_id="+supradesa_id, function(data){
 		dataDashboard = data;	
 		if(chartsPeity.length === 0){
@@ -165,9 +164,12 @@ var changeSelected = function(supradesa_id){
 	});
 }
 
-var panelClicked = function(panel_clicked,data){
+function panelClicked(panel_clicked,data){
+	var header = ["No","Domain", "Desa", "Kecamatan", "Kabupaten","Provinsi"]
+	var thead;
+	var tbody;
 	switch(panel_clicked){
-		case "panel_desa":		
+		case "desa":		
 			desaGraph.data.datasets=[];
 			desaGraph.update();		
 
@@ -197,7 +199,7 @@ var panelClicked = function(panel_clicked,data){
 			})
 			desaGraph.update();
 			desaGraph.render();
-			var tbody = $('#table-domain-weekly tbody');
+			tbody = $('#table-domain-weekly tbody');
 			var week = labels().reverse();
 			$("tr",tbody).remove();
 
@@ -210,10 +212,9 @@ var panelClicked = function(panel_clicked,data){
 				tbody.append(tr);
 			})
 			break;
-		case "panel_post":
+		case "post":
 			postGraph.data.datasets = []			
-			postGraph.update();	
-							
+			postGraph.update();								
 			postGraph.data.datasets.push({
 				label: "Desa Berberita Seminggu",
 				backgroundColor: "#d84315",
@@ -223,8 +224,10 @@ var panelClicked = function(panel_clicked,data){
 				fill:false			
 			})
 			postGraph.update();
+			thead = $('#table-post-weekly thead');
+			tbody = $('#table-post-weekly tbody');
 			break;
-		case "panel_penduduk":
+		case "penduduk":
 			pendudukGraph.data.datasets = []			
 			pendudukGraph.update();					
 			pendudukGraph.data.datasets.push({
@@ -236,8 +239,10 @@ var panelClicked = function(panel_clicked,data){
 				fill:false						
 			})
 			pendudukGraph.update();
+			thead = $('#table-penduduk-weekly thead');
+			tbody = $('#table-penduduk-weekly tbody');
 			break;
-		case "panel_apbdes":
+		case "apbdes":
 			apbdesGraph.data.datasets = []			
 			apbdesGraph.update();						
 			apbdesGraph.data.datasets.push({
@@ -249,34 +254,34 @@ var panelClicked = function(panel_clicked,data){
 				fill:false					
 			})
 			apbdesGraph.update();
+			thead = $('#table-apbdes-weekly thead');
+			tbody = $('#table-apbdes-weekly tbody');
 			break;
 	}	
+	if(panel_clicked !=="desa"){
+		$("tr",thead).remove();
+		$("tr",tbody).remove();
+		var tr = $('<tr>')
+		$.each(header,function(idx,content){
+			$('<th>').html(content).appendTo(tr);
+		})		
+		thead.append(tr);	
+
+		$.each(data[panel_clicked],function(idx, content){
+			tr = $('<tr>');
+			$('<td>').html(idx+1).appendTo(tr);
+			$('<td>').append($('<a>').attr("href", content.url).text(content.domain)).appendTo(tr);
+			$('<td>').html(content.desa).appendTo(tr);
+			$('<td>').html(content.kecamatan).appendTo(tr);
+			$('<td>').html(content.kabupaten).appendTo(tr);
+			$('<td>').html(content.propinsi).appendTo(tr);
+			tbody.append(tr);
+		})	
+	}
 }
 
-$('#select-supradesa').change(function(){
-	var value = $(this).val();
-	changeSelected(value)
-	changeUrl(value)
-	deleteMarkers();	
-	getStatistics(hashUrl())
-});
-
-$('[id="panel-graph"]').click(function(){
-	var selected = $( "#select-supradesa option:selected" ).val();
-	var valuePanel = $(this).attr('value');
-	if (valuePanel == 'panel_desa'){
-		$.getJSON( "/api/domain_weekly?supradesa_id="+selected, function(data){
-			panelClicked(valuePanel,data)
-		})
-	}else{
-		panelClicked(valuePanel,"");
-	}
-});
-
-
-
 // Maps Configuration
-var getStatistics = function(supradesa_id){
+function getStatistics(supradesa_id){
 	initMaps();
 	$.getJSON('/api/statistics?supradesa_id='+supradesa_id, function(data){
 		var icon = "blog";
@@ -287,7 +292,7 @@ var getStatistics = function(supradesa_id){
 	})
 }
 
-var initMaps = function(){
+function initMaps(){
 	var center = {lat:-2.604236, lng: 116.499023};
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 5,
@@ -296,7 +301,7 @@ var initMaps = function(){
 	});	  
 }
 
-var addMarker = function (content,icon) {
+function addMarker(content,icon) {
 	var host = window.location.origin;
 	var pathImage = "/statics/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
 	var loc = {lat: content.latitude,lng:content.longitude}
@@ -320,7 +325,7 @@ var addMarker = function (content,icon) {
 	markers.push(marker);
 }
 
-var buttonScoreClicked = function(clicked){
+function buttonScoreClicked(clicked){
 	clearMarkers();
 	$.each(dataStatistics,function(idx, content){
 		if(content.latitude != null && content.longitude != null)addMarker(content,clicked);
@@ -328,30 +333,53 @@ var buttonScoreClicked = function(clicked){
 	
 }
 
-$('#button-score button').click(function(){
-	var value = $(this).val();
-	buttonScoreClicked(value)
-})
-
-var setMapOnAll = function(map) {
+function setMapOnAll(map) {
   for (var i = 0; i < markers.length; i++) {
     markers[i].setMap(map);
   }
 }
 
-var clearMarkers = function() {
+function clearMarkers() {
   setMapOnAll(null);
 }
 
-// Shows any markers currently in the array.
-var showMarkers =function() {
-  setMapOnAll(map);
-}
-
-var deleteMarkers =function() {
+function deleteMarkers() {
   clearMarkers();
   markers = [];
 }
+
+$('#button-score button').click(function(){
+	var value = $(this).val();
+	buttonScoreClicked(value)
+})
+
+$('#select-supradesa').change(function(){
+	var value = $(this).val();
+	changeSelected(value)
+	changeUrl(value)
+	deleteMarkers();	
+	getStatistics(hashUrl())
+	dataPanel = {};
+});
+
+$('[id="panel-graph"]').click(function(){
+	var selected = $( "#select-supradesa option:selected" ).val();
+	var valuePanel = $(this).attr('value');
+	if (valuePanel == 'desa'){
+		$.getJSON( "/api/domain_weekly?supradesa_id="+selected, function(data){
+			panelClicked(valuePanel,data)
+		})
+	}else{
+		if($.isEmptyObject(dataPanel)){
+			$.getJSON( "/api/panel_weekly?supradesa_id="+selected, function(data){
+				dataPanel = data;
+				panelClicked(valuePanel,data)
+			})
+		}else{
+			panelClicked(valuePanel,dataPanel)
+		}
+	}
+});
 
 window.onload = function(){
 	changeSelected(hashUrl())

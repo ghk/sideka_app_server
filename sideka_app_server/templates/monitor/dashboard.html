@@ -4,7 +4,7 @@
 	<div id="weekly-desa" class="uk-row-first" style="">
 		<div class="md-card md-card-fullscreen-activate">
 			<div class="md-card-fullscreen-hide">
-				<div class="md-card-content" id="panel-graph" value="panel_desa">
+				<div class="md-card-content" id="panel-graph" value="desa">
 					<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
 					<span class="uk-text-muted uk-text-small">Desa Terdaftar</span>
 					<h2 class="uk-margin-remove"><span class="count"></span></h2>
@@ -36,7 +36,7 @@
 	<div id="weekly-post" style="" >
 	    <div class="md-card md-card-fullscreen-activate">
 			<div class="md-card-fullscreen-hide">
-				<div class="md-card-content" id="panel-graph" value="panel_post">
+				<div class="md-card-content" id="panel-graph" value="post">
 					<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
 					<span class="uk-text-muted uk-text-small">Desa Berberita Seminggu</span>
 					<h2 class="uk-margin-remove"><span class="count"></span></h2>
@@ -47,14 +47,21 @@
 				<div style="height:400px;width:100%">
 					<canvas id="post-graph"></canvas>
 				</div>
-
+				<div class="uk-overflow-container uk-margin-large-top">					
+					<table class="uk-table uk-text-nowrap uk-table-hover" id ="table-post-weekly">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
 			</div>
 	    </div>
 	</div>
 	<div id="weekly-penduduk" style="">
 	    <div class="md-card md-card-fullscreen-activate">
 			<div class="md-card-fullscreen-hide">
-				<div class="md-card-content" id="panel-graph" value="panel_penduduk">
+				<div class="md-card-content" id="panel-graph" value="penduduk">
 					<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
 					<span class="uk-text-muted uk-text-small">Desa Berdata Kependudukan</span>
 					<h2 class="uk-margin-remove"><span class="count"></span></h2>					
@@ -65,13 +72,21 @@
 				<div style="height:400px;width:100%">
 					<canvas id="penduduk-graph"></canvas>
 				</div>
+				<div class="uk-overflow-container uk-margin-large-top">					
+					<table class="uk-table uk-text-nowrap uk-table-hover" id ="table-penduduk-weekly">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
 			</div>
 	    </div>
 	</div>
 	<div id="weekly-apbdes" style="">
 	    <div class="md-card md-card-fullscreen-activate">
 			<div class="md-card-fullscreen-hide">
-				<div class="md-card-content" id="panel-graph" value="panel_apbdes">
+				<div class="md-card-content" id="panel-graph" value="apbdes">
 					<div class="uk-float-right uk-margin-top uk-margin-small-right"><span class="peity"></span></div>
 					<span class="uk-text-muted uk-text-small">Desa Berdata Keuangan</span>
 					<h2 class="uk-margin-remove"><span class="count"></span></h2>
@@ -81,6 +96,14 @@
 				<h4 class="heading_a uk-margin-bottom">Desa Berdata Keuangan</h4>
 				<div style="height:400px;width:100%">
 					<canvas id="apbdes-graph"></canvas>
+				</div>
+				<div class="uk-overflow-container uk-margin-large-top">					
+					<table class="uk-table uk-text-nowrap uk-table-hover" id ="table-apbdes-weekly">
+						<thead>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
 				</div>
 			</div>
 	    </div>
