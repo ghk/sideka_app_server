@@ -285,7 +285,7 @@ function getStatistics(supradesa_id){
 	initMaps(supradesa_id);
 	$.getJSON('/api/statistics?supradesa_id='+supradesa_id, function(data){
 		var icon = "blog";
-		dataStatistics = data;	
+		dataStatistics = data;
 		$.each(data,function(idx,content){
 			if(content.latitude != null &&content.longitude)addMarker(content,icon);
 		})	
@@ -306,6 +306,7 @@ function initMaps(supradesa_id){
 		map = new google.maps.Map(document.getElementById('map'), {
 			zoom: zoom,
 			center: center,
+			mapTypeControl: false,
 			mapTypeId: google.maps.MapTypeId.TERRAIN
 		});	
 	})	  
@@ -320,7 +321,7 @@ function addMarker(content,icon) {
 		map: map,
 		icon: host+pathImage
 	});
-	
+
 	var content = 'Domain: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
@@ -338,9 +339,32 @@ function addMarker(content,icon) {
 function buttonScoreClicked(clicked){
 	clearMarkers();
 	$.each(dataStatistics,function(idx, content){
-		if(content.latitude != null && content.longitude != null)addMarker(content,clicked);
-	})
-	
+		if(content.latitude != null && content.longitude != null)
+			addMarker(content,clicked);
+	})	
+}
+
+function applyTableInMaps(buttonClicked){
+	var header= ["No","Domain", "Score"];
+	var thead = $('#table-score-maps thead');
+	var tbody = $('#table-score-maps tbody');
+	var newData = dataStatistics.sort(function(data1,data2){ return data2[buttonClicked].score - data1[buttonClicked].score})
+	var tr = $('<tr>')
+	$("tr", thead).remove();
+	$("tr", tbody).remove();
+
+	$.each(header,function(idx,content){
+		$('<th>').html(content).appendTo(tr);
+	})		
+	thead.append(tr);
+
+	$.each(newData,function(idx, content){
+		tr = $('<tr>');
+		$('<td>').html(idx+1).appendTo(tr);
+		$('<td>').append($('<a>').attr("href", content.url).text(content.domain)).appendTo(tr);
+		$('<td>').html((content[buttonClicked].score*100).toFixed()).appendTo(tr);
+		tbody.append(tr);
+	});
 }
 
 function setMapOnAll(map) {
@@ -361,6 +385,7 @@ function deleteMarkers() {
 $('#button-score button').click(function(){
 	var value = $(this).val();
 	buttonScoreClicked(value)
+	applyTableInMaps(value);
 })
 
 $('#select-supradesa').change(function(){
@@ -370,6 +395,10 @@ $('#select-supradesa').change(function(){
 	deleteMarkers();
 	getStatistics(value)	
 	dataPanel = {};	
+});
+$('#fullscreen-maps').click(function(){
+	var buttonActive = $("#button-score .uk-active" ).val();
+	applyTableInMaps(buttonActive);
 });
 
 $('[id="panel-graph"]').click(function(){
