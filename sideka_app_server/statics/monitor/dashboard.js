@@ -1,4 +1,4 @@
-var dataDashboard, dataStatistics, dataPanel = {}, map, markers = [], chartsPeity = [] ;
+var dataDashboard, dataStatistics, cachedPanelData = {}, map, markers = [], chartsPeity = [] ;
 var weekly = ["desa", "post", "penduduk", "apbdes"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var width = $(window).width();
@@ -45,7 +45,7 @@ var configDaily = {
 };
 var configPanel = $.extend(true, {}, configDaily);
 configPanel.type = "bar";
-configPanel.data.labels = labels().reverse();
+configPanel.data.labels = getPanelDetailLabels().reverse();
 configPanel.options.scales.yAxes[0]["ticks"] ={beginAtZero: true}
 configPanel.options.scales.yAxes[0].scaleLabel.labelString = "Jumlah Desa"
 
@@ -60,7 +60,7 @@ var postGraph = new Chart(getContext(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
 var pendudukGraph = new Chart(getContext(canvasPenduduk),configPanel);
 	
-function convertDate(data){
+function convertDailyGraphDate(data){
 	return data.map(function(timestamp, idx){
 		if(idx%7 ==0 || idx == (data.length-1)){
 			return moment.unix(timestamp).format("DD MMM YYYY");
@@ -69,7 +69,7 @@ function convertDate(data){
 	});
 }
 
-function labels (){
+function getPanelDetailLabels (){
 	var result = [];
 	for(var i=0;i<5;i++){	
 		result.push(moment().weekday(i*-7).format("DD MMM YYYY"))
@@ -88,7 +88,7 @@ function getContext (canvas){
 	}
 }
 
-function changeSelected(supradesaId){
+function onSupradesaChanged(supradesaId){
 	$.getJSON("/api/dashboard?supradesa_id="+supradesaId, function(data){
 		dataDashboard = data;	
 		if(chartsPeity.length === 0){
@@ -109,7 +109,7 @@ function changeSelected(supradesaId){
 		dailyGraph.data.datasets = [];
 		dailyGraph.update();
 
-		dailyGraph.data.labels = convertDate(data.daily.label);
+		dailyGraph.data.labels = convertDailyGraphDate(data.daily.label);
 		dailyGraph.data.datasets.push({
 				label: "Berita Harian",
 				backgroundColor: fill[1],
@@ -135,11 +135,11 @@ function changeSelected(supradesaId){
 	
 }
 
-function panelClicked(panel_clicked,data){
+function onPanelClicked(panelName,data){
 	var header = ["No","Desa","Domain", "Kecamatan", "Kabupaten","Provinsi"];
 	var thead;
 	var tbody;
-	switch(panel_clicked){
+	switch(panelName){
 		case "desa":		
 			var newData = $.extend(true, {}, data);
 			desaGraph.data.datasets=[];
@@ -174,7 +174,7 @@ function panelClicked(panel_clicked,data){
 
 			var header = ['Minggu','Desa Berdomain "sideka.id"','Desa Berdomain "desa.id"','Jumlah Desa']			
 			var length = data.sideka_domain.length;
-			var week = labels();
+			var week = getPanelDetailLabels();
 			var tbody = $('#table-domain-weekly tbody')
 			var thead = $('#table-domain-weekly thead')	
 			applyTableHeader(header,thead);	
@@ -234,13 +234,13 @@ function panelClicked(panel_clicked,data){
 			tbody = $('#table-apbdes-weekly tbody');
 			break;
 	}	
-	if(panel_clicked !=="desa"){
+	if(panelName !=="desa"){
 		$("tr",thead).remove();
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);	
 
-		$.each(data[panel_clicked],function(idx, content){
+		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
 			$('<td>').html(content.desa).appendTo(tr);
@@ -425,11 +425,11 @@ $('#button-score button').click(function(){
 
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	changeSelected(value)
+	onSupradesaChanged(value)
 	changeUrl(value)	
 	deleteMarkers();
 	getStatistics(value)	
-	dataPanel = {};	
+	cachedPanelData = {};	
 });
 $('#fullscreen-maps').click(function(){
 	var buttonActive = $("#button-score .uk-active" ).val();
@@ -438,19 +438,19 @@ $('#fullscreen-maps').click(function(){
 
 $('[id="panel-graph"]').click(function(){
 	var supradesaId = $( "#select-supradesa option:selected").val();
-	var valuePanel = $(this).attr('value');
-	if (valuePanel == 'desa'){
+	var panelName = $(this).attr('value');
+	if (panelName == 'desa'){
 		$.getJSON( "/api/domain_weekly?supradesa_id="+supradesaId, function(data){
-			panelClicked(valuePanel,data)
+			onPanelClicked(panelName, data);
 		})
 	}else{
-		if($.isEmptyObject(dataPanel)){
+		if($.isEmptyObject(cachedPanelData)){
 			$.getJSON( "/api/panel_weekly?supradesa_id="+supradesaId, function(data){
-				dataPanel = data;
-				panelClicked(valuePanel,data)
+				cachedPanelData = data;
+				onPanelClicked(panelName,data);
 			})
 		}else{
-			panelClicked(valuePanel,dataPanel)
+			onPanelClicked(panelName, cachedPanelData);
 		}
 	}
 });
@@ -464,7 +464,7 @@ $(window).on('resize', function(){
 });
 
 window.onload = function(){
-	changeSelected(hashUrl());
+	onSupradesaChanged(hashUrl());
 	getStatistics(hashUrl());	
 }
 
