@@ -1,6 +1,10 @@
 var dataDashboard, dataStatistics, dataPanel = {}, map, markers = [], chartsPeity = [] ;
 var weekly = ["desa", "post", "penduduk", "apbdes"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
+var width = $(window).width();
+var tempData={};
+var tempLabels;
+var tempDatasets;
 
 var configDaily = {
 	type: 'line',
@@ -128,7 +132,9 @@ function changeSelected(supradesaId){
 				data: data.daily.apbdes,
 			})
 		dailyGraph.update();
+		updateDailyGraph(width);
 	});
+	
 }
 
 function panelClicked(panel_clicked,data){
@@ -371,7 +377,47 @@ function applyTableHeader(header,thead){
 	})		
 	thead.append(tr);
 }
+function updateDailyGraph(widthCurrent){	
+	if($.isEmptyObject(tempData))tempData = $.extend(true, {}, dailyGraph.data);
+	var startSlice;
+	var endSlice =  tempData.labels.length;
 
+	dailyGraph.data.labels = [];
+	dailyGraph.data.datasets = [];
+	dailyGraph.update();
+	
+	if(widthCurrent <= 320){		
+		startSlice = tempData.labels.length - 10;
+		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
+		$.each(tempData.datasets,function(idx,dataset){
+			var temp = $.extend(true, {}, dataset)
+			temp.data = temp.data.slice(startSlice,endSlice)
+			dailyGraph.data.datasets.push(temp)
+		})			
+	}else if(widthCurrent < 600){		
+		startSlice = tempData.labels.length - 15;
+		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
+		$.each(tempData.datasets,function(idx,dataset){
+			var temp = $.extend(true, {}, dataset)
+			temp.data = temp.data.slice(startSlice,endSlice)
+			dailyGraph.data.datasets.push(temp)
+		})			
+	}else if(widthCurrent >=600 && widthCurrent <=900){	
+		startSlice = tempData.labels.length - 35;
+		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
+		$.each(tempData.datasets,function(idx,dataset){
+			var temp = $.extend(true, {}, dataset)
+			temp.data = temp.data.slice(startSlice,endSlice)
+			dailyGraph.data.datasets.push(temp)
+		})			
+	}else{
+		dailyGraph.data.labels = tempData.labels;
+		$.each(tempData.datasets,function(idx,dataset){
+			dailyGraph.data.datasets.push(dataset)
+		})
+	}	
+	dailyGraph.update();
+}
 
 $('#button-score button').click(function(){
 	var value = $(this).val();
@@ -393,7 +439,7 @@ $('#fullscreen-maps').click(function(){
 });
 
 $('[id="panel-graph"]').click(function(){
-	var supradesaId = $( "#select-supradesa option:selected" ).val();
+	var supradesaId = $( "#select-supradesa option:selected").val();
 	var valuePanel = $(this).attr('value');
 	if (valuePanel == 'desa'){
 		$.getJSON( "/api/domain_weekly?supradesa_id="+supradesaId, function(data){
@@ -411,7 +457,16 @@ $('[id="panel-graph"]').click(function(){
 	}
 });
 
+
+$(window).on('resize', function(){
+	if($(this).width() != width){
+		width = $(this).width();
+		updateDailyGraph(width)
+	}
+});
+
 window.onload = function(){
-	changeSelected(hashUrl())
-	getStatistics(hashUrl())
+	changeSelected(hashUrl());
+	getStatistics(hashUrl());	
 }
+
