@@ -69,30 +69,20 @@ function convertDate(date){
   return value.getDate() + " " + monthNames[value.getMonth()] + " " + value.getFullYear();
 }
 
-function makeLinkRenderer(link, text){
-	return function linkRenderer(instance, td, row, col, prop, value, cellProperties) {
-		td.innerHTML = "<a href='"+link(value)+"'>"+text(value)+"</a>";
-		return td;
-	}
+function makeButtonScoring(score){
+ 	var classButton;
+ 	var buttonResult;
+ 	score *=100;
+ 	
+ 	if(score < 40)
+ 		classButton= 'uk-badge uk-badge-danger';
+ 	else if(score < 70) 
+ 		classButton ='uk-badge uk-badge-warning'; 
+ 	else
+ 		classButton ='uk-badge uk-badge-success';
+ 	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
+ 	return buttonResult;
 }
-
-function scoreRenderer(instance, td, row, col, prop, value, cellProperties) {
-	var args = [instance, td, row, col, prop, value * 100, cellProperties];
-	var bg = "red";
-	var color = "white";
-	if (value > 0.4){
-		bg = "yellow";
-		color = "black";
-	}
-	if (value > 0.7){
-		bg = "green";
-		color = "white";
-	}
-
-	Handsontable.renderers.NumericRenderer.apply(this, args);
-	td.style.backgroundColor = bg;
-	td.style.color = color;
-};
 
 window.onload = function() {  
     $('#info_desa').text('Desa '+info.desa+', Kecamatan '+info.kecamatan+', Kabupaten '+info.kabupaten)
@@ -110,9 +100,9 @@ window.onload = function() {
     $.each(content_daily,function(idx,content){
         var tr = $('<tr>');
         $('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
-        $('<td>').html(content.blog.score.toFixed(2)).appendTo(tr);
-        $('<td>').html(content.penduduk.score.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.apbdes.score.toFixed(2)).appendTo(tr)
+        $('<td>').html(makeButtonScoring(content.blog.score)).appendTo(tr);
+        $('<td>').html(makeButtonScoring(content.penduduk.score)).appendTo(tr)
+        $('<td>').html(makeButtonScoring(content.apbdes.score)).appendTo(tr)
         $('<td>').html(content.blog.score_quality.toFixed(2)).appendTo(tr)
         $('<td>').html(content.blog.score_frequency.toFixed(2)).appendTo(tr)
         $('<td>').html(content.penduduk.score_quality.toFixed(2)).appendTo(tr)
@@ -135,8 +125,8 @@ window.onload = function() {
         var tr = $('<tr>');
         $('<td>').html(convertDate(content.date)).appendTo(tr);
         $('<td>').html('<a href="http://'+content.domain+'">'+content.domain+'</a>').appendTo(tr);
-        $('<td>').html('<a href="'+content.url+'">'+content.title+'</a>').appendTo(tr)
-        $('<td>').html((content.score*100).toFixed(2)).appendTo(tr)
+        $('<td>').html('<a href="'+content.url+'">'+content.title.substring(0,50)+'</a>').appendTo(tr)
+        $('<td>').html(makeButtonScoring(content.score)).appendTo(tr)
         $('<td>').html(content.kbbi).appendTo(tr)
         $('<td>').html(content.sentences).appendTo(tr)
         $('<td>').html(content.paragraphs).appendTo(tr)
