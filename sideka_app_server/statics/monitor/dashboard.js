@@ -133,6 +133,9 @@ function onSupradesaChanged(supradesaId){
 		updateDailyGraph(width);
 	});
 	
+	deleteMarkers();
+	getStatistics(value);
+	cachedPanelData = {};	
 }
 
 function onPanelClicked(panelName,data){
@@ -310,12 +313,13 @@ function addMarker(content,icon) {
 	markers.push(marker);
 }
 
-function buttonScoreClicked(clicked){
+function onButtonScoreClicked(buttonName){
 	clearMarkers();
 	$.each(dataStatistics,function(idx, content){
 		if(content.latitude != null && content.longitude != null)
-			addMarker(content,clicked);
+			addMarker(content,buttonName);
 	})	
+	applyTableInMaps(buttonName);
 }
 
 function applyTableInMaps(buttonClicked){
@@ -336,14 +340,10 @@ function applyTableInMaps(buttonClicked){
 	});
 }
 
-function setMapOnAll(map) {
+function clearMarkers() {
   for (var i = 0; i < markers.length; i++) {
     markers[i].setMap(map);
   }
-}
-
-function clearMarkers() {
-  setMapOnAll(null);
 }
 
 function deleteMarkers() {
@@ -419,18 +419,15 @@ function updateDailyGraph(widthCurrent){
 
 $('#button-score button').click(function(){
 	var value = $(this).val();
-	buttonScoreClicked(value)
-	applyTableInMaps(value);
+	onButtonScoreClicked(value)
 })
 
 $('#select-supradesa').change(function(){
 	var value = $(this).val();
-	onSupradesaChanged(value)
 	changeUrl(value)	
-	deleteMarkers();
-	getStatistics(value)	
-	cachedPanelData = {};	
+	onSupradesaChanged(value)
 });
+
 $('#fullscreen-maps').click(function(){
 	var buttonActive = $("#button-score .uk-active" ).val();
 	applyTableInMaps(buttonActive);
@@ -465,6 +462,5 @@ $(window).on('resize', function(){
 
 window.onload = function(){
 	onSupradesaChanged(hashUrl());
-	getStatistics(hashUrl());	
 }
 
