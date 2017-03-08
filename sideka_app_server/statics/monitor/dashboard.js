@@ -50,25 +50,23 @@ configPanel.options.scales.yAxes[0]["ticks"] ={beginAtZero: true}
 configPanel.options.scales.yAxes[0].scaleLabel.labelString = "Jumlah Desa"
 
 var canvasDaily = document.getElementById('daily-graph');
-var dailyGraph = new Chart(getCtx(canvasDaily), configDaily);
+var dailyGraph = new Chart(getContext(canvasDaily), configDaily);
 var canvasDesa = document.getElementById('desa-graph')
-var desaGraph = new Chart(getCtx(canvasDesa),configPanel)
+var desaGraph = new Chart(getContext(canvasDesa),configPanel)
 var canvasapbdes = document.getElementById('apbdes-graph');
-var apbdesGraph = new Chart(getCtx(canvasapbdes),configPanel)
+var apbdesGraph = new Chart(getContext(canvasapbdes),configPanel)
 var canvasPost = document.getElementById('post-graph');
-var postGraph = new Chart(getCtx(canvasPost),configPanel)
+var postGraph = new Chart(getContext(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
-var pendudukGraph = new Chart(getCtx(canvasPenduduk),configPanel);
+var pendudukGraph = new Chart(getContext(canvasPenduduk),configPanel);
 	
 function convertDate(data){
-	results = []
-	$.each(data,function(idx,timestamp){
-		results.push("")
+	return data.map(function(timestamp, idx){
 		if(idx%7 ==0 || idx == (data.length-1)){
-			results[idx] = (moment.unix(timestamp).format("DD MMM YYYY"));
+			return moment.unix(timestamp).format("DD MMM YYYY");
 		}		
-	})
-	return results
+		return "";
+	});
 }
 
 function labels (){
@@ -80,7 +78,7 @@ function labels (){
 	return result;
 }
 
-function getCtx (canvas){
+function getContext (canvas){
 	if (canvas.getContext){
 		var ctx = canvas.getContext('2d');
 		ctx.fillStyle = 'black';
