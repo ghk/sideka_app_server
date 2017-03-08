@@ -438,7 +438,7 @@ $('#fullscreen-maps').click(function(){
 
 $('[id="panel-graph"]').click(function(){
 	var supradesaId = $( "#select-supradesa option:selected").val();
-	var panelName = $(this).attr('value');
+	var panelName = $(this).attr('data-panel-name');
 	if (panelName == 'desa'){
 		$.getJSON( "/api/domain_weekly?supradesa_id="+supradesaId, function(data){
 			onPanelClicked(panelName, data);
