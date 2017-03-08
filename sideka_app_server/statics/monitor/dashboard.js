@@ -134,7 +134,7 @@ function onSupradesaChanged(supradesaId){
 	});
 	
 	deleteMarkers();
-	getStatistics(value);
+	getStatistics(supradesaId);
 	cachedPanelData = {};	
 }
 
