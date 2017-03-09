@@ -150,32 +150,31 @@ function onPanelClicked(panelName,data){
 			desaGraph.update();		
 
 			desaGraph.data.datasets.push({
+				label: 'Desa Berdomain "desa.id"',
+				type: 'line',
+				backgroundColor: "#9900cc",
+				borderColor: "#9900cc",
+				data: newData.desa_domain.reverse(),
+				fill:false
+				
+			},{
+				label: 'Desa Berdomain "sideka.id"',
+				type: 'line',
+				borderColor: "#ffbb33",
+				backgroundColor: "#ffbb33",
+				data: newData.sideka_domain.reverse(),
+				fill:false
+			},{
 				label: 'Desa Terdaftar',
 				backgroundColor: "#8bc34a",
 				borderColor: "#8bc34a",
 				borderWidth: 1,
 				data: dataDashboard["weekly"]["desa"],
 				fill:false
-				
-			},{
-				label: 'Desa Berdomain "desa.id"',
-				backgroundColor: "#9900cc",
-				borderColor: "#9900cc",
-				borderWidth: 1,
-				data: newData.desa_domain.reverse(),
-				fill:false
-				
-			},{
-				label: 'Desa Berdomain "sideka.id"',
-				backgroundColor: "#ffbb33",
-				borderColor: "#ffbb33",
-				data: newData.sideka_domain.reverse(),
-				borderWidth: 1,
-				fill:false
 			})
 			desaGraph.update();
 
-			var header = ['Minggu','Desa Berdomain "sideka.id"','Desa Berdomain "desa.id"','Jumlah Desa']			
+			var header = ['Minggu','Desa Berdomain "sideka.id"','Desa Berdomain "desa.id"','Desa Terdaftar']			
 			var length = data.sideka_domain.length;
 			var week = getPanelDetailLabels();
 			var tbody = $('#table-domain-weekly tbody')
