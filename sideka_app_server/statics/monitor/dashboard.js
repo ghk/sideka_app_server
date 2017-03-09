@@ -241,9 +241,8 @@ function onPanelClicked(panelName,data){
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);
-		data[panelName].reverse(c=>c.propinsi!=null)	
 		data[panelName].sort((a,b)=>{			
-			return (a.propinsi==null&&b.propinsi==null) ? 1 : ((b.propinsi==null && a.propinsi!=null) ? -1 : ((a.propinsi!=null && b.propinsi==null) ?-1:(((a.propinsi > b.propinsi) ? 1 : ((b.propinsi > a.propinsi) ? -1 : 0)))));
+			return (a.propinsi==null&&b.propinsi==null) ? 1 : ((b.propinsi==null && a.propinsi!=null) ? -1 : ((a.propinsi==null && b.propinsi!=null) ?1:(((a.propinsi > b.propinsi) ? 1 : ((b.propinsi > a.propinsi) ? -1 : 0)))));
 		})
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
