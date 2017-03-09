@@ -154,7 +154,7 @@ span.ellipse.clickable {
 	border: 1px solid #AAA;
 	border-left: none;
 	min-width: 14px;
-	padding: 0 7px;
+	padding: 0  7px;
 	box-shadow: 2px 2px 2px rgba(0,0,0,0.2);
 	background: #efefef; /* Old browsers */
 	background: -moz-linear-gradient(top, #ffffff 0%, #efefef 100%); /* FF3.6+ */
@@ -296,4 +296,25 @@ span.ellipse.clickable {
 	box-shadow: none;
 	font-weight: bold;
 	cursor: default;
+}
+
+@media only screen 
+and (min-device-width : 320px)
+and (max-device-width : 480px) {
+	.switch-score select {
+		display: block;
+	}
+	.switch-score h3 {
+		display: none;
+	}
+}
+
+@media only screen 
+and (min-device-width : 768px) {
+	.switch-score select {
+		display: none;
+	}
+	.switch-score h3 {
+		display: block;
+	}
 }

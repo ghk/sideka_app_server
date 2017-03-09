@@ -25,9 +25,9 @@ var configDaily = {
 			xAxes: [{
 			display: true,
 			ticks: {
-			autoSkip: false,
-			maxRotation: 0,
-			minRotation: 0
+				autoSkip: false,
+				maxRotation: 0,
+				minRotation: 0
 			}			
 			}],
 			yAxes: [{
@@ -45,6 +45,7 @@ configPanel.type = "bar";
 configPanel.data.labels = getPanelDetailLabels().reverse();
 configPanel.options.scales.yAxes[0]["ticks"] ={beginAtZero: true}
 configPanel.options.scales.yAxes[0].scaleLabel.labelString = "Jumlah Desa"
+delete configPanel.options.scales.xAxes[0]["ticks"]
 
 var canvasDaily = document.getElementById('daily-graph');
 var dailyGraph = new Chart(getContext(canvasDaily), configDaily);
@@ -139,7 +140,7 @@ function onSupradesaChanged(supradesaId){
 }
 
 function onPanelClicked(panelName,data){
-	var header = ["No","Desa","Domain", "Kecamatan", "Kabupaten","Provinsi"];
+	var header = ["No","Desa","Domain","Provinsi","Kabupaten","Kecamatan"];
 	var thead;
 	var tbody;
 	switch(panelName){
@@ -241,15 +242,16 @@ function onPanelClicked(panelName,data){
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);	
-
+		data[panelName].sort(c=>c.propinsi)
+		data[panelName].reverse(c=>c.propinsi)
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
 			$('<td>').html(content.desa).appendTo(tr);
 			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.domain)).appendTo(tr);			
-			$('<td>').html(content.kecamatan).appendTo(tr);
-			$('<td>').html(content.kabupaten).appendTo(tr);
 			$('<td>').html(content.propinsi).appendTo(tr);
+			$('<td>').html(content.kabupaten).appendTo(tr);					
+			$('<td>').html(content.kecamatan).appendTo(tr);
 			tbody.append(tr);
 		})	
 	}
@@ -404,10 +406,9 @@ $('#button-score button').click(function(){
 	onButtonScoreClicked(value)
 })
 
-$('#select-supradesa').change(function(){
+$('.switch-score select').change(function(){
 	var value = $(this).val();
-	changeUrl(value)	
-	onSupradesaChanged(value)
+	onButtonScoreClicked(value)
 });
 
 $('#fullscreen-maps').click(function(){

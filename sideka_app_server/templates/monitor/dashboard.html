@@ -111,14 +111,23 @@
 				<div class="md-card-toolbar-actions">                    
 					<i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed" id="fullscreen-maps">&#xE5D0;</i>
 				</div>
-				<h3 class="md-card-toolbar-heading-text">
-					<div data-uk-button-radio="{target:'.md-btn'}" id="button-score">
-						Kualitas Data: &nbsp; &nbsp; &nbsp;
-						<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave uk-active" value="blog">Berita</button>
-						<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" value="penduduk">Kependudukan</button>
-						<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" value="apbdes">Keuangan</button>
-					</div>
-				</h3>
+				<div class="md-card-toolbar-actions-left switch-score">
+					<h3 class="md-card-toolbar-heading-text">
+						<div data-uk-button-radio="{target:'.md-btn'}" id="button-score">
+							Kualitas Data: &nbsp; &nbsp; &nbsp;
+							<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave uk-active" value="blog">Berita</button>
+							<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" value="penduduk">Kependudukan</button>
+							<button class="md-btn md-btn-flat md-btn-flat-primary md-btn-wave" value="apbdes">Keuangan</button>
+						</div>
+					</h3>
+				</div>
+				<form class="uk-form switch-score">
+					<select class="uk-form-width-medium" style="margin:10px; padding: 5px; background-color: #fff;">
+						<option value="blog">Berita</option>
+						<option value="penduduk">Kependudukan</option>
+						<option value="apbdes">Keuangan</option>
+					</select>  
+				</form>
 			</div>
 			<div class="md-card-content">
 				<div class="mGraph-wrapper">
