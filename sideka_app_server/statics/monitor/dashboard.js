@@ -237,18 +237,16 @@ function onPanelClicked(panelName,data){
 			break;
 	}	
 	if(panelName !=="desa"){
-		$("tr",thead).remove();
+		$("tr",thead).remove() ;
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);
-		data[panelName].sort((a,b)=>{			
-			return (a.propinsi==null&&b.propinsi==null) ? 1 : ((b.propinsi==null && a.propinsi!=null) ? -1 : ((a.propinsi==null && b.propinsi!=null) ?1:(((a.propinsi > b.propinsi) ? 1 : ((b.propinsi > a.propinsi) ? -1 : 0)))));
-		})
+		data[panelName].sort((a,b)=>{return (a.kode > b.kode) ? 1 : ((b.kode > a.kode) ? -1 : 0);})
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
 			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa)).appendTo(tr);
-			$('<td>').append($('<a>').attr("href", "http://"+content.domain).text(content.domain)).appendTo(tr);			
+			$('<td>').append($('<a>').attr("href", "http://"+content.domain).text(content.domain)).appendTo(tr);	
 			$('<td>').html(content.propinsi).appendTo(tr);
 			$('<td>').html(content.kabupaten).appendTo(tr);					
 			$('<td>').html(content.kecamatan).appendTo(tr);

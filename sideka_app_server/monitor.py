@@ -288,12 +288,12 @@ def get_weekly_panel():
 	
 	def combine(row):
 		res = json.loads(row[1])
-		res.update(dict(blog_id = row[0],desa=row[2],kecamatan=row[3],kabupaten=row[4],propinsi=row[5]))
+		res.update(dict(blog_id = row[0],desa=row[2],kecamatan=row[3],kabupaten=row[4],propinsi=row[5],kode=[row[6]]))
 		return res
 	try:
 		
 		post_query = "select distinct d.* from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL -1 WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL 0 WEEK);".format(query_sd_desa)
-		stats_query = "select s.blog_id, statistics, d.desa, d.kecamatan, d.kabupaten, d.propinsi from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL 0 WEEK);".format(query_sd_desa)
+		stats_query = "select s.blog_id, statistics, d.desa, d.kecamatan, d.kabupaten, d.propinsi,d.kode from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL 0 WEEK);".format(query_sd_desa)
 		
 		cur.execute(post_query)
 		header = [column[0] for column in cur.description]
