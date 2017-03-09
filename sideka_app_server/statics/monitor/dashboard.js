@@ -406,6 +406,12 @@ $('#button-score button').click(function(){
 	onButtonScoreClicked(value)
 })
 
+$('#select-supradesa').change(function(){
+	var value = $(this).val();
+	changeUrl(value)	
+	onSupradesaChanged(value)
+});
+
 $('.switch-score select').change(function(){
 	var value = $(this).val();
 	onButtonScoreClicked(value)
