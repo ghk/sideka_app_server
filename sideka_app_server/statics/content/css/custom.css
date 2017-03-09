@@ -300,7 +300,7 @@ span.ellipse.clickable {
 
 @media only screen 
 and (min-device-width :200px)
-and (max-device-width : 550px) {
+and (max-device-width : 600px){
 	.switch-score select {
 		display: block;
 	}
@@ -310,7 +310,7 @@ and (max-device-width : 550px) {
 }
 
 @media only screen 
-and (min-device-width : 768px) 
+and (min-device-width : 601px) 
 and (max-device-width : 1024px){
 	.switch-score select {
 		display: none;
