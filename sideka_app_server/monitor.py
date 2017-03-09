@@ -94,14 +94,14 @@ def send_statics(path):
 def get_statistics():
 	def combine(row):
 		res = json.loads(row[1])
-		res["pendamping"] = row[2]
+		res["desa"] = row[2]
 		res["latitude"] = row[3]
 		res["longitude"] = row[4]
 		return res
 	query_sd_desa = get_sd_desa_query(request.args)
 	cur = mysql.connection.cursor()
 	try:
-		query = """SELECT s.blog_id, s.statistics, d.pendamping, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
+		query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
 				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
 
 		cur.execute(query)

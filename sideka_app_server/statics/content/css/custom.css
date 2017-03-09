@@ -310,17 +310,7 @@ and (max-width : 600px){
 }
 
 @media only screen 
-and (min-width : 601px) 
-and (max-width : 1024px){
-	.switch-score select {
-		display: none;
-	}
-	.switch-score h3 {
-		display: block;
-	}
-}
-@media only screen 
-and (min-width : 1224px) {
+and (min-width : 601px) {
 	.switch-score select {
 		display: none;
 	}

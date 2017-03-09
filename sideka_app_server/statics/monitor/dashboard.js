@@ -242,13 +242,12 @@ function onPanelClicked(panelName,data){
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);	
-		data[panelName].sort(c=>c.propinsi)
-		data[panelName].reverse(c=>c.propinsi)
+		data[panelName].sort((a,b)=>{return (a.propinsi==null) ? -1 : ((b.propinsi==null) ? -1 : ((a.propinsi > b.propinsi) ? 1 : ((b.propinsi > a.propinsi) ? -1 : 0)));})
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
-			$('<td>').html(content.desa).appendTo(tr);
-			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.domain)).appendTo(tr);			
+			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa)).appendTo(tr);
+			$('<td>').append($('<a>').attr("href", "http://"+content.domain).text(content.domain)).appendTo(tr);			
 			$('<td>').html(content.propinsi).appendTo(tr);
 			$('<td>').html(content.kabupaten).appendTo(tr);					
 			$('<td>').html(content.kecamatan).appendTo(tr);
@@ -300,7 +299,8 @@ function addMarker(content,icon) {
 		icon: host+pathImage
 	});
 
-	var content = 'Domain: <a href="/statistic/'+content.blog_id+'">'+content.domain+'</a><br />'+
+	var content = 'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
+				  'Domain: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
 				  'Apbdes: '+(content.apbdes.score*100).toFixed(2);
@@ -324,7 +324,7 @@ function onButtonScoreClicked(buttonName){
 }
 
 function applyTableInMaps(buttonClicked){
-	var header= ["No","Domain", "Score"];
+	var header= ["No","Score", "Domain"];
 	var thead = $('#table-score-maps thead');
 	var tbody = $('#table-score-maps tbody');
 	var newData = dataStatistics.sort(function(data1,data2){ return data2[buttonClicked].score - data1[buttonClicked].score})
@@ -334,9 +334,9 @@ function applyTableInMaps(buttonClicked){
 	$("tr", tbody).remove();	
 	$.each(newData,function(idx, content){
 		tr = $('<tr>');
-		$('<td>').html(idx+1).appendTo(tr);
-		$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.domain)).appendTo(tr);
+		$('<td>').html(idx+1).appendTo(tr);		
 		$('<td>').html(makeButtonScoring(content[buttonClicked].score)).appendTo(tr);
+		$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.domain)).appendTo(tr);
 		tbody.append(tr);
 	});
 }
