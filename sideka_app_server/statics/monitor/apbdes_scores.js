@@ -40,19 +40,19 @@ function applyContent(data,subtypes){
 	})	
 }
 
-function changeSelected(supradesa_id){
-	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesa_id, function(data){
+function onSupradesaChanged(supradesaId){
+	$.getJSON("/api/apbdes_scores?supradesa_id="+supradesaId, function(data){
 		var subtype = getSubtype(data)
 		applyContent(data,subtype)
 	});
+	changeUrl(supradesaId)
 }
 
 $('#select-supradesa').change(function(){
-	var value = $(this).val();
-	changeSelected(value)
-	changeUrl(value)
+	var supradesaId = $(this).val();
+	onSupradesaChanged(supradesaId);	
 });
 
 window.onload = function(){
-	changeSelected(hashUrl());
+	onSupradesaChanged(hashUrl());
 }

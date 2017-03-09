@@ -135,8 +135,8 @@ function scoreRenderer(instance, td, row, col, prop, value, cellProperties) {
 };
 
 
-function changeSelected(supradesa_id){
-	$.getJSON("/api/statistics?supradesa_id="+supradesa_id, function(data){
+function onSupradesaChanged(supradesaId){
+	$.getJSON("/api/statistics?supradesa_id="+supradesaId, function(data){
 		var container = document.getElementById('sheet');
 
 		var hot = new Handsontable(container, {
@@ -149,14 +149,14 @@ function changeSelected(supradesa_id){
 		});
 		setTimeout(function(){ hot.render() }, 0);
 	});	
+	changeUrl(supradesaId) 
 }
 
 $('#select-supradesa').change(function(){
-	var value = $(this).val();
-	changeSelected(value) 
-	changeUrl(value) 
+	var supradesaId = $(this).val();
+	onSupradesaChanged(supradesaId);	
 });
 
 window.onload = function(){
-	changeSelected(hashUrl());
+	onSupradesaChanged(hashUrl());
 }

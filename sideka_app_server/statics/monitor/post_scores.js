@@ -34,7 +34,7 @@ function pagination(page){
         cssStyle: 'light-theme',
 		hrefTextSuffix:"",
 		onPageClick:function(pageNumber,event){
-			getPost(pageNumber,hashUrl());
+			onSupradesaChanged(pageNumber,hashUrl());
 		}
     });
 }
@@ -63,29 +63,29 @@ function applyContent(data){
 	})
 }
 
-function getCountPost(supradesa_id){
-	$.getJSON("/api/count_post_scores?supradesa_id="+supradesa_id, function(data){
+function getCountPost(supradesaId){
+	$.getJSON("/api/count_post_scores?supradesa_id="+supradesaId, function(data){
 		pagination(data)
 	});
 }
 
-function getPost(pageBegin, supradesa_id){
-	$.getJSON("/api/post_scores?pagebegin="+pageBegin+"&itemperpage="+itemPerPage+"&supradesa_id="+supradesa_id, function(data){
+function onSupradesaChanged(pageBegin, supradesaId){	
+	$.getJSON("/api/post_scores?pagebegin="+pageBegin+"&itemperpage="+itemPerPage+"&supradesa_id="+supradesaId, function(data){
 		applyContent(data)
-	}); 	
+	}); 		
+	changeUrl(supradesaId);
 }
 
 $('#select-supradesa').change(function(){
-	var value = $(this).val();
-	getCountPost(value);
-	getPost(1,value);
-	changeUrl(value);
+	var supradesaId = $(this).val();
+	getCountPost(supradesaId);
+	onSupradesaChanged(1,supradesaId);
 });
 
 window.onload = function(){
-	var supradesa_id = hashUrl()
-	applyHeader();
-	getCountPost(supradesa_id);
-	getPost(1,supradesa_id)
+	var supradesaId = hashUrl()
+	applyHeader();	
+	getCountPost(supradesaId);
+	onSupradesaChanged(1,supradesaId)
 }
 

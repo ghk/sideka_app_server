@@ -1,10 +1,7 @@
-var dataDashboard, dataStatistics, cachedPanelData = {}, map, markers = [], chartsPeity = [] ;
+var dataDashboard, dataStatistics, cachedPanelData = {},cachedDailyGraphData = {}, map, markers = [], chartsPeity = [] ;
 var weekly = ["desa", "post", "penduduk", "apbdes"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var width = $(window).width();
-var tempData={};
-var tempLabels;
-var tempDatasets;
 
 var configDaily = {
 	type: 'line',
@@ -130,12 +127,15 @@ function onSupradesaChanged(supradesaId){
 				data: data.daily.apbdes,
 			})
 		dailyGraph.update();
-		updateDailyGraph(width);
+			
+		cachedPanelData = {};	
+		onWidthChange(width);
 	});
 	
-	deleteMarkers();
+	markers= [];
+	cachedDailyGraphData = {};
 	getStatistics(supradesaId);
-	cachedPanelData = {};	
+	
 }
 
 function onPanelClicked(panelName,data){
@@ -173,7 +173,6 @@ function onPanelClicked(panelName,data){
 				fill:false
 			})
 			desaGraph.update();
-			desaGraph.render();
 
 			var header = ['Minggu','Desa Berdomain "sideka.id"','Desa Berdomain "desa.id"','Jumlah Desa']			
 			var length = data.sideka_domain.length;
@@ -346,11 +345,6 @@ function clearMarkers() {
   }
 }
 
-function deleteMarkers() {
-  clearMarkers();
-  markers = [];
-}
-
 function makeButtonScoring(score){
  	var classButton;
  	var buttonResult;
@@ -375,45 +369,33 @@ function applyTableHeader(header,thead){
 	})		
 	thead.append(tr);
 }
-function updateDailyGraph(widthCurrent){	
-	if($.isEmptyObject(tempData))tempData = $.extend(true, {}, dailyGraph.data);
+
+function onWidthChange(widthCurrent){	
+	if($.isEmptyObject(cachedDailyGraphData))
+		cachedDailyGraphData = $.extend(true, {}, dailyGraph.data);
+
 	var startSlice;
-	var endSlice =  tempData.labels.length;
+	var endSlice =  cachedDailyGraphData.labels.length;
 
 	dailyGraph.data.labels = [];
 	dailyGraph.data.datasets = [];
 	dailyGraph.update();
 	
-	if(widthCurrent <= 320){		
-		startSlice = tempData.labels.length - 10;
-		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
-		$.each(tempData.datasets,function(idx,dataset){
-			var temp = $.extend(true, {}, dataset)
-			temp.data = temp.data.slice(startSlice,endSlice)
-			dailyGraph.data.datasets.push(temp)
-		})			
-	}else if(widthCurrent < 600){		
-		startSlice = tempData.labels.length - 15;
-		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
-		$.each(tempData.datasets,function(idx,dataset){
-			var temp = $.extend(true, {}, dataset)
-			temp.data = temp.data.slice(startSlice,endSlice)
-			dailyGraph.data.datasets.push(temp)
-		})			
-	}else if(widthCurrent >=600 && widthCurrent <=900){	
-		startSlice = tempData.labels.length - 35;
-		dailyGraph.data.labels = tempData.labels.slice(startSlice,endSlice)
-		$.each(tempData.datasets,function(idx,dataset){
-			var temp = $.extend(true, {}, dataset)
-			temp.data = temp.data.slice(startSlice,endSlice)
-			dailyGraph.data.datasets.push(temp)
-		})			
-	}else{
-		dailyGraph.data.labels = tempData.labels;
-		$.each(tempData.datasets,function(idx,dataset){
-			dailyGraph.data.datasets.push(dataset)
-		})
-	}	
+	if(widthCurrent <= 320)	
+		startSlice = cachedDailyGraphData.labels.length - 10;
+	else if(widthCurrent > 320 && widthCurrent < 600)		
+		startSlice = cachedDailyGraphData.labels.length - 15;			
+	else if(widthCurrent >=600 && widthCurrent <=900)	
+		startSlice = cachedDailyGraphData.labels.length - 35;					
+	else
+		startSlice = 0;
+	
+	dailyGraph.data.labels = cachedDailyGraphData.labels.slice(startSlice,endSlice)
+	$.each(cachedDailyGraphData.datasets,function(idx,dataset){
+		var temp = $.extend(true, {}, dataset)
+		temp.data = temp.data.slice(startSlice,endSlice)
+		dailyGraph.data.datasets.push(temp)
+	})	
 	dailyGraph.update();
 }
 
@@ -456,7 +438,7 @@ $('[id="panel-graph"]').click(function(){
 $(window).on('resize', function(){
 	if($(this).width() != width){
 		width = $(this).width();
-		updateDailyGraph(width)
+		onWidthChange(width);		
 	}
 });
 
