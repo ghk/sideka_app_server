@@ -23,12 +23,12 @@ var configDaily = {
 		}, 
 		scales: {
 			xAxes: [{
-			display: true,
-			ticks: {
-				autoSkip: false,
-				maxRotation: 0,
-				minRotation: 0
-			}			
+				display: true,
+				ticks: {
+					autoSkip: false,
+					maxRotation: 0,
+					minRotation: 0
+				}			
 			}],
 			yAxes: [{
 			display: true,
@@ -324,7 +324,7 @@ function onButtonScoreClicked(buttonName){
 }
 
 function applyTableInMaps(buttonClicked){
-	var header= ["No","Score", "Domain"];
+	var header= ["No","Score","Desa", "Domain"];
 	var thead = $('#table-score-maps thead');
 	var tbody = $('#table-score-maps tbody');
 	var newData = dataStatistics.sort(function(data1,data2){ return data2[buttonClicked].score - data1[buttonClicked].score})
@@ -336,6 +336,7 @@ function applyTableInMaps(buttonClicked){
 		tr = $('<tr>');
 		$('<td>').html(idx+1).appendTo(tr);		
 		$('<td>').html(makeButtonScoring(content[buttonClicked].score)).appendTo(tr);
+		$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa)).appendTo(tr);
 		$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.domain)).appendTo(tr);
 		tbody.append(tr);
 	});
