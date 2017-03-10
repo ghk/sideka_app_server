@@ -60,6 +60,7 @@ function makeButtonScoring(score){
  	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
  	return buttonResult;
 }
+
 function convertGraphDate(data){
 	return data.map(function(content, idx){
 		if(idx%7 ==0){
@@ -68,6 +69,7 @@ function convertGraphDate(data){
 		return "";
 	});
 }
+
 function getContext (canvas){
 	if (canvas.getContext){
 		var ctx = canvas.getContext('2d');
@@ -77,6 +79,7 @@ function getContext (canvas){
 		return ctx
 	}
 }
+
 function applyGraph(){
     dataQualityGraph.data.labels = convertGraphDate(contentDataQuality)
     dataQualityGraph.data.datasets.push({
@@ -103,6 +106,7 @@ function applyGraph(){
     applyTableContent();
     onWidthChange(width);
 }
+
 function getStartSlice(widthCurrent, lengthLabel){
     var startSlice;
     if(widthCurrent <= 320)	
@@ -115,17 +119,17 @@ function getStartSlice(widthCurrent, lengthLabel){
 		startSlice = 0;
     return startSlice;
 }
-function getDataSlice(startSlice, originData){
-    var tempData = $.extend(true, {}, originData);
-    var endSlice = originData.labels.length;
-    tempData.datasets=[];
-    tempData.labels = originData.labels.slice(startSlice,endSlice)
-	$.each(originData.datasets,function(idx,dataset){
+
+function getDataSlice(startSlice, data){
+    var result = {labels:[],datasets:[]}
+    var endSlice = data.labels.length;
+    result.labels = data.labels.slice(startSlice,endSlice)
+	$.each(data.datasets,function(idx,dataset){
 		var temp = $.extend(true, {}, dataset)
 		temp.data = temp.data.slice(startSlice,endSlice)
-		tempData.datasets.push(temp)
+		result.datasets.push(temp)
 	})
-    return tempData
+    return result
 }
 
 function onWidthChange(widthCurrent){	
