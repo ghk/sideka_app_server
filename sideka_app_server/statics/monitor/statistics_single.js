@@ -79,13 +79,9 @@ function getContext (canvas){
 }
 
 function applyDatasets(graph,datasets,custom){
-    console.log(custom)
     $.each(graph.data.datasets,function(idx,dataset){
-
-        if(!$.isEmptyObject(custom)){
-            console.log("masuk sini")
+        if(!$.isEmptyObject(custom))
             dataset[custom.property] = custom.content[idx];  
-        }
         dataset.data = datasets[idx]
     })
 }
