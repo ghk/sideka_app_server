@@ -1,13 +1,30 @@
-contentDataQuality = contentDataQuality.filter(c=> c.date !=="None")
-//if(contentDataQuality.length >=63)contentDataQuality = contentDataQuality.slice((contentDataQuality.length-63),contentDataQuality.length)
+contentDataQuality = contentDataQuality.filter(c=> c.date !=="None") 
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var width = $(window).width();
-var cachedDataQualityGraph={};
-var config= {
+var cachedDataQualityGraph={},cachedDataActivityGraph={};
+var configDataQualityGraph= {
 	type: 'line',
 	data: {
 		labels: [],
-		datasets: [],
+		datasets: [{
+            label: "Berita",
+            backgroundColor: fill[1],
+            borderColor: fill[1],
+            data:[],
+            fill: false,
+        }, {
+            label: "Penduduk",       
+            backgroundColor: fill[2],
+            borderColor: fill[2],
+            data:[],
+            fill: false,
+        },{
+            label: "Anggaran",
+            backgroundColor: fill[3],
+            borderColor: fill[3],
+            data:[],
+            fill: false,
+        }],
 	},
 	options: {
 		responsive: true,
@@ -44,32 +61,13 @@ var config= {
 	}
 };
 var canvasDataQuality = document.getElementById('data-quality-graph');
-var dataQualityGraph = new Chart(getContext(canvasDataQuality), config);
+var dataQualityGraph = new Chart(getContext(canvasDataQuality), configDataQualityGraph);
+
+var configActivityGraph = $.extend(true,{},configDataQualityGraph);
+configActivityGraph.options.scales.yAxes[0].scaleLabel.labelString = "#Aktifitas"
+var canvasDataActivity = document.getElementById('data-activity-graph');
+var dataActivityGraph = new Chart(getContext(canvasDataActivity), configActivityGraph);
     
-function makeButtonScoring(score){
- 	var classButton;
- 	var buttonResult;
- 	score *=100;
- 	
- 	if(score < 40)
- 		classButton= 'uk-badge uk-badge-danger';
- 	else if(score < 70) 
- 		classButton ='uk-badge uk-badge-warning'; 
- 	else
- 		classButton ='uk-badge uk-badge-success';
- 	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
- 	return buttonResult;
-}
-
-function convertGraphDate(data){
-	return data.map(function(content, idx){
-		if(idx%7 ==0){
-			return moment(content.date).format("DD MMM YYYY");
-		}		
-		return "";
-	});
-}
-
 function getContext (canvas){
 	if (canvas.getContext){
 		var ctx = canvas.getContext('2d');
@@ -80,28 +78,30 @@ function getContext (canvas){
 	}
 }
 
+function applyDatasets(graph,datasets,custom){
+    console.log(custom)
+    $.each(graph.data.datasets,function(idx,dataset){
+
+        if(!$.isEmptyObject(custom)){
+            console.log("masuk sini")
+            dataset[custom.property] = custom.content[idx];  
+        }
+        dataset.data = datasets[idx]
+    })
+}
+
 function applyGraph(){
-    dataQualityGraph.data.labels = convertGraphDate(contentDataQuality)
-    dataQualityGraph.data.datasets.push({
-        label: "Berita",
-        backgroundColor: fill[1],
-        borderColor: fill[1],
-        data: contentDataQuality.map(c => (c.blog.score * 100).toFixed(2)),
-        fill: false,
-    }, {
-        label: "Penduduk",       
-        backgroundColor: fill[2],
-        borderColor: fill[2],
-        data: contentDataQuality.map(c => (c.penduduk.score * 100).toFixed(2)),
-        fill: false,
-    },{
-        label: "Anggaran",
-        backgroundColor: fill[3],
-        borderColor: fill[3],
-        data: contentDataQuality.map(c => (c.apbdes.score * 100).toFixed(2)),
-        fill: false,
-    });
+    var datasets=[contentDataQuality.map(c => (c.blog.score * 100).toFixed(2)),contentDataQuality.map(c => (c.penduduk.score * 100).toFixed(2)),contentDataQuality.map(c => (c.apbdes.score * 100).toFixed(2)),]
+    applyDatasets(dataQualityGraph,datasets)
+    dataQualityGraph.data.labels = contentDataQuality.map(function(content, idx){return (idx%7 ==0)?moment(content.date).format("DD MMM YYYY"):"";}) 
     dataQualityGraph.update();
+
+    var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan"]}
+    datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.apbdes]
+    applyDatasets(dataActivityGraph,datasets,custom)
+    dataActivityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
+    dataActivityGraph.update();
+
     createInfo();
     applyTableContent();
     onWidthChange(width);
@@ -120,7 +120,7 @@ function getStartSlice(widthCurrent, lengthLabel){
     return startSlice;
 }
 
-function getDataSlice(startSlice, data){
+function sliceDataGraph(graph,startSlice, data){
     var result = {labels:[],datasets:[]}
     var endSlice = data.labels.length;
     result.labels = data.labels.slice(startSlice,endSlice)
@@ -129,16 +129,35 @@ function getDataSlice(startSlice, data){
 		temp.data = temp.data.slice(startSlice,endSlice)
 		result.datasets.push(temp)
 	})
-    return result
+    graph.data.labels = result.labels;
+    graph.data.datasets = result.datasets;
 }
 
 function onWidthChange(widthCurrent){	
     if($.isEmptyObject(cachedDataQualityGraph))cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
     var startSlice = getStartSlice(widthCurrent,cachedDataQualityGraph.labels.length)
-    var data = getDataSlice(startSlice,cachedDataQualityGraph)
-    dataQualityGraph.data.labels = data.labels;
-    dataQualityGraph.data.datasets = data.datasets;
+    sliceDataGraph(dataQualityGraph,startSlice,cachedDataQualityGraph)    
     dataQualityGraph.update()  
+    
+    if($.isEmptyObject(cachedDataActivityGraph))cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
+    var startSlice = getStartSlice(widthCurrent,cachedDataActivityGraph.labels.length)
+    sliceDataGraph(dataActivityGraph,startSlice,cachedDataActivityGraph)
+    dataActivityGraph.update()  
+}
+
+function makeButtonScoring(score){
+ 	var classButton;
+ 	var buttonResult;
+ 	score *=100;
+ 	
+ 	if(score < 40)
+ 		classButton= 'uk-badge uk-badge-danger';
+ 	else if(score < 70) 
+ 		classButton ='uk-badge uk-badge-warning'; 
+ 	else
+ 		classButton ='uk-badge uk-badge-success';
+ 	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
+ 	return buttonResult;
 }
 
 function applyTableHeader(header,thead){
@@ -202,6 +221,7 @@ function applyTableContent(){
     })
 
 }
+
 function createInfo(){
     if(info.desa!== null){
         $('#info-desa').text('Desa '+info.desa+', Kecamatan '+info.kecamatan+', Kabupaten '+info.kabupaten);

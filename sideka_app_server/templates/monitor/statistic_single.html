@@ -6,19 +6,34 @@
         <a class="uk-badge uk-badge-primary" id="ckan-url">Portal Data</a>
     </p>
     <div class="md-card">
-    <div class="md-card-toolbar">
-        <div class="md-card-toolbar-actions">
-            <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
+        <div class="md-card-toolbar">
+            <div class="md-card-toolbar-actions">
+                <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
+            </div>
+            <h3 class="md-card-toolbar-heading-text">
+                Kualitas Data per Waktu
+            </h3>
         </div>
-        <h3 class="md-card-toolbar-heading-text">
-            Kualitas Data per Waktu
-        </h3>
-    </div>
-    <div class="md-card-content">
-        <div >
-            <canvas id="data-quality-graph" style="height:250px;width:100%"></canvas>
+        <div class="md-card-content">
+            <div >
+                <canvas id="data-quality-graph" style="height:250px;width:100%"></canvas>
+            </div>
         </div>
     </div>
+    <div class="md-card">
+        <div class="md-card-toolbar">
+            <div class="md-card-toolbar-actions">
+                <i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed">&#xE5D0;</i>
+            </div>
+            <h3 class="md-card-toolbar-heading-text">
+                Aktifitas Penggunan Harian
+            </h3>
+        </div>
+        <div class="md-card-content">
+            <div >
+                <canvas id="data-activity-graph" style="height:250px;width:100%"></canvas>
+            </div>
+        </div>
     </div>
     <div class="md-card">
         <div class="md-card-content">
@@ -60,8 +75,9 @@
     </div>
 
     <script>
-            var contentDataQuality = {{content_daily | safe}};
-            var contentDataPost = {{content_post | safe}};
+            var contentDataQuality = {{content_data_quality | safe}};
+            var contentDataPost = {{content_post_quality | safe}};
+            var contentDataActivity = {{content_data_daily | safe}};
             var info = {{info | safe}};
     </script>
 

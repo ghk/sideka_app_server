@@ -64,16 +64,45 @@ def statistic_single(blog_id):
 		desa_query = "select desa, kecamatan, kabupaten, propinsi from sd_desa d where d.blog_id = %s"
 
 		cur.execute(daily_query, (blog_id,))
-		content_daily = json.dumps([comb(c) for c in cur.fetchall()])
+		content_data_quality = json.dumps([comb(c) for c in cur.fetchall()])
 		
 		cur.execute(post_query, (blog_id,))
-		content_post = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
+		content_post_quality = json.dumps([json.loads(c[0]) for c in cur.fetchall()])
 
 		cur.execute(desa_query, (blog_id,))
 		values = cur.fetchone()
 		header = [column[0] for column in cur.description]
 		info = json.dumps(dict(zip(header,values)))
-		return render_template('monitor/statistic_single.html', active='statistics', content_daily=content_daily, content_post = content_post, info = info)
+
+		daily = {}
+		post_query = "select unix_timestamp(date(ps.post_date)), count(*) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where d.blog_id = %s and ps.post_date is not null GROUP BY date(ps.post_date);"
+		cur.execute(post_query,(blog_id,))
+		daily["post"] =  dict(cur.fetchall())
+		penduduk_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type='penduduk' GROUP BY date(date_accessed);"
+		cur.execute(penduduk_query,(blog_id,))
+		daily["penduduk"] =  dict(cur.fetchall())
+		apbdes_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type='apbdes' GROUP BY date(date_accessed);"
+		cur.execute(apbdes_query,(blog_id,))
+		daily["apbdes"] =  dict(cur.fetchall())
+		
+		def get_daily(typ, time):
+			if time in daily[typ]:
+				return daily[typ][time]
+			return 0
+		results = {"label":[], "post":[], "penduduk":[], "apbdes":[]}
+		for i in range(63):
+			d = datetime.datetime.today() - datetime.timedelta(days = 62 - i)
+			d = datetime.datetime(d.year, d.month, d.day)
+			t = int(time.mktime(d.timetuple()))
+			results["label"].append(t)
+			results["post"].append(get_daily("post", t))
+			results["penduduk"].append(get_daily("penduduk", t))
+			results["apbdes"].append(get_daily("apbdes", t))
+			
+			
+		content_data_daily = json.dumps(results)
+
+		return render_template('monitor/statistic_single.html', active='statistics', content_data_quality=content_data_quality, content_post_quality = content_post_quality,content_data_daily=content_data_daily, info = info)
 	finally:
 		cur.close()
 
