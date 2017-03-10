@@ -175,7 +175,7 @@ function onPanelClicked(panelName,data){
 			})
 			desaGraph.update();
 
-			var header = ['Minggu','Desa Berdomain "sideka.id"','Desa Berdomain "desa.id"','Desa Terdaftar']			
+			var header = ['Minggu','sideka.id','desa.id','Terdaftar']			
 			var length = data.sideka_domain.length;
 			var week = getPanelDetailLabels();
 			var tbody = $('#table-domain-weekly tbody')
