@@ -19,7 +19,7 @@ function applyContent(data,subtypes){
 	$.each(subtypes,function(idx, subtype){
 		var tableContent = $("#table-content").clone().removeClass("hidden");
 		var tbody = $("tbody", tableContent);
-		var dataFiltered = data.filter(c=>c.subtype == subtype)		
+		var dataFiltered = data.filter(function(c){c.subtype == subtype})		
 		var li = $('<li>');
 
 		$('<a>').attr("href","").append(subtype).appendTo(li)

@@ -242,7 +242,7 @@ function onPanelClicked(panelName,data){
 		$("tr",tbody).remove();
 		var tr = $('<tr>')
 		applyTableHeader(header,thead);
-		data[panelName].sort((a,b)=>{return (a.kode > b.kode) ? 1 : ((b.kode > a.kode) ? -1 : 0);})
+		data[panelName].sort(function(a,b){return (a.kode > b.kode) ? 1 : ((b.kode > a.kode) ? -1 : 0);})
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);

@@ -61,7 +61,7 @@ def statistic_single(blog_id):
 	try:
 		daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc";
 		post_query = "select score from sd_post_scores p where p.blog_id = %s ORDER BY p.post_date desc";
-		desa_query = "select desa, kecamatan, kabupaten, propinsi from sd_desa d where d.blog_id = %s"
+		desa_query = "select desa, kecamatan, kabupaten, propinsi, domain from sd_desa d where d.blog_id = %s"
 
 		cur.execute(daily_query, (blog_id,))
 		content_data_quality = json.dumps([comb(c) for c in cur.fetchall()])

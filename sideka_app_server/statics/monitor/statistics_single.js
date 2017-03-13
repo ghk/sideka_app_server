@@ -1,4 +1,4 @@
-contentDataQuality = contentDataQuality.filter(c=> c.date !=="None") 
+contentDataQuality = contentDataQuality.filter(function(c){c.date !=="None"}) 
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var width = $(window).width();
 var cachedDataQualityGraph={},cachedDataActivityGraph={};
@@ -87,7 +87,7 @@ function applyDatasets(graph,datasets,custom){
 }
 
 function applyGraph(){
-    var datasets=[contentDataQuality.map(c => (c.blog.score * 100).toFixed(2)),contentDataQuality.map(c => (c.penduduk.score * 100).toFixed(2)),contentDataQuality.map(c => (c.apbdes.score * 100).toFixed(2)),]
+    var datasets=[contentDataQuality.map(function(c){(c.blog.score * 100).toFixed(2)}),contentDataQuality.map(function(c){(c.penduduk.score * 100).toFixed(2)}),contentDataQuality.map(function(c){(c.apbdes.score * 100).toFixed(2)}),]
     applyDatasets(dataQualityGraph,datasets)
     dataQualityGraph.data.labels = contentDataQuality.map(function(content, idx){return (idx%7 ==0)?moment(content.date).format("DD MMM YYYY"):"";}) 
     dataQualityGraph.update();
@@ -221,9 +221,9 @@ function applyTableContent(){
 function createInfo(){
     if(info.desa!== null){
         $('#info-desa').text('Desa '+info.desa+', Kecamatan '+info.kecamatan+', Kabupaten '+info.kabupaten);
-        $('#domain-url').attr("href","http://"+contentDataQuality[0].domain);
-        $('#ckan-url').attr("href","http://data.prakarsadesa.id/organization/"+info.desa.toLowerCase().replace(/\s/g, ''));
+        $('#ckan-url').removeClass("hidden").attr("href","http://data.prakarsadesa.id/organization/"+info.desa.toLowerCase().replace(/\s/g, ''));           
     }
+    $('#domain-url').removeClass("hidden").attr("href","http://"+info.domain);    
 }
 
 $(window).on('resize', function(){
