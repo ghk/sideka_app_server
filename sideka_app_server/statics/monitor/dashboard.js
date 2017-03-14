@@ -141,7 +141,7 @@ function onSupradesaChanged(supradesaId){
 }
 
 function onPanelClicked(panelName,data){
-	var header = ["No","Desa","Domain","Provinsi","Kabupaten","Kecamatan"];
+	var header = ["No","Desa","Provinsi","Kabupaten","Kecamatan"];
 	var thead;
 	var tbody;
 	switch(panelName){
@@ -247,7 +247,6 @@ function onPanelClicked(panelName,data){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
 			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa)).appendTo(tr);
-			$('<td>').append($('<a>').attr("href", "http://"+content.domain).text(content.domain)).appendTo(tr);	
 			$('<td>').html(content.propinsi).appendTo(tr);
 			$('<td>').html(content.kabupaten).appendTo(tr);					
 			$('<td>').html(content.kecamatan).appendTo(tr);
@@ -300,7 +299,6 @@ function addMarker(content,icon) {
 	});
 
 	var content = 'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
-				  'Domain: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
 				  'Apbdes: '+(content.apbdes.score*100).toFixed(2);
