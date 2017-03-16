@@ -20,6 +20,7 @@ phasher = PasswordHash(8, True)
 @app.route('/login', methods=["POST"])
 def login():
 	login = request.json
+	print(login['user'])
 	cur = mysql.connection.cursor()
 	try:
 		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (login["user"], login["user"]))
@@ -31,10 +32,10 @@ def login():
 		desa_name = None
 		user_id = None
 		user_nicename = None
-
+		
 		if user is not None:
 			success = phasher.check_password(login["password"], user[1])
-
+			
 			if success:
 				user_id = user[0]
 				user_nicename = user[2]
@@ -165,6 +166,7 @@ def get_content(desa_id, content_type, content_subtype=None):
 
 	finally:
 		cur.close()
+	
 
 @app.route('/desa', methods=["GET"])
 @cross_origin()
@@ -178,6 +180,85 @@ def get_all_desa():
 	finally:
 		cur.close()
 
+#new data api
+@app.route('/content_new/<int:desa_id>/<content_type>', methods=["GET"])
+@app.route('/content_new/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
+def get_content_new(desa_id, content_type, content_subtype=None):
+	cur = mysql.connection.cursor()
+	try:
+		user_id = get_auth(desa_id, cur)
+		result = None
+		
+		if user_id is None:
+			return jsonify({}), 403
+		
+		changeId = int(request.args.get("changeId", "0"))
+		query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id = %s ORDER BY change_id DESC"
+
+		if content_subtype is None:
+			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s"
+		
+		if changeId is None:
+			query += " AND change_id > %s ORDER BY change_id DESC"
+		else:
+			query += " AND change_id = %s ORDER BY change_id DESC"
+		
+		cur.execute(query, (desa_id, content_type, content_subtype, changeId))
+		content = cur.fetchone()
+		
+		if content is None:
+			return jsonify({}), 404
+		
+		result = json.loads(content[0])
+
+		if changeId > 0:
+			return jsonify({"changeId": content[1], "content": result })
+
+		return jsonify({"changeId": content[1], "content": result })
+	finally:
+		cur.close()
+
+@app.route('/content_new/<int:desa_id>/<content_type>', methods=["POST"])
+@app.route('/content_new/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
+def post_content_new(desa_id, content_type, content_subtype=None):
+	cur = mysql.connection.cursor()
+	try:
+		success = False
+		user_id = get_auth(desa_id, cur)
+
+		if user_id is None:
+			return jsonify({'success': False}), 403
+
+		changeId = int(request.args.get("changeId", "0"))
+		data = merge_diffs(changeId, desa_id, content_type, content_subtype,request.json["diffs"])
+
+		#if content_subtype != "subtypes":
+			#cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, %s, now(), %s)", (desa_id, content_type, content_subtype, data, user_id, request.changeId))
+			#mysql_connection.commit()
+			#logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
+		suceess = True
+		#cur.lastrowid
+		return jsonify({"success": True, "id": changeId })
+	finally:
+		cur.close()
+
+def merge_diffs(changeId, desaId, type, subtype, diffs):
+	cur = mysql.connection.cursor()
+	query = "SELECT content FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id = %s ORDER BY change_id DESC"
+
+	if subtype is None:
+		query = "SELECT content FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s AND change_id = %s ORDER BY change_id DESC"
+
+	cur.execute(query, (desaId, type, subtype, changeId))
+	content = cur.fetchone()
+	
+	data = json.loads(content[0])
+
+	for x in diffs:
+		print x[0]
+	
+
+	return {}
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
