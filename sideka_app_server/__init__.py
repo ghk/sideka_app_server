@@ -193,15 +193,12 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 			return jsonify({}), 403
 		
 		changeId = int(request.args.get("changeId", "0"))
-		query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id = %s ORDER BY change_id DESC"
+		query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id > %s ORDER BY change_id DESC"
 
 		if content_subtype is None:
-			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s"
+			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s AND change_id > %s ORDER BY change_id DESC"
 		
-		if changeId == 0:
-			query += " AND change_id > %s ORDER BY change_id DESC"
-		else:
-			query += " AND change_id = %s ORDER BY change_id DESC"
+		query += " AND change_id > %s ORDER BY change_id DESC"
 		
 		cur.execute(query, (desa_id, content_type, content_subtype, changeId))
 		content = cur.fetchone()
