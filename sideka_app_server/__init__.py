@@ -198,7 +198,7 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 		if content_subtype is None:
 			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s"
 		
-		if changeId is None:
+		if changeId == 0:
 			query += " AND change_id > %s ORDER BY change_id DESC"
 		else:
 			query += " AND change_id = %s ORDER BY change_id DESC"
@@ -212,7 +212,7 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 		result = json.loads(content[0])
 
 		if changeId > 0:
-			return jsonify({"changeId": content[1], "content": result })
+			return jsonify({"changeId": content[1], "diffs": result["diffs"] })
 
 		return jsonify({"changeId": content[1], "content": result })
 	finally:
@@ -230,15 +230,15 @@ def post_content_new(desa_id, content_type, content_subtype=None):
 			return jsonify({'success': False}), 403
 
 		changeId = int(request.args.get("changeId", "0"))
-		data = merge_diffs(changeId, desa_id, content_type, content_subtype,request.json["diffs"])
+		content = merge_diffs(changeId, desa_id, content_type, content_subtype,request.json["diffs"])
+		
+		if content_subtype != "subtypes":
+			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, json.dumps(content), user_id, changeId + 1))
+			mysql.connection.commit()
+			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
 
-		#if content_subtype != "subtypes":
-			#cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, %s, now(), %s)", (desa_id, content_type, content_subtype, data, user_id, request.changeId))
-			#mysql_connection.commit()
-			#logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
 		suceess = True
-		#cur.lastrowid
-		return jsonify({"success": True, "id": changeId })
+		return jsonify({"success": True, "changeId": changeId + 1 })
 	finally:
 		cur.close()
 
@@ -251,14 +251,23 @@ def merge_diffs(changeId, desaId, type, subtype, diffs):
 
 	cur.execute(query, (desaId, type, subtype, changeId))
 	content = cur.fetchone()
-	
 	data = json.loads(content[0])
+	result = { "columns": data["columns"], "diffs": diffs, "data": data["data"] }
 
-	for x in diffs:
-		print x[0]
-	
-
-	return {}
+	for diff in diffs:
+		for modified in diff["modified"]:
+			for server in result["data"]:
+				if modified[0] == server[0] and modified[1] == server[1]:
+					server = modified
+		for added in diff["added"]:
+			for server in data["data"]:
+				if added[0] == server[0] and added[1] == server[1]:
+					server = added	
+		for deleted in diff["deleted"]:
+			for server in data["data"]:
+				if deleted[0] == server[0] and deleted[1] == server[1]:
+					data["data"].remove(server)
+	return result
 
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
