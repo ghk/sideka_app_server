@@ -198,8 +198,6 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 		if content_subtype is None:
 			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s AND change_id > %s ORDER BY change_id DESC"
 		
-		query += " AND change_id > %s ORDER BY change_id DESC"
-		
 		cur.execute(query, (desa_id, content_type, content_subtype, changeId))
 		content = cur.fetchone()
 		
