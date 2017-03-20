@@ -195,10 +195,10 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 			return jsonify({}), 403
 		
 		changeId = int(request.args.get("changeId", "0"))
-		query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id > %s ORDER BY change_id DESC"
+		query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id >= %s ORDER BY change_id DESC"
 
 		if content_subtype is None:
-			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s AND change_id > %s ORDER BY change_id DESC"
+			query = "SELECT content, change_id FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype is %s AND change_id >= %s ORDER BY change_id DESC"
 		
 		cur.execute(query, (desa_id, content_type, content_subtype, changeId))
 		content = cur.fetchone()
@@ -255,18 +255,19 @@ def merge_diffs(changeId, desaId, type, subtype, diffs, columns):
 		for modified in diff["modified"]:
 			for server in result["data"]:
 				if modified[0] == server[0]:
-					for i in modified:
-						result["data"][i] = modified[i]	
+					server = modified
+					break
 		for added in diff["added"]:
 			for server in data["data"]:
 				if added[0] == server[0]:
-					for i in added:
-						result["data"][i] = added[i]	
+					result["data"].append(added)
+					break			
 		for deleted in diff["deleted"]:
 			for server in data["data"]:
-				if deleted[0] == server[0] and deleted[1] == server[1]:
+				if deleted[0] == server[0]:
 					result["data"].remove(server)
-
+					break
+					
 	return result
 
 if __name__ == '__main__':
