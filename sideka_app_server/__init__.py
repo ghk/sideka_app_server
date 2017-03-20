@@ -225,8 +225,8 @@ def post_content_new(desa_id, content_type, content_subtype=None):
 			return jsonify({'success': False}), 403
 
 		changeId = int(request.args.get("changeId", "0"))
-		content = merge_diffs(changeId, desa_id, content_type, content_subtype, request.json["diffs"])
-
+		content = merge_diffs(changeId, desa_id, content_type, content_subtype, request.json["diffs"], request.json["columns"])
+		
 		if content_subtype != "subtypes":
 			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, json.dumps(content), user_id, changeId + 1))
 			mysql.connection.commit()
@@ -237,7 +237,7 @@ def post_content_new(desa_id, content_type, content_subtype=None):
 	finally:
 		cur.close()
 
-def merge_diffs(changeId, desaId, type, subtype, diffs):
+def merge_diffs(changeId, desaId, type, subtype, diffs, columns):
 	cur = mysql.connection.cursor()
 	query = "SELECT content FROM sd_contents WHERE desa_id = %s AND type = %s AND subtype = %s AND change_id = %s ORDER BY change_id DESC"
 
@@ -247,21 +247,24 @@ def merge_diffs(changeId, desaId, type, subtype, diffs):
 	cur.execute(query, (desaId, type, subtype, changeId))
 	content = cur.fetchone()
 	data = json.loads(content[0])
-	result = { "columns": data["columns"], "diffs": diffs, "data": data["data"] }
+	result = { "columns": columns, "diffs": diffs, "data": data["data"] }
 
 	for diff in diffs:
 		for modified in diff["modified"]:
 			for server in result["data"]:
-				if modified[0] == server[0] and modified[1] == server[1]:
-					server = modified
+				if modified[0] == server[0]:
+					for i in modified:
+						result["data"][i] = modified[i]	
 		for added in diff["added"]:
 			for server in data["data"]:
-				if added[0] == server[0] and added[1] == server[1]:
-					server = added	
+				if added[0] == server[0]:
+					for i in added:
+						result["data"][i] = added[i]	
 		for deleted in diff["deleted"]:
 			for server in data["data"]:
 				if deleted[0] == server[0] and deleted[1] == server[1]:
-					data["data"].remove(server)
+					result["data"].remove(server)
+					
 	return result
 
 if __name__ == '__main__':
