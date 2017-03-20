@@ -6,6 +6,8 @@ import MySQLdb
 import os
 import json
 import time
+import base64
+import uuid
 
 
 app = Flask(__name__)
@@ -248,7 +250,7 @@ def merge_diffs(changeId, desaId, type, subtype, diffs, columns):
 	content = cur.fetchone()
 	data = json.loads(content[0])
 	result = { "columns": columns, "diffs": diffs, "data": data["data"] }
-
+	
 	for diff in diffs:
 		for modified in diff["modified"]:
 			for server in result["data"]:
@@ -264,7 +266,7 @@ def merge_diffs(changeId, desaId, type, subtype, diffs, columns):
 			for server in data["data"]:
 				if deleted[0] == server[0] and deleted[1] == server[1]:
 					result["data"].remove(server)
-					
+
 	return result
 
 if __name__ == '__main__':
