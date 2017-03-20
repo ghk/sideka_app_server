@@ -225,8 +225,8 @@ def post_content_new(desa_id, content_type, content_subtype=None):
 			return jsonify({'success': False}), 403
 
 		changeId = int(request.args.get("changeId", "0"))
-		content = merge_diffs(changeId, desa_id, content_type, content_subtype,request.json["diffs"])
-		
+		content = merge_diffs(changeId, desa_id, content_type, content_subtype, request.json["diffs"])
+
 		if content_subtype != "subtypes":
 			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, json.dumps(content), user_id, changeId + 1))
 			mysql.connection.commit()
