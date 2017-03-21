@@ -183,8 +183,8 @@ def get_all_desa():
 		cur.close()
 
 #new data api
-@app.route('/content_new/<int:desa_id>/<content_type>', methods=["GET"])
-@app.route('/content_new/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
+@app.route('/v2/content/<int:desa_id>/<content_type>', methods=["GET"])
+@app.route('/v2/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
 def get_content_new(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	try:
@@ -215,8 +215,8 @@ def get_content_new(desa_id, content_type, content_subtype=None):
 	finally:
 		cur.close()
 
-@app.route('/content_new/<int:desa_id>/<content_type>', methods=["POST"])
-@app.route('/content_new/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
+@app.route('/v2/content/<int:desa_id>/<content_type>', methods=["POST"])
+@app.route('/v2/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
 def post_content_new(desa_id, content_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	try:
