@@ -258,9 +258,8 @@ def merge_diffs(changeId, desaId, type, subtype, diffs, columns):
 					server = modified
 					break
 		for added in diff["added"]:
-			for server in data["data"]:
-				if added[0] == server[0]:
-					result["data"].append(added)
+			result["data"].append(added)
+				
 					break			
 		for deleted in diff["deleted"]:
 			for server in data["data"]:
