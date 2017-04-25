@@ -9,7 +9,6 @@ import time
 import base64
 import uuid
 
-
 app = Flask(__name__)
 mysql = MySQL(app)
 
@@ -17,7 +16,6 @@ mysql = MySQL(app)
 app.config.from_pyfile('app.cfg')
 
 phasher = PasswordHash(8, True)
-
 
 @app.route('/login', methods=["POST"])
 def login():
@@ -98,33 +96,6 @@ def get_auth(desa_id, cur):
 
 	return None
 
-@app.route('/content/<int:desa_id>/<content_type>', methods=["POST"])
-@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
-def post_content(desa_id, content_type, content_subtype=None):
-	cur = mysql.connection.cursor()
-	try:
-		success = False
-		user_id = get_auth(desa_id, cur)
-
-		if user_id is None:
-			return jsonify({'success': False}), 403
-
-		if content_subtype != "subtypes":
-			timestamp = int(request.json["timestamp"])
-			server_timestamp = int(time.time() * 1000)
-			print "%d - %d = %d" % (timestamp, server_timestamp, timestamp - server_timestamp)
-			if timestamp > server_timestamp or timestamp <= 0:
-				print "reseting to server timestamp, diff: %d" % (server_timestamp - timestamp)
-				timestamp = server_timestamp
-			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
-			mysql.connection.commit()
-			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
-
-			success = True
-		return jsonify({'success': success})
-	finally:
-		cur.close()
-
 @app.route('/content/<int:desa_id>/<content_type>/subtypes', methods=["GET"])
 def get_content_subtype(desa_id, content_type):
 	cur = mysql.connection.cursor()
@@ -141,114 +112,47 @@ def get_content_subtype(desa_id, content_type):
 		return jsonify(subtypes)
 	finally:
 		cur.close()
-
-@app.route('/content/<int:desa_id>/<content_type>', methods=["GET"])
-@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
-def get_content(desa_id, content_type, content_subtype=None):
+		
+@app.route('/content/<int:desa_id>/<content_type>/<data_type>', methods=["GET"])
+@app.route('/content/<int:desa_id>/<content_type>/<data_type>/<content_subtype>', methods=["GET"])
+def get_content(desa_id, content_type, data_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
 		result = None
-
-		if user_id is None:
-			return jsonify({}), 403
-
-		timestamp = int(request.args.get('timestamp', "0"))
-		query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
-		if content_subtype is None:
-			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
-		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
-		content = cur.fetchone()
-		if content is None:
-			return jsonify({}), 404
-
-		logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
-		result = json.loads(content[0])
-		return jsonify(result)
-
-	finally:
-		cur.close()
-	
-
-@app.route('/desa', methods=["GET"])
-@cross_origin()
-def get_all_desa():
-	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-	try:
-		query = "SELECT * from sd_desa"
-		cur.execute(query)
-		desa = list(cur.fetchall())
-		return jsonify(desa)
-	finally:
-		cur.close()
-
-@app.route('/v2/update_data_structure/<int:desa_id>/<content_type>', methods=["POST"])
-@app.route('/v2/update_data_structure/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
-def update_data_structure(desa_id, content_type, content_subtype=None):
-	cur = mysql.connection.cursor()
-	try:
-		user_id = get_auth(desa_id, cur)
-		result = None
-
+		change_id = int(request.args.get("changeId", "0"))
+		
 		if user_id is None:
 			return jsonify({}), 403
 		
-		change_id = int(request.args.get("changeId", "0"))
-		new_bundle_structure = json.dumps(request.json["bundle"])
-		cur.execute("UPDATE sd_contents SET content = %s WHERE desa_id = %s AND type = %s AND change_id = %s", (new_bundle_structure, desa_id, content_type, change_id))
-		mysql.connection.commit()
-		return jsonify({"success": True })
-	finally:
-		cur.close()
-
-@app.route('/v2/content/<int:desa_id>/<content_type>', methods=["GET"])
-@app.route('/v2/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
-def get_content_v2(desa_id, content_type, content_subtype=None):
-	cur = mysql.connection.cursor()
-	try:
-		user_id = get_auth(desa_id, cur)
-		result = None
-
-		if user_id is None:
-			return jsonify({}), 403
-		
-		change_id = int(request.args.get("changeId", "0"))
 		content_query = "select content, change_id from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id >= %s order by change_id desc"
 
 		if content_subtype is None:
 			content_query = "select content, change_id from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id >= %s order by change_id desc"
 		
 		cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
+		cur_bundle_data = cur.fetchone()
 
-		content_data = cur.fetchone()
-
-		if content_data is None:
+		if cur_bundle_data is None:
 			return jsonify({}), 404
-
-		content_data_json = json.loads(content_data[0])
-
+		
+		bundle_data = json.loads(cur_bundle_data[0])
 		diffs = {}
-		diffs[content_type] = []
+		diffs[data_type] = []
 
-		if content_data_json.has_key("diffs"):
-			if isinstance(content_data_json["diffs"], list):
-				diffs[content_type] = content_data_json["diffs"]
-			else:
-				if content_data_json["diffs"].has_key(content_type):
-					diffs[content_type] = content_data_json["diffs"][content_type]
-				else:
-					diffs[content_type] = content_data_json["diffs"]
-		
+		if bundle_data.has_key("diffs"):
+			if bundle_data["diffs"].has_key(data_type):
+				diffs[data_type] = bundle_data["diffs"][data_type]
+
 		if change_id > 0:
-			return jsonify({"change_id": content_data[1], "diffs": diffs[content_type] })
+			return jsonify({"change_id": cur_bundle_data[1], "diffs": diffs[data_type] })	
 		
-		return jsonify({"change_id": content_data[1], "data": content_data_json["data"] })
+		return jsonify({"change_id": cur_bundle_data[1], "data": bundle_data["data"] })
 	finally:
 		cur.close()
-	
-@app.route('/v2/content/<int:desa_id>/<content_type>', methods=["POST"])
-@app.route('/v2/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
-def post_content_v2(desa_id, content_type, content_subtype=None):
+@app.route('/content/<int:desa_id>/<content_type>/<data_type>', methods=["POST"])
+@app.route('/content/<int:desa_id>/<content_type>/<data_type>/<content_subtype>', methods=["POST"])
+def post_content(desa_id, content_type, data_type, content_subtype=None):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
@@ -271,76 +175,71 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
 		else:
 			int_max_change_id = int(max_change_id[0])
 
-		newest_contents_query = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id > %s order by change_id asc"
+		latest_bundle_data_query = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id > %s order by change_id asc"
 
 		if content_subtype is None:
-			newest_contents_query = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id>%s order by change_id asc"
+			latest_bundle_data_query = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id>%s order by change_id asc"
 		
-		cur.execute(newest_contents_query, (content_type, content_subtype, desa_id, current_change_id))
-
-		newest_contents = cur.fetchall()
-		content_type_diffs = {}
-		content_type_diffs[content_type] = []
-
-		for newest_content in newest_contents:
-			diffs = json.loads(newest_content[0])["diffs"]
-	
-			if diffs.has_key(content_type):
-				diffs = diffs[content_type]
-			
-			for diff in diffs:
-				content_type_diffs[content_type].append(diff)
+		cur.execute(latest_bundle_data_query, (content_type, content_subtype, desa_id, current_change_id))
+		latest_bundle_data = cur.fetchall()
+		diffs = {}
+		diffs[data_type] = []
+		for bundle_data in latest_bundle_data:
+			c_diffs = json.loads(bundle_data[0])["diffs"]
+			if c_diffs.has_key(data_type):
+				d_diffs = c_diffs[data_type]
+			for diff in d_diffs:
+				diffs[data_type].append(diff)
 		
 		if content_subtype != 'subtype':
 			new_change_id = int_max_change_id + 1
-			content_query = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id=%s"
+			bundle_data_query = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id=%s"
 
 			if content_subtype is None:
-				content_query = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id=%s"
+				bundle_data_query = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id=%s"
 			
-			cur.execute(content_query, (content_type, content_subtype, desa_id, current_change_id))
+			cur.execute(bundle_data_query, (content_type, content_subtype, desa_id, current_change_id))
+			bundle_data_cur = cur.fetchone()
 
-			content = cur.fetchone()
-
-			if content is None:
+			if bundle_data_cur is None:
 				return jsonify({}), 404
-
-			content_json = json.loads(content[0])
-			content_type_data = []
-			content_type_columns = []
-
-			if isinstance(content_json["data"], list):
-				content_type_data = content_json["data"]
-			else:
-				if content_json["data"].has_key(content_type):
-					content_type_data = content_json["data"][content_type]
-				else:
-					content_type_data = content_json["data"]
 			
-			if isinstance(content_json["columns"], list):
-				content_type_columns = content_json["columns"]
+			bundle_data = json.loads(bundle_data_cur[0])
+			bundle_data_data = []
+			bundle_data_columns = []
+
+			if isinstance(bundle_data["data"], list):
+				bundle_data_data = bundle_data["data"]
 			else:
-				if content_json["columns"].has_key(content_type):
-					content_type_columns = content_json["columns"][content_type]
+				if bundle_data["data"].has_key(data_type):
+					bundle_data_data = bundle_data["data"][data_type]
+
+			if isinstance(bundle_data["columns"], list):
+				bundle_data_columns = bundle_data["columns"]
+			else:
+				if bundle_data["columns"].has_key(data_type):
+					bundle_data_columns = bundle_data["columns"][data_type]
 				else:
-					content_type_columns = content_json["columns"]
-
-			merged_data = merge_diffs(request.json["diffs"], content_type_data)
-			new_bundle = { "columns": {}, "data": {}, "diffs": {}, "changeId": new_change_id }
-
-			new_bundle["diffs"][content_type] = request.json["diffs"]
-
-			new_bundle["columns"][content_type] = content_type_columns
-			new_bundle["data"][content_type] = merged_data
-			new_bundle_dumps = json.dumps(new_bundle)
+					bundle_data_columns = bundle_data["columns"]
+			
+			if bundle_data_data is None:
+				bundle_data_data = []
+			
+			merged_bundle_data_data = merge_diffs(request.json["diffs"], bundle_data_data)
+			new_bundle_data = { "columns": {}, "data": {}, "diffs": {}, "changeId": new_change_id }
+			new_bundle_data["diffs"][data_type] = request.json["diffs"]
+			new_bundle_data["columns"][data_type] = bundle_data_columns
+			new_bundle_data["data"][data_type] = merged_bundle_data_data
+			new_bundle_dumps = json.dumps(new_bundle_data)
 
 			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, new_bundle_dumps, user_id, new_change_id))
 			mysql.connection.commit()
-			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
+			logs(user_id, desa_id, "", "save_content", data_type, content_subtype)
 			suceess = True
-			return jsonify({"success": True, "change_id": new_change_id, "diffs": content_type_diffs[content_type] })
+			
+			return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs[data_type] })
 	finally:
-		cur.close()
+		cur.close();
 
 def merge_diffs(diffs, data):
 	for diff in diffs:
@@ -356,6 +255,5 @@ def merge_diffs(diffs, data):
 				if item[0] == deleted[0]:
 					data.remove(data)
 	return data
-
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
