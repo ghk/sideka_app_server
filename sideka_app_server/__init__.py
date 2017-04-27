@@ -236,7 +236,7 @@ def post_content(desa_id, content_type, key, content_subtype=None):
 			if isinstance(current_content["columns"], list) and key != "penduduk":
 				new_content["columns"]["penduduk"] = current_content["columns"]
 			
-			if isinstance(current_content["data"], dict) and isinstance(current_data["columns"], dict):
+			if isinstance(current_content["data"], dict) and isinstance(current_content["columns"], dict):
 				content_keys = current_data.keys()
 
 				for content_key in content_keys:
