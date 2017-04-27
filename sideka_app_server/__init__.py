@@ -240,11 +240,12 @@ def post_content(desa_id, content_type, key, content_subtype=None):
 				content_keys = current_content.keys()
 
 				for content_key in content_keys:
-					data_keys = current_content[content_key].keys()
-					for content_data_key in data_keys:
-						if content_data_key != key:
-							new_content["data"][content_data_key] = current_content["data"][content_data_key]
-							new_content["columns"][content_data_key] = current_content["columns"][content_data_key]
+					if isinstance(current_content[content_key], dict):
+						data_keys = current_content[content_key].keys()
+						for content_data_key in data_keys:
+							if content_data_key != key:
+								new_content["data"][content_data_key] = current_content["data"][content_data_key]
+								new_content["columns"][content_data_key] = current_content["columns"][content_data_key]
 
 			json_new_content = json.dumps(new_content)
 			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, json_new_content, user_id, new_change_id))
