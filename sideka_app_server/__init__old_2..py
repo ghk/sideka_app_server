@@ -9,7 +9,6 @@ import time
 import base64
 import uuid
 
-
 app = Flask(__name__)
 mysql = MySQL(app)
 
@@ -113,54 +112,49 @@ def get_content_subtype(desa_id, content_type):
 		return jsonify(subtypes)
 	finally:
 		cur.close()
-
+		
 @app.route('/content/<int:desa_id>/<content_type>/<key>', methods=["GET"])
 @app.route('/content/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["GET"])
 def get_content(desa_id, content_type, key, content_subtype=None):
-    cur = mysql.connection.cursor()
-    result = None
-
-    try:
-        user_id = get_auth(desa_id, cur)
-        change_id = int(request.args.get("changeId", "0"))
-
-        if user_id is None:
+	cur = mysql.connection.cursor()
+	try:
+		user_id = get_auth(desa_id, cur)
+		result = None
+		change_id = int(request.args.get("changeId", "0"))
+		
+		if user_id is None:
 			return jsonify({}), 403
-        
-        content_query = "SELECT content, change_id FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
-        
-        if content_subtype is None:
-            content_query = "SELECT content, change_id FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
-      
-        cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
-        cur_fetch = cur.fetchone()
+		
+		content_query = "select content, change_id from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id >= %s order by change_id desc"
 
-        if cur_fetch is None:
-            return jsonify({}), 404
-        
-        bundle_data = json.loads(cur_fetch[0])
+		if content_subtype is None:
+			content_query = "select content, change_id from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id >= %s order by change_id desc"
+		
+		cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
+		cur_bundle_data = cur.fetchone()
+			
+		if cur_bundle_data is None:
+			return jsonify({}), 404
+		
+		bundle_data = json.loads(cur_bundle_data[0])
+		diffs = {}
+		diffs[key] = []
 
-        diff = {}
-        diff[key] = []
+		if bundle_data.has_key("diffs"):
+			if bundle_data["diffs"].has_key(key):
+				diffs[key] = bundle_data["diffs"][key]
 
-        if bundle_data.has_key("diffs") == False:
-            return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
-        
-        if bundle_data["diffs"].has_key(key):
-            diffs[key] = bundle_data["diffs"][key]
-        
-        if change_id > 0:
-            return jsonify({"change_id": cur_fetch[1], "diffs": diffs[key] })
-        
-        return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
-    finally:
-        cur.close()
+		if change_id > 0:
+			return jsonify({"change_id": cur_bundle_data[1], "diffs": diffs[key] })	
+
+		return jsonify({"change_id": cur_bundle_data[1], "data": bundle_data["data"] })
+	finally:
+		cur.close()
 
 @app.route('/content/<int:desa_id>/<content_type>/<key>', methods=["POST"])
 @app.route('/content/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["POST"])
-def post_content(desa_id, content_type, key, content_subtype = None):
+def post_content(desa_id, content_type, key, content_subtype=None):
 	cur = mysql.connection.cursor()
-    
 	try:
 		user_id = get_auth(desa_id, cur)
 		current_change_id = int(request.args.get("changeId", 0))
@@ -169,56 +163,54 @@ def post_content(desa_id, content_type, key, content_subtype = None):
 		if user_id is None or current_change_id is None:
 			return jsonify({}), 403
 		
-		max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s"
+		q_max_change_id = 'select max(change_id) from sd_contents where type=%s and subtype=%s and desa_id=%s'
 
 		if content_subtype is None:
-			max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s"
+			q_max_change_id = 'select max(change_id) from sd_contents where type=%s and subtype is %s and desa_id=%s'
 		
-		cur.execute(max_change_id_query, (content_type, content_subtype, desa_id))
-		cur_fetch_max_change_id = cur.fetchone()
+		cur.execute(q_max_change_id, (content_type, content_subtype, desa_id))
+		c_max_change_id = cur.fetchone()
 
-		if cur_fetch_max_change_id is None:
+		if c_max_change_id is None:
 			return jsonify({}), 404
+		else:
+			max_change_id = int(c_max_change_id[0])
 		
-		max_change_id = int(cur_fetch_max_change_id[0])
-
-		latest_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
+		q_latest_contents = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id > %s order by change_id asc"
 
 		if content_subtype is None:
-			latest_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
+			q_latest_contents = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id>%s order by change_id asc"
 		
-		cur.execute(latest_content_query, (content_type, content_subtype, desa_id, current_change_id))
-		cur_fetch_latest_contents = cur.fetchall()
+		cur.execute(q_latest_contents, (content_type, content_subtype, desa_id, current_change_id))
 
+		latest_contents = cur.fetchall()
 		diffs = {}
 		diffs[key] = []
 
-		for cur_fetch_latest_content in cur_fetch_latest_contents:
-			latest_content = json.loads(cur_fetch_latest_contents[0])
-			if latest_content.has_key("diffs") == False:
-				continue
-			
-			if latest_content["diffs"].has_key(key):
-				for diff in latest_content["diffs"][key]:
+		for c_content in latest_contents:
+			content = json.loads(c_content[0])
+			if content.has_key("diffs"):
+				if content["diffs"].has_key(key):
+					for diff in content["diffs"][key]:
 						diffs[key].append(diff)
 		
 		if content_subtype != 'subtype':
 			new_change_id = max_change_id + 1
-			current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id=%s"
-
-			if content_subtype is None:
-				current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id=%s"
+			q_current_content = "select content from sd_contents where type=%s and subtype=%s and desa_id=%s and change_id=%s"
 			
-			cur.execute(current_content_query, (content_type, content_subtype, desa_id, current_change_id))
-			cur_fetch_current_content = cur.fetchone()	
+			if content_subtype is None:
+				q_current_content = "select content from sd_contents where type=%s and subtype is %s and desa_id=%s and change_id=%s"
+			
+			cur.execute(q_current_content, (content_type, content_subtype, desa_id, current_change_id))
+			c_current_content = cur.fetchone()	
 
-			if cur_fetch_current_content is None:
+			if c_current_content is None:
 				return jsonify({}), 404
 			
-			current_content = json.loads(cur_fetch_current_content[0])
+			current_content = json.loads(c_current_content[0])
 			current_content_data = []
 			current_content_columns = []
-
+			
 			if isinstance(current_content["data"], list) and key == 'penduduk':
 				current_content_data = current_content["data"]
 			elif isinstance(current_content["data"], dict) and current_content["data"].has_key(key):
@@ -263,8 +255,8 @@ def post_content(desa_id, content_type, key, content_subtype = None):
 	finally:
 		cur.close()
 
-@app.route('/content/<int:desa_id>/map', methods=["GET"])
-def get_map_content(desa_id):
+@app.route('/content/<int:desa_id>/mapping', methods=["GET"])
+def get_content_mapping(desa_id):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
@@ -274,7 +266,7 @@ def get_map_content(desa_id):
 		if user_id is None:
 			return jsonify({}), 403
 		
-		content_query = "SELECT content, change_id FROM sd_contents where type='map' AND desa_id=%s AND change_id >= %s ORDER BY change_id DESC"
+		content_query = "select content, change_id from sd_contents where type='mapping'and desa_id=%s and change_id >= %s order by change_id desc"
 		cur.execute(content_query, (desa_id, change_id))
 		cur_bundle_data = cur.fetchone()
 			
@@ -294,6 +286,48 @@ def get_map_content(desa_id):
 		return jsonify({"change_id": cur_bundle_data[1], "center": bundle_data["center"], "data": bundle_data["data"] })
 	finally:
 		cur.close()
+@app.route('/content/<int:desa_id>/mapping', methods=["POST"])
+def post_content_mapping(desa_id):
+	cur = mysql.connection.cursor()
+	try:
+		user_id = get_auth(desa_id, cur)
+		current_change_id = int(request.args.get("changeId", 0))
+		result = None
+
+		if user_id is None or current_change_id is None:
+			return jsonify({}), 403
+		
+		q_max_change_id = "select max(change_id) from sd_contents where type='mapping' and desa_id=%s"
+
+		cur.execute(q_max_change_id, (desa_id))
+		c_max_change_id = cur.fetchone()
+
+		latest_contents = cur.fetchall()
+		diffs = []
+
+		for c_content in latest_contents:
+			content = json.loads(c_content[0])
+			if content.has_key("diffs"):
+				for diff in content["diffs"]:
+						diffs.append(diff)
+		
+		new_change_id = max_change_id + 1
+		q_current_content = "select content from sd_contents where type='mapping' and desa_id=%s and change_id=%s"
+	    cur.execute(q_current_content, (desa_id, current_change_id))
+		c_current_content = cur.fetchone()	
+		
+		if c_current_content is None:
+			return jsonify({}), 404
+			
+		current_content = json.loads(c_current_content[0])
+		merged_data = merge_diffs(request.json["diffs"], current_content["data"])
+		new_content = {"changeId": new_change_id, "center": current_content["center"], "data": merged_data, "diffs": request.json["diffs"]}
+		json_new_content = json.dumps(new_content)
+		cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, None, json_new_content, user_id, new_change_id))
+		mysql.connection.commit()
+		logs(user_id, desa_id, "", "save_content_mapping")
+		suceess = True
+		return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs })
 
 def merge_diffs(diffs, data):
 	for diff in diffs:
@@ -309,6 +343,5 @@ def merge_diffs(diffs, data):
 				if item[0] == deleted[0]:
 					data.remove(data)
 	return data
-	
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
