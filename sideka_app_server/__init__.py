@@ -140,8 +140,8 @@ def get_content(desa_id, content_type, key, content_subtype=None):
         
         bundle_data = json.loads(cur_fetch[0])
 
-        diff = {}
-        diff[key] = []
+        diffs = {}
+        diffs[key] = []
 
         if bundle_data.has_key("diffs") == False:
             return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
@@ -263,17 +263,20 @@ def post_content(desa_id, content_type, key, content_subtype = None):
 	finally:
 		cur.close()
 
-@app.route('/content/<int:desa_id>/map', methods=["GET"])
-def get_map_content(desa_id):
+@app.route('/content-map/<int:desa_id>', methods=["GET"])
+@app.route('/content-map/<int:desa_id>/<int:change_id>', methods=["GET"])
+def get_map_content(desa_id, change_id = None):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
 		result = None
-		change_id = int(request.args.get("changeId", "0"))
 		
 		if user_id is None:
 			return jsonify({}), 403
 		
+		if change_id is None:
+			change_id = 0
+
 		content_query = "SELECT content, change_id FROM sd_contents where type='map' AND desa_id=%s AND change_id >= %s ORDER BY change_id DESC"
 		cur.execute(content_query, (desa_id, change_id))
 		cur_bundle_data = cur.fetchone()
@@ -295,6 +298,57 @@ def get_map_content(desa_id):
 	finally:
 		cur.close()
 
+@app.route('/content-map/<int:desa_id>', methods=["POST"])
+@app.route('/content-map/<int:desa_id>/<int:change_id>', methods=["POST"])
+def post_map_content(desa_id, change_id = None):
+	 cur = mysql.connection.cursor()
+	 try:
+		user_id = get_auth(desa_id, cur)
+		result = None
+		
+		if user_id is None:
+			return jsonify({}), 403
+		
+		max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type='map' AND desa_id=%s"
+		cur.execute(max_change_id_query, (desa_id, ))
+		cur_fetch_max_change_id = cur.fetchone()
+
+		if cur_fetch_max_change_id is None:
+			return jsonify({}), 404
+		
+		max_change_id = int(cur_fetch_max_change_id[0])
+		latest_content_query = "SELECT content FROM sd_contents WHERE type='map' AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
+		cur.execute(latest_content_query, (desa_id, change_id))
+		cur_fetch_latest_contents = cur.fetchall()
+		diffs = []
+
+		for cur_fetch_latest_content in cur_fetch_latest_contents:
+			latest_content = json.loads(cur_fetch_latest_contents[0])
+
+			if latest_content.has_key("diffs") == False:
+				continue
+			
+			diffs.append(latest_content["diffs"])
+		
+		new_change_id = max_change_id + 1
+		current_content_query = "SELECT content FROM sd_contents WHERE type='map' AND desa_id=%s AND change_id=%s"
+		cur.execute(current_content_query, (desa_id, change_id))
+		cur_fetch_current_content = cur.fetchone()	
+
+		if cur_fetch_current_content is None:
+			return jsonify({}), 404
+			
+		current_content = json.loads(cur_fetch_current_content[0])
+		new_content = {"changeId": new_change_id, "center": current_content["center"], "data": []}
+		new_content["data"] = merge_map_diffs(request.json["diffs"], current_content["data"])
+		json_new_content = json.dumps(new_content)
+		cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, 'map', None, json_new_content, user_id, new_change_id))
+		mysql.connection.commit()
+		suceess = True
+		return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs })
+	 finally:
+		 cur.close()
+
 def merge_diffs(diffs, data):
 	for diff in diffs:
 		for added in diff["added"]:
@@ -309,6 +363,21 @@ def merge_diffs(diffs, data):
 				if item[0] == deleted[0]:
 					data.remove(data)
 	return data
-	
+
+def merge_map_diffs(diffs, data):
+	for diff in diffs:
+		for added in diff["added"]:
+			data.append(added)
+		for modified in diff["modified"]:
+			for index, item in enumerate(data):
+				if item["id"] == modified["id"]:
+					data[index] = modified
+					
+					break
+		for deleted in diff["deleted"]:
+			for item in data:
+				if item["id"] == deleted["id"]:
+					data.remove(data)
+	return data
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
