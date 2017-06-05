@@ -339,8 +339,8 @@ def post_map_content(desa_id, change_id = None):
 			return jsonify({}), 404
 			
 		current_content = json.loads(cur_fetch_current_content[0])
-		new_content = {"changeId": new_change_id, "center": current_content["center"], "data": []}
-		new_content["data"] = merge_map_diffs(request.json["diffs"], current_content["data"])
+		new_content = {"changeId": new_change_id, "center": current_content["center"], "data": [], "diffs": request.json["diffs"]}
+		new_content["data"] = merge_map_diffs(new_content["diffs"], current_content["data"])
 		json_new_content = json.dumps(new_content)
 		cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, 'map', None, json_new_content, user_id, new_change_id))
 		mysql.connection.commit()
