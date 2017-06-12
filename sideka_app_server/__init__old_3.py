@@ -6,6 +6,8 @@ import MySQLdb
 import os
 import json
 import time
+import base64
+import uuid
 
 
 app = Flask(__name__)
@@ -51,10 +53,10 @@ def login():
 				cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, login["info"]))
 				mysql.connection.commit()
 				logs(user_id, desa_id, token, "login", None, None)
-		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename, 'api_version': app.config["API_VERSION"]})
+		return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename})
 	finally:
 		cur.close();
-        
+
 def logs(user_id, desa_id, token, action, content_type, content_subtype):
 	if(token==""):
 		token = request.headers.get('X-Auth-Token', None)
@@ -63,6 +65,7 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
 	cur.execute("INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype) VALUES (%s, %s, now(), %s, %s, %s, %s)",   (user_id, desa_id, token, action, content_type, content_subtype))
 	mysql.connection.commit()
 	cur.close();
+
 @app.route('/logout', methods=["GET"])
 def logout():
 	cur = mysql.connection.cursor()
@@ -82,6 +85,7 @@ def check_auth(desa_id):
 		return jsonify({'user_id': user_id})
 	finally:
 		cur.close();
+
 def get_auth(desa_id, cur):
 	token = request.headers.get('X-Auth-Token', None)
 	print token
@@ -92,6 +96,7 @@ def get_auth(desa_id, cur):
 			return user[0]
 
 	return None
+
 @app.route('/content/<int:desa_id>/<content_type>/subtypes', methods=["GET"])
 def get_content_subtype(desa_id, content_type):
 	cur = mysql.connection.cursor()
@@ -108,70 +113,13 @@ def get_content_subtype(desa_id, content_type):
 		return jsonify(subtypes)
 	finally:
 		cur.close()
-@app.route('/content/<int:desa_id>/<content_type>', methods=["GET"])
-@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["GET"])
-def get_content(desa_id, content_type, content_subtype=None):
-	cur = mysql.connection.cursor()
-	try:
-		user_id = get_auth(desa_id, cur)
-		result = None
-		
-		if user_id is None:
-			return jsonify({}), 403
 
-		timestamp = int(request.args.get('timestamp', "0"))
-		query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
-		if content_subtype is None:
-			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
-		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
-		content = cur.fetchone()
-		if content is None:
-			return jsonify({}), 404
-
-		logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
-		result = json.loads(content[0])
-		return jsonify(result)
-
-	finally:
-		cur.close()
-@app.route('/content/<int:desa_id>/<content_type>', methods=["POST"])
-@app.route('/content/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
-def post_content(desa_id, content_type, content_subtype=None):
-	cur = mysql.connection.cursor()
-	try:
-		success = False
-		user_id = get_auth(desa_id, cur)
-		api_version = app.config["API_VERSION"]
-        
-		cur.execute("SELECT COUNT(*) FROM sd_contents WHERE desa_id = %s AND type = %s AND api_version = %s", (desa_id, content_type, api_version))
-		new_data_api = cur.fetchone()
-
-		if new_data_api > 0:
-			return jsonify({"error": "Sideka needs to be updated"}), 500
-
-		if user_id is None:
-			return jsonify({'success': False}), 403
-      
-		if content_subtype != "subtypes":           
-			timestamp = int(request.json["timestamp"])
-			server_timestamp = int(time.time() * 1000)
-			print "%d - %d = %d" % (timestamp, server_timestamp, timestamp - server_timestamp)
-			if timestamp > server_timestamp or timestamp <= 0:
-				print "reseting to server timestamp, diff: %d" % (server_timestamp - timestamp)
-				timestamp = server_timestamp
-			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
-			mysql.connection.commit()
-			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
-
-			success = True
-		return jsonify({'success': success})
-	finally:
-		cur.close()
-@app.route('/content/2.0/<int:desa_id>/<content_type>/<key>', methods=["GET"])
-@app.route('/content/2.0/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["GET"])
-def get_content_v2(desa_id, content_type, key, content_subtype=None):
+@app.route('/content/<int:desa_id>/<content_type>/<key>', methods=["GET"])
+@app.route('/content/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["GET"])
+def get_content(desa_id, content_type, key, content_subtype=None):
     cur = mysql.connection.cursor()
     result = None
+
     try:
         user_id = get_auth(desa_id, cur)
         change_id = int(request.args.get("changeId", "0"))
@@ -208,12 +156,12 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
     finally:
         cur.close()
 
-@app.route('/content/2.0/<int:desa_id>/<content_type>/<key>', methods=["POST"])
-@app.route('/content/2.0/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["POST"])
-def post_content_v2(desa_id, content_type, key, content_subtype=None):
-    cur = mysql.connection.cursor()
-   
-    try:
+@app.route('/content/<int:desa_id>/<content_type>/<key>', methods=["POST"])
+@app.route('/content/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["POST"])
+def post_content(desa_id, content_type, key, content_subtype = None):
+	cur = mysql.connection.cursor()
+    
+	try:
 		user_id = get_auth(desa_id, cur)
 		current_change_id = int(request.args.get("changeId", 0))
 		result = None
@@ -312,8 +260,8 @@ def post_content_v2(desa_id, content_type, key, content_subtype=None):
 			logs(user_id, desa_id, "", "save_content", key, content_subtype)
 			suceess = True
 			return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs[key] })
-    finally:
-        cur.close()
+	finally:
+		cur.close()
 
 @app.route('/content-map/<int:desa_id>', methods=["GET"])
 @app.route('/content-map/<int:desa_id>/<int:change_id>', methods=["GET"])
