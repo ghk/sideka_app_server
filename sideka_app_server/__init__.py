@@ -6,7 +6,8 @@ import MySQLdb
 import os
 import json
 import time
-
+import base64
+import uuid
 
 app = Flask(__name__)
 mysql = MySQL(app)
@@ -84,7 +85,7 @@ def check_auth(desa_id):
 		cur.close();
 def get_auth(desa_id, cur):
 	token = request.headers.get('X-Auth-Token', None)
-	print token
+	print(token)
 	if token is not None:
 		cur.execute("SELECT user_id FROM sd_tokens where token = %s and desa_id = %s", (token, desa_id))
 		user = cur.fetchone()
@@ -97,7 +98,7 @@ def get_content_subtype(desa_id, content_type):
 	cur = mysql.connection.cursor()
 	try:
 		user_id = get_auth(desa_id, cur)
-
+	
 		if user_id is None:
 			return jsonify({}), 403
 
@@ -115,7 +116,7 @@ def get_content(desa_id, content_type, content_subtype=None):
 	try:
 		user_id = get_auth(desa_id, cur)
 		result = None
-		
+		print(desa_id)
 		if user_id is None:
 			return jsonify({}), 403
 
@@ -125,11 +126,13 @@ def get_content(desa_id, content_type, content_subtype=None):
 			query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
 		cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
 		content = cur.fetchone()
+
 		if content is None:
 			return jsonify({}), 404
 
 		logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
-		result = json.loads(content[0])
+		result = json.loads(content)
+		
 		return jsonify(result)
 
 	finally:
@@ -144,22 +147,36 @@ def post_content(desa_id, content_type, content_subtype=None):
 		api_version = app.config["API_VERSION"]
         
 		cur.execute("SELECT COUNT(*) FROM sd_contents WHERE desa_id = %s AND type = %s AND api_version = %s", (desa_id, content_type, api_version))
-		new_data_api = cur.fetchone()
+		new_data_api = int(cur.fetchone()[0])
 
 		if new_data_api > 0:
 			return jsonify({"error": "Sideka needs to be updated"}), 500
 
 		if user_id is None:
 			return jsonify({'success': False}), 403
-      
-		if content_subtype != "subtypes":           
+		
+		max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s"
+
+		if content_subtype is None:
+			max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s"
+		
+		cur.execute(max_change_id_query, (content_type, content_subtype, desa_id))
+		cur_fetch_max_change_id = cur.fetchone()
+
+		if cur_fetch_max_change_id is None:
+			return jsonify({}), 404
+		
+		max_change_id = int(cur_fetch_max_change_id[0])
+
+		if content_subtype != "subtypes":  
+			new_change_id = max_change_id + 1;         
 			timestamp = int(request.json["timestamp"])
 			server_timestamp = int(time.time() * 1000)
 			print "%d - %d = %d" % (timestamp, server_timestamp, timestamp - server_timestamp)
 			if timestamp > server_timestamp or timestamp <= 0:
 				print "reseting to server timestamp, diff: %d" % (server_timestamp - timestamp)
 				timestamp = server_timestamp
-			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by) VALUES (%s, %s, %s, %s, %s, now(), %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id))
+			cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by, change_id) VALUES (%s, %s, %s, %s, %s, now(), %s, %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id, new_change_id))
 			mysql.connection.commit()
 			logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
 
@@ -175,10 +192,11 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
     try:
         user_id = get_auth(desa_id, cur)
         change_id = int(request.args.get("changeId", "0"))
-
+		
+		
         if user_id is None:
 			return jsonify({}), 403
-        
+		
         content_query = "SELECT content, change_id FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
         
         if content_subtype is None:
@@ -186,7 +204,7 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
       
         cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
         cur_fetch = cur.fetchone()
-
+		
         if cur_fetch is None:
             return jsonify({}), 404
         
@@ -194,10 +212,13 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
 
         diffs = {}
         diffs[key] = []
-
-        if bundle_data.has_key("diffs") == False:
-            return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
-        
+		
+	if bundle_data.has_key("diffs") == False:
+		for data in bundle_data["data"]:
+				data.insert(0, base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
+		return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
+					
+    
         if bundle_data["diffs"].has_key(key):
             diffs[key] = bundle_data["diffs"][key]
         
@@ -307,7 +328,7 @@ def post_content_v2(desa_id, content_type, key, content_subtype=None):
 								new_content["columns"][content_data_key] = current_content["columns"][content_data_key]
 
 			json_new_content = json.dumps(new_content)
-			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id) VALUES(%s, %s, %s, %s, now(), %s, %s)", (desa_id, content_type, content_subtype, json_new_content, user_id, new_change_id))
+			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json_new_content, user_id, new_change_id, '2.0'))
 			mysql.connection.commit()
 			logs(user_id, desa_id, "", "save_content", key, content_subtype)
 			suceess = True
