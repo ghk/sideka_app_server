@@ -212,10 +212,7 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
         diffs = {}
         diffs[key] = []
 		
-	if bundle_data.has_key("diffs") == False:
-		for data in bundle_data["data"]:
-				data.insert(0, base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
-				
+	if bundle_data.has_key("diffs") == False:	
 		return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
 					
     
