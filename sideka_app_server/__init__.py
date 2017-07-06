@@ -433,7 +433,7 @@ def merge_diffs(diffs, data):
 					break
 		for deleted in diff["deleted"]:
 			for item in data:
-				if item[0] == deleted[0]:
+				if item[0] == deleted[0] or len(item[0]) != len(modified[0]):
 					data.remove(data)
 	return data
 
