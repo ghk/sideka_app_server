@@ -192,8 +192,7 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
     try:
         user_id = get_auth(desa_id, cur)
         change_id = int(request.args.get("changeId", "0"))
-		
-		
+
         if user_id is None:
 			return jsonify({}), 403
 		
@@ -216,6 +215,7 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
 	if bundle_data.has_key("diffs") == False:
 		for data in bundle_data["data"]:
 				data.insert(0, base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
+				
 		return jsonify({"change_id": cur_fetch[1], "data": bundle_data["data"] })
 					
     
@@ -428,7 +428,7 @@ def merge_diffs(diffs, data):
 			data.append(added)
 		for modified in diff["modified"]:
 			for index, item in enumerate(data):
-				if item[0] == modified[0]:
+				if item[0] == modified[0] or len(item[0]) != len(modified[0]):
 					data[index] = modified
 					break
 		for deleted in diff["deleted"]:
