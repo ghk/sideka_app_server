@@ -190,51 +190,55 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
     cur = mysql.connection.cursor()
     result = None
     try:
-        user_id = get_auth(desa_id, cur)
-        change_id = int(request.args.get("changeId", "0"))
+			user_id = get_auth(desa_id, cur)
+			change_id = int(request.args.get("changeId", "0"))
 
-        if user_id is None:
-			return jsonify({}), 403
-		
-        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
-        
-        if content_subtype is None:
-            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
-      
-        cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
-        cur_fetch = cur.fetchone()
-		
-        if cur_fetch is None:
-            return jsonify({}), 404
-        
-        bundle_data = json.loads(cur_fetch[0])
-
-        diffs = {}
-        diffs[key] = []
-		
-	current_change_id = cur_fetch[1]
-	api_version = cur_fetch[2]
-
-	if api_version != app.config["API_VERSION"]:
-		for index, data in enumerate(bundle_data["data"]):
-			bundle_data["data"][index].insert(0,  base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
+			if user_id is None:
+				return jsonify({}), 403
 			
-		api_version = app.config["API_VERSION"]
-		current_change_id = current_change_id + 1
-		query_insert = 'INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)'
-		cur.execute(query_insert, (desa_id, content_type, content_subtype, json.dumps(bundle_data), user_id, current_change_id, app.config["API_VERSION"]))
-		mysql.connection.commit()
-    
-	if bundle_data.has_key("diffs") == False:
-		return jsonify({"change_id": current_change_id, "data": bundle_data["data"], "api_version": api_version })
-	
-	elif bundle_data["diffs"].has_key(key):
-		diffs[key] = bundle_data["diffs"][key]
-	
-	if change_id > 0:
-		return jsonify({"change_id": current_change_id, "diffs": diffs[key], "api_version": api_version })
-	
-	return jsonify({"change_id": current_change_id, "data": bundle_data["data"], "api_version": api_version })
+			content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
+			
+			if content_subtype is None:
+				content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
+		
+			cur.execute(content_query, (content_type, content_subtype, desa_id, change_id))
+			cur_fetch = cur.fetchone()
+			
+			if cur_fetch is None:
+				return jsonify({}), 404
+			
+			bundle_data = json.loads(cur_fetch[0])
+
+			diffs = {}
+			diffs[key] = []
+		
+			current_change_id = cur_fetch[1]
+			api_version = cur_fetch[2]
+
+			if api_version != app.config["API_VERSION"]:
+				bundle_data_new = []
+				for index, data in enumerate(bundle_data["data"]):
+					if isinstance(bundle_data["data"][index], list):				
+						bundle_data["data"][index].insert(0,  base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
+						bundle_data_new.append(bundle_data["data"][index])
+				
+				bundle_data["data"] = bundle_data_new
+				api_version = app.config["API_VERSION"]
+				current_change_id = current_change_id + 1
+				query_insert = 'INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)'
+				cur.execute(query_insert, (desa_id, content_type, content_subtype, json.dumps(bundle_data), user_id, current_change_id, app.config["API_VERSION"]))
+				mysql.connection.commit()
+			
+			if bundle_data.has_key("diffs") == False:
+				return jsonify({"change_id": current_change_id, "data": bundle_data["data"], "api_version": api_version })
+			
+			elif bundle_data["diffs"].has_key(key):
+				diffs[key] = bundle_data["diffs"][key]
+			
+			if change_id > 0:
+				return jsonify({"change_id": current_change_id, "diffs": diffs[key], "api_version": api_version })
+			
+			return jsonify({"change_id": current_change_id, "data": bundle_data["data"], "api_version": api_version })
 
     finally:
         cur.close()
