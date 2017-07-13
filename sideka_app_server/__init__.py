@@ -436,6 +436,18 @@ def post_map_content(desa_id, change_id = None):
 	 finally:
 		 cur.close()
 
+@app.route('/desa', methods=["GET"])
+@cross_origin()
+def get_all_desa():
+	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT * from sd_desa"
+		cur.execute(query)
+		desa = list(cur.fetchall())
+		return jsonify(desa)
+	finally:
+		cur.close()
+		
 def merge_diffs(diffs, data):
 	for diff in diffs:
 		for added in diff["added"]:
