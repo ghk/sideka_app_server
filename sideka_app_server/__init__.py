@@ -20,7 +20,7 @@ phasher = PasswordHash(8, True)
 @app.route('/login', methods=["POST"])
 def login():
 	login = request.json
-	print(login['user'])
+	print(login)
 	cur = mysql.connection.cursor()
 	try:
 		cur.execute("SELECT ID, user_pass, user_nicename FROM wp_users where user_login = %s or user_email = %s", (login["user"], login["user"]))
@@ -131,7 +131,7 @@ def get_content(desa_id, content_type, content_subtype=None):
 			return jsonify({}), 404
 
 		logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
-		result = json.loads(content)
+		result = json.loads(content[0])
 		
 		return jsonify(result)
 
@@ -221,7 +221,7 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
 					if isinstance(bundle_data["data"][index], list):				
 						bundle_data["data"][index].insert(0,  base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("="))
 						bundle_data_new.append(bundle_data["data"][index])
-				
+						
 				bundle_data["data"] = bundle_data_new
 				api_version = app.config["API_VERSION"]
 				current_change_id = current_change_id + 1
@@ -247,8 +247,9 @@ def get_content_v2(desa_id, content_type, key, content_subtype=None):
 @app.route('/content/2.0/<int:desa_id>/<content_type>/<key>/<content_subtype>', methods=["POST"])
 def post_content_v2(desa_id, content_type, key, content_subtype=None):
     cur = mysql.connection.cursor()
-   
+	
     try:
+		print request.json
 		user_id = get_auth(desa_id, cur)
 		current_change_id = int(request.args.get("changeId", 0))
 		result = None
@@ -318,11 +319,13 @@ def post_content_v2(desa_id, content_type, key, content_subtype=None):
 
 			if current_content_columns == []:
 				current_content_columns = request.json["columns"]
+			
+			#print(request.json['diffs'])
 
 			new_content = {"changeId": new_change_id, "columns": {}, "data": {}, "diffs": {}}
 			new_content["columns"][key] = current_content_columns
-			new_content["data"][key] = merge_diffs(request.json["diffs"], current_content_data)
-			new_content["diffs"][key] = request.json["diffs"]
+			#new_content["data"][key] = merge_diffs(request.json["diffs"], current_content_data)
+			#new_content["diffs"][key] = request.json["diffs"]
 
 			if isinstance(current_content["data"], list) and key != "penduduk":
 			   new_content["data"]["penduduk"] = current_content["data"]
@@ -342,8 +345,8 @@ def post_content_v2(desa_id, content_type, key, content_subtype=None):
 								new_content["columns"][content_data_key] = current_content["columns"][content_data_key]
 
 			json_new_content = json.dumps(new_content)
-			cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json_new_content, user_id, new_change_id, app.config["API_VERSION"]))
-			mysql.connection.commit()
+			#cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json_new_content, user_id, new_change_id, app.config["API_VERSION"]))
+			#mysql.connection.commit()
 			logs(user_id, desa_id, "", "save_content", key, content_subtype)
 			suceess = True
 			return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs[key] })
