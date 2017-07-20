@@ -324,8 +324,8 @@ def post_content_v2(desa_id, content_type, key, content_subtype=None):
 
 			new_content = {"changeId": new_change_id, "columns": {}, "data": {}, "diffs": {}}
 			new_content["columns"][key] = current_content_columns
-			#new_content["data"][key] = merge_diffs(request.json["diffs"], current_content_data)
-			#new_content["diffs"][key] = request.json["diffs"]
+			new_content["data"][key] = merge_diffs(request.json["diffs"], current_content_data)
+			new_content["diffs"][key] = request.json["diffs"]
 
 			if isinstance(current_content["data"], list) and key != "penduduk":
 			   new_content["data"]["penduduk"] = current_content["data"]
