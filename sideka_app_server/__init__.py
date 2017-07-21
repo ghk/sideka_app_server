@@ -235,7 +235,7 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
 
             new_content["changeId"] = client_change_id + 1
             query_insert = "INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)"
-            cur.execute(query_insert, (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_content["apiVersion"], app.config["API_VERSION"]))
+            cur.execute(query_insert, (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_content["changeId"], app.config["API_VERSION"]))
             mysql.connection.commit()
             return jsonify({"change_id": new_content["changeId"], "data": new_content["data"], "api_version": api_version})
             
