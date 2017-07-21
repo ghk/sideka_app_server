@@ -333,7 +333,8 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         suceess = True
         return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs })
-
+    except Exception, e:
+        return jsonify({"message": str(e)}), 500
     finally:
         cur.close()
 
