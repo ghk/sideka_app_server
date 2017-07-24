@@ -1,0 +1,11 @@
+{% extends "admin/admin.html" %}
+{% block body %}
+    <div>Desa ID: {{desa_id}}, Type: {{typ}}, Sub Type: {{subtyp}}</div>
+    <br />
+    <div id="sheet"></div>
+    <script>
+		var content = {{content | safe}};
+		var schema = {{schema | safe}};
+	</script>
+    <script src="/statics/admin/content_diffs.js"></script>
+{% endblock %}

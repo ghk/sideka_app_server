@@ -127,6 +127,11 @@ def logout():
 def contents():
 	return render_template('admin/contents.html', active='contents', now = datetime.datetime.now())
 
+@app.route('/contents/v2')
+@login_required
+def contents_v2():
+    return render_template('admin/contents_v2.html', active='contents_v2', now = datetime.datetime.now())
+
 @app.route('/code_finder')
 @login_required
 def code_finder():
@@ -162,6 +167,38 @@ def contents_single(content_id):
 	finally:
 		cur.close()
 
+@app.route('/contents/v2/<int:content_id>/<type>')
+@login_required
+def contents_v2_single(content_id, type = 'data'):
+    	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+			sheet = request.args.get("sheet", "0")
+			query = "SELECT desa_id, subtype, type, content, change_id from sd_contents WHERE id=%s AND api_version='2.0'"
+			cur.execute(query, (content_id,))
+			result = cur.fetchone()
+			content = result["content"]
+			typ = result["type"]
+			subtyp = result["subtype"]
+			desa_id = result["desa_id"]
+			schema = []
+			keys = []
+
+			jsonContent = json.loads(content);
+			
+			if sheet == "null":
+					sheet = typ
+
+			if isinstance(jsonContent[type], dict):
+					for key, value in jsonContent[type].items():
+						keys.append(key)
+			
+			if sheet == 'penduduk':
+					sheet = 'penduduk_v2'
+					with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "schemas/"+sheet+".json"), 'r') as myFile:schema = myFile.read()
+					
+			return render_template('admin/contents_v2_single.html', active='contents_v2', keys=keys, content_id=content_id, content=content, schema= schema, subtyp=subtyp, typ=typ, desa_id = desa_id)
+	finally:
+		cur.close()
 @app.route('/statics/<path:path>')
 def send_statics(path):
 	return send_from_directory('statics', path)
@@ -289,6 +326,17 @@ def get_contents():
 	finally:
 		cur.close()
 
+@app.route('/api/contents/v2', methods=["GET"])
+@login_required
+def get_contents_v2():
+    	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	try:
+		query = "SELECT sd_contents.id, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' order by date_created desc limit 1000"
+		cur.execute(query)
+		contents = list(cur.fetchall())
+		return jsonify(contents)
+	finally:
+		cur.close()
 @app.route('/api/statistics', methods=["GET"])
 @login_required
 def get_statistics():
