@@ -121,10 +121,10 @@ def get_content(desa_id, content_type, content_subtype = None):
             return jsonify({}), 403
         
         timestamp = int(request.args.get('timestamp', "0"))
-        query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s order by timestamp desc"
+        query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s and api_version = '1.0' order by timestamp desc"
 
         if content_subtype is None:
-            query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s order by timestamp desc"
+            query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype is %s and api_version = '1.0' order by timestamp desc"
         
         cur.execute(query, (desa_id, timestamp, content_type, content_subtype))
         content = cur.fetchone()
