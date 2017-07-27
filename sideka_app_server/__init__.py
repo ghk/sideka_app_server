@@ -346,6 +346,9 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
                         else:
                             new_content["data"][key] = current_content["data"][key]
         
+        if content_type == 'map':
+            new_content['data']['center'] = current_content['data']['center']
+            
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
