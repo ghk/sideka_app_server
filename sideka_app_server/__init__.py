@@ -187,8 +187,6 @@ def post_content(desa_id, content_type, content_subtype = None):
         mysql.connection.commit()
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         return jsonify({'success': True})
-    except Exception:
-        return jsonify({success: False, message: Exception}), 500
     finally:
         cur.close()
 
@@ -243,8 +241,6 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
             return jsonify({"change_id": change_id, "data": content["data"], "api_version": api_version })
         elif content.has_key("diffs"):
             return jsonify({"change_id": change_id, "diffs": content['diffs'], "api_version": api_version })
-    except Exception, e:
-        return jsonify({"message": str(e)}), 500
     finally:
         cur.close()
 
