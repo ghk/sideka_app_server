@@ -221,7 +221,7 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
         content = json.loads(cursor[0])
         change_id = cursor[1]
         api_version = cursor[2]
-        
+
         if api_version != app.config["API_VERSION"]:
             new_content = {"changeId": 0, "data": [], "columns": [], "apiVersion": app.config["API_VERSION"]}
 
@@ -232,9 +232,6 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
             
             if content.has_key("columns"):
                 new_content["columns"] = content["columns"]
-            
-            if content_type == 'map':
-                new_content['data']['center'] = content['data']['center']
             
             new_content["changeId"] = change_id + 1
             query_insert = "INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)"
