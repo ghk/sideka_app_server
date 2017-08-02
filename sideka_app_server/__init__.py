@@ -150,10 +150,10 @@ def post_content(desa_id, content_type, content_subtype = None):
         api_version = app.config["API_VERSION"]
 
         cur.execute("SELECT COUNT(*) FROM sd_contents WHERE desa_id = %s AND type = %s AND api_version = %s", (desa_id, content_type, api_version))
-        new_data_api = int(cur.fetchone()[0])
+        total_data_api = int(cur.fetchone()[0])
 
-        if new_data_api > 0:
-            return jsonify({"error": "Sideka needs to be updated"}), 500
+        if total_data_api > 0:
+            return jsonify({"error": "Sideka desktop needs to be updated"}), 500
         
         if user_id is None:
             return jsonify({'success': False}), 403
@@ -236,11 +236,19 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
             cur.execute(query_insert, (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_content["changeId"], app.config["API_VERSION"]))
             mysql.connection.commit()
             return jsonify({"change_id": new_content["changeId"], "data": new_content["data"], "api_version": api_version})
-            
-        elif client_change_id == 0 or content.has_key("diffs") == False:
-            return jsonify({"change_id": change_id, "data": content["data"], "api_version": api_version })
+        
+        return_data = {"change_id": change_id, "api_version": api_version }
+
+        if content["center"]:
+           return_data["center"] = content["center"]
+           
+        if client_change_id == 0 or content.has_key("diffs") == False:
+            return_data["data"] = content["data"]
         elif content.has_key("diffs"):
-            return jsonify({"change_id": change_id, "diffs": content['diffs'], "api_version": api_version })
+            return_data["diffs"] = content["diffs"]
+
+        return jsonify(return_data)
+
     finally:
         cur.close()
 
@@ -316,40 +324,29 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
         cur.execute(current_content_query, (content_type, content_subtype, desa_id, client_change_id))
         cursor_current_content = cur.fetchone()
         
-        #if there is no data in server at all
         if cursor_current_content is None:
-           for key, value in request.json["columns"].items():   
-               if content_type == 'map':
-                   new_content['data'][key] = merge_map_diffs(new_content['diffs'][key], [])
-               else:
-                   new_content['data'][key] = merge_diffs(new_content['diffs'][key], [])
-
-           diffs = new_content['diffs']
+            current_content = new_content
         else:
             current_content = json.loads(cursor_current_content[0])
+        
+        merge_method = None
 
-            if isinstance(current_content["data"], list):
-                new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
-            elif isinstance(current_content["data"], dict):
-                for key, value in request.json["columns"].items():
-                    if content_type != 'map':
-                        if len(new_content["diffs"][key]) > 0:
-                            new_content["data"][key] = merge_diffs(new_content["diffs"][key], current_content["data"][key])
-                        else:
-                            new_content["data"][key] = current_content["data"][key]
+        if isinstance(current_content["data"], list):
+            new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
+        elif isinstance(current_content["data"], dict):
+            for key, value in request.json["columns"].items():
+                if(len(new_content["diffs"][key]) > 0):
+                   merge_method = merge_map_diffs if content_type == 'map' else merge_diffs
+                   new_content["data"][key] = merge_method(new_content["diffs"][key], current_content["data"][key])
+                else:
+                    new_content["data"][key] = current_content["data"][key]
 
-                        new_content["columns"][key] = request.json["columns"][key]
-                    elif content_type == 'map':
-                        if len(new_content["diffs"][key]) > 0:
-                            new_content["data"][key] = merge_map_diffs(new_content["diffs"][key], current_content["data"][key])
-                        else:
-                            new_content["data"][key] = current_content["data"][key]
-
+                new_content["data"][key] = current_content["data"][key]
+                
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         suceess = True
-
         return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs })
     finally:
         cur.close()
