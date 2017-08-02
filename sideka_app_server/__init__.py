@@ -239,9 +239,9 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
         
         return_data = {"change_id": change_id, "api_version": api_version }
 
-        if content["center"]:
+        if content.has_key("center"):
            return_data["center"] = content["center"]
-           
+
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
         elif content.has_key("diffs"):
