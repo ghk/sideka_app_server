@@ -330,6 +330,7 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
             current_content = json.loads(cursor_current_content[0])
         
         merge_method = None
+        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs}
 
         if isinstance(current_content["data"], list):
             new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
@@ -346,8 +347,12 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
-        suceess = True
-        return jsonify({"success": True, "change_id": new_change_id, "diffs": diffs })
+        return_data['success'] = True
+
+        if content_type == 'map':
+            return_data['center'] = new_content['center']
+            
+        return jsonify(return_data)
     finally:
         cur.close()
 @app.route('/desa', methods=["GET"])
