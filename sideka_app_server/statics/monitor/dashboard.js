@@ -298,7 +298,8 @@ function addMarker(content,icon) {
 		icon: host+pathImage
 	});
 
-	var content = 'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
+	var content = 'Website: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
+				  'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
 				  'Apbdes: '+(content.apbdes.score*100).toFixed(2);

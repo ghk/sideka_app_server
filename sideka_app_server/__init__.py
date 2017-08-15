@@ -39,7 +39,7 @@ def login():
         success = phasher.check_password(login["password"], user[1])
 
         if success == False:
-            return jsonify({success: False, message: 'Password is not found'}), 401
+            return jsonify({"success": False, "message": 'Password is not found'}), 401
         
         user_id = user[0]
         user_nicename = user[2]
@@ -47,7 +47,7 @@ def login():
         primary_blog = cur.fetchone()
 
         if primary_blog is None:
-            return jsonify({success: False, message: 'Primary blog is not found'}), 403
+            return jsonify({"success": False, "message": 'Primary blog is not found'}), 403
         
         desa_id = int(primary_blog[0])
         cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % desa_id)
@@ -61,8 +61,8 @@ def login():
         mysql.connection.commit()
         logs(user_id, desa_id, token, "login", None, None)
         return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename, 'api_version': app.config["API_VERSION"]})
-    except Exception:
-        return jsonify({"success": False, "message": Exception}), 500
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -74,8 +74,8 @@ def logout():
         cur.execute("DELETE FROM sd_tokens where token = %s", (token, ))
         mysql.connection.commit()
         return jsonify({'success': True})
-    except Exception:
-        return jsonify({success: False, message: Exception}), 500
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -85,8 +85,8 @@ def check_auth(desa_id):
     try:
 		user_id = get_auth(desa_id, cur)
 		return jsonify({'user_id': user_id})
-    except Exception:
-        return jsonify({success: False, message: Exception}), 500
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
 		cur.close();
 
@@ -104,8 +104,8 @@ def get_content_subtype(desa_id, content_type):
         content = list(cur.fetchall())
         subtypes = [c[0] for c in content]
         return jsonify(subtypes)
-    except Exception:
-        return jsonify({success: False, message: Exception}), 500
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -135,8 +135,8 @@ def get_content(desa_id, content_type, content_subtype = None):
         logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
         result = json.loads(content[0])
         return jsonify(result)
-    except Exception:
-        return jsonify({success: False, message: Exception}), 500
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
