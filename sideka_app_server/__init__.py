@@ -62,6 +62,7 @@ def login():
         logs(user_id, desa_id, token, "login", None, None)
         return jsonify({'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token , 'user_id': user_id, 'user_nicename': user_nicename, 'api_version': app.config["API_VERSION"]})
     except Exception as e:
+        print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
@@ -75,6 +76,7 @@ def logout():
         mysql.connection.commit()
         return jsonify({'success': True})
     except Exception as e:
+        print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
@@ -86,6 +88,7 @@ def check_auth(desa_id):
 		user_id = get_auth(desa_id, cur)
 		return jsonify({'user_id': user_id})
     except Exception as e:
+        print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
 		cur.close();
@@ -105,6 +108,7 @@ def get_content_subtype(desa_id, content_type):
         subtypes = [c[0] for c in content]
         return jsonify(subtypes)
     except Exception as e:
+        print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
@@ -136,6 +140,7 @@ def get_content(desa_id, content_type, content_subtype = None):
         result = json.loads(content[0])
         return jsonify(result)
     except Exception as e:
+        print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
@@ -187,6 +192,9 @@ def post_content(desa_id, content_type, content_subtype = None):
         mysql.connection.commit()
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         return jsonify({'success': True})
+    except Exception as e:
+        print str(e)
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -248,7 +256,9 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
             return_data["diffs"] = content["diffs"]
 
         return jsonify(return_data)
-
+    except Exception as e:
+        print str(e)
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -343,7 +353,10 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
                     new_content["data"][key] = current_content["data"][key]
 
                 new_content["data"][key] = current_content["data"][key]
-                
+            
+            if content_type == 'map':
+                new_content['center'] = current_content['center']
+        
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
@@ -353,6 +366,9 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
             return_data['center'] = new_content['center']
             
         return jsonify(return_data)
+    except Exception as e:
+        print str(e)
+        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 @app.route('/desa', methods=["GET"])
