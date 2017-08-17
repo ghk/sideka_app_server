@@ -76,6 +76,9 @@ $.getJSON("/api/desa", function(desas){
 	  columnSorting: true,
 	  sortIndicator: true,
 	  rowHeaders: true,
+          schemaFilters: true,
+	  renderAllRows: false,
+	  dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 	  colHeaders: columns.map(c => c.header),
           afterChange: function(changes, source){
 		if(source != "loadData"){

@@ -1,9 +1,11 @@
 {% extends "admin/admin.html" %}
 {% block body %}
-	<div id="sheet"></div>
+	<div id="sheet" style="flex: 1; height: 100%; overflow: hidden;"></div>
+	<div class="flex-item">
+		<button id="btn-update-from-code">Update from Code</button>
+		<button id="btn-update-sd-desa">Update Desa</button>
+		<button id="btn-geocode-empty-latlong">Geocode Empty Lat Long</button>
+	</div>
 	<div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; background-color: yellow; padding: 20px;">Notification</div>
-	<button id="btn-update-from-code">Update from Code</button>
-	<button id="btn-update-sd-desa">Update Desa</button>
-	<button id="btn-geocode-empty-latlong">Geocode Empty Lat Long</button>
 	<script src="/statics/admin/desa.js"></script>
 {% endblock %}
