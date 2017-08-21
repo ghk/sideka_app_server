@@ -188,7 +188,7 @@ def post_content(desa_id, content_type, content_subtype = None):
             print "reseting to server timestamp, diff: %d" % (server_timestamp - timestamp)
             timestamp = server_timestamp
         
-        cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by, change_id) VALUES (%s, %s, %s, %s, %s, now(), %s, %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id, new_change_id))
+        cur.execute("INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by, change_id, api_version) VALUES (%s, %s, %s, %s, %s, now(), %s, %s, %s)",   (desa_id, content_type, content_subtype, request.data, timestamp, user_id, new_change_id, '1.0'))
         mysql.connection.commit()
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         return jsonify({'success': True})
