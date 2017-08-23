@@ -1,0 +1,27 @@
+body {
+	background: rgba(0, 0, 0, 0) url("/statics/content/img/hip-square.png") repeat scroll 0% 0%;
+}
+
+#container {
+	display: flex; 
+	flex-direction: column; 
+	height: 100%; 
+	width: 100%;
+}
+
+.nav-tabs > li > a {
+	border-radius: 0;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover{
+	background-color: rgba(240, 237, 230, 255);
+	font-weight: bold;
+}
+
+#sheet {
+	flex: 1; height: 100%; overflow: hidden;
+}
+
+.flex-item {
+	padding: 3px 15px;
+}

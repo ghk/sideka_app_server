@@ -223,7 +223,8 @@ def update_desa():
 	column = str(request.form.get('column'))
 	value = str(request.form.get('value'))
 	print blog_id, column, value
-	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping"];
+	allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"];
+	booleanColumns = ["is_dbt", "is_lokpri"]
 	if column not in allowedColumns:
 		return
 
@@ -232,7 +233,10 @@ def update_desa():
 
 	cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 	try:
+		
 		query = "UPDATE sd_desa set "+column+" = %s where blog_id = %s"
+		if column in booleanColumns:
+	        	value = int(value)
 		cur.execute(query, (value, blog_id))
 		mysql.connection.commit()
 		return jsonify({'success': True})

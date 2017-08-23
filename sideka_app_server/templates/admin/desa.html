@@ -1,9 +1,12 @@
 {% extends "admin/admin.html" %}
 {% block body %}
-	<div id="sheet"></div>
-	<div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; background-color: yellow; padding: 20px;">Notification</div>
-	<button id="btn-update-from-code">Update from Code</button>
-	<button id="btn-update-sd-desa">Update Desa</button>
-	<button id="btn-geocode-empty-latlong">Geocode Empty Lat Long</button>
+	<div id="sheet" style="flex: 1; height: 100%; overflow: hidden;"></div>
+	<div class="flex-item">
+		<span id="table-count"></span> 
+		<button id="btn-update-sd-desa">Update Desa dari Wordpress</button>
+		<button id="btn-update-from-code">Update Wilayah dari Kode</button>
+		<button id="btn-geocode-empty-latlong">Geocode Lat Long dari Wilayah</button>
+	</div>
+	<div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; background-color: #dff0d8; padding: 20px; z-index: 1000;">Notification</div>
 	<script src="/statics/admin/desa.js"></script>
 {% endblock %}
