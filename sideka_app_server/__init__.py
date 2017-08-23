@@ -213,16 +213,16 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
         if request.args.get("change_id", 0) is not None:
             client_change_id = int(request.args.get("changeId", "0"))
         
-        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
+        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
 
         if content_subtype is None:
-            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
+            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
         
         cur.execute(content_query, (content_type, content_subtype, desa_id, client_change_id))
         cursor = cur.fetchone()
 
         if cursor is None:
-            return jsonify({}), 404
+            return jsonify({"success": True, "change_id": client_change_id})
         
         content = json.loads(cursor[0])
         change_id = cursor[1]
@@ -322,8 +322,8 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
                     for diff in content["diffs"][key]:
                         diffs[key].append(diff)
         
-        if content_subtype != None and content_subtype == 'subtypes':
-            return jsonify({}), 404
+        if content_subtype == 'subtypes':
+            return jsonify({success: False}), 500
         
         new_change_id = max_change_id + 1
         current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id=%s"
@@ -366,9 +366,6 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
             return_data['center'] = new_content['center']
             
         return jsonify(return_data)
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 @app.route('/desa', methods=["GET"])
