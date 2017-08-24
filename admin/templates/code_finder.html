@@ -1,0 +1,21 @@
+{% extends "admin.html" %}
+{% block body %}
+	<form id="form-finder" class="flex-item">
+	<input type="text" id="input-finder" style="width: 300px;">
+	<input type="checkbox" id="is-full-search"> Cari Penuh
+	</form>
+	<table class="table table-condensed table-bordered table-striped flex-item" id="result-finder" style="flex: 1;">
+		<thead>
+			<tr>
+				<th>Kode</th>
+				<th>Desa</th>
+				<th>Kecamatan</th>
+				<th>Kabupaten</th>
+				<th>Propinsi</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<script src="/static/scripts/code_finder.js"></script>
+{% endblock %}

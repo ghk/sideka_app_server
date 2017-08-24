@@ -1,3 +1,4 @@
-*.swp
-*.pyc
-sideka_app_server/app.cfg
+.idea
+.vscode
+venv
+app/app.cfg
