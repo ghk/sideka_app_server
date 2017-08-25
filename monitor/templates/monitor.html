@@ -1,29 +1,30 @@
 <!doctype html>
 <!--[if lte IE 9]> <html class="lte-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 9]><!--> <html lang="en"> <!--<![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en">
+<!--<![endif]-->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="msapplication-tap-highlight" content="no"/>
-    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0"/>
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0" />
 
     <title>Sideka Monitoring</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.2/css/uikit.almost-flat.min.css" media="all">
-    <link rel="stylesheet" href="{{ url_for('static', filename='statics/content/css/main.min.css')}}" media="all">
-    <link rel="stylesheet" href="{{ url_for('static', filename='statics/content/css/custom.css')}}" media="all">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />
+    <link rel="stylesheet" href="/static/content/css/main.min.css" media="all">
+    <link rel="stylesheet" href="/static/content/css/custom.css" media="all">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.css" />
 </head>
-<body class=" sidebar_main_open sidebar_main_swipe">
+
+<body class="sidebar_main_open sidebar_main_swipe">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/id.js"></script>
-    <script src="/statics/monitor/monitor.js"></script>
-<!--
--->
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/id.js"></script>
+    <script src="/static/scripts/monitor.js"></script>
 
     <!-- main header -->
     <header id="header_main">
@@ -44,7 +45,7 @@
                             <form class="uk-form">
                                 <select id="select-supradesa" class="uk-form-width-medium" style="margin:10px; padding: 5px; background-color: #fff;">
                                     <option value="null">Semua Desa</option>
-                                </select>  
+                                </select>
                             </form>
                         </li>
                     </ul>
@@ -56,7 +57,8 @@
                 </div>
             </nav>
         </div>
-    </header><!-- main header end -->
+    </header>
+    <!-- main header end -->
     <!-- main sidebar -->
     <aside id="sidebar_main">
         <div class="sidebar_main_header">
@@ -97,26 +99,28 @@
                 </li>
             </ul>
         </div>
-    </aside><!-- main sidebar end -->
-    
+    </aside>
+    <!-- main sidebar end -->
+
     <div id="page_content">
         <div id="page_content_inner">
-		{% block body %}{% endblock %}
+            {% block body %}{% endblock %}
         </div>
-    </div>   
-    
-	<script src="/statics/content/js/jquery.bez.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-	<script src="/statics/content/js/jquery.scrollbar.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.4.1/velocity.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.5/waves.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.20/autosize.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/screenfull.js/3.0.2/screenfull.min.js"></script>
-	<script src="{{ url_for('static', filename='/statics/content/js/altair_admin_common.js')}}"></script>
-	<script src="{{ url_for('static', filename='/statics/content/js/uikit_custom.min.js')}}"></script>
-<!--
+    </div>
+
+    <script src="/static/content/js/jquery.bez.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+    <script src="/static/content/js/jquery.scrollbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.4.1/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.5/waves.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/3.0.20/autosize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/screenfull.js/3.0.2/screenfull.min.js"></script>
+    <script src="/static/content/js/altair_admin_common.js"></script>
+    <script src="/static/content/js/uikit_custom.min.js"></script>
+    <!--
 	<script src="{{ url_for('static', filename='statics/content/js/common.min.js')}}"></script>    
--->
-    
+    -->
+
 </body>
+
 </html>

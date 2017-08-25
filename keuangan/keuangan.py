@@ -1,12 +1,14 @@
-from flask import Flask
+import sys
+sys.path.append('../common')
+
+from flask import Flask, send_from_directory
+import os, json
 
 app = Flask(__name__)
+app.secret_key = app.config["SECRET_KEY"]
+app.config.from_pyfile('../common/app.cfg')
+BASE_URL = os.path.abspath(os.path.dirname(__file__))
+CLIENT_FOLDER = os.path.join(BASE_URL, "client")
 
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
-
-if __name__ == '__main__':
-    app.run()
+if __name__ == "__main__":
+    app.run(debug=True, host=app.config["HOST"], port=app.config["KEUANGAN_PORT"])

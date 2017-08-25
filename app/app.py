@@ -477,4 +477,4 @@ def upload_map_indicator(desa_id, indicator):
         print "close"
 
 if __name__ == '__main__':
-    app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
+    app.run(debug=True, host=app.config["HOST"], port=app.config["APP_PORT"])
