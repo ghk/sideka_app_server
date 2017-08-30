@@ -8,7 +8,7 @@ function makeLinkRenderer(link, text){
 var columns = [
       {
 	data: 'blog_id',
-	header: 'Wordpress ID',
+	header: 'W ID',
 	renderer: makeLinkRenderer(v => "https://sideka.id/wp-admin/network/site-info.php?id="+v, v => v),
 	readOnly: true,
       },
@@ -33,6 +33,16 @@ var columns = [
 	header: 'Longitude',
 	format: '0.0000000',
 	type: 'numeric',
+      },
+      {	
+	data: 'is_dbt',
+	header: 'DBT?',
+	type: 'checkbox',
+      },
+      {	
+	data: 'is_lokpri',
+	header: 'LokPri?',
+	type: 'checkbox',
       },
       {	
 	data: 'desa',
@@ -67,7 +77,42 @@ var columns = [
 	header: 'Pendamping',
       },
     ];
+
+function initializeTableCount(hot, spanCount){
+    //bug on first call 
+    var firstCall = true; 
+    var updateCount = function(){
+            var all = hot.getSourceData().length;
+            var filtered = hot.getData().length;
+            var text = all;
+            if(!firstCall && all != filtered){
+                text = filtered + " dari " + all;
+            }
+            spanCount.innerHTML = text + " baris";
+            firstCall = false; 
+    }
+    
+    Handsontable.hooks.add('afterLoadData', updateCount);
+    Handsontable.hooks.add('afterFilter', updateCount);
+    Handsontable.hooks.add('afterChange', updateCount);
+    Handsontable.hooks.add('afterRemoveRow', updateCount);
+    updateCount();
+} 
+
+function convertBoolean(rows, column){
+	for(var i = 0, len = rows.length; i < len; i++){
+		var val = rows[i][column]
+		if(val ===  '\u0000')
+			val = false;
+		if(val ===  '\u0001')
+			val = true;
+		rows[i][column]=val;
+	}
+}
+
 $.getJSON("/api/desa", function(desas){
+	convertBoolean(desas, 'is_dbt');
+	convertBoolean(desas, 'is_lokpri');
 	var container = document.getElementById('sheet');
 
 	var hot = new Handsontable(container, {
@@ -76,16 +121,24 @@ $.getJSON("/api/desa", function(desas){
 	  columnSorting: true,
 	  sortIndicator: true,
 	  rowHeaders: true,
+          schemaFilters: true,
+	  renderAllRows: false,
+	  dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 	  colHeaders: columns.map(c => c.header),
           afterChange: function(changes, source){
 		if(source != "loadData"){
 			changes.forEach(function(change){
-				var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping"];
+				var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"];
 				var column = change[1];	
 				var value = change[3];
 				var prevvalue = change[2];
 				var id = hot.getDataAtCell(change[0], 0);
+				console.log(column, value, prevvalue, id);
 				if(id && allowedColumns.indexOf(column) >= 0 && prevvalue != value){
+					if(value === false)
+						value = '0';
+					if(value === true)
+						value = '1';
 					$("#notification").html("Menyimpan...").show();
 					$.post( "/api/desa", { blog_id: id, column: column, value: value})
 					  .done(function( data ) {
@@ -99,7 +152,10 @@ $.getJSON("/api/desa", function(desas){
 		}		
 	  },
 	});
-	setTimeout(()=> hot.render(), 0);
+	setTimeout(()=> {
+		hot.render();
+		initializeTableCount(hot, $("#table-count")[0]);
+	}, 0);
 });
 
 $("#btn-update-from-code").click(function(){
