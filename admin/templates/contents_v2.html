@@ -1,6 +1,11 @@
 {% extends "admin.html" %}
 {% block body %}
-	<div class="flex-item">Current time: {{now}}</div>
+	<div class="flex-item">
+		<form id='filter-form' style='display: inline;'>
+			<input type='text' name='filter-textbox' placeholder='Desa ID atau domain'>
+		</form>
+		Current time: {{now}}
+	</div>
 	<div id="sheet"></div>
 	<script src="/static/scripts/contents_v2.js"></script>
 {% endblock %}

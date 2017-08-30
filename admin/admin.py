@@ -361,9 +361,33 @@ def get_contents():
 def get_contents_v2():
     cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     try:
-        query = "SELECT sd_contents.id, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' order by date_created desc limit 1000"
-        cur.execute(query)
+        filter_value = request.args.get("desa_id", "true")
+	filter_text = "'true' = %s"
+	if filter_value != "true":
+		filter_text = "desa_id = %s"
+		filter_value = int(filter_value)
+        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and "+filter_text+" order by date_created desc limit 100"
+        cur.execute(query, (filter_value,))
         contents = list(cur.fetchall())
+	for c in contents:
+		j = json.loads(c["content"])
+		if "data" in j and "keys" in dir(j["data"]):
+			keys = j["data"].keys()
+			for i, key in enumerate(keys):
+				c["d"+str(i)]=len(j["data"][key])
+		if "diffs" in j:
+			added = 0
+			modified = 0
+			deleted = 0
+			for l in j["diffs"].values():
+				for d in l:
+					added += len(d["added"])
+					modified += len(d["modified"])
+					deleted += len(d["deleted"])
+			c["added"] = added
+			c["modified"] = modified
+			c["deleted"] = deleted
+		del c["content"]
         return jsonify(contents)
     finally:
         cur.close()

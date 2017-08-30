@@ -29,8 +29,32 @@ var columns = [
         header: 'SubType',
       },
       {
-        data: 'timestamp',
-        header: 'Timestamp',
+        data: 'd0',
+        header: 'Data 0',
+      },
+      {
+        data: 'd1',
+        header: 'Data 1',
+      },
+      {
+        data: 'd2',
+        header: 'Data 2',
+      },
+      {
+        data: 'd3',
+        header: 'Data 3',
+      },
+      {
+        data: 'added',
+        header: 'Added',
+      },
+      {
+        data: 'modified',
+        header: 'Modified',
+      },
+      {
+        data: 'deleted',
+        header: 'Deleted',
       },
       {	
         data: 'date_created',
@@ -58,10 +82,12 @@ columns.forEach(c => {
 	c.readOnly = true;
 });
 
+var hot;
+
 $.getJSON("/api/contents/v2", function(data){
 	var container = document.getElementById('sheet');
 
-	var hot = new Handsontable(container, {
+	hot = new Handsontable(container, {
 	  data: data,
 	  columns: columns,
 	  rowHeaders: true,
@@ -69,4 +95,16 @@ $.getJSON("/api/contents/v2", function(data){
 	  colHeaders: columns.map(c => c.header),
 	});
 	setTimeout(()=> hot.render(), 0);
+});
+
+$("#filter-form").submit(function(){
+	var desa_id=$("input[name='filter-textbox']").val();
+	var query_string = "";
+	if(desa_id)
+		query_string = "?desa_id="+desa_id;
+	$.getJSON("/api/contents/v2"+query_string, function(data){
+		hot.loadData(data);
+		setTimeout(()=> hot.render(), 0);
+	});
+	return false;
 });
