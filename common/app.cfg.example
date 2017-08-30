@@ -11,5 +11,5 @@ TATAKELOLA_PORT=5004
 KEUANGAN_PORT=5005
 KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ingininiinginitubanyaksekali@database.neon.microvac/sideka_keuangan"
 CKAN_HOST="http://data.prakarsadesa.id"
-CKAN_KEY="712e7e8d-bf1b-4a2a-9a3c-60f4eb2e49a4"
+CKAN_KEY=""
 SECRET_KEY="microvac"
