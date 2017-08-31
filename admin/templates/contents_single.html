@@ -1,0 +1,10 @@
+{% extends "admin.html" %}
+{% block body %}
+	<div class="flex-item">Desa ID: {{desa_id}}, Type: {{typ}}, Sub Type: {{subtyp}}</div>
+	<div id="sheet"></div>
+	<script>
+		var content = {{content | safe}};
+		var schema = {{schema | safe}};
+	</script>
+	<script src="/static/scripts/contents_single.js"></script>
+{% endblock %}

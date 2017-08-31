@@ -1,0 +1,37 @@
+{% extends "admin.html" %}
+{% block body %}
+
+	<style>
+		.nav-pills > li > a {
+			border-radius: 0;
+			padding: 5px;
+		}
+	</style>
+	
+	<div class="flex-item">
+		<span style="line-height: 40px; vertical-align: top;">Desa ID: {{desa_id}}, Type: {{typ}}, Sub Type: {{subtyp}}</span>
+		<ul class="nav nav-pills flex-item" role="tablist" id="nav-data" style="display: inline-block;">
+			{% for x in keys %}
+
+				<li role="presentation" id="{{x}}">
+					<a href="/contents/v2/{{content_id}}/data?sheet={{x}}" id="penduduk-link" aria-controls="home" role="tab" data-toggle="tab">{{x}}</a>
+				</li>
+
+			{% endfor %}
+		</ul>
+	</div>
+	<div class="flex-item">
+		<span>
+			<input type="radio" name="mode" value="data" onclick="onModeChange(this)" checked> Data &nbsp;
+			<input type="radio" name="mode" value="added" onclick="onModeChange(this)"> Added &nbsp; 
+			<input type="radio" name="mode" value="modified" onclick="onModeChange(this)"> Modified &nbsp;
+			<input type="radio" name="mode" value="deleted" onclick="onModeChange(this)"> Deleted &nbsp;
+		</span>
+	</div>
+	<div id="sheet"></div>
+	<script>
+		var content = {{content | safe}};
+		var schema = {{schema | safe}};
+	</script>
+	<script src="/static/scripts/contents_v2_single.js"></script>
+{% endblock %}
