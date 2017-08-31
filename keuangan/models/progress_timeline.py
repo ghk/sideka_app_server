@@ -1,5 +1,8 @@
 from keuangan import db
-from keuangan.models import BaseModel
+from keuangan import ma
+from base import BaseModel
+from region import RegionSchema
+
 
 class ProgressTimeline(BaseModel):
     __tablename__ = 'progress_timelines'
@@ -14,14 +17,13 @@ class ProgressTimeline(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region')
 
-    def __init__(self, apbn_key, month, transferred_dd, transferred_add, transferred_bhpr, realized_spending):
-        self.apbn_key = apbn_key
-        self.month = month
-        self.transferred_dd = transferred_dd
-        self.transferred_add = transferred_add
-        self.transferred_bhpr = transferred_bhpr
-        self.realized_spending = realized_spending
-
     def __repr__(self):
         return '<ProgressTimeline %r>' % self.id
 
+
+class ProgressTimelineSchema(ma.ModelSchema):
+    class Meta:
+        model = ProgressTimeline
+        include_fk = True
+
+    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))
