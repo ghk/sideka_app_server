@@ -174,7 +174,7 @@ def contents_single(content_id):
         typ = result["type"]
         subtyp = result["subtype"]
         desa_id = result["desa_id"]
-        schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "schemas/" + typ + ".json")
+        schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + typ + ".json")
         print schema_file
         with open(schema_file, 'r') as myfile:
             schema = myfile.read()
@@ -211,7 +211,7 @@ def contents_v2_single(content_id, type='data'):
 
         if sheet == 'penduduk':
             sheet = 'penduduk_v2'
-            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "schemas/" + sheet + ".json"),
+            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + sheet + ".json"),
                       'r') as myFile: schema = myFile.read()
 
         return render_template('contents_v2_single.html', active='contents_v2', keys=keys, content_id=content_id,

@@ -290,7 +290,7 @@ function initMaps(supradesaId){
 
 function addMarker(content,icon) {
 	var host = window.location.origin;
-	var pathImage = "/statics/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
+	var pathImage = "/static/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
 	var loc = {lat: content.latitude,lng:content.longitude}
 	var marker = new google.maps.Marker({
 		position: loc,

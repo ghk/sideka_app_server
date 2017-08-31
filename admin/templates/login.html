@@ -1,31 +1,28 @@
 <html>
-<head>
-    <title>login</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/styles/admin.css"/>
-    <link rel="stylesheet" href="/static/content/css/custom.css" media="all">
-</head>
-<body>
-<div class="container">
-    <div class="row">
-        <div class="col-sm-6 col-md-4 col-md-offset-4">
-            <h1 class="text-center login-title">admin.sideka.id</h1>
-            <div class="account-wall">
-                <img class="profile-img"
-                     src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
-                     alt="">
-                <form class="form-signin" method="POST">
-                    <input type="text" class="form-control" name="nickname" id="nickname" placeholder="Nama Pengguna"
-                           required autofocus>
-                    <input type="password" class="form-control" name="pw" id="pw" placeholder="Password" required>
-                    <button class="btn btn-lg btn-primary btn-block" type="submit" name="submit">
-                        Sign in
-                    </button>
-                </form>
+    <head>
+        <title>login</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+            <link rel="stylesheet" href="/static/styles/admin.css" />	
+	    <link rel="stylesheet" href="/static/styles/login.css" media="all">
+    </head>
+    <body>            
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-md-4 col-md-offset-4">
+                    <h1 class="text-center login-title">admin.sideka.id</h1>
+                    <div class="account-wall">
+                        <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
+                            alt="">
+                        <form class="form-signin" method="POST">
+                            <input type="text" class="form-control" name="nickname" id="nickname" placeholder="Nama Pengguna" required autofocus>
+                            <input type="password" class="form-control" name="pw" id="pw" placeholder="Password" required>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit" name="submit">
+                                Sign in
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-</body>
+    </body>
 </html>

@@ -30,17 +30,21 @@ setTimeout(function() {
 
 function onModeChange(radio){
     var value = radio.value;
+    console.log(value);
     var result = [];
 
-    if(value === 'diffs'){
-        if(content['diffs'])
-            result = parseDiffs(content['diffs'][sheet]);
-    }
-    else{
+    if(value === 'data'){
         result = content.data[sheet];
     }
+    else{
+        if(content['diffs']){
+            result = content['diffs'][sheet][0][value];
+	}
+    }
 
+    console.log(content);
     hot.loadData(result);
+    hot.render;
 }
 
 function parseDiffs(data){
