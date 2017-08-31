@@ -246,10 +246,7 @@ def get_content_v2(desa_id, content_type, content_subtype = None):
             return jsonify({"change_id": new_content["changeId"], "data": new_content["data"], "api_version": api_version})
         
         return_data = {"change_id": change_id, "api_version": api_version }
-
-        if content.has_key("center"):
-           return_data["center"] = content["center"]
-
+        
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
         elif content.has_key("diffs"):
@@ -307,9 +304,6 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
             new_content["columns"][key] = value
             new_content["diffs"][key] = request.json["diffs"][key]
             diffs[key] = []
-        
-        if content_type == 'map':
-            new_content['center'] = request.json['center']
 
         if len(cursor_contents) >  0:
             for value in cursor_contents:
@@ -347,24 +341,18 @@ def post_content_v2(desa_id, content_type, content_subtype = None):
         elif isinstance(current_content["data"], dict):
             for key, value in request.json["columns"].items():
                 if(len(new_content["diffs"][key]) > 0):
-                   merge_method = merge_map_diffs if content_type == 'map' else merge_diffs
+                   merge_method = merge_map_diffs if content_type == 'pemetaan' else merge_diffs
                    new_content["data"][key] = merge_method(new_content["diffs"][key], current_content["data"][key])
                 else:
                     new_content["data"][key] = current_content["data"][key]
 
                 new_content["data"][key] = current_content["data"][key]
             
-            if content_type == 'map':
-                new_content['center'] = current_content['center']
-        
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         return_data['success'] = True
-
-        if content_type == 'map':
-            return_data['center'] = new_content['center']
-            
+        
         return jsonify(return_data)
     finally:
         cur.close()
@@ -427,21 +415,5 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
 	mysql.connection.commit()
 	cur.close();
 
-
-@app.route('/content-map/v2/<int:desa_id>/<indicator>', methods=['POST'])
-def upload_map_indicator(desa_id, indicator):
-    try:
-        geojson = request.json["data"]
-        result = []
-
-        for data in geojson['features']:
-            data['id'] =base64.urlsafe_b64encode(uuid.uuid4().bytes).strip("=")
-            data['indicator'] = indicator
-            data['properties'] = {}
-            result.append(data)
-
-        return jsonify({"success": True, "data": result })
-    finally:
-        print "close"
 if __name__ == '__main__':
     app.run(debug=True, host=app.config["HOST"], port=app.config["PORT"])
