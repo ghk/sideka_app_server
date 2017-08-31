@@ -1,5 +1,8 @@
 from keuangan import db
-from keuangan.models import BaseModel
+from keuangan import ma
+from base import BaseModel
+from region import RegionSchema
+
 
 class ProgressRecapitulation(BaseModel):
     __tablename__ = 'progress_recapitulations'
@@ -11,11 +14,13 @@ class ProgressRecapitulation(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region')
 
-    def __init__(self, transfered_revenue, realized_revenue, apbn_key):
-        self.transferred_revenue = transfered_revenue
-        self.realized_revenue = realized_revenue
-        self.apbn_key = apbn_key
-
     def __repr__(self):
         return '<ProgressRecapitulation %r>' % self.id
 
+
+class ProgressRecapitulationSchema(ma.ModelSchema):
+    class Meta:
+        model = ProgressRecapitulation
+        include_fk = True
+
+    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))

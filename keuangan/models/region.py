@@ -1,5 +1,7 @@
 from keuangan import db
-from keuangan.models import BaseModel
+from keuangan import ma
+from base import BaseModel
+
 
 class Region(BaseModel):
     __tablename__ = 'regions'
@@ -10,18 +12,25 @@ class Region(BaseModel):
     url_key = db.Column(db.Text)
     is_kelurahan = db.Column(db.Boolean, nullable=False, default=False)
     is_in_scope = db.Column(db.Boolean, nullable=False, default=False)
+    is_lokpri = db.Column(db.Boolean, nullable=False, default=False)
 
     fk_parent_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    parent = db.relationship('Parent', remote_side=[id])
+    parent = db.relationship('Region', remote_side=[id])
 
-    def __init__(self, name, type, website, url_key, is_kelurahan, is_in_scope):
-        self.name = name
-        self.type = type
-        self.website = website
-        self.url_key = url_key
-        self.is_kelurahan = is_kelurahan
-        self.is_in_scope = is_in_scope
+    __table_args__ = (
+        db.Index('regions_IX_fk_parent_id', 'fk_parent_id'),
+        db.Index('regions_IX_url_key', 'url_key'),
+        db.Index('regions_IX_id_is_lokpri', 'id', 'is_lokpri'),
+        db.Index('regions_IX_is_lokpri', 'is_lokpri'),
+    )
 
     def __repr__(self):
         return '<Region %r>' % self.id
 
+
+class RegionSchema(ma.ModelSchema):
+    class Meta:
+        model = Region
+        include_fk = True
+
+    #parent = ma.Nested('self', many=False, exclude=('parent', ))

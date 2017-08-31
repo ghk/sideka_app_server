@@ -1,4 +1,7 @@
 from base import BaseModel
 from progress_recapitulation import ProgressRecapitulation
+from progress_recapitulation import ProgressRecapitulationSchema
 from progress_timeline import ProgressTimeline
+from progress_timeline import ProgressTimelineSchema
 from region import Region
+from region import RegionSchema
