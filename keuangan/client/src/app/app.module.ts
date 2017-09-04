@@ -2,10 +2,12 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
+import { HttpModule } from '@angular/http';
+import { ProgressHttpModule } from 'angular-progress-http';
 
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
-import { TransferRecapitulationComponent } from './components/transfer-recapitulation';
+import { ProgressRecapitulationComponent } from './components/progress-recapitulation';
 
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
@@ -14,15 +16,17 @@ import { SharedService } from './services/shared';
   declarations: [
     AppComponent,
     HeaderComponent,
-    TransferRecapitulationComponent
+    ProgressRecapitulationComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpModule,
+    ProgressHttpModule,
     RouterModule.forRoot([
       { path: '', redirectTo: '', pathMatch: 'full' },
-      { path: 'transfer', component: TransferRecapitulationComponent}
-    ])
+      { path: 'progress', component: ProgressRecapitulationComponent}
+    ]),
   ],
   providers: [
     DataService,

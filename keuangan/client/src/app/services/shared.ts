@@ -1,20 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
-import 'rxjs/add/observable/of';
+
+import { environment } from '../../environments/environment'; 
 
 @Injectable()
 export class SharedService {
 
-    private _regions: ReplaySubject<any>
+    private _config: any
+    private _config$: ReplaySubject<any>
 
     constructor() { }
 
-    getRegions(): Observable<any> {
-        if (!this._regions) {
-            this._regions = new ReplaySubject(1);
-            this._regions.next(null);
+    getConfig(refresh: boolean): Observable<any> {
+        if (!this._config$ || refresh) {
+            if (!this._config$)
+                this._config$ = new ReplaySubject(1);
+            this._config = environment;
+            this._config$.next(this._config);
         }
-        return this._regions;
+        return this._config$;
     }
-
 }

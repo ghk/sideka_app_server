@@ -5,3 +5,4 @@ node_modules
 common/app.cfg
 *.pyc
 *.swp
+npm-debug.log.*

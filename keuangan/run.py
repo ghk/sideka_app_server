@@ -22,7 +22,7 @@ def get_regions_count():
     return jsonify(result)
 
 
-@app.route('/api/region/<string:id>', methods=['GET'])
+@app.route('/api/regions/<string:id>', methods=['GET'])
 def get_region(id):
     region = db.session.query(Region).filter(Region.id == id and Region.is_lokpri == True).first()
     result = RegionSchema(many=False).dump(region)
@@ -31,11 +31,11 @@ def get_region(id):
 
 @app.route('/api/progress_recapitulations', methods=['GET'])
 def get_progress_recapitulations():
-    query = db.session.query(ProgressRecapitulation).all()
+    query = db.session.query(ProgressRecapitulation)
     query = QueryHelper.build_sort_query(query, ProgressRecapitulation, request)
     query = QueryHelper.build_page_query(query, request)
-    query = query.all()
-    result = ProgressRecapitulationSchema(many=True).dump(query)
+    prs = query.all()
+    result = ProgressRecapitulationSchema(many=True).dump(prs)
     return jsonify(result.data)
 
 

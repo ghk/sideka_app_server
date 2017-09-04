@@ -1,0 +1,85 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8" style="border-right: 1px solid #ddd;">
+            <ul class="nav nav-tabs front-numbers">
+                <li>
+                    <span class="number text-primary">Rp. {{ total.transferredRevenue }}</span>
+                </li>
+                <li>
+                    <span class="number text-success">Rp. {{ total.transferredRevenue }}</span>
+                    <span class="text text-success">Tersalurkan Kabupaten</span>
+                </li>
+                <li>
+                    <span class="number text-success">Rp. {{ total.realizedRevenue }}</span>
+                    <span class="text text-success">Terrealisasi Desa</span>
+                </li>
+            </ul>
+
+            <div class="content-header">
+                Pencapaian Penyaluran &amp; Realisasi Anggaran Desa
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-condensed table-responsive table-bordered table-striped">
+                    <thead ng-show="!isEntitiesLoading">
+                        <tr>
+                            <th>Desa</th>
+                            <th class="money">Anggaran Desa</th>
+                            <th class="money">Terrealisasi Desa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let entity of entities">
+                            <td>
+                                <a href="/p/{{entity.RegionId}}">
+                                    <span>{{ entity.region.name }}</span> 
+                                </a>
+                            </td>
+                            <td class="money">
+                                <div style="float:right;">{{ entity.transferred_revenue }} </div>
+                                <div class="bar-percent"> </div>
+                            </td>
+                            <td class="money">
+                                <div style="float:right;">{{ entity.realized_revenue }} </div>
+                                <div class="bar-percent"> </div>
+                            </td>
+                        </tr>                      
+                    </tbody>
+
+                    <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
+                        <tr class="success">
+                            <td><a href>Total</a></td>
+                            <td class="money"> {{ total.transferredRevenue }} </td>
+                            <td class="money"> {{ total.realizedRevenue }} </td>
+                        </tr>
+                    </tfoot>
+                    <tfoot [hidden]="progress?.percentage === 100">
+                        <tr>
+                            <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                                <br>
+                                <br> Memuat data...
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div style="position: fixed; width: 31%;">
+                <div class="content-header">
+                    Penyaluran Seluruh Desa
+                </div>
+                <br>
+                <!-- Insert Angular-Chart Here -->
+                <br>
+                <div class="content-header">
+                    Realisasi Seluruh Desa
+                </div>
+                <br>
+                <!-- Insert Angular-Chart Here -->
+            </div>
+        </div>
+    </div>
+</div>
