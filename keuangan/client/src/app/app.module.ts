@@ -4,10 +4,12 @@ import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
+import { ChartsModule } from 'ng2-charts/ng2-charts';
 
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
 import { ProgressRecapitulationComponent } from './components/progress-recapitulation';
+import { ProgressTimelineComponent } from './components/progress-timeline';
 
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
@@ -16,13 +18,15 @@ import { SharedService } from './services/shared';
   declarations: [
     AppComponent,
     HeaderComponent,
-    ProgressRecapitulationComponent
+    ProgressRecapitulationComponent,
+    ProgressTimelineComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     HttpModule,
     ProgressHttpModule,
+    ChartsModule,
     RouterModule.forRoot([
       { path: '', redirectTo: '', pathMatch: 'full' },
       { path: 'progress', component: ProgressRecapitulationComponent}

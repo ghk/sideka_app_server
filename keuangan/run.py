@@ -45,22 +45,6 @@ def get_progress_recapitulations_count():
     return jsonify(result)
 
 
-@app.route('/api/progress_timelines', methods=['GET'])
-def get_progress_timelines():
-    query = db.session.query(ProgressTimeline)
-    query = QueryHelper.build_sort_query(query, ProgressTimeline, request)
-    query = QueryHelper.build_page_query(query, request)
-    query = query.all()
-    result = ProgressRecapitulationSchema(many=True).dump(query)
-    return jsonify(result.data)
-
-
-@app.route('/api/progress_timelines/count', methods=['GET'])
-def get_progress_timelines_count():
-    result = db.session.query(ProgressTimeline).count()
-    return jsonify(result)
-
-
 @app.route('/api/progress_recapitulations/generate', methods=['GET'])
 def generate_progress_recapitulations():
     regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
@@ -71,6 +55,32 @@ def generate_progress_recapitulations():
         db.session.add(pr)
 
     db.session.commit()
+
+
+@app.route('/api/progress_timelines', methods=['GET'])
+def get_progress_timelines():
+    query = db.session.query(ProgressTimeline)
+    query = QueryHelper.build_sort_query(query, ProgressTimeline, request)
+    query = QueryHelper.build_page_query(query, request)
+    pts = query.all()
+    result = ProgressTimelineSchema(many=True).dump(pts)
+    return jsonify(result.data)
+
+
+@app.route('/api/progress_timelines/count', methods=['GET'])
+def get_progress_timelines_count():
+    result = db.session.query(ProgressTimeline).count()
+    return jsonify(result)
+
+
+@app.route('/api/progress_timelines/region/<string:region_id>', methods=['GET'])
+def get_region_progress_timelines(region_id):
+    query = db.session.query(ProgressTimeline)\
+        .join(ProgressTimeline.region, aliased=True)\
+        .filter(Region.id == region_id)
+    pts = query.all()
+    result = ProgressTimelineSchema(many=True).dump(pts)
+    return jsonify(result.data)
 
 
 @app.route('/api/progress_timelines/generate', methods=['GET'])

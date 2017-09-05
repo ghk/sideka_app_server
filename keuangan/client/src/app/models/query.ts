@@ -1,6 +1,6 @@
 export interface Query {
-    keywords: string;
-    page: number;
-    perPage: number;
-    sort: string;
+    keywords?: string;
+    page?: number;
+    perPage?: number;
+    sort?: string;
 }
