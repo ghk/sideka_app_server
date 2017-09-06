@@ -24,7 +24,7 @@ export class DataService {
   }
 
   getRegions(query: Query, progressListener: any): Observable<any> {
-    let result = RequestHelper.generateHttpRequest(
+    let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
       this._serverUrl + '/api/regions',
@@ -32,13 +32,13 @@ export class DataService {
       progressListener
     );
 
-    return result
+    return request
       .map(res => res.json())
       .catch(this.handleError)
   }
 
   getProgressRecapitulations(query: Query, progressListener: any): Observable<any> {
-    let result = RequestHelper.generateHttpRequest(
+    let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
       this._serverUrl + '/api/progress_recapitulations',
@@ -46,13 +46,13 @@ export class DataService {
       progressListener
     );
 
-    return result
+    return request
       .map(res => res.json())
       .catch(this.handleError)
   }
 
   getProgressTimelines(query: Query, progressListener: any): Observable<any> {
-    let result = RequestHelper.generateHttpRequest(
+    let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
       this._serverUrl + '/api/progress_timelines',
@@ -60,13 +60,13 @@ export class DataService {
       progressListener
     );
     
-    return result
+    return request
       .map(res => res.json())
       .catch(this.handleError)
   }
 
   getRegionProgressTimelines(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let result = RequestHelper.generateHttpRequest(
+    let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
       this._serverUrl + '/api/progress_timelines/regions/' + regionId,
@@ -74,7 +74,35 @@ export class DataService {
       progressListener
     );
     
-    return result
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
+  getSpendingTypes(query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      this._serverUrl + '/api/spending_types',
+      query,
+      progressListener
+    )
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
+  getSpendingRecapitulations(query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      this._serverUrl + '/api/spending_recapitulations',
+      query,
+      progressListener
+    )
+
+    return request
       .map(res => res.json())
       .catch(this.handleError)
   }

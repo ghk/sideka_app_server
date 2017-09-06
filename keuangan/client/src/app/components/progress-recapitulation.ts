@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
+import { Query } from '../models/query';
 
 @Component({
   selector: 'sk-progress-recapitulation',

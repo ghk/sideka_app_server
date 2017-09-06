@@ -17,9 +17,6 @@ class ProgressTimeline(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
-    def __repr__(self):
-        return '<ProgressTimeline %r>' % self.id
-
 
 class ProgressTimelineSchema(ma.ModelSchema):
     class Meta:

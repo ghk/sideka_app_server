@@ -97,6 +97,58 @@ def generate_progress_timelines():
     db.session.commit()
 
 
+@app.route('/api/spending_types', methods=['GET'])
+def get_spending_types():
+    spending_types = db.session.query(SpendingType).all()
+    result = SpendingTypeSchema(many=True).dump(spending_types)
+    return jsonify(result.data)
+
+
+@app.route('/api/spending_types/generate', methods=['GET'])
+def generate_spending_types():
+    spending_types = ['Pendapatan', 'Infrastruktur', 'Ekonomi dan Pembinaan Masyarakat',
+                      'Pendidikan dan Pelatihan', 'Belanja Pegawai', 'Pemerintahan Umum',
+                      'Pembangunan Kantor Desa']
+    for spending_type in spending_types:
+        for is_realization in [True, False]:
+            st = SpendingType()
+            st.name = spending_type
+            st.is_realization = is_realization
+            db.session.add(st)
+
+    db.session.commit()
+
+
+@app.route('/api/spending_recapitulations', methods=['GET'])
+def get_spending_recapitulations():
+    query = db.session.query(SpendingRecapitulation)
+    query = QueryHelper.build_sort_query(query, SpendingRecapitulation, request)
+    query = QueryHelper.build_page_query(query, request)
+    srs = query.all()
+    result = SpendingRecapitulationSchema(many=True).dump(srs)
+    return jsonify(result.data)
+
+
+@app.route('/api/spending_recapitulations/count', methods=['GET'])
+def get_spending_recapitulations_count():
+    result = db.session.query(SpendingRecapitulation).count()
+    return jsonify(result)
+
+
+@app.route('/api/spending_recapitulations/generate', methods=['GET'])
+def generate_spending_recapitulations():
+    regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
+    spending_types = db.session.query(SpendingType).all()
+    for region in regions:
+        for spending_type in spending_types:
+            sr = Generator.generate_spending_recapitulations(spending_type.is_realization)
+            sr.fk_region_id = region.id
+            sr.fk_type_id = spending_type.id
+            db.session.add(sr)
+
+    db.session.commit()
+
+
 if __name__ == "__main__":
     db.create_all();
     app.run(debug=True, host=app.config["HOST"], port=app.config["KEUANGAN_PORT"])

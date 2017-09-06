@@ -1,5 +1,6 @@
 from keuangan.models import ProgressRecapitulation
 from keuangan.models import ProgressTimeline
+from keuangan.models import SpendingRecapitulation
 from datetime import datetime
 import random
 import decimal
@@ -24,4 +25,12 @@ class Generator:
         result.transferred_add = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
         result.transferred_bhpr = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
         result.realized_spending = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
+        return result
+
+    @staticmethod
+    def generate_spending_recapitulations(is_realization):
+        result = SpendingRecapitulation()
+        result.value = decimal.Decimal(random.randrange(10000000, 100000000)) / 100
+        if is_realization:
+            result.value = result.value / (random.randrange(1, 10))
         return result

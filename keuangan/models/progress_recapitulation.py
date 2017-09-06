@@ -14,9 +14,6 @@ class ProgressRecapitulation(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
-    def __repr__(self):
-        return '<ProgressRecapitulation %r>' % self.id
-
 
 class ProgressRecapitulationSchema(ma.ModelSchema):
     class Meta:

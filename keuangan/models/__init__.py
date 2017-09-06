@@ -5,3 +5,7 @@ from progress_timeline import ProgressTimeline
 from progress_timeline import ProgressTimelineSchema
 from region import Region
 from region import RegionSchema
+from spending_type import SpendingType
+from spending_type import SpendingTypeSchema
+from spending_recapitulation import SpendingRecapitulation
+from spending_recapitulation import SpendingRecapitulationSchema

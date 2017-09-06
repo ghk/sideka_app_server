@@ -18,7 +18,7 @@
 
             <div class="table-responsive">
                 <table class="table table-condensed table-responsive table-bordered table-striped">
-                    <thead ng-show="!isEntitiesLoading">
+                    <thead [hidden]="progress?.percentage !== 100">
                         <tr>
                             <th>Desa</th>
                             <th class="money">Anggaran Desa</th>
