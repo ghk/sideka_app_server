@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { ChartsModule } from 'ng2-charts/ng2-charts';
@@ -29,12 +29,14 @@ import { SharedService } from './services/shared';
     ChartsModule,
     RouterModule.forRoot([
       { path: '', redirectTo: '', pathMatch: 'full' },
-      { path: 'progress', component: ProgressRecapitulationComponent}
+      { path: 'progress', component: ProgressRecapitulationComponent }, 
+      { path: 'realization', component: ProgressRecapitulationComponent }
     ]),
   ],
   providers: [
     DataService,
-    SharedService
+    SharedService,
+    { provide: LOCALE_ID, useValue: 'id-ID' }
   ],
   bootstrap: [AppComponent]
 })

@@ -42,7 +42,7 @@ export class DataService {
       this._http,
       'GET',
       this._serverUrl + '/api/progress_recapitulations',
-      'query',
+      query,
       progressListener
     );
 
@@ -56,7 +56,7 @@ export class DataService {
       this._http,
       'GET',
       this._serverUrl + '/api/progress_timelines',
-      'query',
+      query,
       progressListener
     );
     
@@ -70,7 +70,7 @@ export class DataService {
       this._http,
       'GET',
       this._serverUrl + '/api/progress_timelines/regions/' + regionId,
-      'query',
+      query,
       progressListener
     );
     

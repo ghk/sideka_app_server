@@ -15,7 +15,7 @@ class ProgressTimeline(BaseModel):
     realized_spending = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    region = db.relationship('Region')
+    region = db.relationship('Region', lazy='joined')
 
     def __repr__(self):
         return '<ProgressTimeline %r>' % self.id

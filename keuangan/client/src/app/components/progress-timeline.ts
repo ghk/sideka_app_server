@@ -1,15 +1,14 @@
 import { Component, ViewChild, Input, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { BaseChartDirective } from 'ng2-charts/ng2-charts';
-
-import { BehaviorSubject } from 'rxjs';
 
 import { DataService } from '../services/data';
 import { Query } from '../models/query';
 
 @Component({
-  selector: 'sk-progress-timeline',
-  templateUrl: '../templates/progress-timeline.html',
+    selector: 'sk-progress-timeline',
+    templateUrl: '../templates/progress-timeline.html',
 })
 
 export class ProgressTimelineComponent implements OnInit, OnDestroy {
@@ -35,11 +34,27 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         return this._rDatasets.getValue();
     }
 
-    transferredDatasets: any[] = [];
-    realizedDatasets: any[] = [];
     labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    options: any = {};
-    chartType: string = 'line';  
+    options: any = {
+        tooltips: {
+            mode: 'index',
+            callbacks: {
+                label: function(tooltipItem, data) {
+                    return tooltipItem.yLabel.toLocaleString('id-ID');;
+                }
+            }
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    callback: function (value, index, values) {
+                        return value.toLocaleString('id-ID');
+                    }
+                }
+            }]
+        }
+    };
+    chartType: string = 'line';
 
     progress: Progress;
 
@@ -50,8 +65,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         let query: Query = {
-            sort: 'month'
-        };        
+        };
 
         let transferredDdDataset = {
             label: 'Penyaluran DD',
@@ -68,39 +82,31 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         let realizedSpendingDataset = {
             label: 'Realisasi Desa',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        } 
-
-        this._tDatasets.subscribe(x => {
-            this.transferredDatasets = this.tDatasets;
-        });
-
-        this._rDatasets.subscribe(x => {
-            this.realizedDatasets = this.rDatasets;
-        });
+        }
 
         this.tDatasets = [transferredDdDataset, transferredAddDataset, transferredBhprDataset];
-        this.rDatasets = [realizedSpendingDataset];          
+        this.rDatasets = [realizedSpendingDataset];
 
         this._dataService.getProgressTimelines(query, this.progressListener.bind(this)).subscribe(
             results => {
-                results.forEach(result => {  
-                    transferredDdDataset.data[result.month-1] += result.transferred_dd;
-                    transferredAddDataset.data[result.month-1] += result.transferred_add;
-                    transferredBhprDataset.data[result.month-1] += result.transferred_bhpr;
-                    realizedSpendingDataset.data[result.month-1] += result.realized_spending;                    
-                })        
+                results.forEach(result => {
+                    transferredDdDataset.data[result.month - 1] += result.transferred_dd;
+                    transferredAddDataset.data[result.month - 1] += result.transferred_add;
+                    transferredBhprDataset.data[result.month - 1] += result.transferred_bhpr;
+                    realizedSpendingDataset.data[result.month - 1] += result.realized_spending;
+                })
                 this.tDatasets = [transferredDdDataset, transferredAddDataset, transferredBhprDataset];
-                this.rDatasets = [realizedSpendingDataset];          
+                this.rDatasets = [realizedSpendingDataset];
             },
-            error => {}
+            error => { }
         );
     }
 
     ngOnDestroy(): void {
-    }   
+    }
 
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
-  
+
 }

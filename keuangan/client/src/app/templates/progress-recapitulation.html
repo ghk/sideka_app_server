@@ -3,14 +3,11 @@
         <div class="col-sm-8" style="border-right: 1px solid #ddd;">
             <ul class="nav nav-tabs front-numbers">
                 <li>
-                    <span class="number text-primary">Rp. {{ total.transferredRevenue }}</span>
-                </li>
-                <li>
-                    <span class="number text-success">Rp. {{ total.transferredRevenue }}</span>
+                    <span class="number text-success">Rp. {{ total.transferredRevenue | number:'3.2-2' }}</span>
                     <span class="text text-success">Tersalurkan Kabupaten</span>
                 </li>
                 <li>
-                    <span class="number text-success">Rp. {{ total.realizedRevenue }}</span>
+                    <span class="number text-success">Rp. {{ total.realizedRevenue | number:'3.2-2' }}</span>
                     <span class="text text-success">Terrealisasi Desa</span>
                 </li>
             </ul>
@@ -36,11 +33,11 @@
                                 </a>
                             </td>
                             <td class="money">
-                                <div style="float:right;">{{ entity.transferred_revenue }} </div>
+                                <div style="float:right;">{{ entity.transferred_revenue | number:'3.2-2' }} </div>
                                 <div class="bar-percent"> </div>
                             </td>
                             <td class="money">
-                                <div style="float:right;">{{ entity.realized_revenue }} </div>
+                                <div style="float:right;">{{ entity.realized_revenue | number:'3.2-2' }} </div>
                                 <div class="bar-percent"> </div>
                             </td>
                         </tr>                      
@@ -49,8 +46,8 @@
                     <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
                         <tr class="success">
                             <td><a href>Total</a></td>
-                            <td class="money"> {{ total.transferredRevenue }} </td>
-                            <td class="money"> {{ total.realizedRevenue }} </td>
+                            <td class="money"> {{ total.transferredRevenue | number:'3.2-2'}} </td>
+                            <td class="money"> {{ total.realizedRevenue | number:'3.2-2'}} </td>
                         </tr>
                     </tfoot>
                     <tfoot [hidden]="progress?.percentage === 100">

@@ -18,7 +18,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     constructor(
-        private dataService: DataService
+        private _dataService: DataService
     ) { 
         this.total = {
             text: 'haha',
@@ -28,7 +28,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.dataService.getProgressRecapitulations(null, this.progressListener.bind(this)).subscribe(
+        this._dataService.getProgressRecapitulations(null, this.progressListener.bind(this)).subscribe(
             result => {
                 this.entities = result;
                 this.entities.forEach(entity => {

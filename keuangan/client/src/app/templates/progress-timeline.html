@@ -1,4 +1,4 @@
-<div *ngIf="progress?.percentage < 100" style="margin: auto; width: 50%; height:50%; text-align:center">
+<div *ngIf="progress?.percentage < 100" style="margin: auto; width: 50%; height:100vh; text-align:center; padding-top:50%;">
   <img src="/assets/images/loading.gif">
   <br>
   <br> Memuat data...
@@ -10,7 +10,7 @@
   </div>
   <br />
   <div>
-    <canvas baseChart [datasets]="transferredDatasets" [labels]="labels" [options]="options" [chartType]="chartType">
+    <canvas baseChart [datasets]="tDatasets" [labels]="labels" [options]="options" [chartType]="chartType">
     </canvas>
   </div>
   <br />
@@ -19,7 +19,7 @@
   </div>
   <br />
   <div>
-    <canvas baseChart [datasets]="realizedDatasets" [labels]="labels" [options]="options" [chartType]="chartType">
+    <canvas baseChart [datasets]="rDatasets" [labels]="labels" [options]="options" [chartType]="chartType">
     </canvas>
   </div>
 </div>
