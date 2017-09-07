@@ -5,7 +5,8 @@ sys.path.append("../common");
 from admin import app, db, login_manager
 from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import login_user, login_required, current_user, logout_user, UserMixin
-from sqlalchemy.orm import load_only
+from sqlalchemy.orm import load_only, aliased
+from sqlalchemy import func
 
 from phpserialize import *
 from collections import OrderedDict
@@ -69,30 +70,28 @@ def unauthorized_handler():
 
 @login_manager.user_loader
 def user_loader(nickname):
-    userMix = User()
-    userMix.id = nickname
-    return userMix
+    user = User()
+    user.id = nickname
+    return user
 
 
 @login_manager.request_loader
 def request_loader(request):
     nickname = request.form.get('nickname')
-    superadminUsers = get_superadmin_user()
-    if nickname in superadminUsers:
-        success = False
-        userMix = User()
-        userMix.id = nickname
+    superadmin_users = get_superadmin_user()
+    if nickname in superadmin_users:
+        user = User()
+        user.id = nickname
         user = get_user_by_nickname(nickname)
         success = phasher.check_password(request.form['pw'], user['user_pass'])
         if success:
-            userMix.is_authenticated = success
+            user.is_authenticated = success
     return
 
 
 @app.route('/')
 @login_required
 def desa():
-    users = get_superadmin_user()
     return render_template('desa.html', active='desa')
 
 
@@ -100,15 +99,14 @@ def desa():
 def login():
     if request.method == 'POST':
         nickname = request.form.get('nickname')
-        superadminUsers = get_superadmin_user()
-        if nickname in superadminUsers:
-            success = False
+        superadmin_users = get_superadmin_user()
+        if nickname in superadmin_users:
             user = get_user_by_nickname(nickname)
             success = phasher.check_password(request.form['pw'], user['user_pass'])
             if success:
-                usermix = User()
-                usermix.id = nickname
-                login_user(usermix)
+                user = User()
+                user.id = nickname
+                login_user(user)
                 return redirect('/')
     return render_template('login.html')
 
@@ -149,62 +147,44 @@ def agregate():
     return render_template('supradesa.html', active='supradesa')
 
 
-@app.route('/contents/<int:content_id>')
+@app.route('/contents/<int:id>')
 @login_required
-def contents_single(content_id):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT desa_id, subtype, type, content from sd_contents where id = %s"
-        cur.execute(query, (content_id,))
-        result = cur.fetchone()
-        content = result["content"]
-        typ = result["type"]
-        subtyp = result["subtype"]
-        desa_id = result["desa_id"]
-        schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + typ + ".json")
-        print schema_file
-        with open(schema_file, 'r') as myfile:
-            schema = myfile.read()
-        return render_template('contents_single.html', active='contents', content=content, schema=schema,
-                               subtyp=subtyp, typ=typ, desa_id=desa_id)
-    finally:
-        cur.close()
+def get_content(id):
+    query = db.session.query(SdContent)
+    query = query.options(load_only('desa_id', 'subtype', 'type', 'content'))
+    query = query.filter(SdContent.id == id)
+    content = query.first()
+    schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + content.type + ".json")
+    with open(schema_file, 'r') as myfile:
+        schema = myfile.read()
+    return render_template('content.html', active='contents', content=content, schema=schema)
 
 
-@app.route('/contents/v2/<int:content_id>/<type>')
+@app.route('/contents/v2/<int:id>/<type>')
 @login_required
-def contents_v2_single(content_id, type='data'):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        sheet = request.args.get("sheet", "0")
-        query = "SELECT desa_id, subtype, type, content, change_id from sd_contents WHERE id=%s AND api_version='2.0'"
-        cur.execute(query, (content_id,))
-        result = cur.fetchone()
-        content = result["content"]
-        typ = result["type"]
-        subtyp = result["subtype"]
-        desa_id = result["desa_id"]
-        schema = []
-        keys = []
+def get_content_v2(id, type='data'):
+    sheet = request.args.get("sheet", "0")
+    query = db.session.query(SdContent)
+    query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
+    query = query.filter(SdContent.id == id).filter(SdContent.api_version == '2.0')
+    content = query.first()
+    schema = []
+    keys = []
+    json_content = json.loads(content.content);
 
-        jsonContent = json.loads(content);
+    if sheet == "null":
+        sheet = content.type
 
-        if sheet == "null":
-            sheet = typ
+    if isinstance(json_content[type], dict):
+        for key, value in json_content[type].items():
+            keys.append(key)
 
-        if isinstance(jsonContent[type], dict):
-            for key, value in jsonContent[type].items():
-                keys.append(key)
+    if sheet == 'penduduk':
+        sheet = 'penduduk_v2'
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + sheet + ".json"),'r') as myFile:
+            schema = myFile.read()
 
-        if sheet == 'penduduk':
-            sheet = 'penduduk_v2'
-            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + sheet + ".json"),
-                      'r') as myFile: schema = myFile.read()
-
-        return render_template('contents_v2_single.html', active='contents_v2', keys=keys, content_id=content_id,
-                               content=content, schema=schema, subtyp=subtyp, typ=typ, desa_id=desa_id)
-    finally:
-        cur.close()
+    return render_template('content_v2.html', active='contents_v2', schema=schema, keys=keys, content=content)
 
 
 @app.route('/statics/<path:path>')
@@ -214,15 +194,10 @@ def send_statics(path):
 
 @app.route('/api/desa', methods=["GET"])
 @login_required
-def get_all_desa():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT * from sd_desa"
-        cur.execute(query)
-        desa = list(cur.fetchall())
-        return jsonify(desa)
-    finally:
-        cur.close()
+def get_desas():
+    query = db.session.query(SdDesa)
+    desas = query.all()
+    return jsonify(desa)
 
 
 @app.route('/api/desa', methods=["POST"])
@@ -231,51 +206,46 @@ def update_desa():
     blog_id = int(request.form.get('blog_id'))
     column = str(request.form.get('column'))
     value = str(request.form.get('value'))
-    print blog_id, column, value
-    allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"];
-    booleanColumns = ["is_dbt", "is_lokpri"]
-    if column not in allowedColumns:
-        return
+    allowed_columns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"]
+    boolean_columns = ["is_dbt", "is_lokpri"]
 
+    if column not in allowed_columns:
+        return
     if column in ["latitude", "longitude"]:
         value = float(value)
+    if column in boolean_columns:
+        value = int(value)
 
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-
-        query = "UPDATE sd_desa set " + column + " = %s where blog_id = %s"
-        if column in booleanColumns:
-            value = int(value)
-        cur.execute(query, (value, blog_id))
-        mysql.connection.commit()
-        return jsonify({'success': True})
-    finally:
-        cur.close()
+    query = db.session.query(SdDesa)\
+        .update(dict(column=value))\
+        .query.where(SdDesa.blog_id == blog_id)
+    db.session.commit()
+    return jsonify({'success': True})
 
 
-@app.route('/api/update_desa_from_code', methods=["POST"])
+@app.route('/api/desa/update_from_code', methods=["POST"])
 @login_required
 def update_desa_from_code():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = """
-		update
-		sd_desa d
-	left join  sd_all_desa desa on d.kode = desa.region_code
-	left join  sd_all_desa kec on desa.parent_code = kec.region_code
-	left join  sd_all_desa kab on kec.parent_code = kab.region_code
-	left join  sd_all_desa prop on kab.parent_code = prop.region_code
-		set d.desa = desa.region_name,
-			d.kecamatan = kec.region_name,
-			d.kabupaten = kab.region_name,
-			d.propinsi = prop.region_name
-	where trim(coalesce(d.kode, '')) <> ''
-		"""
-        cur.execute(query)
-        mysql.connection.commit()
-        return jsonify({'success': True})
-    finally:
-        cur.close()
+    desa_alias = aliased(SdAllDesa)
+    kecamatan_alias = aliased(SdAllDesa)
+    kabupaten_alias = aliased(SdAllDesa)
+    propinsi_alias = aliased(SdAllDesa)
+
+    db.session.query(SdDesa)\
+        .join(desa_alias, SdDesa.kode == desa_alias.region_code)\
+        .join(kecamatan_alias, desa_alias.parent_code == kecamatan_alias.region_code)\
+        .join(kabupaten_alias, kecamatan_alias.parent_code == kabupaten_alias.region_code)\
+        .join(propinsi_alias, kabupaten_alias.parent_code == propinsi_alias.region_code)\
+        .update().values(
+            desa=desa_alias.region_name,
+            kecamatan=kecamatan_alias.region_name,
+            kabupaten=kabupaten_alias.region_name,
+            propinsi=propinsi_alias.region_name
+        )\
+        .where(func.trim(func.coalesce(SdDesa.kode, '')) != '')
+
+    db.session.commit()
+    return jsonify({'success': True})
 
 
 @app.route('/api/update_sd_desa', methods=["POST"])

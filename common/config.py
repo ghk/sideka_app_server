@@ -11,7 +11,7 @@ class Config(object):
     MYSQL_PASSWORD = "ingininiinginitubanyaksekali"
     MYSQL_HOST = "database.neon.microvac"
     MYSQL_DB = "wp_sideka_proot"
-    KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ingininiinginitubanyaksekali@database.neon.microvac/sideka_keuangan"
+    KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@database.neon.microvac:5094/sideka_keuangan"
     ADMIN_SQLALCHEMY_DATABASE_URI = "mysql://root:ingininiinginitubanyaksekali/wp_sideka_proot"
     SQLALCHEMY_ECHO = True
     CKAN_HOST = "http://data.prakarsadesa.id"
@@ -20,7 +20,7 @@ class Config(object):
 
 
 class ProductionConfig(Config):
-    KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ingininiinginitubanyaksekali@database.neon.microvac/sideka_keuangan"
+    KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost/sideka_keuangan"
     ADMIN_SQLALCHEMY_DATABASE_URI = "mysql://root:ingininiinginitubanyaksekali/wp_sideka_proot"
     SQLALCHEMY_ECHO = False
 

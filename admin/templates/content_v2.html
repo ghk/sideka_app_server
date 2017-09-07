@@ -9,14 +9,12 @@
 	</style>
 	
 	<div class="flex-item">
-		<span style="line-height: 40px; vertical-align: top;">Desa ID: {{desa_id}}, Type: {{typ}}, Sub Type: {{subtyp}}</span>
+		<span style="line-height: 40px; vertical-align: top;">Desa ID: {{content.desa_id}}, Type: {{content.type}}, Sub Type: {{content.subtype}}</span>
 		<ul class="nav nav-pills flex-item" role="tablist" id="nav-data" style="display: inline-block;">
 			{% for x in keys %}
-
 				<li role="presentation" id="{{x}}">
-					<a href="/contents/v2/{{content_id}}/data?sheet={{x}}" id="penduduk-link" aria-controls="home" role="tab" data-toggle="tab">{{x}}</a>
+					<a href="/contents/v2/{{content.id}}/data?sheet={{x}}" id="penduduk-link-{{x}}" aria-controls="home" role="tab" data-toggle="tab">{{x}}</a>
 				</li>
-
 			{% endfor %}
 		</ul>
 	</div>
@@ -30,8 +28,8 @@
 	</div>
 	<div id="sheet"></div>
 	<script>
-		var content = {{content | safe}};
+		var content = {{content.content | safe}};
 		var schema = {{schema | safe}};
 	</script>
-	<script src="/static/scripts/contents_v2_single.js"></script>
+	<script src="/static/scripts/content_v2.js"></script>
 {% endblock %}
