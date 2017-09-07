@@ -11,8 +11,9 @@ class Generator:
     def generate_progress_recapitulation():
         result = ProgressRecapitulation()
         result.apbn_key = '2017'
-        result.realized_revenue = decimal.Decimal(random.randrange(50000000000, 100000000000)) / 100
-        result.transferred_revenue = decimal.Decimal(random.randrange(100000000000, 150000000000)) / 100
+        result.budgeted_revenue = decimal.Decimal(random.randrange(100000000000, 150000000000)) / 100
+        result.transferred_revenue = decimal.Decimal(random.randrange(50000000000, 100000000000)) / 100
+        result.realized_spending = decimal.Decimal(random.randrange(25000000000, 50000000000)) / 100
         result.date_created = datetime.utcnow()
         result.date_modified = datetime.utcnow()
         return result
@@ -30,7 +31,7 @@ class Generator:
     @staticmethod
     def generate_spending_recapitulations(is_realization):
         result = SpendingRecapitulation()
-        result.value = decimal.Decimal(random.randrange(10000000, 100000000)) / 100
+        result.value = decimal.Decimal(random.randrange(10000000000, 100000000000)) / 100
         if is_realization:
             result.value = result.value / (random.randrange(1, 10))
         return result
