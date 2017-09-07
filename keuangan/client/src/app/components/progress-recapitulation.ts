@@ -14,8 +14,9 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     progress: Progress;
     total: {
         text: string;
+        budgetedRevenue: number;
         transferredRevenue: number;
-        realizedRevenue: number;
+        realizedSpending: number;
     }
 
     constructor(
@@ -23,8 +24,9 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     ) { 
         this.total = {
             text: 'haha',
+            budgetedRevenue: 0,
             transferredRevenue: 0,
-            realizedRevenue: 0
+            realizedSpending: 0
         }
     }
 
@@ -33,8 +35,9 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
             result => {
                 this.entities = result;
                 this.entities.forEach(entity => {
+                    this.total.budgetedRevenue += entity.budgeted_revenue;
                     this.total.transferredRevenue += entity.transferred_revenue;
-                    this.total.realizedRevenue += entity.realized_revenue;
+                    this.total.realizedSpending += entity.realized_spending;
                 })   
             },
             error => {
@@ -46,6 +49,12 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
 
     }   
+
+    getBarPercent(numerator, denominator) {
+        return { 
+            'width': (numerator / denominator) * 100 + '%'
+        };
+    }
 
     progressListener(progress: Progress): void {
         this.progress = progress;

@@ -1,9 +1,11 @@
-import os
+import os, sys
 from flask import jsonify, request
 
 from keuangan import app, db
 from keuangan.models import *
 from keuangan.helpers import *
+
+print sys.path
 
 BASE_URL = os.path.abspath(os.path.dirname(__file__))
 CLIENT_FOLDER = os.path.join(BASE_URL, "client")

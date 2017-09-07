@@ -30,9 +30,9 @@ import { SharedService } from './services/shared';
     ProgressHttpModule,
     ChartsModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: '', pathMatch: 'full' },
+      { path: '', redirectTo: 'progress', pathMatch: 'full' },
       { path: 'progress', component: ProgressRecapitulationComponent }, 
-      { path: 'realization', component: SpendingRecapitulationComponent }
+      { path: 'spending', component: SpendingRecapitulationComponent }
     ]),
   ],
   providers: [
