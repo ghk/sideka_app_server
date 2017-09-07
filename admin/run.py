@@ -2,30 +2,22 @@ import sys
 
 sys.path.append("../common");
 
-from flask import Flask, request, jsonify, render_template, send_from_directory, redirect, url_for
-from flask_login import LoginManager, login_user, login_required, current_user, logout_user, UserMixin
+from admin import app, db, login_manager
+from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
+from flask_login import login_user, login_required, current_user, logout_user, UserMixin
+from sqlalchemy.orm import load_only
+
 from phpserialize import *
 from collections import OrderedDict
-from flask_mysqldb import MySQL
-from common.phpass import PasswordHash
+from common import PasswordHash
+from models import *
 
-import MySQLdb
 import os
 import json
 import urllib
 import datetime
 
-app = Flask(__name__)
-mysql = MySQL(app)
-# MySQL configurations
-app.config.from_pyfile('../common/app.cfg')
-
 phasher = PasswordHash(8, True)
-app.secret_key = app.config["SECRET_KEY"]
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "users.login"
 
 
 class User(UserMixin):
@@ -33,40 +25,35 @@ class User(UserMixin):
 
 
 def get_user_by_nickname(nickname):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT ID, user_pass from wp_users where user_login = %s"
-        cur.execute(query, (nickname,))
-        user = cur.fetchone()
-        return user
-    finally:
-        cur.close()
+    query = db.session.query(WpUser)
+    query = query.options(load_only('ID', 'user_pass'))
+    user = query.first()
+    return user
 
 
 def get_superadmin_user():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        cur.execute("SELECT meta_value FROM wp_sitemeta WHERE meta_key = 'site_admins'")
-        result = cur.fetchone()
-        users = loads(result["meta_value"], array_hook=OrderedDict)
-        return users.values()
-    finally:
-        cur.close
+    query = db.session.query(WpSiteMeta)
+    query = query.options(load_only('meta_value'))
+    result = query.first()
+    users = loads(result['meta_value'], array_hook=OrderedDict)
+    return users.values()
 
 
 def remove_capabilities_and_userlevel(user_id):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        capabilities = '%' + '_capabilities'
-        user_level = '%' + '_user_level'
-        query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-        cur.execute(query, (capabilities, str(user_id),))
+    capabilities = '%' + '_capabilities'
+    user_level = '%' + '_user_level'
 
-        query = "DELETE FROM wp_usermeta where meta_key like %s and user_id = %s"
-        cur.execute(query, (user_level, str(user_id),))
-        mysql.connection.commit()
-    finally:
-        cur.close()
+    db.session.query(WpUserMeta)\
+        .filter(WpUserMeta.meta_key.like(capabilities))\
+        .filter(WpUserMeta.user_id == user_id)\
+        .delete()
+
+    db.session.query(WpUserMeta)\
+        .filter(WpUserMeta.meta_key.like(user_level))\
+        .filter(WpUserMeta.user_id == user_id)\
+        .delete()
+
+    db.session.commit()
 
 
 def normalize(row, keys):
@@ -362,32 +349,32 @@ def get_contents_v2():
     cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     try:
         filter_value = request.args.get("desa_id", "true")
-	filter_text = "'true' = %s"
-	if filter_value != "true":
-		filter_text = "desa_id = %s"
-		filter_value = int(filter_value)
-        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and "+filter_text+" order by date_created desc limit 100"
+        filter_text = "'true' = %s"
+        if filter_value != "true":
+            filter_text = "desa_id = %s"
+            filter_value = int(filter_value)
+        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and " + filter_text + " order by date_created desc limit 100"
         cur.execute(query, (filter_value,))
         contents = list(cur.fetchall())
-	for c in contents:
-		j = json.loads(c["content"])
-		if "data" in j and "keys" in dir(j["data"]):
-			keys = j["data"].keys()
-			for i, key in enumerate(keys):
-				c["d"+str(i)]=len(j["data"][key])
-		if "diffs" in j:
-			added = 0
-			modified = 0
-			deleted = 0
-			for l in j["diffs"].values():
-				for d in l:
-					added += len(d["added"])
-					modified += len(d["modified"])
-					deleted += len(d["deleted"])
-			c["added"] = added
-			c["modified"] = modified
-			c["deleted"] = deleted
-		del c["content"]
+        for c in contents:
+            j = json.loads(c["content"])
+            if "data" in j and "keys" in dir(j["data"]):
+                keys = j["data"].keys()
+                for i, key in enumerate(keys):
+                    c["d" + str(i)] = len(j["data"][key])
+            if "diffs" in j:
+                added = 0
+                modified = 0
+                deleted = 0
+                for l in j["diffs"].values():
+                    for d in l:
+                        added += len(d["added"])
+                        modified += len(d["modified"])
+                        deleted += len(d["deleted"])
+                c["added"] = added
+                c["modified"] = modified
+                c["deleted"] = deleted
+            del c["content"]
         return jsonify(contents)
     finally:
         cur.close()
