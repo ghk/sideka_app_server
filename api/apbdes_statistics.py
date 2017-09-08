@@ -8,7 +8,6 @@ import traceback
 import json
 import pprint
 from datetime import datetime, timedelta
-from ckanapi import RemoteCKAN
 
 from HTMLParser import HTMLParser, HTMLParseError
 from htmlentitydefs import name2codepoint
@@ -143,7 +142,7 @@ if __name__ == "__main__":
 	db.close()
 
 if __name__ == "___main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../commmon/app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,    
 			     user=conf.MYSQL_USER,      
 			     passwd=conf.MYSQL_PASSWORD,

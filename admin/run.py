@@ -2,15 +2,15 @@ import sys
 
 sys.path.append("../common");
 
-from admin import app, db, login_manager
+from admin import app, db, ma, login_manager
 from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import login_user, login_required, current_user, logout_user, UserMixin
 from sqlalchemy.orm import load_only, aliased
-from sqlalchemy import func
+from sqlalchemy import func, desc, update
 
 from phpserialize import *
 from collections import OrderedDict
-from common import PasswordHash
+from common import PasswordHash, gzipped
 from models import *
 
 import os
@@ -26,17 +26,20 @@ class User(UserMixin):
 
 
 def get_user_by_nickname(nickname):
-    query = db.session.query(WpUser)
-    query = query.options(load_only('ID', 'user_pass'))
-    user = query.first()
+    user = db.session.query(WpUser)\
+        .filter(WpUser.user_login == nickname)\
+        .first()
     return user
 
 
 def get_superadmin_user():
-    query = db.session.query(WpSiteMeta)
-    query = query.options(load_only('meta_value'))
-    result = query.first()
-    users = loads(result['meta_value'], array_hook=OrderedDict)
+    site_meta = db.session.query(WpSiteMeta)\
+        .filter(WpSiteMeta.meta_key == 'site_admins')\
+        .first()
+
+    if site_meta is not None:
+        users = loads(site_meta.meta_value, array_hook=OrderedDict)
+
     return users.values()
 
 
@@ -44,17 +47,15 @@ def remove_capabilities_and_userlevel(user_id):
     capabilities = '%' + '_capabilities'
     user_level = '%' + '_user_level'
 
-    db.session.query(WpUserMeta)\
-        .filter(WpUserMeta.meta_key.like(capabilities))\
-        .filter(WpUserMeta.user_id == user_id)\
+    db.session.query(WpUserMeta) \
+        .filter(WpUserMeta.meta_key.like(capabilities)) \
+        .filter(WpUserMeta.user_id == user_id) \
         .delete()
 
-    db.session.query(WpUserMeta)\
-        .filter(WpUserMeta.meta_key.like(user_level))\
-        .filter(WpUserMeta.user_id == user_id)\
+    db.session.query(WpUserMeta) \
+        .filter(WpUserMeta.meta_key.like(user_level)) \
+        .filter(WpUserMeta.user_id == user_id) \
         .delete()
-
-    db.session.commit()
 
 
 def normalize(row, keys):
@@ -83,7 +84,7 @@ def request_loader(request):
         user = User()
         user.id = nickname
         user = get_user_by_nickname(nickname)
-        success = phasher.check_password(request.form['pw'], user['user_pass'])
+        success = phasher.check_password(request.form['pw'], user.user_pass)
         if success:
             user.is_authenticated = success
     return
@@ -102,7 +103,10 @@ def login():
         superadmin_users = get_superadmin_user()
         if nickname in superadmin_users:
             user = get_user_by_nickname(nickname)
-            success = phasher.check_password(request.form['pw'], user['user_pass'])
+            if user is None:
+                success = False
+            else:
+                success = phasher.check_password(request.form['pw'], user.user_pass)
             if success:
                 user = User()
                 user.id = nickname
@@ -154,7 +158,8 @@ def get_content(id):
     query = query.options(load_only('desa_id', 'subtype', 'type', 'content'))
     query = query.filter(SdContent.id == id)
     content = query.first()
-    schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + content.type + ".json")
+    schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               "../common/schemas/" + content.type + ".json")
     with open(schema_file, 'r') as myfile:
         schema = myfile.read()
     return render_template('content.html', active='contents', content=content, schema=schema)
@@ -181,7 +186,8 @@ def get_content_v2(id, type='data'):
 
     if sheet == 'penduduk':
         sheet = 'penduduk_v2'
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + sheet + ".json"),'r') as myFile:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../common/schemas/" + sheet + ".json"),
+                  'r') as myFile:
             schema = myFile.read()
 
     return render_template('content_v2.html', active='contents_v2', schema=schema, keys=keys, content=content)
@@ -192,18 +198,17 @@ def send_statics(path):
     return send_from_directory('statics', path)
 
 
-@app.route('/api/desa', methods=["GET"])
+@app.route('/api/desas', methods=["GET"])
 @login_required
 def get_desas():
-    query = db.session.query(SdDesa)
-    desas = query.all()
-    return jsonify(desa)
+    desas = db.session.query(SdDesa).all()
+    result = SdDesaSchema(many=True).dump(desas)
+    return jsonify(result.data)
 
 
-@app.route('/api/desa', methods=["POST"])
+@app.route('/api/desas/<int:blog_id>', methods=["POST"])
 @login_required
-def update_desa():
-    blog_id = int(request.form.get('blog_id'))
+def update_desa(blog_id):
     column = str(request.form.get('column'))
     value = str(request.form.get('value'))
     allowed_columns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"]
@@ -216,14 +221,15 @@ def update_desa():
     if column in boolean_columns:
         value = int(value)
 
-    query = db.session.query(SdDesa)\
-        .update(dict(column=value))\
-        .query.where(SdDesa.blog_id == blog_id)
+    query = db.session.query(SdDesa) \
+        .update(dict(column=value)) \
+        .where(SdDesa.blog_id == blog_id)
+
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/api/desa/update_from_code', methods=["POST"])
+@app.route('/api/desas/update_from_code', methods=["POST"])
 @login_required
 def update_desa_from_code():
     desa_alias = aliased(SdAllDesa)
@@ -231,312 +237,366 @@ def update_desa_from_code():
     kabupaten_alias = aliased(SdAllDesa)
     propinsi_alias = aliased(SdAllDesa)
 
-    db.session.query(SdDesa)\
-        .join(desa_alias, SdDesa.kode == desa_alias.region_code)\
-        .join(kecamatan_alias, desa_alias.parent_code == kecamatan_alias.region_code)\
-        .join(kabupaten_alias, kecamatan_alias.parent_code == kabupaten_alias.region_code)\
-        .join(propinsi_alias, kabupaten_alias.parent_code == propinsi_alias.region_code)\
-        .update().values(
-            desa=desa_alias.region_name,
-            kecamatan=kecamatan_alias.region_name,
-            kabupaten=kabupaten_alias.region_name,
-            propinsi=propinsi_alias.region_name
-        )\
-        .where(func.trim(func.coalesce(SdDesa.kode, '')) != '')
+    query = update(SdDesa).values(
+        desa=desa_alias.region_name,
+        kecamatan=kecamatan_alias.region_name,
+        kabupaten=kabupaten_alias.region_name,
+        propinsi=propinsi_alias.region_name
+    )
+    query = query.where(SdDesa.kode == desa_alias.region_code)
+    query = query.where(desa_alias.parent_code == kecamatan_alias.region_code)
+    query = query.where(kecamatan_alias.parent_code == kabupaten_alias.region_code)
+    query = query.where(kabupaten_alias.parent_code == propinsi_alias.region_code)
+    query = query.where(func.trim(func.coalesce(SdDesa.kode, '')) != '')
 
+    db.session.execute(query)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/api/update_sd_desa', methods=["POST"])
+@app.route('/api/desas', methods=["POST"])
 @login_required
 def update_sd_desa():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = """
-			INSERT INTO sd_desa (blog_id, domain) SELECT blog_id, domain FROM wp_blogs WHERE blog_id > (select max(blog_id) from sd_desa)
-		"""
-        cur.execute(query)
-        query = """
-			UPDATE sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id set d.domain = b.domain
-		"""
-        cur.execute(query)
-        mysql.connection.commit()
-        return jsonify({'success': True})
-    finally:
-        cur.close()
+    max_blog_id = db.session.query(func.max(SdDesa.blog_id)).first()
+    wp_blogs_query = db.session.query(WpBlog) \
+        .options(load_only('blog_id', 'domain')) \
+
+    if max_blog_id[0] is not None:
+        wp_blogs_query = wp_blogs_query.filter(WpBlog.blog_id > max_blog_id[0])
+
+    wp_blogs = wp_blogs_query.all()
+
+    sd_desas = []
+    for wp_blog in wp_blogs:
+        sd_desa = SdDesa()
+        sd_desa.blog_id = wp_blog.blog_id
+        sd_desa.domain = wp_blog.domain
+        sd_desas.append(sd_desa)
+        db.session.add_all(sd_desas)
+        db.session.flush()
+
+    query = update(SdDesa).values(domain=WpBlog.domain).where(SdDesa.blog_id == WpBlog.blog_id)
+    db.session.execute(query)
+    db.session.commit()
+    return jsonify({'success': True})
 
 
-@app.route('/api/geocode_empty_latlong', methods=["POST"])
+@app.route('/api/desas/empty_latlong', methods=["POST"])
 @login_required
-def geocode_empty_latlong():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = """
-			select blog_id, desa, kecamatan, kabupaten from sd_desa where latitude is null and longitude is null and (kode is not null and kode <> '')
-		"""
-        cur.execute(query)
-        desas = list(cur.fetchall())
-        results = []
-        for desa in desas:
-            address = (desa['desa'] + ', ' + desa['kecamatan'] + ", " + desa['kabupaten']).replace(' ', '+')
-            url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyATCm-ki0JV9hjtjQXOKvqwlMaBWpYByEc" % address
-            results.append(url)
-            response = urllib.urlopen(url)
-            data = json.loads(response.read())
-            if data["status"] == "OK":
-                result = data["results"][0]
-                latitude = result["geometry"]["location"]["lat"]
-                longitude = result["geometry"]["location"]["lng"]
-                query = """
-					UPDATE sd_desa set latitude = %s, longitude = %s where blog_id = %s
-				"""
-                cur.execute(query, (latitude, longitude, desa['blog_id']))
-                mysql.connection.commit()
-            else:
-                results.append("%s: not found" % (address,))
-        return jsonify(results)
-    finally:
-        cur.close()
+def desa_empty_latlong():
+    query = db.session.query(SdDesa) \
+        .options(load_only('blog_id', 'desa', 'kecamatan', 'kabupaten')) \
+        .filter(SdDesa.latitude == None) \
+        .filter(SdDesa.longitude == None) \
+        .filter(SdDesa.kode <> None) \
+        .filter(SdDesa.kode <> '')
+
+    desas = query.all()
+    results = []
+
+    for desa in desas:
+        address = (desa.desa + ', ' + desa.kecamatan + ", " + desa.kabupaten).replace(' ', '+')
+        url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyATCm-ki0JV9hjtjQXOKvqwlMaBWpYByEc" % address
+        results.append(url)
+        response = urllib.urlopen(url)
+        data = json.loads(response.read())
+        if data["status"] == "OK":
+            result = data["results"][0]
+            latitude = result["geometry"]["location"]["lat"]
+            longitude = result["geometry"]["location"]["lng"]
+            desa.latitude = latitude
+            desa.longitude = longitude
+            db.session.add(desa)
+        else:
+            results.append("%s: not found" % (address,))
+
+    db.session.commit()
+    return jsonify(results)
 
 
 @app.route('/api/contents', methods=["GET"])
 @login_required
 def get_contents():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT sd_contents.id, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by order by date_created desc limit 1000"
-        cur.execute(query)
-        contents = list(cur.fetchall())
-        return jsonify(contents)
-    finally:
-        cur.close()
+    sd_desa_alias = aliased(SdDesa)
+    wp_user_alias = aliased(WpUser)
+    query = db.session.query(SdContent.id, SdContent.desa_id, sd_desa_alias.desa,
+                             SdContent.type, SdContent.subtype, SdContent.timestamp,
+                             SdContent.date_created, SdContent.created_by, wp_user_alias.user_login,
+                             SdContent.opendata_date_pushed, SdContent.opendata_push_error) \
+        .join(sd_desa_alias, SdContent.desa_id == sd_desa_alias.blog_id) \
+        .join(wp_user_alias, SdContent.created_by == wp_user_alias.ID) \
+        .order_by(desc(SdContent.date_created)) \
+        .limit(1000)
+
+    contents = query.all()
+    return jsonify(contents)
 
 
 @app.route('/api/contents/v2', methods=["GET"])
 @login_required
 def get_contents_v2():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        filter_value = request.args.get("desa_id", "true")
-        filter_text = "'true' = %s"
-        if filter_value != "true":
-            filter_text = "desa_id = %s"
-            filter_value = int(filter_value)
-        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and " + filter_text + " order by date_created desc limit 100"
-        cur.execute(query, (filter_value,))
-        contents = list(cur.fetchall())
-        for c in contents:
-            j = json.loads(c["content"])
-            if "data" in j and "keys" in dir(j["data"]):
-                keys = j["data"].keys()
-                for i, key in enumerate(keys):
-                    c["d" + str(i)] = len(j["data"][key])
-            if "diffs" in j:
-                added = 0
-                modified = 0
-                deleted = 0
-                for l in j["diffs"].values():
-                    for d in l:
-                        added += len(d["added"])
-                        modified += len(d["modified"])
-                        deleted += len(d["deleted"])
-                c["added"] = added
-                c["modified"] = modified
-                c["deleted"] = deleted
-            del c["content"]
-        return jsonify(contents)
-    finally:
-        cur.close()
+    sd_desa_alias = aliased(SdDesa)
+    wp_user_alias = aliased(WpUser)
+    query = db.session.query(SdContent.id, SdContent.content, SdContent.desa_id,
+                             sd_desa_alias.desa, sd_desa_alias.domain, SdContent.type,
+                             SdContent.subtype, SdContent.timestamp, SdContent.date_created,
+                             SdContent.created_by, wp_user_alias.user_login, SdContent.opendata_date_pushed,
+                             SdContent.opendata_push_error, SdContent.change_id, SdContent.api_version) \
+        .join(sd_desa_alias, SdContent.desa_id == sd_desa_alias.blog_id) \
+        .join(wp_user_alias, SdContent.created_by == wp_user_alias.ID) \
+        .filter(SdContent.api_version == '2.0')
+
+    desa_id = request.args.get("desa_id", "true")
+    if desa_id != "true":
+        query = query.filter(SdContent.desa_id == int(desa_id))
+
+    domain = request.args.get("domain", "true")
+    if domain != "true":
+        filter_value = domain + ".%"
+        query = query.filter(sd_desa_alias.domain.like(filter_value))
+
+    type_filter_value = request.args.get("type", "true")
+    if type_filter_value != "true":
+        query = query.filter(SdContent.type == type_filter_value)
+
+    query = query.order_by(desc(SdContent.date_created))
+    query = query.limit(100)
+
+    contents = query.all()
+    result = []
+
+    for content in contents:
+        c = content._asdict()
+        j = json.loads(c["content"])
+        if "data" in j and "keys" in dir(j["data"]):
+            keys = j["data"].keys()
+            for i, key in enumerate(keys):
+                c["d" + str(i)] = len(j["data"][key])
+        if "diffs" in j:
+            added = 0
+            modified = 0
+            deleted = 0
+            for l in j["diffs"].values():
+                for d in l:
+                    added += len(d["added"])
+                    modified += len(d["modified"])
+                    deleted += len(d["deleted"])
+            c["added"] = added
+            c["modified"] = modified
+            c["deleted"] = deleted
+        del c["content"]
+        result.append(c)
+
+    return jsonify(result)
 
 
 @app.route('/api/statistics', methods=["GET"])
 @login_required
 def get_statistics():
-    cur = mysql.connection.cursor()
-    try:
-        query = "SELECT statistics from sd_statistics"
-        cur.execute(query)
-        results = [json.loads(c[0]) for c in cur.fetchall()]
-        return jsonify(results)
-    finally:
-        cur.close()
+    statistics = db.session.query(SdStatistics).all()
+    return jsonify(statistics)
 
 
-@app.route('/api/find_all_desa', methods=["GET"])
+@app.route('/api/desas/search', methods=["GET"])
 @login_required
-def find_all_desa():
+def search_all_desa():
     q = str(request.args.get('q')).lower()
-    print q
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT d.region_code, d.region_name as desa, kec.region_name as kecamatan, kab.region_name as kabupaten, prop.region_name as propinsi from sd_all_desa d left join sd_all_desa kec on d.parent_code = kec.region_code left join sd_all_desa kab on kec.parent_code = kab.region_code left join sd_all_desa prop on kab.parent_code = prop.region_code where lower(d.region_name) like %s and d.depth = 4 limit 100"
-        cur.execute(query, (q,))
-        results = list(cur.fetchall())
-        return jsonify(results)
-    finally:
-        cur.close()
+    kecamatan_alias = aliased(SdAllDesa)
+    kabupaten_alias = aliased(SdAllDesa)
+    propinsi_alias = aliased(SdAllDesa)
+
+    query = db.session.query(SdAllDesa.region_code, SdAllDesa.region_name.label('desa'),
+                             kecamatan_alias.region_name.label('kecamatan'),
+                             kabupaten_alias.region_name.label('kabupaten'),
+                             propinsi_alias.region_name.label('propinsi')) \
+        .join(kecamatan_alias, SdAllDesa.parent_code == kecamatan_alias.region_code) \
+        .join(kabupaten_alias, kecamatan_alias.parent_code == kabupaten_alias.region_code) \
+        .join(propinsi_alias, kabupaten_alias.parent_code == propinsi_alias.region_code) \
+        .filter(func.lower(SdAllDesa.region_name).like(q)) \
+        .filter(SdAllDesa.depth == 4) \
+        .limit(100)
+
+    results = query.all()
+    return jsonify(results)
 
 
-@app.route('/api/users_supradesa', methods=["GET"])
+@app.route('/api/user_supradesas', methods=["GET"])
 @login_required
 def get_user_supradesa():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "select * from sd_users_supradesa"
-        cur.execute(query)
-        results = list(cur.fetchall())
-        return jsonify(results)
-    finally:
-        cur.close()
+    user_supradesas = db.session.query(SdUserSupradesa).all()
+    return jsonify(user_supradesas)
 
 
-@app.route('/api/update_users_supradesa', methods=["POST"])
+@app.route('/api/user_supradesas', methods=["POST"])
 @login_required
 def update_user_supradesa():
     data = json.loads(request.form.get("data"))
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     keys = {'username': None, 'supradesa_id': None, 'level': None}
-    try:
-        for values in data:
-            print values
-            row = normalize(values, keys)
-            if row["username"] == None or row["supradesa_id"] == None:
-                continue
 
-            query = "SELECT ID FROM wp_users WHERE user_login = %s"
-            cur.execute(query, (row["username"],))
-            user = cur.fetchone()
-            if user == None:
-                continue
+    for values in data:
+        print values
+        row = normalize(values, keys)
+        if row["username"] == None or row["supradesa_id"] == None:
+            continue
 
-            query = "SELECT * FROM sd_users_supradesa WHERE username = %s and supradesa_id = %s"
-            cur.execute(query, (row["username"], row["supradesa_id"],))
-            same = cur.fetchone()
-            if same != None:
-                continue
+        user = db.session.query(WpUser) \
+            .filter(WpUser.user_login == row["username"]) \
+            .first()
+        if user == None:
+            continue
 
-            query = "SELECT region_code FROM sd_supradesa WHERE id = %s"
-            cur.execute(query, (row["supradesa_id"],))
-            code = cur.fetchone()
-            if code == None:
-                continue
+        user_supradesa = db.session.query(SdUserSupradesa) \
+            .filter(SdUserSupradesa.username == row["username"]) \
+            .filter(SdUserSupradesa.supradesa_id == row["supradesa_id"]) \
+            .first()
+        if user_supradesa != None:
+            continue
 
-            query = "REPLACE INTO sd_users_supradesa (username, supradesa_id,level) VALUES (%s,%s,%s)"
-            cur.execute(query, (row["username"], row["supradesa_id"], row["level"]))
-            mysql.connection.commit()
-            remove_capabilities_and_userlevel(user["ID"], )
+        region_code = db.session.query(SdSupradesa.region_code) \
+            .filter(SdSupradesa.id == row["supradesa_id"]) \
+            .first()
+        if region_code == None:
+            continue
 
-            query = "SELECT blog_id FROM sd_desa WHERE kode like %s"
-            cur.execute(query, (code["region_code"] + '.%',), )
-            blogs_id = list(cur.fetchall())
-            for blog_id in blogs_id:
-                role = {"administrator": "10", "editor": "7", "author": "2", "contributor": "1", "subscriber": "0"}
-                capabilities = ('wp_' + str(blog_id["blog_id"]) + '_capabilities')
-                user_level = ('wp_' + str(blog_id["blog_id"]) + '_user_level')
-                level_value = role[row["level"]]
-                role = dumps({row["level"]: 1})
+        user_supradesa = db.session.query(SdUserSupradesa) \
+            .filter(SdUserSupradesa.username == row["username"]) \
+            .filter(SdUserSupradesa.supradesa_id == row["supradesa_id"]) \
+            .first()
 
-                query = """INSERT INTO wp_usermeta (user_id, meta_key,meta_value) VALUES (%s, %s,%s), (%s, %s,%s)"""
-                cur.execute(query, (user["ID"], capabilities, role, user["ID"], user_level, level_value))
-                mysql.connection.commit()
+        if user_supradesa is None:
+            user_supradesa = SdUserSupradesa()
+            user_supradesa.username = row["username"]
+            user_supradesa.supradesa_id = row["supradesa_id"]
+        user_supradesa.level = row["level"]
 
-        return jsonify({'success': True})
-    finally:
-        cur.close()
+        db.session.add(user_supradesa)
+        db.session.flush()
+        remove_capabilities_and_userlevel(user["ID"], )
+
+        blogs_id = db.session.query(SdDesa.blog_id) \
+            .filter(SdDesa.kode.like(region_code + '.%')) \
+            .all()
+
+        for blog_id in blogs_id:
+            role = {"administrator": "10", "editor": "7", "author": "2", "contributor": "1", "subscriber": "0"}
+            capabilities = ('wp_' + str(blog_id["blog_id"]) + '_capabilities')
+            user_level = ('wp_' + str(blog_id["blog_id"]) + '_user_level')
+            level_value = role[row["level"]]
+            role = dumps({row["level"]: 1})
+
+            wp_usermeta = WpUserMeta()
+            wp_usermeta.user_id = user["ID"]
+            wp_usermeta.meta_key = capabilities
+            wp_usermeta.meta_value = role
+
+            wp_usermeta2 = WpUserMeta()
+            wp_usermeta2.user_id = user["ID"]
+            wp_usermeta2.meta_key = user_level
+            wp_usermeta2.meta_value = level_value
+
+            db.session.add(wp_usermeta)
+            db.session.add(wp_usermeta2)
+
+    db.session.commit()
+    return jsonify({'success': True})
 
 
-@app.route('/api/remove_users_supradesa', methods=["POST"])
+@app.route('/api/user_supradesas', methods=["DELETE"])
 @login_required
 def remove_user_supradesa():
     data = json.loads(request.form.get("data"))
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
 
-        query = "DELETE FROM sd_users_supradesa WHERE username = %s and supradesa_id = %s"
-        cur.execute(query, (data["username"], data["supradesa_id"],))
-        mysql.connection.commit()
+    db.session.query(SdUserSupradesa) \
+        .filter(SdUserSupradesa.username == data["username"]) \
+        .filter(SdUserSupradesa.supradesa_id == data["supradesa_id"]) \
+        .delete()
 
-        query = "SELECT ID from wp_users WHERE user_login = %s"
-        cur.execute(query, (data["username"],))
-        user = cur.fetchone()
-        remove_capabilities_and_userlevel(user["ID"])
+    wp_user = db.session.query(WpUser) \
+        .filter(WpUser.user_login == data["username"]) \
+        .first()
 
-        return jsonify({'success': True})
-    finally:
-        cur.close
+    if wp_user is not None:
+        remove_capabilities_and_userlevel(wp_user["ID"])
+
+    db.session.commit()
+    return jsonify({'success': True})
 
 
-@app.route('/api/get_region', methods=["GET"])
+@app.route('/api/regions', methods=["GET"])
 @login_required
-def get_region():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT region_code, id as supradesa_id FROM sd_supradesa"
-        cur.execute(query)
-        result = jsonify(cur.fetchall())
-        return result
-    finally:
-        cur.close()
+def get_regions():
+    supradesas = db.session.query(SdSupradesa.region_code, SdSupradesa.id.label('id')).all()
+    result = []
+    for supradesa in supradesas:
+        result.append(supradesa._asdict())
+
+    return jsonify(result)
 
 
-@app.route('/api/supradesa', methods=["GET"])
+@app.route('/api/supradesas', methods=["GET"])
 @login_required
-def get_supradesa():
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT * FROM sd_supradesa"
-        cur.execute(query)
-        result = jsonify(cur.fetchall())
-        return result
-    finally:
-        cur.close()
+def get_supradesas():
+    supradesas = db.session.query(SdSupradesa).all()
+    result = SdSupradesaSchema(many=True).dump(supradesas)
+    return jsonify(result.data)
 
 
-@app.route('/api/save_supradesa', methods=["POST"])
+@app.route('/api/supradesas', methods=["POST"])
 @login_required
 def save_supradesa():
     data = json.loads(request.form.get("data"))
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     keys = {'id': None, 'region_code': None, 'flag': None, 'name': None, 'blog_agregate': None, 'username': None,
             'password': None, 'zoom': None, 'latitude': None, 'longitude': None}
-    try:
-        for row in data:
-            if row == {}:
-                continue
-            result = normalize(row, keys)
-            query = "REPLACE INTO sd_supradesa (id,region_code,flag,name,blog_agregate,username,password,zoom,latitude,longitude) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-            cur.execute(query, (
-                result["id"], result["region_code"], result["flag"], result["name"], result["blog_agregate"],
-                result["username"], result["password"], result["zoom"], result["latitude"], result["longitude"]))
-            mysql.connection.commit()
-        return jsonify({'success': True})
-    finally:
-        cur.close()
+
+    for row in data:
+        if row == {}:
+            continue
+
+        result = normalize(row, keys)
+
+        supradesa = db.session.query(SdSupradesa) \
+            .filter(SdSupradesa.id == result["id"]) \
+            .first()
+
+        if supradesa is None:
+            supradesa = SdSupradesa()
+        supradesa.region_code = result["region_code"]
+        supradesa.flag = result["flag"]
+        supradesa.name = result["name"]
+        supradesa.blog_agregate = result["blog_agregate"]
+        supradesa.username = result["username"]
+        supradesa.password = result["password"]
+        supradesa.zoom = result["zoom"]
+        supradesa.latitude = result["latitude"]
+        supradesa.longitude = result["longitude"]
+
+        db.session.add(supradesa)
+
+    db.session.commit()
+    return jsonify({'success': True})
 
 
-@app.route('/api/remove_supradesa', methods=["POST"])
+@app.route('/api/supradesas', methods=["DELETE"])
 @login_required
 def remove_supradesa():
     data = json.loads(request.form.get("data"))
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        query = "SELECT u.ID FROM sd_users_supradesa us INNER JOIN wp_users u ON u.user_login = us.username WHERE us.supradesa_id = %s"
-        cur.execute(query, (data["id"],))
-        user = cur.fetchone()
-        if user != None:
-            print "user ada"
-            remove_capabilities_and_userlevel(user["ID"])
-            query = "DELETE FROM sd_users_supradesa WHERE supradesa_id = %s"
-            cur.execute(query, (data["id"],))
-            mysql.connection.commit()
+    user = db.session.query(SdUserSupradesa, WpUser.ID) \
+        .join(WpUser, SdUserSupradesa.username == WpUser.user_login) \
+        .filter(SdUserSupradesa.supradesa_id == data["id"]) \
+        .first()
 
-        query = "DELETE FROM sd_supradesa WHERE id= %s"
-        cur.execute(query, (data["id"],))
-        mysql.connection.commit()
-        return jsonify({'success': True})
-    finally:
-        cur.close
+    if user is not None:
+        remove_capabilities_and_userlevel(user.ID)
+        db.session.query(SdUserSupradesa) \
+            .filter(SdUserSupradesa.supradesa_id == data["id"]) \
+            .delete()
+
+    db.session.query(SdSupradesa) \
+        .filter(SdSupradesa.id == data["id"]) \
+        .delete()
+
+    db.session.commit()
+    return jsonify({'success': True})
 
 
 if __name__ == '__main__':

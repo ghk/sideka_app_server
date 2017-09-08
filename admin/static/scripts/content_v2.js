@@ -1,7 +1,7 @@
 schema.forEach(c = > {
     c.readOnly = true;
-})
-;
+});
+
 var container = document.getElementById('sheet');
 var search = document.location.search.split('=');
 var sheet = search[search.length - 1];
@@ -38,8 +38,7 @@ function onModeChange(radio) {
 
     if (value === 'data') {
         result = content.data[sheet];
-    }
-    else {
+    } else {
         if (content['diffs']) {
             result = content['diffs'][sheet][0][value];
         }

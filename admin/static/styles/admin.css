@@ -25,3 +25,9 @@ body {
 .flex-item {
 	padding: 3px 15px;
 }
+
+.handsontable td, .handsontable th {
+  text-overflow: hidden;
+  overflow: hidden;
+  white-space: nowrap;
+}

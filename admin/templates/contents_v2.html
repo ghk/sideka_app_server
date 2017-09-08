@@ -2,7 +2,17 @@
 {% block body %}
 	<div class="flex-item">
 		<form id='filter-form' style='display: inline;'>
-			<input type='text' name='filter-textbox' placeholder='Desa ID atau domain'>
+			<input type='text' name='desa-filter' placeholder='-- Filter Desa ID atau domain --' style="width: 200px;">
+			<select name="type">
+				<option value="">-- Filter tipe --</option>
+				<option>penduduk</option>
+				<option>map</option>
+				<option>perencanaan</option>
+				<option>penganggaranan</option>
+				<option>spp</option>
+				<option>penerimaan</option>
+				<option>kemiskinan</option>
+			</select>
 		</form>
 		Current time: {{now}}
 	</div>

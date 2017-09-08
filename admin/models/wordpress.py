@@ -42,3 +42,20 @@ class WpSiteMeta(db.Model):
         return '<WpSiteMeta(%r, %r)>' % (self.meta_key, self.meta_value)
 
 
+class WpBlog(db.Model):
+    __tablename__ = 'wp_blogs'
+    blog_id = db.Column('blog_id', db.Integer, primary_key=True, autoincrement=True)
+    site_id = db.Column('site_id', db.Integer, nullable=False)
+    domain = db.Column('domain', db.String(length=200), nullable=False)
+    path = db.Column('path', db.String(length=100), nullable=False)
+    registered = db.Column('registered', db.DateTime(timezone=False), nullable=False)
+    last_updated = db.Column('last_updated', db.DateTime(timezone=False), nullable=False)
+    public = db.Column('public', db.Integer, nullable=False)
+    archived = db.Column('archived', db.Integer, nullable=False)
+    mature = db.Column('mature', db.Integer, nullable=False)
+    lang_id = db.Column('lang_id', db.Integer, nullable=False)
+
+    def __repr__(self):
+        return '<WpBlog(%r)>' % self.blog_id
+
+
