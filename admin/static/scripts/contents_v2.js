@@ -84,7 +84,23 @@ columns.forEach(c => {
 
 var hot;
 
-$.getJSON("/api/contents/v2", function(data){
+var getUrl = function(){
+	var params = {};
+	var filter=$("input[name='desa-filter']").val();
+	if(filter){
+		if(parseInt(filter))
+			params["desa_id"] =filter;
+		else
+			params["domain"] = filter;
+	}
+	var type_filter=$("[name='type']").val();
+	if(type_filter){
+		params["type"]=type_filter;
+	}
+	return "/api/contents/v2?"+$.param(params);
+}
+
+$.getJSON(getUrl(), function(data){
 	var container = document.getElementById('sheet');
 
 	hot = new Handsontable(container, {
@@ -97,14 +113,18 @@ $.getJSON("/api/contents/v2", function(data){
 	setTimeout(()=> hot.render(), 0);
 });
 
-$("#filter-form").submit(function(){
-	var desa_id=$("input[name='filter-textbox']").val();
-	var query_string = "";
-	if(desa_id)
-		query_string = "?desa_id="+desa_id;
-	$.getJSON("/api/contents/v2"+query_string, function(data){
+
+var filter = function(){
+	$.getJSON(getUrl(), function(data){
 		hot.loadData(data);
 		setTimeout(()=> hot.render(), 0);
 	});
+};
+$("#filter-form").submit(function(){
+	filter();
 	return false;
+});
+
+$("#filter-form select").change(function(){
+	filter();
 });

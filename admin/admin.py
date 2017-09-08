@@ -361,13 +361,22 @@ def get_contents():
 def get_contents_v2():
     cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     try:
-        filter_value = request.args.get("desa_id", "true")
 	filter_text = "'true' = %s"
-	if filter_value != "true":
+	filter_value = "true"
+        desa_id = request.args.get("desa_id", "true")
+	if desa_id != "true":
 		filter_text = "desa_id = %s"
-		filter_value = int(filter_value)
-        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and "+filter_text+" order by date_created desc limit 100"
-        cur.execute(query, (filter_value,))
+		filter_value = int(desa_id)
+        domain = request.args.get("domain", "true")
+	if domain != "true":
+		filter_text = "domain like %s"
+		filter_value = domain+".%"
+	type_filter_text = "'true' = %s"
+        type_filter_value = request.args.get("type", "true")
+	if type_filter_value != "true":
+		type_filter_text = "type = %s"
+        query = "SELECT sd_contents.id, sd_contents.content, desa_id, d.desa, d.domain, type, subtype, timestamp, date_created, created_by, u.user_login, opendata_date_pushed, opendata_push_error, change_id, api_version from sd_contents left join sd_desa d on desa_id = d.blog_id left join wp_users u on u.ID = created_by WHERE api_version='2.0' and "+filter_text+" and "+type_filter_text+" order by date_created desc limit 100"
+        cur.execute(query, (filter_value,type_filter_value))
         contents = list(cur.fetchall())
 	for c in contents:
 		j = json.loads(c["content"])

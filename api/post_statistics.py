@@ -7,7 +7,6 @@ import sys
 import traceback
 import json
 from datetime import datetime, timedelta
-from ckanapi import RemoteCKAN
 
 from bs4  import BeautifulSoup
 from HTMLParser import HTMLParser, HTMLParseError
@@ -275,7 +274,7 @@ if __name__ == "__main__":
 	db.close()
 
 if __name__ == "___main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../common/app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,    
 			     user=conf.MYSQL_USER,      
 			     passwd=conf.MYSQL_PASSWORD,

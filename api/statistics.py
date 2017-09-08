@@ -7,7 +7,6 @@ import sys
 import traceback
 import json
 from datetime import datetime, timedelta
-from ckanapi import RemoteCKAN
 
 from utils import open_cfg, query_single
 
@@ -135,7 +134,7 @@ def get_statistics(cur, desa_id):
 
 
 if __name__ == "__main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../common/app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,
 			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,
@@ -145,12 +144,15 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		stats = get_statistics(cur, desa["blog_id"])
-		stats["blog_id"] = desa["blog_id"]
-		stats["domain"] = desa["domain"]
-		statistics = json.dumps(stats)
-		print "%d - %s" % (desa["blog_id"], desa["domain"])
-		print statistics
-		cur.execute("REPLACE into sd_statistics (blog_id, statistics, date) VALUES (%s, %s, now())", (desa["blog_id"], statistics))
-		db.commit()
+		try:
+			stats = get_statistics(cur, desa["blog_id"])
+			stats["blog_id"] = desa["blog_id"]
+			stats["domain"] = desa["domain"]
+			statistics = json.dumps(stats)
+			print "%d - %s" % (desa["blog_id"], desa["domain"])
+			print statistics
+			cur.execute("REPLACE into sd_statistics (blog_id, statistics, date) VALUES (%s, %s, now())", (desa["blog_id"], statistics))
+			db.commit()
+		except Exception as e:
+			print e
 	db.close()
