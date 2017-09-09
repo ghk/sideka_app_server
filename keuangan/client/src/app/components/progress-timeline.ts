@@ -34,7 +34,8 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         return this._rDatasets.getValue();
     }
 
-    labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    //labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep'];
     options: any = {
         tooltips: {
             mode: 'index',
@@ -68,20 +69,20 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         };
 
         let transferredDdDataset = {
-            label: 'Penyaluran DD',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            label: 'Penyaluran DDS',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
         let transferredAddDataset = {
             label: 'Penyaluran ADD',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
         let transferredBhprDataset = {
-            label: 'Penyaluran BHPR',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            label: 'Penyaluran PBH',
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
         let realizedSpendingDataset = {
             label: 'Realisasi Desa',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
 
         this.tDatasets = [transferredDdDataset, transferredAddDataset, transferredBhprDataset];
