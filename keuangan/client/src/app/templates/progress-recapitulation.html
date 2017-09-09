@@ -3,14 +3,14 @@
         <div class="col-sm-8" style="border-right: 1px solid #ddd;">
             <ul class="nav nav-tabs front-numbers">
                 <li>
-                    <span class="number text-success">Rp. {{ total.budgetedRevenue | number:'3.2-2' }}</span>
+                    <span class="number text-success">Rp. {{ total.budgetedRevenue | number:'3.0-0' }}</span>
                 </li>
                 <li>
-                    <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.2-2' }}</span>
+                    <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.0-0' }}</span>
                     <span class="text text-success">Tersalurkan Kabupaten</span>
                 </li>
                 <li>
-                    <span class="number text-success">{{ total.realizedSpending / total.budgetedRevenue | percent:'2.2-2' }}</span>
+                    <span class="number text-success">{{ total.realizedSpending / total.budgetedRevenue | percent:'2.0-0' }}</span>
                     <span class="text text-success">Terrealisasi Desa</span>
                 </li>
             </ul>
@@ -37,15 +37,15 @@
                                 </a>
                             </td>
                             <td class="money">
-                                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.2-2' }} </div>
+                                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
                                 <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
                             </td>
                             <td class="money">
-                                <div style="float:right;">{{ entity.transferred_revenue | number:'3.2-2' }} </div>
+                                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }} </div>
                                 <div class="bar-percent" [ngStyle]="getBarPercent(entity.transferred_revenue, entity.budgeted_revenue)"> </div>
                             </td>
                             <td class="money">
-                                <div style="float:right;">{{ entity.realized_spending | number:'3.2-2' }} </div>
+                                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }} </div>
                                 <div class="bar-percent" [ngStyle]="getBarPercent(entity.realized_spending, entity.budgeted_revenue)"> </div>
                             </td>
                         </tr>                      
@@ -54,9 +54,9 @@
                     <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
                         <tr class="success">
                             <td><a href>Total</a></td>
-                            <td class="money"> {{ total.budgetedRevenue | number:'3.2-2'}} </td>
-                            <td class="money"> {{ total.transferredRevenue | number:'3.2-2'}} </td>
-                            <td class="money"> {{ total.realizedSpending | number:'3.2-2'}} </td>
+                            <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
+                            <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
+                            <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>
                         </tr>
                     </tfoot>
                     <tfoot [hidden]="progress?.percentage === 100">

@@ -1,4 +1,5 @@
 import sys
+import traceback
 sys.path.append('../common')
 
 from flask import Flask, request, jsonify
@@ -12,6 +13,10 @@ import json
 import time
 import base64
 import uuid
+
+import logging, sys
+logging.basicConfig(stream=sys.stderr)
+sys.stdout = sys.stderr
 
 app = Flask(__name__)
 mysql = MySQL(app)
