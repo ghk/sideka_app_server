@@ -247,7 +247,7 @@ def get_post_scores(cur, desa_id, domain, post_id):
 
 
 if __name__ == "__main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../common/app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,    
 			     user=conf.MYSQL_USER,      
 			     passwd=conf.MYSQL_PASSWORD,
@@ -258,19 +258,22 @@ if __name__ == "__main__":
 	desas = list(cur.fetchall())
 	for desa in desas:
 		print desa["blog_id"]
-		query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
-		cur.execute(query)
-		posts = list(cur.fetchall())
-		for post in posts:
-			try:
-				scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
-				s = json.dumps(scores)
-				print s
-				cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
-			except Exception as e:
-				traceback.print_exc()
-				
-		db.commit()
+		try:
+			query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
+			cur.execute(query)
+			posts = list(cur.fetchall())
+			for post in posts:
+				try:
+					scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
+					s = json.dumps(scores)
+					print s
+					cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
+				except Exception as e:
+					traceback.print_exc()
+					
+			db.commit()
+		except Exception as e:
+			traceback.print_exc()
 	db.close()
 
 if __name__ == "___main__":

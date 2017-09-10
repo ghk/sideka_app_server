@@ -362,6 +362,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
         elif isinstance(current_content["data"], dict):
             for key, value in request.json["columns"].items():
+                if key not in current_content["data"]:
+                    current_content["data"][key]=[]
+
                 if(len(new_content["diffs"][key]) > 0):
                    merge_method = merge_map_diffs if content_type == 'pemetaan' else merge_diffs
                    new_content["data"][key] = merge_method(new_content["diffs"][key], current_content["data"][key])

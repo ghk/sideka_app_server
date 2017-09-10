@@ -15,7 +15,6 @@ class BasePusher(object):
 		self.desa_name = d["desa"]
 
 		self.deserialized = json.loads(d["content"], encoding='ISO-8859-1')
-		self.data = self.deserialized["data"]
 		#print len(self.data)
 
 	
@@ -42,15 +41,13 @@ class BasePusher(object):
 			res = self.ckan.action.datastore_create(resource=resource, records=records, primary_key=keys)
 		return res
 
-	def data_as_dicts(self, schema_name):
-		schema_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schemas/"+schema_name+".json")
-		schema = None
-		with open(schema_file) as f:    
-		    schema = demjson.decode(f.read())
-		self.schema = schema
+	def data_as_dicts(self, tab_name):
+		columns = self.deserialized["columns"][tab_name]
+		print columns
 		def to_dict(row):
-			return dict((schema[i]["field"], v) for i, v in enumerate(row) if i < len(schema))
-		return [to_dict(row) for row in self.data]
+			return dict((columns[i], v) for i, v in enumerate(row) if i < len(columns))
+		print self.deserialized['data'][tab_name][0]
+		return [to_dict(row) for row in self.deserialized['data'][tab_name]]
 
 	def setup(self):
 		try:

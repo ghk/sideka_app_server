@@ -13,7 +13,7 @@ from pushers.keluarga_pusher import KeluargaPusher
 from pushers.apbdes_pusher import ApbdesPusher
 from utils import open_cfg
 
-conf = open_cfg('app.cfg')
+conf = open_cfg('../common/app.cfg')
 
 db = MySQLdb.connect(host=conf.MYSQL_HOST,    
                      user=conf.MYSQL_USER,      
@@ -31,7 +31,7 @@ cur = db.cursor(MySQLdb.cursors.DictCursor)
 cur.execute("""
 SELECT * FROM sd_contents c 
 	left join sd_desa d on d.blog_id = c.desa_id
-	WHERE c.api_version = 1.0 and c.timestamp is not null and c.opendata_date_pushed is null and c.opendata_push_error is null order by timestamp asc
+	WHERE c.api_version = '2.0' and c.opendata_date_pushed is null and c.opendata_push_error is null order by c.change_id asc
 """)
 
 contents = list(cur.fetchall())
@@ -40,17 +40,22 @@ print len(contents)
 
 pusher_classes = {}
 pusher_classes["penduduk"] = PendudukPusher
-pusher_classes["keluarga"] = KeluargaPusher
-pusher_classes["apbdes"] = ApbdesPusher
+#pusher_classes["apbdes"] = ApbdesPusher
+
 
 for c in contents:
+
 	print "------------------------------------------------------------"
 	domain = c["domain"]
 	if not domain:
-		print "no domain %d" % c["desa_id"]
+		if c["desa_id"] is not None:
+			print "no domain for domain id: %d" % c["desa_id"]
+		else:
+			print "no domain for id: %d" % c["id"]
 		continue
 	desa_slug = domain.split(".")[0]
-	print "%d - %d %s %s: %s %s %d" % (c["id"], c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["timestamp"])
+	print "%d - %d %s %s: %s %s %d" % (c["id"], c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["change_id"])
+
 	if not c["type"] in pusher_classes:
 		print "no pusher for %s" % c["type"]
 		continue
@@ -65,6 +70,5 @@ for c in contents:
 		traceback.print_exc()
 		cur.execute("update sd_contents set opendata_push_error = %s where id = %s", (str(e), c["id"]))
 		db.commit()
-
 
 db.close()

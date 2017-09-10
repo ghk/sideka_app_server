@@ -22,7 +22,7 @@ class PendudukPusher(BasePusher):
 		for key, group in itertools.groupby(sorted(self.penduduk,key=keyfunc), keyfunc):
 			c1, c2 = key
 			row = {}
-			row["tahun"] = 2015
+			row["tahun"] = 2017
 			row[column_names[0]] = c1
 			row[column_names[1]] = c2
 			row["jumlah"] = len(list(group))
@@ -34,7 +34,7 @@ class PendudukPusher(BasePusher):
 		records = self.sql_two_columns(columns, column_names)
 		columns = ["tahun", column_names[0], column_names[1], "jumlah"]
 		keys = ["tahun", column_names[0], column_names[1]]
-		delete_filters = {"tahun": 2015}
+		delete_filters = {"tahun": 2017}
 		return self.ckan_push(name, columns, keys, records, delete_filters=delete_filters)
 
 	def sql_pyramid(self):
@@ -54,7 +54,7 @@ class PendudukPusher(BasePusher):
 		for key, group in itertools.groupby(sorted(self.penduduk,key=keyfunc), keyfunc):
 			age, jenkel = key
 			row = {}
-			row["tahun"] = 2015
+			row["tahun"] = 2017
 			row["min_umur"] = age * 5
 			row["max_umur"] = (age+1) * 5
 			row["jenis_kelamin"] = jenkel
