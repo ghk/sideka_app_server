@@ -9,9 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
-app.config.from_object('common.Config')
-# app.config.from_object('common.ProductionConfig')
-app.config.from_object('common.DevelopmentConfig')
+app.config.from_pyfile('../common/app.cfg')
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['ADMIN_SQLALCHEMY_DATABASE_URI']
 app.secret_key = app.config["SECRET_KEY"]
 

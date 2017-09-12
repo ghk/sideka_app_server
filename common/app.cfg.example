@@ -14,3 +14,4 @@ ADMIN_SQLALCHEMY_DATABASE_URI = "mysql://root:ingininiinginitubanyaksekali/wp_si
 CKAN_HOST="http://data.prakarsadesa.id"
 CKAN_KEY=""
 SECRET_KEY="microvac"
+SQLALCHEMY_ECHO=True

@@ -8,7 +8,7 @@ class Region(BaseModel):
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.Text)
     type = db.Column(db.Integer, nullable=False, default=False)
-    website = db.Column(db.Text)
+    domain = db.Column(db.Text)
     url_key = db.Column(db.Text)
     is_kelurahan = db.Column(db.Boolean, nullable=False, default=False)
     is_in_scope = db.Column(db.Boolean, nullable=False, default=False)

@@ -2,9 +2,9 @@ import sys
 
 sys.path.append("../common");
 
-from admin import app, db, ma, login_manager
+from admin import app, db, login_manager
 from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
-from flask_login import login_user, login_required, current_user, logout_user, UserMixin
+from flask_login import login_user, login_required, logout_user, UserMixin
 from sqlalchemy.orm import load_only, aliased
 from sqlalchemy import func, desc, update
 
