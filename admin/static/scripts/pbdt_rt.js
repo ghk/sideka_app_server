@@ -1336,7 +1336,6 @@ var columns = [
 var container = document.getElementById('sheet');
 var hot; 
 
-
 function customDropdownRenderer (instance, td, row, col, prop, value, cellProperties) {
     var selectedId;
     var optionsList = cellProperties.chosenOptions.data;
@@ -1354,7 +1353,6 @@ function customDropdownRenderer (instance, td, row, col, prop, value, cellProper
     
     Handsontable.TextCell.renderer.apply(this, arguments);
 }
-
 
 $('#upload').click(function(){
     var fileUploader = $('#file').prop('files');
