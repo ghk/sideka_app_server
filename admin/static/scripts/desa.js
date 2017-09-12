@@ -102,9 +102,9 @@ function initializeTableCount(hot, spanCount) {
 function convertBoolean(rows, column) {
 	for (var i = 0, len = rows.length; i < len; i++) {
 		var val = rows[i][column]
-		if (val === '\u0000')
+		if (val === 0)
 			val = false;
-		if (val === '\u0001')
+		if (val === 1)
 			val = true;
 		rows[i][column] = val;
 	}
@@ -126,7 +126,7 @@ $.getJSON("/api/desas", function (desas) {
 		dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
 		colHeaders: columns.map(c => c.header),
 		afterChange: function (changes, source) {
-			if (source != "loadData") {
+			if (source != "loadData" && source != "external") {
 				changes.forEach(function (change) {
 					var allowedColumns = ["kode", "latitude", "longitude", "sekdes", "kades", "pendamping", "is_dbt", "is_lokpri"];
 					var column = change[1];
@@ -136,11 +136,11 @@ $.getJSON("/api/desas", function (desas) {
 					console.log(column, value, prevvalue, id);
 					if (id && allowedColumns.indexOf(column) >= 0 && prevvalue != value) {
 						if (value === false)
-							value = '0';
+							value = 0;
 						if (value === true)
-							value = '1';
+							value = 1;
 						$("#notification").html("Menyimpan...").show();
-						$.post("/api/desas/" + blog_id, {
+						$.post("/api/desas/" + id, {
 								column: column,
 								value: value
 							})

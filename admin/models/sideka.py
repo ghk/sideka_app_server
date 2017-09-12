@@ -1,6 +1,6 @@
 from admin import db, ma
 from datetime import datetime
-
+from sqlalchemy.dialects.mysql import BIT
 
 class SdContent(db.Model):
     __tablename__ = 'sd_contents'
@@ -37,8 +37,8 @@ class SdDesa(db.Model):
     kades = db.Column(db.String(length=100))
     sekdes = db.Column(db.String(length=100))
     pendamping = db.Column(db.String(length=100))
-    is_dbt = db.Column(db.Boolean)
-    is_lokpri = db.Column(db.Boolean)
+    is_dbt = db.Column(BIT)
+    is_lokpri = db.Column(BIT)
 
 
 class SdDesaSchema(ma.ModelSchema):

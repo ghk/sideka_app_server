@@ -221,9 +221,10 @@ def update_desa(blog_id):
     if column in boolean_columns:
         value = int(value)
 
+    update_value = { column: value }
     query = db.session.query(SdDesa) \
-        .update(dict(column=value)) \
-        .where(SdDesa.blog_id == blog_id)
+        .filter(SdDesa.blog_id == blog_id) \
+        .update(update_value) \
 
     db.session.commit()
     return jsonify({'success': True})
