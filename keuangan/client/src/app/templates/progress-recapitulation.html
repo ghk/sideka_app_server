@@ -32,7 +32,7 @@
                     <tbody>
                         <tr *ngFor="let entity of entities">
                             <td>
-                                <a href="http://{{entity.domain}}/data/anggaran">
+                                <a [routerLink]="['/progress/region', entity.region.id]">
                                     <span>{{ entity.region.name }}</span> 
                                 </a>
                             </td>

@@ -34,8 +34,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         return this._rDatasets.getValue();
     }
 
-    //labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep'];
+    labels: any[] = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     options: any = {
         tooltips: {
             mode: 'index',
@@ -68,35 +67,35 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         let query: Query = {
         };
 
-        let transferredDdDataset = {
+        let transferredDdsDataset = {
             label: 'Penyaluran DDS',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
         let transferredAddDataset = {
             label: 'Penyaluran ADD',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
-        let transferredBhprDataset = {
+        let transferredPbhDataset = {
             label: 'Penyaluran PBH',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         };
         let realizedSpendingDataset = {
             label: 'Realisasi Desa',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         }
 
-        this.tDatasets = [transferredDdDataset, transferredAddDataset, transferredBhprDataset];
+        this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
         this.rDatasets = [realizedSpendingDataset];
 
         this._dataService.getProgressTimelines(query, this.progressListener.bind(this)).subscribe(
             results => {                
                 results.forEach(result => {
-                    transferredDdDataset.data[result.month - 1] += result.transferred_dd;
+                    transferredDdsDataset.data[result.month - 1] += result.transferred_dd;
                     transferredAddDataset.data[result.month - 1] += result.transferred_add;
-                    transferredBhprDataset.data[result.month - 1] += result.transferred_bhpr;
+                    transferredPbhDataset.data[result.month - 1] += result.transferred_pbh;
                     realizedSpendingDataset.data[result.month - 1] += result.realized_spending;
                 })
-                this.tDatasets = [transferredDdDataset, transferredAddDataset, transferredBhprDataset];
+                this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
                 this.rDatasets = [realizedSpendingDataset];
             },
             error => { }

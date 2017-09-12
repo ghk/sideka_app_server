@@ -9,9 +9,9 @@ class ProgressTimeline(BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     apbn_key = db.Column(db.String, nullable=False)
     month = db.Column(db.Integer)
-    transferred_dd = db.Column(db.DECIMAL)
+    transferred_dds = db.Column(db.DECIMAL)
     transferred_add = db.Column(db.DECIMAL)
-    transferred_bhpr = db.Column(db.DECIMAL)
+    transferred_pbh = db.Column(db.DECIMAL)
     realized_spending = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))

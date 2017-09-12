@@ -3,11 +3,6 @@ import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { Query } from '../models/query';
 
-var domains = {
-	"32.06.19.2006": 'papayan.desa.id',
-	"32.06.19.2009": 'mandalamekar.desa.id'
-}
-
 @Component({
   selector: 'sk-progress-recapitulation',
   templateUrl: '../templates/progress-recapitulation.html',
@@ -40,7 +35,6 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
             result => {
                 this.entities = result;
                 this.entities.forEach(entity => {
-                    entity.domain = domains[entity.fk_region_id];
                     this.total.budgetedRevenue += entity.budgeted_revenue;
                     this.total.transferredRevenue += entity.transferred_revenue;
                     this.total.realizedSpending += entity.realized_spending;
@@ -53,7 +47,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-
+        
     }   
 
     getBarPercent(numerator, denominator) {

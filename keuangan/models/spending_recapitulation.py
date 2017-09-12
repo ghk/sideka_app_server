@@ -8,7 +8,8 @@ from spending_type import SpendingTypeSchema
 class SpendingRecapitulation(BaseModel):
     __tablename__ = 'spending_recapitulations'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    value = db.Column(db.DECIMAL)
+    budgeted = db.Column(db.DECIMAL)
+    realized = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

@@ -10,6 +10,7 @@ import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
 import { ProgressRecapitulationComponent } from './components/progress-recapitulation';
 import { ProgressTimelineComponent } from './components/progress-timeline';
+import { ProgressDetailComponent } from './components/progress-detail';
 import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
 
 import { DataService } from './services/data';
@@ -21,6 +22,7 @@ import { SharedService } from './services/shared';
     HeaderComponent,
     ProgressRecapitulationComponent,
     ProgressTimelineComponent,
+    ProgressDetailComponent,
     SpendingRecapitulationComponent
   ],
   imports: [
@@ -32,6 +34,7 @@ import { SharedService } from './services/shared';
     RouterModule.forRoot([
       { path: '', redirectTo: 'progress', pathMatch: 'full' },
       { path: 'progress', component: ProgressRecapitulationComponent }, 
+      { path: 'progress/region/:regionId', component: ProgressDetailComponent },
       { path: 'spending', component: SpendingRecapitulationComponent }
     ]),
   ],

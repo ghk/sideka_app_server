@@ -1,0 +1,149 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="content-header">
+                Penerimaan Desa 
+            </div>
+            <div class="table-responsive">
+                <table class="table table-condensed table-responsive table-bordered table-striped">
+                    <thead [hidden]="progress?.percentage !== 100">
+                        <tr>
+                            <th style="text-align: center">Desa</th>              
+                            <th style="text-align: center">Kode</th>              
+                            <th style="text-align: center">Deskripsi</th>              
+                            <th style="text-align: center">Jumlah</th>              
+                            <th style="text-align: center">Sumber Dana</th>     
+                            <th style="text-align: center">Tanggal</th>              
+                            <th style="text-align: center">Nama Pengirim</th>                       
+                            <th style="text-align: center">Alamat Pengirim</th>    
+                            <th style="text-align: center">TTD Pengirim</th>    
+                            <th style="text-align: center">Nomor Rekening</th>    
+                            <th style="text-align: center">Nama Bank</th>    
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let entity of revenues">
+                            <td>
+                                <a [routerLink]="['/progress/region', entity.region.id]">
+                                    <span>{{ entity.region.name }}</span> 
+                                </a>
+                            </td>
+                            <td>
+                                <div>{{ entity.code }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.description }}</div>
+                            </td>
+                            <td class="money">
+                                <div>{{ entity.value | number:'3.0-0' }} </div>
+                                <div class="bar-percent"></div>
+                            </td>
+                            <td>
+                                <div>{{ entity.type }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.date }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.source_name }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.source_address }}</div>                                
+                            </td>
+                            <td>
+                                <div>{{ entity.source_signature }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.account_number }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.bank_name }}</div>
+                            </td>
+                        </tr>                      
+                    </tbody>
+
+                    <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
+                        <tr class="success">
+                            <td><a href>Total</a></td>
+                            <td class="money"></td>
+                        </tr>
+                    </tfoot>
+                    <tfoot [hidden]="progress?.percentage === 100">
+                        <tr>
+                            <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                                <br>
+                                <br> Memuat data...
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+        </div>        
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="content-header">
+                Realisasi Desa
+            </div>
+            <div class="table-responsive">
+                <table class="table table-condensed table-responsive table-bordered table-striped">
+                    <thead [hidden]="progress?.percentage !== 100">
+                        <tr>
+                            <th style="text-align: center">Desa</th>              
+                            <th style="text-align: center">Kode</th>              
+                            <th style="text-align: center">Deskripsi</th>              
+                            <th style="text-align: center">Jumlah</th>              
+                            <th style="text-align: center">Jenis SPP</th>     
+                            <th style="text-align: center">Tanggal</th>              
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let entity of realizations">
+                            <td>
+                                <a [routerLink]="['/progress/region', entity.region.id]">
+                                    <span>{{ entity.region.name }}</span> 
+                                </a>
+                            </td>
+                            <td>
+                                <div>{{ entity.code }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.description }}</div>
+                            </td>
+                            <td class="money">
+                                <div>{{ entity.value | number:'3.0-0' }} </div>
+                                <div class="bar-percent"></div>
+                            </td>
+                            <td>
+                                <div>{{ entity.type }}</div>
+                            </td>
+                            <td>
+                                <div>{{ entity.date }}</div>
+                            </td>                         
+                        </tr>                      
+                    </tbody>
+
+                    <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
+                        <tr class="success">
+                            <td><a href>Total</a></td>
+                            <td class="money"></td>
+                        </tr>
+                    </tfoot>
+                    <tfoot [hidden]="progress?.percentage === 100">
+                        <tr>
+                            <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                                <br>
+                                <br> Memuat data...
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+        </div>        
+    </div>
+</div>
