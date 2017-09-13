@@ -8,6 +8,7 @@ from spending_type import SpendingTypeSchema
 class SpendingRecapitulation(BaseModel):
     __tablename__ = 'spending_recapitulations'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    year = db.Column(db.String, nullable=False)
     budgeted = db.Column(db.DECIMAL)
     realized = db.Column(db.DECIMAL)
 
@@ -18,8 +19,8 @@ class SpendingRecapitulation(BaseModel):
     type = db.relationship('SpendingType', lazy='joined')
 
     __table_args__ = (
-        db.Index('ix_fk_type_id', 'fk_type_id'),
-        db.Index('ix_fk_region_id_fk_type_id', 'fk_region_id', 'fk_type_id')
+        db.Index('sr_ix_fk_type_id', 'fk_type_id'),
+        db.Index('sr_ix_fk_region_id_fk_type_id', 'fk_region_id', 'fk_type_id')
     )
 
 

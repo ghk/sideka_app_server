@@ -47,8 +47,10 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         let spendingTypeQuery: Query = {            
-            sort: 'name'
         };
+        let spendingRecapitulationsQuery: Query = {
+            sort: 'region.name'
+        }
 
         this._spendingTypes.subscribe(x => {
             this.transformData();
@@ -65,7 +67,7 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
             }
         )
 
-        this._dataService.getSpendingRecapitulations(null, this.progressListener.bind(this)).subscribe(
+        this._dataService.getSpendingRecapitulations(spendingRecapitulationsQuery, this.progressListener.bind(this)).subscribe(
             result => {
                 this.spendingRecapitulations = result;
             },
@@ -82,15 +84,13 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
             if (!entities[sr.region.id])
                 entities[sr.region.id] = {
                     'region': sr.region,
-                    'data': new Array(this.spendingTypes.length).fill(0)
+                    'data': new Array(this.spendingTypes.length * 2).fill(0)
                 }
 
             this.spendingTypes.forEach((st, index) => {
-                if (sr.type.id === st.id && sr.type.is_realization === st.is_realization) {                     
-                    if (st.is_realization)
-                        entities[sr.region.id]['data'][2 * Math.floor(index / 2) + 1] = sr.value
-                    else 
-                        entities[sr.region.id]['data'][2 * Math.floor(index / 2)] = sr.value
+                if (sr.type.id === st.id) {                     
+                    entities[sr.region.id]['data'][2 * index + 1] = sr.realized
+                    entities[sr.region.id]['data'][2 * index] = sr.budgeted
                 }   
             })
         })

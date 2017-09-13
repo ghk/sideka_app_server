@@ -18,10 +18,10 @@ class Region(BaseModel):
     parent = db.relationship('Region', remote_side=[id])
 
     __table_args__ = (
-        db.Index('ix_fk_parent_id', 'fk_parent_id'),
-        db.Index('ix_url_key', 'url_key'),
-        db.Index('ix_id_is_lokpri', 'id', 'is_lokpri'),
-        db.Index('ix_is_lokpri', 'is_lokpri'),
+        db.Index('regions_ix_fk_parent_id', 'fk_parent_id'),
+        db.Index('regions_ix_url_key', 'url_key'),
+        db.Index('regions_ix_id_is_lokpri', 'id', 'is_lokpri'),
+        db.Index('regions_ix_is_lokpri', 'is_lokpri'),
     )
 
 

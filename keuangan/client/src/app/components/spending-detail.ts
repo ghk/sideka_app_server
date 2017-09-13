@@ -6,20 +6,19 @@ import { DataService } from '../services/data';
 import { Query } from '../models/query';
 
 @Component({
-    selector: 'sk-progress-detail',
-    templateUrl: '../templates/progress-detail.html',
+  selector: 'sk-spending-detail',
+  templateUrl: '../templates/spending-detail.html',
 })
 
-export class ProgressDetailComponent implements OnInit, OnDestroy {
+export class SpendingDetailComponent implements OnInit, OnDestroy {
 
     private _routeSubscription: Subscription;
-
-    regionId: string;
+    
+    regionId: string;   
     region: any;
-    revenues: any[] = [];
-    spendings: any[] = [];
     progress: Progress;
-
+    entities: any[] = [];
+    
     constructor(
         private _route: ActivatedRoute,
         private _dataService: DataService
@@ -34,36 +33,32 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
         });
     }
 
-    getData() {
+    getData() {  
+        let siskeudesRabQuery: Query = {
+            sort: 'row_number'
+        }
+
         this._dataService.getRegion(this.regionId, null, null).subscribe(result => {
-            this.region = result;
+            this.region = result
         })
 
         this._dataService
-            .getProgressRevenuesByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesRabsByRegion(this.regionId, null, this.progressListener.bind(this))
             .subscribe(
-            results => {
-                this.revenues = results;
-            },
-            error => { }
-            )
-
-        this._dataService
-            .getProgressSpendingsByRegion(this.regionId, null, this.progressListener.bind(this))
-            .subscribe(
-            results => {
-                this.spendings = results
-            },
-            error => { }
-            )
+                result => {
+                    this.entities = result
+                },
+                error => {                    
+                }
+        )     
     }
 
     ngOnDestroy(): void {
-        this._routeSubscription.unsubscribe()
-    }
+        this._routeSubscription.unsubscribe()    
+    }   
 
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
-
+  
 }

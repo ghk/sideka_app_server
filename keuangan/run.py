@@ -20,7 +20,7 @@ def get_regions():
 
 @app.route('/regions/count', methods=['GET'])
 def get_regions_count():
-    result = db.session.query(Region).count()
+    result = db.session.query(Region).filter(Region.is_lokpri == True).count()
     return jsonify(result)
 
 
@@ -77,7 +77,7 @@ def get_progress_timelines_count():
 
 @app.route('/progress_timelines/region/<string:region_id>', methods=['GET'])
 def get_region_progress_timelines(region_id):
-    query = db.session.query(ProgressTimeline)\
+    query = db.session.query(ProgressTimeline) \
         .filter(ProgressTimeline.fk_region_id == region_id)
     pts = query.all()
     result = ProgressTimelineSchema(many=True).dump(pts)
@@ -94,7 +94,6 @@ def generate_progress_timelines():
             pt.month = month
             pt.fk_region_id = region.id
             db.session.add(pt)
-
     db.session.commit()
 
 
@@ -113,8 +112,8 @@ def get_progress_revenues_count():
 
 @app.route('/progress_revenues/region/<string:region_id>', methods=['GET'])
 def get_progress_revenues_by_region(region_id):
-    revenues = db.session.query(ProgressRevenue)\
-        .filter(ProgressRevenue.fk_region_id == region_id)\
+    revenues = db.session.query(ProgressRevenue) \
+        .filter(ProgressRevenue.fk_region_id == region_id) \
         .all()
     result = ProgressRevenueSchema(many=True).dump(revenues)
     return jsonify(result.data)
@@ -127,46 +126,47 @@ def generate_progress_revenues():
         pr = Generator.generate_progress_revenue()
         pr.fk_region_id = region.id
         db.session.add(pr)
-
     db.session.commit()
 
 
-@app.route('/progress_realizations', methods=['GET'])
-def get_progress_realizations():
-    realizations = db.session.query(ProgressRealization).all()
-    result = ProgressRealizationSchema(many=True).dump(realizations)
+@app.route('/progress_spendings', methods=['GET'])
+def get_progress_spendings():
+    realizations = db.session.query(ProgressSpending).all()
+    result = ProgressSpendingSchema(many=True).dump(realizations)
     return jsonify(result.data)
 
 
-@app.route('/progress_realizations/count', methods=['GET'])
-def get_progress_realizations_count():
-    result = db.session.query(ProgressRealization).count()
+@app.route('/progress_spendings/count', methods=['GET'])
+def get_progress_spendings_count():
+    result = db.session.query(ProgressSpending).count()
     return jsonify(result)
 
 
-@app.route('/progress_realizations/region/<string:region_id>', methods=['GET'])
-def get_progress_realizations_by_region(region_id):
-    realizations = db.session.query(ProgressRealization)\
-        .filter(ProgressRealization.fk_region_id == region_id)\
+@app.route('/progress_spendings/region/<string:region_id>', methods=['GET'])
+def get_progress_spendings_by_region(region_id):
+    realizations = db.session.query(ProgressSpending) \
+        .filter(ProgressSpending.fk_region_id == region_id) \
         .all()
-    result = ProgressRealizationSchema(many=True).dump(realizations)
+    result = ProgressSpendingSchema(many=True).dump(realizations)
     return jsonify(result.data)
 
 
 @app.route('/progress_realizations/generate', methods=['GET'])
-def generate_progress_realizations():
+def generate_progress_spendings():
     regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
     for region in regions:
         pr = Generator.generate_progress_realization()
         pr.fk_region_id = region.id
         db.session.add(pr)
-
     db.session.commit()
 
 
 @app.route('/spending_types', methods=['GET'])
 def get_spending_types():
-    spending_types = db.session.query(SpendingType).all()
+    query = db.session.query(SpendingType)
+    query = QueryHelper.build_sort_query(query, SpendingType, request)
+    query = QueryHelper.build_page_query(query, request)
+    spending_types = query.all()
     result = SpendingTypeSchema(many=True).dump(spending_types)
     return jsonify(result.data)
 
@@ -180,7 +180,6 @@ def generate_spending_types():
         st = SpendingType()
         st.name = spending_type
         db.session.add(st)
-
     db.session.commit()
 
 
@@ -210,8 +209,54 @@ def generate_spending_recapitulations():
             sr.fk_region_id = region.id
             sr.fk_type_id = spending_type.id
             db.session.add(sr)
-
     db.session.commit()
+
+
+@app.route('/siskeudes/rab', methods=['GET'])
+def get_siskeudes_rabs():
+    query = db.session.query(SiskeudesRab)
+    query = QueryHelper.build_sort_query(query, SiskeudesRab, request)
+    query = QueryHelper.build_page_query(query, request)
+    srs = query.all()
+    result = SpendingRecapitulationSchema(many=True).dump(srs)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/rab/count', methods=['GET'])
+def get_spending_budgets_count():
+    result = db.session.query(SiskeudesRab).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/rab/region/<string:region_id>', methods=['GET'])
+def get_spending_budgets_by_region(region_id):
+    sbs = db.session.query(SiskeudesRab) \
+        .filter(SiskeudesRab.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesRabSchema(many=True).dump(sbs)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/kegiatan/', methods=['GET'])
+def get_siskeudes_kegiatans():
+    sks = db.session.query(SiskeudesKegiatan).all()
+    result = SiskeudesKegiatanSchema(many=True).dump(sks)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/kegiatan/count', methods=['GET'])
+def get_siskeudes_kegiatans_count():
+    result = db.session.query(SiskeudesKegiatan).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/kegiatan/region/<string:region_id>', methods=['GET'])
+def get_siskeudes_kegiatans_by_region(region_id):
+    sks = db.session.query(SiskeudesKegiatan)\
+        .filter(SiskeudesKegiatan.fk_region_id == region_id)\
+        .all()
+    result = SiskeudesKegiatanSchema(many=True).dump(sks)
+    return jsonify(result.data)
 
 
 @app.route('/generate', methods=['GET'])
@@ -221,7 +266,7 @@ def generate_all():
     generate_spending_types()
     generate_spending_recapitulations()
     generate_progress_revenues()
-    generate_progress_realizations()
+    generate_progress_spendings()
 
 
 if __name__ == "__main__":

@@ -4,28 +4,25 @@
       <div class="content-header">
         ANGGARAN PENDAPATAN DAN BELANJA DESA (APBDES) BESERTA REALISASINYA
       </div>
-
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
               <th rowspan="2" style="text-align: center; vertical-align: middle;">Desa</th>
-              <ng-container *ngFor="let spendingType of spendingTypes">                  
-                <th class="money" style="text-align: center" colspan="2" *ngIf="spendingType.is_realization"> {{ spendingType.name }}</th>
+              <ng-container *ngFor="let spendingType of spendingTypes">
+                <th class="money" style="text-align: center" colspan="2"> {{ spendingType.name }}</th>
               </ng-container>
             </tr>
             <tr>
               <ng-container *ngFor="let spendingType of spendingTypes">
-                  <ng-container *ngIf="spendingType.is_realization">
-                    <th class="money" style="text-align: center">Anggaran</th>
-                    <th class="money" style="text-align: center">Realisasi</th>
-                  </ng-container>
+                <th class="money" style="text-align: center">Anggaran</th>
+                <th class="money" style="text-align: center">Realisasi</th>
               </ng-container>
           </thead>
           <tbody>
             <tr *ngFor="let entity of entities">
               <td>
-                <a href="/p/{{entity[0].id}}"><span>{{ entity[0].name }}</span></a>
+                <a [routerLink]="['/spending/region', entity[0].id]"><span>{{ entity[0].name }}</span></a>
               </td>
               <ng-container *ngFor="let data of entity[1]">
                 <td class="money">
@@ -34,7 +31,7 @@
                 </td>
               </ng-container>
             </tr>
-          </tbody>          
+          </tbody>
           <tfoot [hidden]="progress?.percentage === 100">
             <tr>
               <td style="padding: 80px 5px; text-align: center;" colspan="100">

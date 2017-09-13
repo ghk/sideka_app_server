@@ -10,7 +10,7 @@ class ProgressRecapitulation(BaseModel):
     budgeted_revenue = db.Column(db.DECIMAL)
     transferred_revenue = db.Column(db.DECIMAL)
     realized_spending = db.Column(db.DECIMAL)
-    apbn_key = db.Column(db.String, nullable=False)
+    year = db.Column(db.String, nullable=False)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

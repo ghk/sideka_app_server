@@ -4,8 +4,8 @@ from base import BaseModel
 from region import RegionSchema
 
 
-class ProgressRealization(BaseModel):
-    __tablename__ = 'progress_realizations'
+class ProgressSpending(BaseModel):
+    __tablename__ = 'progress_spendings'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     year = db.Column(db.String)
     code = db.Column(db.String, nullable=False)
@@ -18,9 +18,9 @@ class ProgressRealization(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
 
-class ProgressRealizationSchema(ma.ModelSchema):
+class ProgressSpendingSchema(ma.ModelSchema):
     class Meta:
-        model = ProgressRealization
+        model = ProgressSpending
         include_fk = True
 
     region = ma.Nested(RegionSchema, many=False, exclude=('parent',))

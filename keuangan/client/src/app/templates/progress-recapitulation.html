@@ -1,81 +1,81 @@
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-8" style="border-right: 1px solid #ddd;">
-            <ul class="nav nav-tabs front-numbers">
-                <li>
-                    <span class="number text-success">Rp. {{ total.budgetedRevenue | number:'3.0-0' }}</span>
-                </li>
-                <li>
-                    <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.0-0' }}</span>
-                    <span class="text text-success">Tersalurkan Kabupaten</span>
-                </li>
-                <li>
-                    <span class="number text-success">{{ total.realizedSpending / total.budgetedRevenue | percent:'2.0-0' }}</span>
-                    <span class="text text-success">Terrealisasi Desa</span>
-                </li>
-            </ul>
+  <div class="row">
+    <div class="col-sm-8" style="border-right: 1px solid #ddd;">
+      <ul class="nav nav-tabs front-numbers">
+        <li>
+          <span class="number text-success">Rp. {{ total.budgetedRevenue | number:'3.0-0' }}</span>
+        </li>
+        <li>
+          <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.0-0' }}</span>
+          <span class="text text-success">Tersalurkan Kabupaten</span>
+        </li>
+        <li>
+          <span class="number text-success">{{ total.realizedSpending / total.budgetedRevenue | percent:'2.0-0' }}</span>
+          <span class="text text-success">Terrealisasi Desa</span>
+        </li>
+      </ul>
 
-            <div class="content-header">
-                Pencapaian Penyaluran &amp; Realisasi Anggaran Desa
-            </div>
+      <div class="content-header">
+        Pencapaian Penyaluran &amp; Realisasi Anggaran Desa
+      </div>
 
-            <div class="table-responsive">
-                <table class="table table-condensed table-responsive table-bordered table-striped">
-                    <thead [hidden]="progress?.percentage !== 100">
-                        <tr>
-                            <th>Desa</th>                            
-                            <th class="money">Anggaran Desa</th>
-                            <th class="money">Tersalurkan Kabupaten</th>
-                            <th class="money">Terrealisasi Desa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let entity of entities">
-                            <td>
-                                <a [routerLink]="['/progress/region', entity.region.id]">
+      <div class="table-responsive">
+        <table class="table table-condensed table-responsive table-bordered table-striped">
+          <thead [hidden]="progress?.percentage !== 100">
+            <tr>
+              <th>Desa</th>
+              <th class="money">Anggaran Desa</th>
+              <th class="money">Tersalurkan Kabupaten</th>
+              <th class="money">Terrealisasi Desa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entity of entities">
+              <td>
+                <a [routerLink]="['/progress/region', entity.region.id]">
                                     <span>{{ entity.region.name }}</span> 
                                 </a>
-                            </td>
-                            <td class="money">
-                                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
-                                <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
-                            </td>
-                            <td class="money">
-                                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }} </div>
-                                <div class="bar-percent" [ngStyle]="getBarPercent(entity.transferred_revenue, entity.budgeted_revenue)"> </div>
-                            </td>
-                            <td class="money">
-                                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }} </div>
-                                <div class="bar-percent" [ngStyle]="getBarPercent(entity.realized_spending, entity.budgeted_revenue)"> </div>
-                            </td>
-                        </tr>                      
-                    </tbody>
+              </td>
+              <td class="money">
+                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
+                <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
+              </td>
+              <td class="money">
+                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }} </div>
+                <div class="bar-percent" [ngStyle]="getBarPercent(entity.transferred_revenue, entity.budgeted_revenue)"> </div>
+              </td>
+              <td class="money">
+                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }} </div>
+                <div class="bar-percent" [ngStyle]="getBarPercent(entity.realized_spending, entity.budgeted_revenue)"> </div>
+              </td>
+            </tr>
+          </tbody>
 
-                    <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
-                        <tr class="success">
-                            <td><a href>Total</a></td>
-                            <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
-                            <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
-                            <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>
-                        </tr>
-                    </tfoot>
-                    <tfoot [hidden]="progress?.percentage === 100">
-                        <tr>
-                            <td style="padding: 80px 5px; text-align: center;" colspan="100">
-                                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
-                                <br>
-                                <br> Memuat data...
-                            </td>
-                        </tr>
-                    </tfoot>
+          <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
+            <tr class="success">
+              <td><a href>Total</a></td>
+              <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
+              <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
+              <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>
+            </tr>
+          </tfoot>
+          <tfoot [hidden]="progress?.percentage === 100">
+            <tr>
+              <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                <br>
+                <br> Memuat data...
+              </td>
+            </tr>
+          </tfoot>
 
-                </table>
-            </div>
-        </div>
-        <div class="col-sm-4">            
-            <div style="position: fixed; width: 31%;">
-                <sk-progress-timeline></sk-progress-timeline>
-            </div>
-        </div>
+        </table>
+      </div>
     </div>
+    <div class="col-sm-4">
+      <div style="position: fixed; width: 31%;">
+        <sk-progress-timeline></sk-progress-timeline>
+      </div>
+    </div>
+  </div>
 </div>

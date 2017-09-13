@@ -7,7 +7,7 @@ from region import RegionSchema
 class ProgressTimeline(BaseModel):
     __tablename__ = 'progress_timelines'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    apbn_key = db.Column(db.String, nullable=False)
+    year = db.Column(db.String, nullable=False)
     month = db.Column(db.Integer)
     transferred_dds = db.Column(db.DECIMAL)
     transferred_add = db.Column(db.DECIMAL)

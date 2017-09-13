@@ -4,8 +4,8 @@ import { DataService } from '../services/data';
 import { Query } from '../models/query';
 
 @Component({
-  selector: 'sk-progress-recapitulation',
-  templateUrl: '../templates/progress-recapitulation.html',
+    selector: 'sk-progress-recapitulation',
+    templateUrl: '../templates/progress-recapitulation.html',
 })
 
 export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
@@ -21,7 +21,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
 
     constructor(
         private _dataService: DataService
-    ) { 
+    ) {
         this.total = {
             text: 'haha',
             budgetedRevenue: 0,
@@ -31,14 +31,18 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._dataService.getProgressRecapitulations(null, this.progressListener.bind(this)).subscribe(
+        let query: Query = {
+            sort: 'region.name'
+        }
+
+        this._dataService.getProgressRecapitulations(query, this.progressListener.bind(this)).subscribe(
             result => {
                 this.entities = result;
                 this.entities.forEach(entity => {
                     this.total.budgetedRevenue += entity.budgeted_revenue;
                     this.total.transferredRevenue += entity.transferred_revenue;
                     this.total.realizedSpending += entity.realized_spending;
-                })   
+                })
             },
             error => {
                 console.log(error);
@@ -47,11 +51,11 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        
-    }   
+
+    }
 
     getBarPercent(numerator, denominator) {
-        return { 
+        return {
             'width': (numerator / denominator) * 100 + '%'
         };
     }
@@ -59,5 +63,5 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
-  
+
 }

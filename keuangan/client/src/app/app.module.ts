@@ -12,6 +12,7 @@ import { ProgressRecapitulationComponent } from './components/progress-recapitul
 import { ProgressTimelineComponent } from './components/progress-timeline';
 import { ProgressDetailComponent } from './components/progress-detail';
 import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
+import { SpendingDetailComponent } from './components/spending-detail';
 
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
@@ -23,7 +24,8 @@ import { SharedService } from './services/shared';
     ProgressRecapitulationComponent,
     ProgressTimelineComponent,
     ProgressDetailComponent,
-    SpendingRecapitulationComponent
+    SpendingRecapitulationComponent,
+    SpendingDetailComponent
   ],
   imports: [
     BrowserModule,
@@ -35,7 +37,8 @@ import { SharedService } from './services/shared';
       { path: '', redirectTo: 'progress', pathMatch: 'full' },
       { path: 'progress', component: ProgressRecapitulationComponent }, 
       { path: 'progress/region/:regionId', component: ProgressDetailComponent },
-      { path: 'spending', component: SpendingRecapitulationComponent }
+      { path: 'spending', component: SpendingRecapitulationComponent },
+      { path: 'spending/region/:regionId', component: SpendingDetailComponent }
     ]),
   ],
   providers: [

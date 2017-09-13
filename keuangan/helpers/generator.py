@@ -1,7 +1,7 @@
 from keuangan.models import ProgressRecapitulation
 from keuangan.models import ProgressTimeline
 from keuangan.models import ProgressRevenue
-from keuangan.models import ProgressRealization
+from keuangan.models import ProgressSpending
 from keuangan.models import SpendingRecapitulation
 
 from datetime import datetime
@@ -13,7 +13,7 @@ class Generator:
     @staticmethod
     def generate_progress_recapitulation():
         result = ProgressRecapitulation()
-        result.apbn_key = '2017'
+        result.year = '2017'
         result.budgeted_revenue = decimal.Decimal(random.randrange(100000000000, 150000000000)) / 100
         result.transferred_revenue = decimal.Decimal(random.randrange(50000000000, 100000000000)) / 100
         result.realized_spending = decimal.Decimal(random.randrange(25000000000, 50000000000)) / 100
@@ -25,7 +25,7 @@ class Generator:
     @staticmethod
     def generate_progress_timeline():
         result = ProgressTimeline()
-        result.apbn_key = '2017'
+        result.year = '2017'
         result.transferred_dd = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
         result.transferred_add = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
         result.transferred_bhpr = decimal.Decimal(random.randrange(5000000000, 10000000000)) / 100
@@ -59,8 +59,8 @@ class Generator:
 
 
     @staticmethod
-    def generate_progress_realization():
-        result = ProgressRealization()
+    def generate_progress_spending():
+        result = ProgressSpending()
         result.year = '2017'
         result.code = '0001/SPP/19.09/2017'
         result.description = 'Pembayaran SILTAP Kepala Desa Dan Perangkat'

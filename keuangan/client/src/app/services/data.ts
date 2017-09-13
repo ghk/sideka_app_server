@@ -8,6 +8,8 @@ import { SharedService } from '../services/shared';
 import { RequestHelper } from '../helpers/request';
 import { environment } from '../../environments/environment';
 
+import * as urljoin from 'url-join';
+
 @Injectable()
 export class DataService {
 
@@ -26,7 +28,21 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/regions',
+      urljoin(this._serverUrl, 'regions'),
+      query,
+      progressListener
+    );
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
+  getRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'regions', regionId),
       query,
       progressListener
     );
@@ -40,7 +56,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_recapitulations',
+      urljoin(this._serverUrl, 'progress_recapitulations'),
       query,
       progressListener
     );
@@ -54,7 +70,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_timelines',
+      urljoin(this._serverUrl, 'progress_timelines'),
       query,
       progressListener
     );
@@ -64,11 +80,11 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getRegionProgressTimelines(regionId: string, query: Query, progressListener: any): Observable<any> {
+  getProgressTimelinesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_timelines/region/' + regionId,
+      urljoin(this._serverUrl, 'progress_timelines/region', regionId),
       query,
       progressListener
     );
@@ -82,7 +98,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_revenues',
+      urljoin(this._serverUrl, 'progress_revenues'),
       query,
       progressListener
     );
@@ -92,11 +108,11 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getRegionProgressRevenues(regionId: string, query: Query, progressListener: any): Observable<any> {
+  getProgressRevenuesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {    
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_revenues/region/' + regionId,
+      urljoin(this._serverUrl, 'progress_revenues/region', regionId),
       query,
       progressListener
     );
@@ -106,11 +122,11 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getProgressRealizations(query: Query, progressListener: any): Observable<any> {
+  getProgressSpendings(query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_realizations',
+      urljoin(this._serverUrl, 'progress_spendings'),
       query,
       progressListener
     );
@@ -120,11 +136,11 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getRegionProgressRealizations(regionId: string, query: Query, progressListener: any): Observable<any> {
+  getProgressSpendingsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/progress_realizations/region/' + regionId,
+      urljoin(this._serverUrl, 'progress_spendings/region', regionId),
       query,
       progressListener
     );
@@ -138,7 +154,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/spending_types',
+      urljoin(this._serverUrl, 'spending_types'),
       query,
       progressListener
     )
@@ -152,7 +168,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      this._serverUrl + '/spending_recapitulations',
+      urljoin(this._serverUrl, 'spending_recapitulations'),
       query,
       progressListener
     )
@@ -160,6 +176,20 @@ export class DataService {
     return request
       .map(res => res.json())
       .catch(this.handleError)
+  }
+
+  getSiskeudesRabsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'siskeudes/rab/region', regionId),
+      query,
+      progressListener
+    )
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError);
   }
 
   private handleError(error: Response | any) {
