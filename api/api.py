@@ -351,28 +351,43 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         cursor_current_content = cur.fetchone()
 
         if cursor_current_content is None:
-            current_content = new_content
+            current_content = {}
+            current_content["data"] = {}
+            current_content["columns"] = request.json["columns"]
         else:
             current_content = json.loads(cursor_current_content[0])
 
         merge_method = None
         return_data = {"success": True, "change_id": new_change_id, "diffs": diffs}
 
-        if isinstance(current_content["data"], list):
+        if isinstance(current_content["data"], list) and content_type = "penduduk":
+            #v1 penduduk content
             new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
-        elif isinstance(current_content["data"], dict):
-            for key, value in request.json["columns"].items():
-                if key not in current_content["data"]:
-                    current_content["data"][key]=[]
+        else:
+            for tab, new_columns in request.json["columns"].items():
+                if tab not in current_content["data"]:
+                    current_content["data"][tab]=[]
+                    current_content["columns"][tab]=None
 
-                if(len(new_content["diffs"][key]) > 0):
+                if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
+                    #Special case for client who posted data instead of diffs
+                    new_content["data"][tab] = request.json["data"][tab]
+
+                    #Add new diffs to show that the content is rewritten
+                    if not isinstance(new_content["diffs"][tab], list):
+                        new_content["diffs"][tab] = []
+                    new_content["diffs"][tab].append({"added":[], "deleted": [], "modified":[], "rewritten":True})
+
+                elif(len(new_content["diffs"][tab]) > 0):
+                    #There's diffs in the posted content for this tab, apply them to current data
                     merge_method = merge_map_diffs if content_type == 'pemetaan' else merge_diffs
-                    new_content["data"][key] = merge_method(new_content["diffs"][key], current_content["data"][key])
-                else:
-                    new_content["data"][key] = current_content["data"][key]
+                    current_columns = current_content["columns"].get(tab, None)
+                    new_content["data"][tab] = merge_method(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
 
-                if "data" in request.json and key in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
-                    new_content["data"][key] = request.json["data"][key]
+                else:
+                    #There's no diffs in the posted content for this tab, use the old data
+                    new_content["data"][tab] = current_content["data"][tab]
+
 
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", 
             (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
@@ -406,7 +421,7 @@ def get_all_desa():
         cur.close()
 
 
-def merge_diffs(diffs, data):
+def merge_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
         for add in diff["added"]:
             data.append(add)
@@ -421,7 +436,7 @@ def merge_diffs(diffs, data):
     return data
 
 
-def merge_map_diffs(diffs, data):
+def merge_map_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
         for added in diff["added"]:
             data.append(added)
