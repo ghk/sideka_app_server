@@ -362,7 +362,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
 
         if isinstance(current_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
-            new_content["data"]["penduduk"] = merge_diffs(new_content["diffs"]["penduduk"], current_content["data"])
+            #todo: merge diffs columns
+            new_content["data"]["penduduk"] = merge_diffs(None, new_content["diffs"]["penduduk"], None, current_content["data"])
         else:
             for tab, new_columns in request.json["columns"].items():
                 if tab not in current_content["data"]:
