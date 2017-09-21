@@ -382,6 +382,10 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                 elif(len(new_content["diffs"][tab]) > 0):
                     #There's diffs in the posted content for this tab, apply them to current data
                     current_columns = current_content["columns"].get(tab, None)
+
+                    if tab is not in new_content["data"]:
+                        new_content["data"][tab] = []
+                    
                     new_content["data"][tab] = merge_diffs(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
 
                 else:
