@@ -325,7 +325,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         for key, value in request.json["columns"].items():
             new_content["data"][key] = []
             new_content["columns"][key] = value
-            if "diff" in request.json and key in request.json["diffs"]:
+            if "diffs" in request.json and key in request.json["diffs"]:
                 new_content["diffs"][key] = request.json["diffs"][key]
             diffs[key] = []
 
@@ -430,7 +430,7 @@ def merge_diffs(diffs_columns, diffs, data_columns, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if data_columns == 'dict':
+                if diffs_columns == 'dict':
                     if item["id"] == modified["id"]:
                         data[index] = modified
                 else:
@@ -438,7 +438,7 @@ def merge_diffs(diffs_columns, diffs, data_columns, data):
                         data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if data_columns == 'dict':
+                if diffs_columns == 'dict':
                     if item["id"] == deleted["id"]:
                         data.remove(item)
                 else:
