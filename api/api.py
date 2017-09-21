@@ -284,6 +284,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
 @app.route('/content/v2/<int:desa_id>/<content_type>', methods=["POST"])
 @app.route('/content/v2/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
 def post_content_v2(desa_id, content_type, content_subtype=None):
+    print "post content %d, %s, %s" % (desa_id, content_type, content_subtype)
     cur = mysql.connection.cursor()
     try:
         user_id = get_auth(desa_id, cur)
@@ -396,14 +397,6 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
         return_data['success'] = True
         
-        cur.execute(
-            "INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)",
-            (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id,
-             app.config["API_VERSION"]))
-        mysql.connection.commit()
-        logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
-        return_data['success'] = True
-
         return jsonify(return_data)
     finally:
         cur.close()
@@ -428,16 +421,16 @@ def merge_diffs(diffs_columns, diffs, data_columns, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if data_columns === 'dict':
-                    if item["id"] === modified["id"]:
+                if data_columns == 'dict':
+                    if item["id"] == modified["id"]:
                         data[index] = modified
                 else:
                     if item[0] == modified[0]:
                         data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if data_columns === 'dict':
-                    if item["id"] === deleted["id"]:
+                if data_columns == 'dict':
+                    if item["id"] == deleted["id"]:
                         data.remove(item)
                 else:
                     if item[0] == deleted[0]:
