@@ -338,6 +338,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
 
                 for key, value in content["diffs"].items():
                     for diff in content["diffs"][key]:
+                        if key not in diffs:
+                            diffs[key] = []
                         diffs[key].append(diff)
 
         if content_subtype == 'subtypes':
