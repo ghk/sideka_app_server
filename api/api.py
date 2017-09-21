@@ -382,9 +382,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
 
                 elif(len(new_content["diffs"][tab]) > 0):
                     #There's diffs in the posted content for this tab, apply them to current data
-                    merge_method = merge_map_diffs if content_type == 'pemetaan' else merge_diffs
                     current_columns = current_content["columns"].get(tab, None)
-                    new_content["data"][tab] = merge_method(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
+                    new_content["data"][tab] = merge_diffs(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
 
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
@@ -429,14 +428,35 @@ def merge_diffs(diffs_columns, diffs, data_columns, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if item[0] == modified[0]:
+                if data_columns === 'dict':
+                    if item["id"] === modified["id"]:
+                        data[index] = modified
+                else:
+                    if item[0] == modified[0]:
+                        data[index] = modified
+        for deleted in diff["deleted"]:
+            for item in data:
+                if data_columns === 'dict':
+                    if item["id"] === deleted["id"]:
+                        data.remove(item)
+                else:
+                    if item[0] == deleted[0]:
+                        data.remove(item)
+    return data
+
+def merge_dict_diffs(diffs_columns, diffs, data_columns, data):
+    for diff in diffs:
+        for added in diff["added"]:
+            data.append(added)
+        for modified in diff["modified"]:
+            for index, item in enumerate(data):
+                if item["id"] == modified["id"]:
                     data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if item[0] == deleted[0]:
+                if item["id"] == deleted["id"]:
                     data.remove(item)
-    return data
-
+        return data
 
 def merge_map_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
