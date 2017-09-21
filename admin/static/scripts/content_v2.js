@@ -1,10 +1,12 @@
-schema.forEach(c = > {
+schema.forEach(function(c) {
     c.readOnly = true;
 });
 
 var container = document.getElementById('sheet');
 var search = document.location.search.split('=');
 var sheet = search[search.length - 1];
+console.log(content);
+console.log(JSON.stringify(content, null, 4));
 
 if (sheet === "null") {
     var keys = Object.keys(content.data);
@@ -16,7 +18,7 @@ if (sheet === "null") {
 
 $('#' + sheet).addClass("active");
 
-var data = content.content.data[sheet] ? content.content.data[sheet] : content.content.data;
+var data = content.data[sheet] ? content.data[sheet] : content.data;
 
 var hot = new Handsontable(container, {
     data: data,

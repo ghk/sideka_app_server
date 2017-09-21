@@ -190,7 +190,21 @@ def get_content_v2(id, type='data'):
                   'r') as myFile:
             schema = myFile.read()
 
-    return render_template('content_v2.html', active='contents_v2', schema=schema, keys=keys, content=content)
+    return render_template('content_v2.html', active='contents_v2', schema=schema, keys=keys, content=content, id=id)
+
+@app.route('/api/contents/v2/<int:id>')
+@login_required
+def get_json_content_v2(id, type='data'):
+    sheet = request.args.get("sheet", "0")
+    query = db.session.query(SdContent)
+    query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
+    query = query.filter(SdContent.id == id).filter(SdContent.api_version == '2.0')
+    content = query.first()
+    schema = []
+    keys = []
+    json_content = json.loads(content.content);
+
+    return jsonify(json_content)
 
 
 @app.route('/statics/<path:path>')

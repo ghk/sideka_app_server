@@ -382,6 +382,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     new_content["data"][tab] = request.json["data"][tab]
 
                     #Add new diffs to show that the content is rewritten
+                    if tab not in new_content["diffs"]:
+                        new_content["diffs"][tab]=[]
                     new_content["diffs"][tab].append({"added":[], "deleted": [], "modified":[], "rewritten":True})
 
                 elif(len(new_content["diffs"][tab]) > 0):

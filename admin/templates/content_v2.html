@@ -9,7 +9,7 @@
 	</style>
 	
 	<div class="flex-item">
-		<span style="line-height: 40px; vertical-align: top;">Desa ID: {{content.desa_id}}, Type: {{content.type}}, Sub Type: {{content.subtype}}</span>
+		<span style="line-height: 40px; vertical-align: top;"><a href="/api/contents/v2/{{id}}">JSON</a> Desa ID: {{content.desa_id}}, Type: {{content.type}}, Sub Type: {{content.subtype}}</span>
 		<ul class="nav nav-pills flex-item" role="tablist" id="nav-data" style="display: inline-block;">
 			{% for x in keys %}
 				<li role="presentation" id="{{x}}">
