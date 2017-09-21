@@ -324,7 +324,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         for key, value in request.json["columns"].items():
             new_content["data"][key] = []
             new_content["columns"][key] = value
-            new_content["diffs"][key] = request.json["diffs"][key]
+            if "diff" in request.json and key in request.json["diffs"]:
+                new_content["diffs"][key] = request.json["diffs"][key]
             diffs[key] = []
 
         if len(cursor_contents) > 0:
@@ -375,7 +376,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     new_content["data"][tab] = request.json["data"][tab]
 
                     #Add new diffs to show that the content is rewritten
-                    if not isinstance(new_content["diffs"][tab], list):
+                    if tab not in new_content["diffs"]:
                         new_content["diffs"][tab] = []
                     new_content["diffs"][tab].append({"added":[], "deleted": [], "modified":[], "rewritten":True})
 
