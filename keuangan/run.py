@@ -1,14 +1,13 @@
-import os, sys
+import os, requests, urlparse, simplejson as json
 from flask import jsonify, request
 
 from keuangan import app, db
 from keuangan.models import *
 from keuangan.helpers import *
 
-print sys.path
-
 BASE_URL = os.path.abspath(os.path.dirname(__file__))
 CLIENT_FOLDER = os.path.join(BASE_URL, "client")
+API_URL = app.config['API_URL']
 
 
 @app.route('/regions', methods=['GET'])
@@ -31,7 +30,7 @@ def get_region(id):
     return jsonify(result.data)
 
 
-@app.route('/progress_recapitulations', methods=['GET'])
+@app.route('/progress/recapitulations', methods=['GET'])
 def get_progress_recapitulations():
     query = db.session.query(ProgressRecapitulation)
     query = QueryHelper.build_sort_query(query, ProgressRecapitulation, request)
@@ -41,13 +40,13 @@ def get_progress_recapitulations():
     return jsonify(result.data)
 
 
-@app.route('/progress_recapitulations/count', methods=['GET'])
+@app.route('/progress/recapitulations/count', methods=['GET'])
 def get_progress_recapitulations_count():
     result = db.session.query(ProgressRecapitulation).count()
     return jsonify(result)
 
 
-@app.route('/progress_recapitulations/generate', methods=['GET'])
+@app.route('/progress/recapitulations/generate', methods=['GET'])
 def generate_progress_recapitulations():
     regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
 
@@ -59,7 +58,7 @@ def generate_progress_recapitulations():
     db.session.commit()
 
 
-@app.route('/progress_timelines', methods=['GET'])
+@app.route('/progress/timelines', methods=['GET'])
 def get_progress_timelines():
     query = db.session.query(ProgressTimeline)
     query = QueryHelper.build_sort_query(query, ProgressTimeline, request)
@@ -69,13 +68,13 @@ def get_progress_timelines():
     return jsonify(result.data)
 
 
-@app.route('/progress_timelines/count', methods=['GET'])
+@app.route('/progress/timelines/count', methods=['GET'])
 def get_progress_timelines_count():
     result = db.session.query(ProgressTimeline).count()
     return jsonify(result)
 
 
-@app.route('/progress_timelines/region/<string:region_id>', methods=['GET'])
+@app.route('/progress/timelines/region/<string:region_id>', methods=['GET'])
 def get_region_progress_timelines(region_id):
     query = db.session.query(ProgressTimeline) \
         .filter(ProgressTimeline.fk_region_id == region_id)
@@ -84,7 +83,7 @@ def get_region_progress_timelines(region_id):
     return jsonify(result.data)
 
 
-@app.route('/progress_timelines/generate', methods=['GET'])
+@app.route('/progress/timelines/generate', methods=['GET'])
 def generate_progress_timelines():
     regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
     months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -97,71 +96,7 @@ def generate_progress_timelines():
     db.session.commit()
 
 
-@app.route('/progress_revenues', methods=['GET'])
-def get_progress_revenues():
-    revenues = db.session.query(ProgressRevenue).all()
-    result = ProgressRevenueSchema(many=True).dump(revenues)
-    return jsonify(result.data)
-
-
-@app.route('/progress_revenues/count', methods=['GET'])
-def get_progress_revenues_count():
-    result = db.session.query(ProgressRevenue).count()
-    return jsonify(result)
-
-
-@app.route('/progress_revenues/region/<string:region_id>', methods=['GET'])
-def get_progress_revenues_by_region(region_id):
-    revenues = db.session.query(ProgressRevenue) \
-        .filter(ProgressRevenue.fk_region_id == region_id) \
-        .all()
-    result = ProgressRevenueSchema(many=True).dump(revenues)
-    return jsonify(result.data)
-
-
-@app.route('/progress_revenues/generate', methods=['GET'])
-def generate_progress_revenues():
-    regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
-    for region in regions:
-        pr = Generator.generate_progress_revenue()
-        pr.fk_region_id = region.id
-        db.session.add(pr)
-    db.session.commit()
-
-
-@app.route('/progress_spendings', methods=['GET'])
-def get_progress_spendings():
-    realizations = db.session.query(ProgressSpending).all()
-    result = ProgressSpendingSchema(many=True).dump(realizations)
-    return jsonify(result.data)
-
-
-@app.route('/progress_spendings/count', methods=['GET'])
-def get_progress_spendings_count():
-    result = db.session.query(ProgressSpending).count()
-    return jsonify(result)
-
-
-@app.route('/progress_spendings/region/<string:region_id>', methods=['GET'])
-def get_progress_spendings_by_region(region_id):
-    realizations = db.session.query(ProgressSpending) \
-        .filter(ProgressSpending.fk_region_id == region_id) \
-        .all()
-    result = ProgressSpendingSchema(many=True).dump(realizations)
-    return jsonify(result.data)
-
-
-@app.route('/progress_realizations/generate', methods=['GET'])
-def generate_progress_spendings():
-    regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
-    for region in regions:
-        pr = Generator.generate_progress_realization()
-        pr.fk_region_id = region.id
-        db.session.add(pr)
-    db.session.commit()
-
-
-@app.route('/spending_types', methods=['GET'])
+@app.route('/spending/types', methods=['GET'])
 def get_spending_types():
     query = db.session.query(SpendingType)
     query = QueryHelper.build_sort_query(query, SpendingType, request)
@@ -171,7 +106,7 @@ def get_spending_types():
     return jsonify(result.data)
 
 
-@app.route('/spending_types/generate', methods=['GET'])
+@app.route('/spending/types/generate', methods=['GET'])
 def generate_spending_types():
     spending_types = ['Pendapatan', 'Infrastruktur', 'Ekonomi dan Pembinaan Masyarakat',
                       'Pendidikan dan Pelatihan', 'Belanja Pegawai', 'Pemerintahan Umum',
@@ -183,7 +118,7 @@ def generate_spending_types():
     db.session.commit()
 
 
-@app.route('/spending_recapitulations', methods=['GET'])
+@app.route('/spending/recapitulations', methods=['GET'])
 def get_spending_recapitulations():
     query = db.session.query(SpendingRecapitulation)
     query = QueryHelper.build_sort_query(query, SpendingRecapitulation, request)
@@ -193,13 +128,13 @@ def get_spending_recapitulations():
     return jsonify(result.data)
 
 
-@app.route('/spending_recapitulations/count', methods=['GET'])
+@app.route('/spending/recapitulations/count', methods=['GET'])
 def get_spending_recapitulations_count():
     result = db.session.query(SpendingRecapitulation).count()
     return jsonify(result)
 
 
-@app.route('/spending_recapitulations/generate', methods=['GET'])
+@app.route('/spending/recapitulations/generate', methods=['GET'])
 def generate_spending_recapitulations():
     regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
     spending_types = db.session.query(SpendingType).all()
@@ -212,50 +147,149 @@ def generate_spending_recapitulations():
     db.session.commit()
 
 
-@app.route('/siskeudes/rab', methods=['GET'])
-def get_siskeudes_rabs():
-    query = db.session.query(SiskeudesRab)
-    query = QueryHelper.build_sort_query(query, SiskeudesRab, request)
-    query = QueryHelper.build_page_query(query, request)
-    srs = query.all()
-    result = SpendingRecapitulationSchema(many=True).dump(srs)
-    return jsonify(result.data)
-
-
-@app.route('/siskeudes/rab/count', methods=['GET'])
-def get_spending_budgets_count():
-    result = db.session.query(SiskeudesRab).count()
-    return jsonify(result)
-
-
-@app.route('/siskeudes/rab/region/<string:region_id>', methods=['GET'])
-def get_spending_budgets_by_region(region_id):
-    sbs = db.session.query(SiskeudesRab) \
-        .filter(SiskeudesRab.fk_region_id == region_id) \
-        .all()
-    result = SiskeudesRabSchema(many=True).dump(sbs)
-    return jsonify(result.data)
-
-
-@app.route('/siskeudes/kegiatan/', methods=['GET'])
+@app.route('/siskeudes/kegiatans/', methods=['GET'])
 def get_siskeudes_kegiatans():
     sks = db.session.query(SiskeudesKegiatan).all()
     result = SiskeudesKegiatanSchema(many=True).dump(sks)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/kegiatan/count', methods=['GET'])
+@app.route('/siskeudes/kegiatans/count', methods=['GET'])
 def get_siskeudes_kegiatans_count():
     result = db.session.query(SiskeudesKegiatan).count()
     return jsonify(result)
 
 
-@app.route('/siskeudes/kegiatan/region/<string:region_id>', methods=['GET'])
+@app.route('/siskeudes/kegiatans/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_kegiatans_by_region(region_id):
     sks = db.session.query(SiskeudesKegiatan)\
         .filter(SiskeudesKegiatan.fk_region_id == region_id)\
         .all()
     result = SiskeudesKegiatanSchema(many=True).dump(sks)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penerimaans', methods=['GET'])
+def get_siskeudes_penerimaans():
+    revenues = db.session.query(SiskeudesPenerimaan).all()
+    result = SiskeudesPenerimaanSchema(many=True).dump(revenues)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penerimaans/count', methods=['GET'])
+def get_siskeudes_penerimaans_count():
+    result = db.session.query(SiskeudesPenerimaan).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/penerimaans/region/<string:region_id>', methods=['GET'])
+def get_siskeudes_penerimaans_by_region(region_id):
+    revenues = db.session.query(SiskeudesPenerimaan) \
+        .filter(SiskeudesPenerimaan.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesPenerimaanSchema(many=True).dump(revenues)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penerimaans/fetch', methods=['GET'])
+def fetch_siskeudes_penerimaans():
+    desas = requests.get(urlparse.urljoin(API_URL, 'desa')).json()
+    regions = db.session.query(Region).filter(Region.is_lokpri == True).all()
+
+    for region in regions:
+        for desa in desas:
+            if (str(region.id).strip() == str(desa.kode).strip()):
+                #sps = requests.get(urlparse.urljoin(API_URL, 'content/v2/', ), )
+
+
+@app.route('/siskeudes/penganggarans', methods=['GET'])
+def get_siskeudes_rabs():
+    query = db.session.query(SiskeudesPenganggaran)
+    query = QueryHelper.build_sort_query(query, SiskeudesPenganggaran, request)
+    query = QueryHelper.build_page_query(query, request)
+    srs = query.all()
+    result = SpendingRecapitulationSchema(many=True).dump(srs)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penganggarans/count', methods=['GET'])
+def get_spending_budgets_count():
+    result = db.session.query(SiskeudesPenganggaran).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/penganggarans/region/<string:region_id>', methods=['GET'])
+def get_spending_budgets_by_region(region_id):
+    sbs = db.session.query(SiskeudesPenganggaran) \
+        .filter(SiskeudesPenganggaran.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesPenganggaranSchema(many=True).dump(sbs)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp', methods=['GET'])
+def get_progress_spendings():
+    realizations = db.session.query(SiskeudesSpp).all()
+    result = SiskeudesSppSchema(many=True).dump(realizations)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp/count', methods=['GET'])
+def get_progress_spendings_count():
+    result = db.session.query(SiskeudesSpp).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/spp/region/<string:region_id>', methods=['GET'])
+def get_progress_spendings_by_region(region_id):
+    realizations = db.session.query(SiskeudesSpp) \
+        .filter(SiskeudesSpp.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesSppSchema(many=True).dump(realizations)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp/bukti', methods=['GET'])
+def get_progress_spendings():
+    realizations = db.session.query(SiskeudesSppBukti).all()
+    result = SiskeudesSppBuktiSchema(many=True).dump(realizations)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp/bukti/count', methods=['GET'])
+def get_progress_spendings_count():
+    result = db.session.query(SiskeudesSppBukti).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/spp/bukti/region/<string:region_id>', methods=['GET'])
+def get_progress_spendings_by_region(region_id):
+    realizations = db.session.query(SiskeudesSppBukti) \
+        .filter(SiskeudesSppBukti.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesSppBuktiSchema(many=True).dump(realizations)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp/rinci', methods=['GET'])
+def get_progress_spendings():
+    realizations = db.session.query(SiskeudesSppRinci).all()
+    result = SiskeudesSppRinciSchema(many=True).dump(realizations)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/spp/rinci/count', methods=['GET'])
+def get_progress_spendings_count():
+    result = db.session.query(SiskeudesSppRinci).count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/spp/rinci/region/<string:region_id>', methods=['GET'])
+def get_progress_spendings_by_region(region_id):
+    realizations = db.session.query(SiskeudesSppRinci) \
+        .filter(SiskeudesSppRinci.fk_region_id == region_id) \
+        .all()
+    result = SiskeudesSppRinciSchema(many=True).dump(realizations)
     return jsonify(result.data)
 
 
@@ -265,8 +299,6 @@ def generate_all():
     generate_progress_timelines()
     generate_spending_types()
     generate_spending_recapitulations()
-    generate_progress_revenues()
-    generate_progress_spendings()
 
 
 if __name__ == "__main__":

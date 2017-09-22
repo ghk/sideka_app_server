@@ -9,6 +9,7 @@ ADMIN_PORT=5002
 MONITOR_PORT=5003
 TATAKELOLA_PORT=5004
 KEUANGAN_PORT=5005
+API_URL = "http://10.10.10.107:5001"
 KEUANGAN_SQLALCHEMY_DATABASE_URI = "postgresql://postgres:ingininiinginitubanyaksekali@database.neon.microvac/sideka_keuangan"
 ADMIN_SQLALCHEMY_DATABASE_URI = "mysql://root:ingininiinginitubanyaksekali/wp_sideka_proot"
 CKAN_HOST="http://data.prakarsadesa.id"

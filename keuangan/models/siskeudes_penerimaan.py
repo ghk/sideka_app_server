@@ -4,10 +4,12 @@ from base import BaseModel
 from region import RegionSchema
 
 
-class ProgressRevenue(BaseModel):
-    __tablename__ = 'progress_revenues'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+class SiskeudesPenerimaan(BaseModel):
+    __tablename__ = 'siskeudes_penerimaans'
+    pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     year = db.Column(db.String)
+    row_number = db.Column(db.Integer)
+    id = db.Column(db.String, nullable=False)
     code = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     value = db.Column(db.DECIMAL, nullable=False)
@@ -23,9 +25,9 @@ class ProgressRevenue(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
 
-class ProgressRevenueSchema(ma.ModelSchema):
+class SiskeudesPenerimaanSchema(ma.ModelSchema):
     class Meta:
-        model = ProgressRevenue
+        model = SiskeudesPenerimaan
         include_fk = True
 
     region = ma.Nested(RegionSchema, many=False, exclude=('parent',))

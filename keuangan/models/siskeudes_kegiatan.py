@@ -6,9 +6,10 @@ from region import RegionSchema
 
 class SiskeudesKegiatan(BaseModel):
     __tablename__ = 'siskeudes_kegiatans'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     year = db.Column(db.String)
-    sk_id = db.Column(db.String)
+    row_number = db.Column(db.Integer)
+    id = db.Column(db.String)
     kode_bidang = db.Column(db.String)
     nama_bidang = db.Column(db.String)
     kode_kegiatan = db.Column(db.String)

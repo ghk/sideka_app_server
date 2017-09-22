@@ -343,7 +343,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                         diffs[key].append(diff)
 
         if content_subtype == 'subtypes':
-            return jsonify({success: False}), 500
+            return jsonify({"success": False}), 500
 
         new_change_id = max_change_id + 1
         current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id=%s"
