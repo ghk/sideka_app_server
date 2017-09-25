@@ -1,9 +1,12 @@
-from admin import db, ma
+from common.database import db
+from common.marshmallow import ma
+from marshmallow import post_load
 from datetime import datetime
 from sqlalchemy.dialects.mysql import BIT
 
 class SdContent(db.Model):
     __tablename__ = 'sd_contents'
+    __bind_key__ = 'sideka'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     desa_id = db.Column(db.Integer)
     type = db.Column(db.String(length=50))
@@ -23,8 +26,14 @@ class SdContent(db.Model):
     )
 
 
+class SdContentSchema(ma.ModelSchema):
+    class Meta:
+        model = SdContent
+
+
 class SdDesa(db.Model):
     __tablename__ = 'sd_desa'
+    __bind_key__ = 'sideka'
     blog_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(length=100))
     latitude = db.Column(db.Float)
@@ -48,6 +57,7 @@ class SdDesaSchema(ma.ModelSchema):
 
 class SdAllDesa(db.Model):
     __tablename__ = 'sd_all_desa'
+    __bind_key__ = 'sideka'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     region_code = db.Column(db.String(length=15), nullable=False)
     region_name = db.Column(db.String(length=80), nullable=False)
@@ -62,6 +72,7 @@ class SdAllDesaSchema(ma.ModelSchema):
 
 class SdStatistics(db.Model):
     __tablename__ = 'sd_statistics'
+    __bind_key__ = 'sideka'
     blog_id = db.Column(db.Integer, primary_key=True)
     statistics = db.Column(db.Text)
     date = db.Column(db.Date, nullable=False)
@@ -69,6 +80,7 @@ class SdStatistics(db.Model):
 
 class SdUserSupradesa(db.Model):
     __tablename__ = 'sd_users_supradesa'
+    __bind_key__ = 'sideka'
     username = db.Column(db.String(length=50), primary_key=True)
     supradesa_id = db.Column(db.Integer, primary_key=True)
     level = db.Column(db.String(length=50))
@@ -76,6 +88,7 @@ class SdUserSupradesa(db.Model):
 
 class SdSupradesa(db.Model):
     __tablename__ = 'sd_supradesa'
+    __bind_key__ = 'sideka'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     region_code = db.Column(db.String(length=50), unique=True)
     flag = db.Column(db.String(length=50))

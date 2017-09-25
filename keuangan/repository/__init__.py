@@ -1,0 +1,7 @@
+from base import BaseRepository
+from region import RegionRepository
+from progress_recapitulation import ProgressRecapitulationRepository
+from progress_timeline import ProgressTimelineRepository
+from spending_type import SpendingTypeRepository
+from spending_recapitulation import SpendingRecapitulationRepository
+from siskeudes_kegiatan import SiskeudesKegiatanRepository

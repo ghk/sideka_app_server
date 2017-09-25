@@ -34,9 +34,7 @@ class QueryHelper:
 
 
     @staticmethod
-    def build_page_query(query, request):
-        page = request.args.get('page')
-        per_page = request.args.get('per_page')
+    def build_page_query(query, page, per_page):
         if (page is not None and per_page is not None):
             return QueryHelper.page(query, int(page), int(per_page))
         else:
@@ -44,11 +42,31 @@ class QueryHelper:
 
 
     @staticmethod
-    def build_sort_query(query, model, request):
-        sort = request.args.get('sort')
+    def build_sort_query(query, model, sort):
         if (sort is not None):
             sort = str(sort)
             sort_arr = sort.split(',')
             return QueryHelper.sort(query, model, *sort_arr)
         else:
             return query
+
+
+    @staticmethod
+    def build_page_sort_query(query, model, page_sort_params):
+        if (page_sort_params is not None):
+            query = QueryHelper.build_sort_query(query, model, page_sort_params['sort'])
+            query = QueryHelper.build_page_query(query, page_sort_params['page'], page_sort_params['per_page'])
+        return query
+
+
+    @staticmethod
+    def get_page_sort_params_from_request(request):
+        page = request.args.get('page')
+        per_page = request.args.get('per_page')
+        sort = request.args.get('sort')
+        result = {
+            'page': page,
+            'per_page': per_page,
+            'sort': sort
+        }
+        return result

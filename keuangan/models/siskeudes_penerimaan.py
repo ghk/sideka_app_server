@@ -1,3 +1,4 @@
+from marshmallow import post_load
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
@@ -9,17 +10,22 @@ class SiskeudesPenerimaan(BaseModel):
     pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     year = db.Column(db.String)
     row_number = db.Column(db.Integer)
-    id = db.Column(db.String, nullable=False)
-    code = db.Column(db.String, nullable=False)
-    description = db.Column(db.String, nullable=False)
-    value = db.Column(db.DECIMAL, nullable=False)
-    type = db.Column(db.String, nullable=False) # DDS, ADD, PBH
-    date = db.Column(db.Date, nullable=False)
-    source_name = db.Column(db.String)
-    source_address = db.Column(db.String)
-    source_signature = db.Column(db.String)
-    account_number = db.Column(db.String)
-    bank_name = db.Column(db.String)
+    no = db.Column(db.String)
+    kode_desa = db.Column(db.String)
+    tahun = db.Column(db.String)
+    tanggal = db.Column(db.Date)
+    uraian = db.Column(db.String)
+    nama_penyetor = db.Column(db.String)
+    alamat_penyetor = db.Column(db.String)
+    ttd = db.Column(db.String)
+    rekening_bank = db.Column(db.String)
+    nama_bank = db.Column(db.String)
+    jumlah = db.Column(db.DECIMAL)
+    nama_bendahara = db.Column(db.String)
+    jabatan_bendahara = db.Column(db.String)
+    status = db.Column(db.String)
+    kode_bayar = db.Column(db.Integer)
+    ref_bayar = db.Column(db.String)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

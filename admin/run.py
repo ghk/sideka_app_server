@@ -1,8 +1,7 @@
 import sys
-
 sys.path.append("../common");
 
-from admin import app, db, login_manager
+from admin import create_app, create_login_manager, db
 from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import login_user, login_required, logout_user, UserMixin
 from sqlalchemy.orm import load_only, aliased
@@ -10,7 +9,7 @@ from sqlalchemy import func, desc, update
 
 from phpserialize import *
 from collections import OrderedDict
-from common import PasswordHash, gzipped
+from common import PasswordHash
 from models import *
 
 import os
@@ -19,6 +18,8 @@ import urllib
 import datetime
 
 phasher = PasswordHash(8, True)
+app = create_app()
+login_manager = create_login_manager(app)
 
 
 class User(UserMixin):

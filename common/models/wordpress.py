@@ -1,8 +1,9 @@
-from admin import db
+from common.database import db
 
 
 class WpUser(db.Model):
     __tablename__ = 'wp_users'
+    __bind_key__ = 'sideka'
     ID = db.Column('ID', db.Integer, primary_key=True, nullable=False)
     user_login = db.Column('user_login', db.String(length=60), nullable=False)
     user_pass = db.Column('user_pass', db.String(length=64), nullable=False)
@@ -20,6 +21,7 @@ class WpUser(db.Model):
 
 class WpUserMeta(db.Model):
     __tablename__ = 'wp_usermeta'
+    __bind_key__ = 'sideka'
     umeta_id = db.Column('umeta_id', db.Integer, primary_key=True, nullable=False)
     meta_key = db.Column('meta_key', db.String(length=255))
     meta_value = db.Column('meta_value', db.Text(length=None))
@@ -33,6 +35,7 @@ class WpUserMeta(db.Model):
 
 class WpSiteMeta(db.Model):
     __tablename__ = 'wp_sitemeta'
+    __bind_key__ = 'sideka'
     meta_id = db.Column('meta_id', db.Integer, primary_key=True, nullable=False)
     site_id = db.Column('site_id', db.Integer, nullable=False)
     meta_key = db.Column('meta_key', db.String(length=255))
@@ -44,6 +47,7 @@ class WpSiteMeta(db.Model):
 
 class WpBlog(db.Model):
     __tablename__ = 'wp_blogs'
+    __bind_key__ = 'sideka'
     blog_id = db.Column('blog_id', db.Integer, primary_key=True, autoincrement=True)
     site_id = db.Column('site_id', db.Integer, nullable=False)
     domain = db.Column('domain', db.String(length=200), nullable=False)
