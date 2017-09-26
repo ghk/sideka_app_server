@@ -1,58 +1,76 @@
 from flask import Blueprint, jsonify, request
+from datetime import datetime
 from keuangan import db
-from keuangan.models import SpendingType, SpendingTypeSchema, SpendingRecapitulationSchema
-from keuangan.repository import RegionRepository, SpendingTypeRepository, SpendingRecapitulationRepository
-from keuangan.helpers import QueryHelper, Generator
+from keuangan.models import SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanRinciModelSchema
+from keuangan.repository import RegionRepository, SidekaContentRepository
+from keuangan.repository import SiskeudesPenerimaanRepository, SiskeudesPenerimaanRinciRepository
+from keuangan.helpers import QueryHelper, ContentTransformer
 
-
-app = Blueprint('spending', __name__)
+app = Blueprint('penerimaan', __name__)
 region_repository = RegionRepository(db)
-st_repository = SpendingTypeRepository(db)
-sr_repository = SpendingRecapitulationRepository(db)
+sideka_content_repository = SidekaContentRepository(db)
+siskeudes_penerimaan_repository = SiskeudesPenerimaanRepository(db)
+siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
 
 
-@app.route('/spending/types', methods=['GET'])
-def get_spending_types():
+@app.route('/siskeudes/penerimaans', methods=['GET'])
+def get_siskeudes_penerimaans():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = st_repository.all(page_sort_params)
-    result = SpendingTypeSchema(many=True).dump(entities)
+    entities = siskeudes_penerimaan_repository.all(page_sort_params)
+    result = SiskeudesPenerimaanModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/spending/types/generate', methods=['GET'])
-def generate_spending_types():
-    spending_types = ['Pendapatan', 'Infrastruktur', 'Ekonomi dan Pembinaan Masyarakat',
-                      'Pendidikan dan Pelatihan', 'Belanja Pegawai', 'Pemerintahan Umum',
-                      'Pembangunan Kantor Desa']
-    for spending_type in spending_types:
-        st = SpendingType()
-        st.name = spending_type
-        db.session.add(st)
-    db.session.commit()
-
-
-@app.route('/spending/recapitulations', methods=['GET'])
-def get_spending_recapitulations():
-    page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = sr_repository.all(page_sort_params)
-    result = SpendingRecapitulationSchema(many=True).dump(entities)
-    return jsonify(result.data)
-
-
-@app.route('/spending/recapitulations/count', methods=['GET'])
-def get_spending_recapitulations_count():
-    result = sr_repository.count()
+@app.route('/siskeudes/penerimaans/count', methods=['GET'])
+def get_siskeudes_penerimaans_count():
+    result = siskeudes_penerimaan_repository.count()
     return jsonify(result)
 
 
-@app.route('/spending/recapitulations/generate', methods=['GET'])
-def generate_spending_recapitulations():
+@app.route('/siskeudes/penerimaans/region/<string:region_id>', methods=['GET'])
+def get_siskeudes_penerimaans_by_region(region_id):
+    entities = siskeudes_penerimaan_repository.get_by_region(region_id)
+    result = SiskeudesPenerimaanModelSchema(many=True).dump(entities)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penerimaans/fetch', methods=['GET'])
+def fetch_siskeudes_penerimaans():
+    # delete all penerimaan and penerimaan rincis
+    siskeudes_penerimaan_repository.delete_all()
+    siskeudes_penerimaan_rinci_repository.delete_all()
+
+    year = str(datetime.now().year)
     regions = region_repository.all()
-    spending_types = db.session.query(SpendingType).all()
-    for region in regions:
-        for spending_type in spending_types:
-            sr = Generator.generate_spending_recapitulations()
-            sr.fk_region_id = region.id
-            sr.fk_type_id = spending_type.id
-            db.session.add(sr)
-    db.session.commit()
+    sd_contents = sideka_content_repository.get_latest_content('penerimaan', year)
+
+    for sd_content in sd_contents:
+        contents = ContentTransformer.transform(sd_content.content)
+        for region in regions:
+            sps = SiskeudesPenerimaanModelSchema(many=True).load(contents['tbp'])
+            sprs = SiskeudesPenerimaanRinciModelSchema(many=True).load(contents['tbp_rinci'])
+            siskeudes_penerimaan_repository.add_all(sps.data, region, year)
+            siskeudes_penerimaan_rinci_repository.add_all(sprs.data, region, year)
+
+    return jsonify({'success': True})
+
+
+@app.route('/siskeudes/penerimaans/rincis', methods=['GET'])
+def get_siskeudes_penerimaan_rincis():
+    page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
+    entities = siskeudes_penerimaan_rinci_repository.all(page_sort_params)
+    result = SiskeudesPenerimaanRinciModelSchema(many=True).dump(entities)
+    return jsonify(result.data)
+
+
+@app.route('/siskeudes/penerimaans/rincis/count', methods=['GET'])
+def get_siskeudes_penerimaan_rincis_count():
+    result = siskeudes_penerimaan_rinci_repository.count()
+    return jsonify(result)
+
+
+@app.route('/siskeudes/penerimaans/rincis/region/<string:region_id>', methods=['GET'])
+def get_siskeudes_penerimaan_rincis_by_region(region_id):
+    entities = siskeudes_penerimaan_rinci_repository.get_by_region(region_id)
+    result = SiskeudesPenerimaanRinciModelSchema(many=True).dump(entities)
+    return jsonify(result.data)

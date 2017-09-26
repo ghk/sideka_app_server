@@ -1,8 +1,8 @@
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionSchema
-
+from region import RegionModelSchema
+from marshmallow import fields
 
 class SiskeudesSpp(BaseModel):
     __tablename__ = 'siskeudes_spps'
@@ -22,9 +22,24 @@ class SiskeudesSpp(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
 
-class SiskeudesSppSchema(ma.ModelSchema):
+class SiskeudesSppModelSchema(ma.ModelSchema):
     class Meta:
         model = SiskeudesSpp
         include_fk = True
 
-    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+
+
+# class SiskeudesSppSchema(ma.Schema):
+#     pid = fields.Integer()
+#     year = fields.String()
+#     row_number = fields.Integer()
+#     no = fields.String(allow_none=True)
+#     kode_desa = fields.String(allow_none=True)
+#     tahun = fields.String(allow_none=True)
+#     tanggal = fields.Date(allow_none=True)
+#     jenis = fields.String(allow_none=True)
+#     keterangan = fields.String(allow_none=True)
+#     jumlah = fields.Decimal(allow_none=True)
+#     potongan = fields.Decimal(allow_none=True)
+#     fk_region_id = fields.Integer()

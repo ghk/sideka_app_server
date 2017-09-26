@@ -1,15 +1,15 @@
 from base import BaseModel
-from region import Region, RegionSchema
-from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationSchema
-from progress_timeline import ProgressTimeline, ProgressTimelineSchema
-from spending_type import SpendingType, SpendingTypeSchema
-from spending_recapitulation import SpendingRecapitulation, SpendingRecapitulationSchema
-from siskeudes_kegiatan import SiskeudesKegiatan, SiskeudesKegiatanSchema
-from siskeudes_penerimaan import SiskeudesPenerimaan, SiskeudesPenerimaanSchema
-from siskeudes_penerimaan_rinci import SiskeudesPenerimaanRinci, SiskeudesPenerimaanRinciSchema
-from siskeudes_penganggaran import SiskeudesPenganggaran, SiskeudesPenganggaranSchema
-from siskeudes_spp import SiskeudesSpp, SiskeudesSppSchema
-from siskeudes_spp_bukti import SiskeudesSppBukti, SiskeudesSppBuktiSchema
-from siskeudes_spp_rinci import SiskeudesSppRinci, SiskeudesSppRinciSchema
+from region import Region, RegionModelSchema
+from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationModelSchema
+from progress_timeline import ProgressTimeline, ProgressTimelineModelSchema
+from spending_type import SpendingType, SpendingTypeModelSchema
+from spending_recapitulation import SpendingRecapitulation, SpendingRecapitulationModelSchema
+from siskeudes_kegiatan import SiskeudesKegiatan, SiskeudesKegiatanModelSchema, SiskeudesKegiatanSchema
+from siskeudes_penerimaan import SiskeudesPenerimaan, SiskeudesPenerimaanModelSchema
+from siskeudes_penerimaan_rinci import SiskeudesPenerimaanRinci, SiskeudesPenerimaanRinciModelSchema
+from siskeudes_penganggaran import SiskeudesPenganggaran, SiskeudesPenganggaranModelSchema, SiskeudesPenganggaranSchema
+from siskeudes_spp import SiskeudesSpp, SiskeudesSppModelSchema
+from siskeudes_spp_bukti import SiskeudesSppBukti, SiskeudesSppBuktiModelSchema
+from siskeudes_spp_rinci import SiskeudesSppRinci, SiskeudesSppRinciModelSchema
 
-from common.models import SdDesa, SdDesaSchema, SdContent, SdContentSchema
+from common.models import SdContent, SdContentSchema

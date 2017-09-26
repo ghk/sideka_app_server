@@ -16,6 +16,8 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
 
     regionId: string;
     region: any;
+    totalRevenue: number = 0;
+    totalSpending: number = 0;
     revenues: any[] = [];
     spendings: any[] = [];
     progress: Progress;
@@ -40,19 +42,25 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
         })
 
         this._dataService
-            .getProgressRevenuesByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesPenerimaanByRegion(this.regionId, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.revenues = results;
+                this.revenues.forEach(revenue => {                    
+                    this.totalRevenue += revenue.jumlah
+                })
             },
             error => { }
             )
 
         this._dataService
-            .getProgressSpendingsByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesSppByRegion(this.regionId, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.spendings = results
+                this.spendings.forEach(spending => {
+                    this.totalSpending += spending.jumlah
+                })
             },
             error => { }
             )

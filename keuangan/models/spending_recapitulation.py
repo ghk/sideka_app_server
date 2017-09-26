@@ -1,8 +1,8 @@
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionSchema
-from spending_type import SpendingTypeSchema
+from region import RegionModelSchema
+from spending_type import SpendingTypeModelSchema
 
 
 class SpendingRecapitulation(BaseModel):
@@ -24,10 +24,10 @@ class SpendingRecapitulation(BaseModel):
     )
 
 
-class SpendingRecapitulationSchema(ma.ModelSchema):
+class SpendingRecapitulationModelSchema(ma.ModelSchema):
     class Meta:
         model = SpendingRecapitulation
         include_fk = True
 
-    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))
-    type = ma.Nested(SpendingTypeSchema, many=False)
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+    type = ma.Nested(SpendingTypeModelSchema, many=False)

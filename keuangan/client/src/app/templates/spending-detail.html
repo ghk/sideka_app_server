@@ -32,7 +32,7 @@
                 <div>{{ entity.kode_bidang_or_kegiatan }}</div>
               </td>
               <td>
-                <div>{{ entity.uraian }}</div>
+                <div [innerHTML]="entity.uraian"></div>
               </td>
               <td>
                 <div>{{ entity.sumber_dana }}</div>
@@ -43,11 +43,11 @@
               <td>
                 <div>{{ entity.satuan }}</div>
               </td>
-              <td>
-                <div>{{ entity.harga_satuan }}</div>
+              <td class="money">
+                <div>{{ entity.harga_satuan | number:'3.0-0' }}</div>
               </td>
               <td class="money">
-                <div>{{ entity.anggaran }}</div>
+                <div>{{ entity.anggaran | number:'3.0-0' }}</div>
               </td>
               <td>
                 <div>{{ entity.jumlah_satuan_pak }}</div>
@@ -55,14 +55,14 @@
               <td>
                 <div>{{ entity.satuan }}</div>
               </td>
-              <td>
-                <div>{{ entity.harga_satuan_pak }}</div>
+              <td class="money">
+                <div>{{ entity.harga_satuan_pak | number:'3.0-0' }}</div>
               </td>
               <td class="money">
-                <div>{{ entity.anggaran_pak }}</div>
+                <div>{{ entity.anggaran_pak | number:'3.0-0' }}</div>
               </td>
               <td class="money">
-                <div>{{ entity.anggaran - entity.anggaran_pak }}</div>
+                <div>{{ entity.perubahan | number:'3.0-0' }}</div>
               </td>
             </tr>
           </tbody>

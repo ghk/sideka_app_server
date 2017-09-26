@@ -23,43 +23,51 @@
           <tbody>
             <tr *ngFor="let entity of revenues">
               <td>
-                <div>{{ entity.code }}</div>
+                <div>{{ entity.no }}</div>
               </td>
               <td>
-                <div>{{ entity.description }}</div>
+                <div>{{ entity.uraian }}</div>
               </td>
               <td class="money">
-                <div>{{ entity.value | number:'3.0-0' }} </div>
+                <div>{{ entity.jumlah | number:'3.0-0' }} </div>
                 <div class="bar-percent"></div>
               </td>
               <td>
-                <div>{{ entity.type }}</div>
+                <div>{{ entity.kode_bayar }}</div>
+              </td>
+              <td style="font-family: 'Consolas'">
+                <div>{{ entity.tanggal | date:'dd MMM y' }}</div>
               </td>
               <td>
-                <div>{{ entity.date }}</div>
+                <div>{{ entity.nama_penyetor }}</div>
               </td>
               <td>
-                <div>{{ entity.source_name }}</div>
+                <div>{{ entity.alamat_penyetor }}</div>
               </td>
               <td>
-                <div>{{ entity.source_address }}</div>
+                <div>{{ entity.ttd }}</div>
               </td>
               <td>
-                <div>{{ entity.source_signature }}</div>
+                <div>{{ entity.rekening_bank }}</div>
               </td>
               <td>
-                <div>{{ entity.account_number }}</div>
-              </td>
-              <td>
-                <div>{{ entity.bank_name }}</div>
+                <div>{{ entity.nama_bank }}</div>
               </td>
             </tr>
           </tbody>
 
           <tfoot [hidden]="progress?.percentage !== 100 && revenues.length <= 0">
-            <tr [hidden]="true" class="success">
+            <tr class="success">
               <td><a href>Total</a></td>
-              <td class="money"></td>
+              <td></td>
+              <td class="money">{{ totalRevenue | number:'3.0-0' }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
             </tr>
           </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">
@@ -71,7 +79,6 @@
               </td>
             </tr>
           </tfoot>
-
         </table>
       </div>
     </div>
@@ -95,27 +102,30 @@
           <tbody>
             <tr *ngFor="let entity of spendings">
               <td>
-                <div>{{ entity.code }}</div>
+                <div>{{ entity.no }}</div>
               </td>
               <td>
-                <div>{{ entity.description }}</div>
+                <div>{{ entity.keterangan }}</div>
               </td>
               <td class="money">
-                <div>{{ entity.value | number:'3.0-0' }} </div>
+                <div>{{ entity.jumlah | number:'3.0-0' }} </div>
                 <div class="bar-percent"></div>
               </td>
               <td>
-                <div>{{ entity.type }}</div>
+                <div>{{ entity.jenis }}</div>
               </td>
-              <td>
-                <div>{{ entity.date }}</div>
+              <td style="font-family: 'Consolas'">
+                <div>{{ entity.tanggal | date:'dd MMM y' }}</div>
               </td>
             </tr>
           </tbody>
           <tfoot [hidden]="progress?.percentage !== 100 && spendings.length <= 0">
-            <tr [hidden]="true" class="success">
-              <td><a href>Total</a></td>
-              <td class="money"></td>
+            <tr class="success">
+              <td>Total</td>
+              <td></td>
+              <td class="money">{{ totalSpending | number:'3.0-0' }}</td>
+              <td></td>
+              <td></td>
             </tr>
           </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">

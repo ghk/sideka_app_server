@@ -25,7 +25,7 @@ class Region(BaseModel):
     )
 
 
-class RegionSchema(ma.ModelSchema):
+class RegionModelSchema(ma.ModelSchema):
     class Meta:
         model = Region
         include_fk = True

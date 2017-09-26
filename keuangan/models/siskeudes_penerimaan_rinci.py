@@ -2,7 +2,7 @@ from marshmallow import post_load
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionSchema
+from region import RegionModelSchema
 
 
 class SiskeudesPenerimaanRinci(BaseModel):
@@ -22,9 +22,9 @@ class SiskeudesPenerimaanRinci(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
 
-class SiskeudesPenerimaanRinciSchema(ma.ModelSchema):
+class SiskeudesPenerimaanRinciModelSchema(ma.ModelSchema):
     class Meta:
         model = SiskeudesPenerimaanRinci
         include_fk = True
 
-    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))

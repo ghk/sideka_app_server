@@ -9,6 +9,6 @@ class SpendingType(BaseModel):
     name = db.Column(db.String, nullable=False)
 
 
-class SpendingTypeSchema(ma.ModelSchema):
+class SpendingTypeModelSchema(ma.ModelSchema):
     class Meta:
         model = SpendingType

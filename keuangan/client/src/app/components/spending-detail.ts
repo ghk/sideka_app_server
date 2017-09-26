@@ -43,10 +43,24 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
         })
 
         this._dataService
-            .getSiskeudesRabsByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesPenganggaranByRegion(this.regionId, null, this.progressListener.bind(this))
             .subscribe(
                 result => {
-                    this.entities = result
+                    this.entities = result                                        
+                    this.entities.forEach(entity => {
+                        if (entity.jumlah_satuan && entity.harga_satuan)
+                            entity.anggaran = entity.jumlah_satuan * entity.harga_satuan;
+                        if (entity.jumlah_satuan_pak && entity.harga_satuan_pak)
+                            entity.anggaran_pak = entity.jumlah_satuan_pak * entity.harga_satuan_pak;
+                        if (entity.anggaran_pak)
+                            entity.perubahan = entity.anggaran_pak - entity.anggaran;
+
+                        /*
+                        let rekeningDepth = (entity.kode_rekening.match(/\./g) || []).length - 1;
+                        let append = '&nbsp;'.repeat(rekeningDepth * 4);                        
+                        entity.uraian = append + entity.uraian;
+                        */
+                    })
                 },
                 error => {                    
                 }

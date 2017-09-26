@@ -56,7 +56,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'progress_recapitulations'),
+      urljoin(this._serverUrl, 'progress/recapitulations'),
       query,
       progressListener
     );
@@ -70,7 +70,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'progress_timelines'),
+      urljoin(this._serverUrl, 'progress/timelines'),
       query,
       progressListener
     );
@@ -78,83 +78,13 @@ export class DataService {
     return request
       .map(res => res.json())
       .catch(this.handleError)
-  }
-
-  getProgressTimelinesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'progress_timelines/region', regionId),
-      query,
-      progressListener
-    );
-    
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getProgressRevenues(query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'progress_revenues'),
-      query,
-      progressListener
-    );
-
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getProgressRevenuesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {    
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'progress_revenues/region', regionId),
-      query,
-      progressListener
-    );
-
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getProgressSpendings(query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'progress_spendings'),
-      query,
-      progressListener
-    );
-    
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getProgressSpendingsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'progress_spendings/region', regionId),
-      query,
-      progressListener
-    );
-
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
+  } 
 
   getSpendingTypes(query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'spending_types'),
+      urljoin(this._serverUrl, 'spending/types'),
       query,
       progressListener
     )
@@ -168,7 +98,7 @@ export class DataService {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'spending_recapitulations'),
+      urljoin(this._serverUrl, 'spending/recapitulations'),
       query,
       progressListener
     )
@@ -178,11 +108,40 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getSiskeudesRabsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+  getSiskeudesPenerimaanByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {    
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'siskeudes/rab/region', regionId),
+      urljoin(this._serverUrl, 'siskeudes/penerimaans/region', regionId),
+      query,
+      progressListener
+    );
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
+  getSiskeudesSppByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'siskeudes/spps/region', regionId),
+      query,
+      progressListener
+    );
+    
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
+ 
+  getSiskeudesPenganggaranByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'siskeudes/penganggarans/region', regionId),
       query,
       progressListener
     )

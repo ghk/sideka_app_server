@@ -1,7 +1,8 @@
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionSchema
+from region import RegionModelSchema
+from marshmallow import fields
 
 
 class SiskeudesPenganggaran(BaseModel):
@@ -10,7 +11,6 @@ class SiskeudesPenganggaran(BaseModel):
     year = db.Column(db.String)
     row_number = db.Column(db.Integer)
     id = db.Column(db.String)
-    row_number = db.Column(db.Integer)
     kode_kegiatan = db.Column(db.String)
     kode_rekening = db.Column(db.String)
     uraian = db.Column(db.String)
@@ -28,9 +28,29 @@ class SiskeudesPenganggaran(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
 
-class SiskeudesPenganggaranSchema(ma.ModelSchema):
+class SiskeudesPenganggaranModelSchema(ma.ModelSchema):
     class Meta:
         model = SiskeudesPenganggaran
         include_fk = True
 
-    region = ma.Nested(RegionSchema, many=False, exclude=('parent',))
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+
+
+class SiskeudesPenganggaranSchema(ma.Schema):
+    pid = fields.Integer()
+    year = fields.String()
+    row_number = fields.Integer()
+    id = fields.String(allow_none=True)
+    kode_kegiatan = fields.String(allow_none=True)
+    kode_rekening = fields.String(allow_none=True)
+    uraian = fields.String(allow_none=True)
+    sumber_dana = fields.String(allow_none=True)
+    satuan = fields.String(allow_none=True)
+    jumlah_satuan = fields.Integer(allow_none=True)
+    harga_satuan = fields.Decimal(allow_none=True)
+    anggaran = fields.Decimal(allow_none=True)
+    jumlah_satuan_pak = fields.Integer(allow_none=True)
+    harga_satuan_pak = fields.Decimal(allow_none=True)
+    anggaran_pak = fields.Decimal(allow_none=True)
+    perubahan = fields.Decimal(allow_none=True)
+    fk_region_id = fields.Integer()

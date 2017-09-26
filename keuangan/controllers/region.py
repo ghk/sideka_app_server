@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
-from keuangan.models import RegionSchema
+from keuangan.models import RegionModelSchema
 from keuangan.repository import RegionRepository
 from keuangan.helpers import QueryHelper
 
@@ -12,7 +12,7 @@ region_repository = RegionRepository(db)
 def get_regions():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = region_repository.all(page_sort_params=page_sort_params)
-    result = RegionSchema(many=True).dump(entities)
+    result = RegionModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
@@ -25,5 +25,5 @@ def get_regions_count():
 @app.route('/regions/<string:id>', methods=['GET'])
 def get_region(id):
     region = region_repository.get(id)
-    result = RegionSchema(many=False).dump(region)
+    result = RegionModelSchema(many=False).dump(region)
     return jsonify(result.data)

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
-from keuangan.models import SpendingType, SpendingTypeSchema, SpendingRecapitulationSchema
+from keuangan.models import SpendingType, SpendingTypeModelSchema, SpendingRecapitulationModelSchema
 from keuangan.repository import RegionRepository, SpendingTypeRepository, SpendingRecapitulationRepository
 from keuangan.helpers import QueryHelper, Generator
 
@@ -15,7 +15,7 @@ sr_repository = SpendingRecapitulationRepository(db)
 def get_spending_types():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = st_repository.all(page_sort_params)
-    result = SpendingTypeSchema(many=True).dump(entities)
+    result = SpendingTypeModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
@@ -35,7 +35,7 @@ def generate_spending_types():
 def get_spending_recapitulations():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = sr_repository.all(page_sort_params)
-    result = SpendingRecapitulationSchema(many=True).dump(entities)
+    result = SpendingRecapitulationModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
