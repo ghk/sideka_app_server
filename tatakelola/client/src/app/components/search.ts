@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
-  selector: 'st-app',
-  templateUrl: '../templates/app.html',
+  selector: 'st-search',
+  templateUrl: '../templates/search.html',
 })
 
-export class AppComponent implements OnInit, OnDestroy {
+export class SearchComponent implements OnInit, OnDestroy {
 
   constructor() { }
 
