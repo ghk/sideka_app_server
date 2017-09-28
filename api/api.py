@@ -233,10 +233,10 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         if request.args.get("change_id", 0) is not None:
             client_change_id = int(request.args.get("changeId", "0"))
 
-        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
+        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
 
         if content_subtype is None:
-            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
+            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
 
         cur.execute(content_query, (content_type, content_subtype, desa_id, client_change_id))
         cursor = cur.fetchone()
@@ -248,6 +248,9 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         change_id = cursor[1]
         api_version = cursor[2]
 
+        if change_id == client_change_id:
+             return jsonify({"success": True, "change_id": client_change_id, "columns": content['columns']})
+             
         if api_version != app.config["API_VERSION"]:
             new_content = {"changeId": 0, "data": [], "columns": [], "apiVersion": app.config["API_VERSION"]}
 
@@ -266,7 +269,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             app.config["API_VERSION"]))
             mysql.connection.commit()
 
-        return_data = {"change_id": change_id, "api_version": api_version}
+        return_data = {"change_id": change_id, "api_version": api_version, "columns": content['columns']}
 
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
@@ -370,13 +373,15 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], None, current_content["data"])
         else:
             for tab, new_columns in request.json["columns"].items():
+               
                 if tab not in new_content['data']:
                     new_content['data'][tab] = []
+                    print('New data: ' + tab)
                     
                 if tab not in current_content["data"]:
                     current_content["data"][tab]=[]
                     current_content["columns"][tab]=None
-
+                   
                 if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
                     #Special case for client who posted data instead of diffs
                     new_content["data"][tab] = request.json["data"][tab]
@@ -389,12 +394,15 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                 elif(len(new_content["diffs"][tab]) > 0):
                     #There's diffs in the posted content for this tab, apply them to current data
                     current_columns = current_content["columns"].get(tab, None)
-
+                   
                     if tab not in new_content["data"]:
                         new_content["data"][tab] = []
+
                     
                     new_content["data"][tab] = merge_diffs(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
 
+                    if tab == 'log_pembangunan':
+                        print new_content['data'][tab]
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
                     new_content["data"][tab] = current_content["data"][tab]
