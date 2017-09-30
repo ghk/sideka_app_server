@@ -5,7 +5,7 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
-from phpass import PasswordHash
+from common.phpass import PasswordHash
 
 import MySQLdb
 import os
@@ -249,7 +249,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         api_version = cursor[2]
 
         if change_id == client_change_id:
-             return jsonify({"success": True, "change_id": client_change_id, "columns": content['columns']})
+             return jsonify({ "success": True, "change_id": client_change_id })
              
         if api_version != app.config["API_VERSION"]:
             new_content = {"changeId": 0, "data": [], "columns": [], "apiVersion": app.config["API_VERSION"]}
@@ -269,7 +269,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             app.config["API_VERSION"]))
             mysql.connection.commit()
 
-        return_data = {"change_id": change_id, "api_version": api_version, "columns": content['columns']}
+        return_data = {"change_id": change_id, "api_version": api_version }
 
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
@@ -364,7 +364,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             current_content = json.loads(cursor_current_content[0])
 
         merge_method = None
-        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": current_content['columns']}
+        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs }
         
         if isinstance(current_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
@@ -375,6 +375,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                 
                 if tab not in new_content['data']:
                     new_content['data'][tab] = []
+                
+                if tab not in new_content['diffs']:
+                    new_content['diffs'][tab] = []
                     
                 if tab not in current_content["data"]:
                     current_content["data"][tab]=[]
@@ -397,9 +400,12 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                         current_content['columns'][tab] = new_columns
                     
                     #TODO - transform data with new columns
-                   
-                    new_content["data"][tab] = transform_data(current_content['columns'][tab], new_columns, new_content["data"][tab])
-                    new_content["data"][tab] = merge_diffs(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
+                    transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
+                    transformed_diffs = transform_diffs(current_content['columns'][tab], new_columns, new_content["diffs"][tab])
+    
+                    new_content['diffs'][tab] = transformed_diffs
+
+                    new_content["data"][tab] = merge_diffs(new_columns, transformed_diffs, current_columns, transformed_data)
                     new_content['columns'][tab] = new_columns
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
@@ -430,29 +436,44 @@ def get_all_desa():
         cur.close()
 
 def transform_data(old_columns, new_columns, data):
-    new_data = []
-   
-    available_indexes = get_available_indexes(old_columns, new_columns)
+    missing_indexes = get_missing_indexes(old_columns, new_columns)
 
-    for itemIdx, item in enumerate(data):     
-        for dataItemIdx, dataItem in enumerate(available_indexes):
-            new_data.append(data[itemIdx][dataItemIdx])
+    for index, item in enumerate(data):
+        if len(item) == len(new_columns):
+            continue
+        for missing in missing_indexes:
+            item.pop(missing)
+            
+    return data
+
+def transform_diffs(old_columns, new_columns, diffs):
+    missing_indexes = get_missing_indexes(old_columns, new_columns)
     
-    return new_data
-
-def get_available_indexes(old_columns, new_columns):
-    available_indexes = []
-    new_index = 0
-    print old_columns
-    print new_columns
+    for missing in missing_indexes:
+        for diff in diffs:
+            for add in diff["added"]:
+                if len(add) == len(new_columns):
+                    continue
+                else:
+                    add.pop(missing)
+            for modified in diff["modified"]:
+                print modified
+                if len(modified) == len(new_columns):
+                    continue
+                else:
+                    modified.pop(missing)
+                    
+    return diffs
+def get_missing_indexes(old_columns, new_columns):
+    missing_indexes = []
+    index_at_new = 0
     for index, old in enumerate(old_columns):
-        for new in enumerate(new_columns):
-            if old == new:
-                available_indexes.append(index)
-                new_index = new_index + 1
-    
-    return available_indexes
-
+        if old != new_columns[index_at_new]:
+            missing_indexes.append(index)
+        else:
+            index_at_new += 1
+    return missing_indexes
+        
 def merge_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
         for add in diff["added"]:
