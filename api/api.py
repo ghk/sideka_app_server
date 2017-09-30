@@ -5,7 +5,7 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
-from common.phpass import PasswordHash
+from phpass import PasswordHash
 
 import MySQLdb
 import os
@@ -401,11 +401,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     
                     #TODO - transform data with new columns
                     transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
-                    transformed_diffs = transform_diffs(current_content['columns'][tab], new_columns, new_content["diffs"][tab])
-    
-                    new_content['diffs'][tab] = transformed_diffs
-
-                    new_content["data"][tab] = merge_diffs(new_columns, transformed_diffs, current_columns, transformed_data)
+       
+                    new_content["data"][tab] = merge_diffs(new_columns, new_content['diffs'][tab], current_columns, transformed_data)
                     new_content['columns'][tab] = new_columns
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
@@ -446,24 +443,6 @@ def transform_data(old_columns, new_columns, data):
             
     return data
 
-def transform_diffs(old_columns, new_columns, diffs):
-    missing_indexes = get_missing_indexes(old_columns, new_columns)
-    
-    for missing in missing_indexes:
-        for diff in diffs:
-            for add in diff["added"]:
-                if len(add) == len(new_columns):
-                    continue
-                else:
-                    add.pop(missing)
-            for modified in diff["modified"]:
-                print modified
-                if len(modified) == len(new_columns):
-                    continue
-                else:
-                    modified.pop(missing)
-                    
-    return diffs
 def get_missing_indexes(old_columns, new_columns):
     missing_indexes = []
     index_at_new = 0
