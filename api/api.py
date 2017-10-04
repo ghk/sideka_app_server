@@ -240,16 +240,12 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
 
         cur.execute(content_query, (content_type, content_subtype, desa_id, client_change_id))
         cursor = cur.fetchone()
-
-        if cursor is None:
-            return jsonify({"success": True, "change_id": client_change_id})
-
         content = json.loads(cursor[0])
         change_id = cursor[1]
         api_version = cursor[2]
 
         if change_id == client_change_id:
-             return jsonify({ "success": True, "change_id": client_change_id })
+             return jsonify({ "success": True, "change_id": client_change_id, "columns": content["columns"] })
              
         if api_version != app.config["API_VERSION"]:
             new_content = {"changeId": 0, "data": [], "columns": [], "apiVersion": app.config["API_VERSION"]}
@@ -269,7 +265,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             app.config["API_VERSION"]))
             mysql.connection.commit()
 
-        return_data = {"change_id": change_id, "api_version": api_version }
+        return_data = {"change_id": change_id, "api_version": api_version, "columns": content["columns"] }
 
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
@@ -401,13 +397,18 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     
                     #TODO - transform data with new columns
                     transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
-       
+                    
+                    for index, diff in enumerate(new_content['diffs'][tab]):
+                        for added_diff in diff["added"]:
+                            diff[index]["added"] = transform_data(current_content['columns'][tab], new_columns, added_diff)
+                        for modified_diff in diff["modified"]:
+                            diff[index]["modified"] = transform_data(current_content['columns'][tab], new_columns, modified_diff)
+                        
                     new_content["data"][tab] = merge_diffs(new_columns, new_content['diffs'][tab], current_columns, transformed_data)
                     new_content['columns'][tab] = new_columns
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
                     new_content["data"][tab] = current_content["data"][tab]
-
 
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", 
             (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
@@ -418,7 +419,6 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         return jsonify(return_data)
     finally:
         cur.close()
-
 
 @app.route('/desa', methods=["GET"])
 @cross_origin()
@@ -432,27 +432,32 @@ def get_all_desa():
     finally:
         cur.close()
 
-def transform_data(old_columns, new_columns, data):
-    missing_indexes = get_missing_indexes(old_columns, new_columns)
 
-    for index, item in enumerate(data):
-        if len(item) == len(new_columns):
-            continue
-        for missing in missing_indexes:
-            item.pop(missing)
-            
-    return data
+def transform_data(from_columns, to_columns, data):
+    if from_columns == to_columns:
+        return data
+    
+    from_data_dict = array_to_object(data, from_columns)
+    return object_to_array(from_data_dict, to_columns)
 
-def get_missing_indexes(old_columns, new_columns):
-    missing_indexes = []
-    index_at_new = 0
-    for index, old in enumerate(old_columns):
-        if old != new_columns[index_at_new]:
-            missing_indexes.append(index)
-        else:
-            index_at_new += 1
-    return missing_indexes
-        
+def array_to_object(arr, columns):
+    result = {}
+    counter = 0
+
+    for column in columns:
+        result[column] = arr[counter]
+        counter += 1
+    
+    return result
+
+def object_to_array(object, columns):
+    result = []
+
+    for column in columns:
+        result.append(object[column])
+    
+    return result
+
 def merge_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
         for add in diff["added"]:
