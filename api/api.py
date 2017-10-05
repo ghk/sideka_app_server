@@ -5,7 +5,7 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
-from common.phpass import PasswordHash
+from phpass import PasswordHash
 
 import MySQLdb
 import os
@@ -233,21 +233,20 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         if request.args.get("change_id", 0) is not None:
             client_change_id = int(request.args.get("changeId", "0"))
 
-        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
+        content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
 
         if content_subtype is None:
-            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >%s ORDER BY change_id DESC"
+            content_query = "SELECT content, change_id, api_version FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id >=%s ORDER BY change_id DESC"
 
         cur.execute(content_query, (content_type, content_subtype, desa_id, client_change_id))
         cursor = cur.fetchone()
-
-        if cursor is None:
-            return jsonify({"success": True, "change_id": client_change_id})
-
         content = json.loads(cursor[0])
         change_id = cursor[1]
         api_version = cursor[2]
 
+        if change_id == client_change_id:
+             return jsonify({ "success": True, "change_id": client_change_id, "columns": content["columns"] })
+             
         if api_version != app.config["API_VERSION"]:
             new_content = {"changeId": 0, "data": [], "columns": [], "apiVersion": app.config["API_VERSION"]}
 
@@ -266,7 +265,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             app.config["API_VERSION"]))
             mysql.connection.commit()
 
-        return_data = {"change_id": change_id, "api_version": api_version}
+        return_data = {"change_id": change_id, "api_version": api_version, "columns": content["columns"] }
 
         if client_change_id == 0 or content.has_key("diffs") == False:
             return_data["data"] = content["data"]
@@ -279,7 +278,6 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
-
 
 @app.route('/content/v2/<int:desa_id>/<content_type>', methods=["POST"])
 @app.route('/content/v2/<int:desa_id>/<content_type>/<content_subtype>', methods=["POST"])
@@ -362,21 +360,25 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             current_content = json.loads(cursor_current_content[0])
 
         merge_method = None
-        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs}
-
+        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
+        
         if isinstance(current_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
             #todo: merge diffs columns
             new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], None, current_content["data"])
         else:
             for tab, new_columns in request.json["columns"].items():
+                
                 if tab not in new_content['data']:
                     new_content['data'][tab] = []
+                
+                if tab not in new_content['diffs']:
+                    new_content['diffs'][tab] = []
                     
                 if tab not in current_content["data"]:
                     current_content["data"][tab]=[]
                     current_content["columns"][tab]=None
-
+                   
                 if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
                     #Special case for client who posted data instead of diffs
                     new_content["data"][tab] = request.json["data"][tab]
@@ -389,16 +391,29 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                 elif(len(new_content["diffs"][tab]) > 0):
                     #There's diffs in the posted content for this tab, apply them to current data
                     current_columns = current_content["columns"].get(tab, None)
-
-                    if tab not in new_content["data"]:
-                        new_content["data"][tab] = []
                     
-                    new_content["data"][tab] = merge_diffs(new_columns, new_content["diffs"][tab], current_columns, current_content["data"][tab])
+                    if current_content['columns'][tab] is None:
+                        current_content['columns'][tab] = new_columns
+                    
+                    #TODO - transform data with new columns
+                    print current_content["data"][tab][3]
+                    transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
+                    print transformed_data[3]
+                    
+                    """
+                    for diff in new_content['diffs'][tab]:
+                        for index, added_diff in enumerate(diff["added"]):
+                            diff["added"][index] = transform_data(current_content['columns'][tab], new_columns, added_diff)
+                        for index,modified_diff in enumerate(diff["modified"]):
+                            diff["modified"][index] = transform_data(current_content['columns'][tab], new_columns, modified_diff)
+                    print diff
+                    """
 
+                    new_content["data"][tab] = merge_diffs(new_columns, new_content['diffs'][tab], current_columns, transformed_data)
+                    new_content['columns'][tab] = new_columns
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
                     new_content["data"][tab] = current_content["data"][tab]
-
 
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", 
             (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
@@ -409,7 +424,6 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         return jsonify(return_data)
     finally:
         cur.close()
-
 
 @app.route('/desa', methods=["GET"])
 @cross_origin()
@@ -423,6 +437,31 @@ def get_all_desa():
     finally:
         cur.close()
 
+
+def transform_data(from_columns, to_columns, data):
+    if from_columns == to_columns:
+        return data
+    
+    from_data_dict = [array_to_object(d, from_columns) for d in data]
+    return [object_to_array(d, to_columns) for d in from_data_dict]
+
+def array_to_object(arr, columns):
+    result = {}
+    counter = 0
+
+    for column in columns:
+        result[column] = arr[counter]
+        counter += 1
+    
+    return result
+
+def object_to_array(object, columns):
+    result = []
+
+    for column in columns:
+        result.append(object.get(column))
+    
+    return result
 
 def merge_diffs(diffs_columns, diffs, data_columns, data):
     for diff in diffs:
@@ -445,35 +484,6 @@ def merge_diffs(diffs_columns, diffs, data_columns, data):
                     if item[0] == deleted[0]:
                         data.remove(item)
     return data
-
-def merge_dict_diffs(diffs_columns, diffs, data_columns, data):
-    for diff in diffs:
-        for added in diff["added"]:
-            data.append(added)
-        for modified in diff["modified"]:
-            for index, item in enumerate(data):
-                if item["id"] == modified["id"]:
-                    data[index] = modified
-        for deleted in diff["deleted"]:
-            for item in data:
-                if item["id"] == deleted["id"]:
-                    data.remove(item)
-        return data
-
-def merge_map_diffs(diffs_columns, diffs, data_columns, data):
-    for diff in diffs:
-        for added in diff["added"]:
-            data.append(added)
-        for modified in diff["modified"]:
-            for index, item in enumerate(data):
-                if item["id"] == modified["id"]:
-                    data[index] = modified
-        for deleted in diff["deleted"]:
-            for item in data:
-                if item["id"] == deleted["id"]:
-                    data.remove(item)
-        return data
-
 
 def get_auth(desa_id, cur):
     token = request.headers.get('X-Auth-Token', None)
