@@ -360,7 +360,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             current_content = json.loads(cursor_current_content[0])
 
         merge_method = None
-        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs }
+        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
         
         if isinstance(current_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
@@ -396,14 +396,19 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                         current_content['columns'][tab] = new_columns
                     
                     #TODO - transform data with new columns
+                    print current_content["data"][tab][3]
                     transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
+                    print transformed_data[3]
                     
-                    for index, diff in enumerate(new_content['diffs'][tab]):
-                        for added_diff in diff["added"]:
-                            diff[index]["added"] = transform_data(current_content['columns'][tab], new_columns, added_diff)
-                        for modified_diff in diff["modified"]:
-                            diff[index]["modified"] = transform_data(current_content['columns'][tab], new_columns, modified_diff)
-                        
+                    """
+                    for diff in new_content['diffs'][tab]:
+                        for index, added_diff in enumerate(diff["added"]):
+                            diff["added"][index] = transform_data(current_content['columns'][tab], new_columns, added_diff)
+                        for index,modified_diff in enumerate(diff["modified"]):
+                            diff["modified"][index] = transform_data(current_content['columns'][tab], new_columns, modified_diff)
+                    print diff
+                    """
+
                     new_content["data"][tab] = merge_diffs(new_columns, new_content['diffs'][tab], current_columns, transformed_data)
                     new_content['columns'][tab] = new_columns
                 else:
@@ -437,8 +442,8 @@ def transform_data(from_columns, to_columns, data):
     if from_columns == to_columns:
         return data
     
-    from_data_dict = array_to_object(data, from_columns)
-    return object_to_array(from_data_dict, to_columns)
+    from_data_dict = [array_to_object(d, from_columns) for d in data]
+    return [object_to_array(d, to_columns) for d in from_data_dict]
 
 def array_to_object(arr, columns):
     result = {}
@@ -454,7 +459,7 @@ def object_to_array(object, columns):
     result = []
 
     for column in columns:
-        result.append(object[column])
+        result.append(object.get(column))
     
     return result
 
