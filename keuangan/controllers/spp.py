@@ -79,23 +79,23 @@ def get_siskeudes_spps_rincis_by_region(region_id):
 
 @app.route('/siskeudes/spps/fetch', methods=['GET'])
 def fetch_siskeudes_spps():
-    # delete all spp, spp bukti and spp rinci
-    siskeudes_spp_repository.delete_all()
-    siskeudes_spp_bukti_repository.delete_all()
-    siskeudes_spp_rinci_repository.delete_all()
-
     year = str(datetime.now().year)
     regions = region_repository.all()
-    sd_contents = sideka_content_repository.get_latest_content('spp', year)
 
-    for sd_content in sd_contents:
+    for region in regions:
+        # delete all spp, spp bukti and spp rinci
+        siskeudes_spp_repository.delete_by_region(region.id)
+        siskeudes_spp_bukti_repository.delete_by_region(region.id)
+        siskeudes_spp_rinci_repository.delete_by_region(region.id)
+
+        sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
         contents = ContentTransformer.transform(sd_content.content)
-        for region in regions:
-            spps = SiskeudesSppModelSchema(many=True).load(contents['spp'])
-            sppbs = SiskeudesSppBuktiModelSchema(many=True).load(contents['spp_bukti'])
-            spprs = SiskeudesSppRinciModelSchema(many=True).load(contents['spp_rinci'])
-            siskeudes_spp_repository.add_all(spps.data, region, year)
-            siskeudes_spp_bukti_repository.add_all(sppbs.data, region, year)
-            siskeudes_spp_rinci_repository.add_all(spprs.data, region, year)
+
+        spps = SiskeudesSppModelSchema(many=True).load(contents['spp'])
+        sppbs = SiskeudesSppBuktiModelSchema(many=True).load(contents['spp_bukti'])
+        spprs = SiskeudesSppRinciModelSchema(many=True).load(contents['spp_rinci'])
+        siskeudes_spp_repository.add_all(spps.data, region, year)
+        siskeudes_spp_bukti_repository.add_all(sppbs.data, region, year)
+        siskeudes_spp_rinci_repository.add_all(spprs.data, region, year)
 
     return jsonify({'success': True})

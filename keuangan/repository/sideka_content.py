@@ -1,4 +1,4 @@
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, desc
 from base import BaseRepository
 from keuangan.models import SdContent
 
@@ -22,5 +22,15 @@ class SidekaContentRepository(BaseRepository):
             self.model.subtype == subq.c.subtype,
             self.model.change_id == subq.c.max_change_id)) \
             .all()
+
+        return result
+
+    def get_latest_content_by_desa_id(self, type, subtype, desa_id):
+        result = self.db.session.query(self.model) \
+            .filter(self.model.type == type) \
+            .filter(self.model.subtype == subtype) \
+            .filter(self.model.desa_id == desa_id) \
+            .order_by(desc(self.model.change_id)) \
+            .first()
 
         return result

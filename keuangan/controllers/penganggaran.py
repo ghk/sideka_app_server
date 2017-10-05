@@ -37,15 +37,13 @@ def get_siskeudes_penganggarans_by_region(region_id):
 
 @app.route('/siskeudes/penganggarans/fetch', methods=['GET'])
 def fetch_siskeudes_penganggarans():
-    # delete all penganggaran and kegiatan
-    siskeudes_penganggaran_repository.delete_all()
-    siskeudes_kegiatan_repository.delete_all()
-
     year = str(datetime.now().year)
     regions = region_repository.all()
-    sd_contents = sideka_content_repository.get_latest_content('penganggaran', year)
 
-    for sd_content in sd_contents:
+    for region in regions:
+        siskeudes_penganggaran_repository.delete_by_region(region.id)
+        siskeudes_kegiatan_repository.delete_by_region(region.id)
+        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         contents = ContentTransformer.transform(sd_content.content)
 
         # Hack
@@ -53,11 +51,10 @@ def fetch_siskeudes_penganggarans():
             if not bool(content_rab['perubahan'] and content_rab['perubahan'].strip()):
                 content_rab['perubahan'] = None
 
-        for region in regions:
-            sps = SiskeudesPenganggaranModelSchema(many=True).load(contents['rab'])
-            sks = SiskeudesKegiatanModelSchema(many=True).load(contents['kegiatan'])
-            siskeudes_penganggaran_repository.add_all(sps.data, region, year)
-            siskeudes_kegiatan_repository.add_all(sks.data, region, year)
+        sps = SiskeudesPenganggaranModelSchema(many=True).load(contents['rab'])
+        sks = SiskeudesKegiatanModelSchema(many=True).load(contents['kegiatan'])
+        siskeudes_penganggaran_repository.add_all(sps.data, region, year)
+        siskeudes_kegiatan_repository.add_all(sks.data, region, year)
 
     return jsonify({'success': True})
 
