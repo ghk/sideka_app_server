@@ -252,7 +252,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             return_data["data"] = content["data"]
         elif change_id == client_change_id:
             return_data["diffs"] = []
-        elif:
+        else:
             diffs = get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, content["columns"])
             return_data["diffs"] = diffs
 
