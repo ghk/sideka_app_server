@@ -46,7 +46,7 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        let spendingTypeQuery: Query = {            
+        let spendingTypeQuery: Query = {           
         };
         let spendingRecapitulationsQuery: Query = {
             sort: 'region.name'

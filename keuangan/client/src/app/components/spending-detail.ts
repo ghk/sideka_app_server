@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
+import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
 @Component({
@@ -12,25 +11,22 @@ import { Query } from '../models/query';
 
 export class SpendingDetailComponent implements OnInit, OnDestroy {
 
-    private _routeSubscription: Subscription;
-    
-    regionId: string;   
     region: any;
     progress: Progress;
     entities: any[] = [];
     
     constructor(
-        private _route: ActivatedRoute,
-        private _dataService: DataService
+        private _dataService: DataService,
+        private _sharedService: SharedService
     ) {
 
     }
 
     ngOnInit(): void {
-        this._routeSubscription = this._route.params.subscribe(params => {
-            this.regionId = params['regionId'];
+        this._sharedService.getRegion().subscribe(region => {
+            this.region = region;
             this.getData();
-        });
+        })
     }
 
     getData() {  
@@ -38,12 +34,12 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
             sort: 'row_number'
         }
 
-        this._dataService.getRegion(this.regionId, null, null).subscribe(result => {
+        this._dataService.getRegion(this.region.id, null, null).subscribe(result => {
             this.region = result
         })
 
         this._dataService
-            .getSiskeudesPenganggaranByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesPenganggaranByRegion(this.region.id, null, this.progressListener.bind(this))
             .subscribe(
                 result => {
                     this.entities = result                                        
@@ -68,7 +64,6 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this._routeSubscription.unsubscribe()    
     }   
 
     progressListener(progress: Progress): void {

@@ -18,17 +18,23 @@
           </ul>
         </li>
         <li routerLinkActive="active">
-          <a routerLink="/progress">Pencapaian</a>
+          <a routerLink="/progress/region/{{region?.id}}">Pencapaian</a>
         </li>
         <li routerLinkActive="active">
-          <a routerLink="/spending">Belanja</a>
+          <a routerLink="/spending/region/{{region?.id}}">Belanja</a>
         </li>
       </ul>
       <ul class="nav navbar-nav nav-region">
         <li class="active">
-          <a href="#">DESA PRIORITAS</a>
+          <a routerLink="/{{state}}/region/0">DESA PRIORITAS</a>
         </li>
-      </ul>
+        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}">
+          <div class="gt hidden-xs">→</div>
+        </li>
+        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}">
+          <a routerLink="/{{state}}/region/{{region?.id}}">{{region?.name}}</a>
+        </li>
+      </ul>      
       <ul class="nav navbar-nav navbar-right">
         <li>
           <a href="/login">Login</a>

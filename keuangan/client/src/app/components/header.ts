@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { SharedService } from '../services/shared';
 
 @Component({
   selector: 'sk-header',
@@ -7,9 +8,21 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 export class HeaderComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+  state: any;
+  region: any;
 
-  ngOnInit(): void { }
+  constructor(
+    private _sharedService: SharedService
+  ) { }
+
+  ngOnInit(): void { 
+    this._sharedService.getRegion().subscribe(region => {
+      this.region = region;
+    })
+    this._sharedService.getState().subscribe(state => {
+      this.state = state;
+    })
+  }
 
   ngOnDestroy(): void { }
 }

@@ -8,9 +8,11 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
+import { ProgressComponent } from './components/progress';
 import { ProgressRecapitulationComponent } from './components/progress-recapitulation';
 import { ProgressTimelineComponent } from './components/progress-timeline';
 import { ProgressDetailComponent } from './components/progress-detail';
+import { SpendingComponent } from './components/spending';
 import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
 import { SpendingDetailComponent } from './components/spending-detail';
 
@@ -21,9 +23,11 @@ import { SharedService } from './services/shared';
   declarations: [
     AppComponent,
     HeaderComponent,
+    ProgressComponent,
     ProgressRecapitulationComponent,
     ProgressTimelineComponent,
     ProgressDetailComponent,
+    SpendingComponent,
     SpendingRecapitulationComponent,
     SpendingDetailComponent
   ],
@@ -34,11 +38,9 @@ import { SharedService } from './services/shared';
     ProgressHttpModule,
     ChartsModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: 'progress', pathMatch: 'full' },
-      { path: 'progress', component: ProgressRecapitulationComponent }, 
-      { path: 'progress/region/:regionId', component: ProgressDetailComponent },
-      { path: 'spending', component: SpendingRecapitulationComponent },
-      { path: 'spending/region/:regionId', component: SpendingDetailComponent }
+      { path: '', redirectTo: 'progress/region/0', pathMatch: 'full' },
+      { path: 'progress/region/:regionId', component: ProgressComponent }, 
+      { path: 'spending/region/:regionId', component: SpendingComponent }
     ]),
   ],
   providers: [

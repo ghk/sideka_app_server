@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
+import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
 @Component({
@@ -12,9 +12,6 @@ import { Query } from '../models/query';
 
 export class ProgressDetailComponent implements OnInit, OnDestroy {
 
-    private _routeSubscription: Subscription;
-
-    regionId: string;
     region: any;
     totalRevenue: number = 0;
     totalSpending: number = 0;
@@ -23,26 +20,22 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     progress: Progress;
 
     constructor(
-        private _route: ActivatedRoute,
-        private _dataService: DataService
+        private _dataService: DataService,
+        private _sharedService: SharedService
     ) {
 
     }
 
     ngOnInit(): void {
-        this._routeSubscription = this._route.params.subscribe(params => {
-            this.regionId = params['regionId'];
+        this._sharedService.getRegion().subscribe(region => {
+            this.region = region;
             this.getData();
-        });
+        })
     }
 
     getData() {
-        this._dataService.getRegion(this.regionId, null, null).subscribe(result => {
-            this.region = result;
-        })
-
         this._dataService
-            .getSiskeudesPenerimaanByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesPenerimaanByRegion(this.region.id, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.revenues = results;
@@ -54,7 +47,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
             )
 
         this._dataService
-            .getSiskeudesSppByRegion(this.regionId, null, this.progressListener.bind(this))
+            .getSiskeudesSppByRegion(this.region.id, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.spendings = results
@@ -67,7 +60,6 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this._routeSubscription.unsubscribe()
     }
 
     progressListener(progress: Progress): void {

@@ -8,9 +8,8 @@ class RegionRepository(BaseRepository):
         self.db = db
         self.model = Region
 
-    def get(self, id, is_lokpri=True):
+    def get(self, id):
         return self.db.session.query(self.model) \
-            .filter(self.model.is_lokpri == is_lokpri) \
             .filter(self.model.id == id) \
             .first()
 
