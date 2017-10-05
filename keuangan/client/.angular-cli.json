@@ -30,6 +30,7 @@
       "environments": {
         "dev": "environments/environment.ts",
         "hmr": "environments/environment.hmr.ts",
+        "ckan": "environments/environment.ckan.ts",
         "prod": "environments/environment.prod.ts"
       }
     }
