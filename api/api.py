@@ -295,125 +295,108 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         if user_id is None:
             return jsonify({}), 403
 
+        #Find max change id
         max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s"
-
         if content_subtype is None:
             max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s"
 
         cur.execute(max_change_id_query, (content_type, content_subtype, desa_id))
-        cursor_max_change_id = cur.fetchone()
-
-        if cursor_max_change_id[0] is None:
+        max_change_id_row = cur.fetchone()
+        if max_change_id_row[0] is None:
             max_change_id = 0
         else:
-            max_change_id = int(cursor_max_change_id[0])
+            max_change_id = int(max_change_id_row[0])
+        new_change_id = max_change_id + 1
 
-        contents_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
-
+        #Find content newer than client
+        newer_than_client_contents_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
         if content_subtype is None:
-            contents_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
-
-        cur.execute(contents_query, (content_type, content_subtype, desa_id, client_change_id))
-        cursor_contents = cur.fetchall()
+            newer_than_client_contents_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id > %s ORDER BY change_id ASC"
+        cur.execute(newer_than_client_contents_query, (content_type, content_subtype, desa_id, client_change_id))
+        newer_than_client_content_rows = cur.fetchall()
 
         new_content = {"changeId": 0, "data": {}, "columns": {}, "diffs": {}, "apiVersion": app.config["API_VERSION"]};
-
         diffs = {}
 
-        for key, value in request.json["columns"].items():
-            new_content["data"][key] = []
-            new_content["columns"][key] = value
-            if "diffs" in request.json and key in request.json["diffs"]:
-                new_content["diffs"][key] = request.json["diffs"][key]
-            diffs[key] = []
+        #Initialize new content to be saved
+        for tab, columns in request.json["columns"].items():
+            new_content["data"][tab] = []
+            new_content["columns"][tab] = tab
+            if "diffs" in request.json and tab in request.json["diffs"]:
+                new_content["diffs"][tab] = request.json["diffs"][tab]
+            else:
+                new_content['diffs'][tab] = []
+            diffs[tab] = []
 
-        if len(cursor_contents) > 0:
-            for value in cursor_contents:
-                content = json.loads(value[0])
+        #Concatenate diffs for every content newer than client
+        for row in newer_than_client_content_rows:
+            content = json.loads(row[0])
 
-                if content.has_key("diffs") == False:
-                    continue
+            if content.has_key("diffs") == False:
+                continue
 
-                for key, value in content["diffs"].items():
-                    for diff in content["diffs"][key]:
-                        if key not in diffs:
-                            diffs[key] = []
-                        diffs[key].append(diff)
+            for tab, value in content["diffs"].items():
+                #only append diffs which exists posted tab
+                if tab in request.json["columns"]:
+                    diff_columns = content["columns"][tab]
+                    client_columns = request.json["columns"][tab]
+                    for diff in content["diffs"][tab]:
+                        if diff_columns == client_columns:
+                            diffs[tab].append(diff)
+                        else:
+                            transformed_diff = {}
+                            for typ in ["added", "modified", "deleted"]:
+                                transformed_diff[typ] = [transform_data(diff_columns, client_columns, d) for d in diff[typ]]
+                            diffs[tab].append(transformed_diff)
 
-        if content_subtype == 'subtypes':
-            return jsonify({"success": False}), 500
-
-        new_change_id = max_change_id + 1
-        current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s AND change_id=%s"
-
+        latest_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s order by change_id DESC"
         if content_subtype is None:
-            current_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s AND change_id=%s"
+            latest_content_query = "SELECT content FROM sd_contents WHERE type=%s AND subtype is %s AND desa_id=%s order by change_id DESC"
 
-        cur.execute(current_content_query, (content_type, content_subtype, desa_id, client_change_id))
-        cursor_current_content = cur.fetchone()
+        cur.execute(latest_content_query, (content_type, content_subtype, desa_id))
+        latest_content_row = cur.fetchone()
 
-        if cursor_current_content is None:
-            current_content = {}
-            current_content["data"] = {}
-            current_content["columns"] = request.json["columns"]
+        if latest_content_row is None:
+            latest_content = {}
+            latest_content["data"] = {}
+            latest_content["columns"] = request.json["columns"]
         else:
-            current_content = json.loads(cursor_current_content[0])
+            latest_content = json.loads(latest_content_row[0])
 
         merge_method = None
         return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
         
-        if isinstance(current_content["data"], list) and content_type == "penduduk":
+        if isinstance(latest_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
             #todo: merge diffs columns
-            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], None, current_content["data"])
+            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], None, latest_content["data"])
         else:
             for tab, new_columns in request.json["columns"].items():
                 
-                if tab not in new_content['data']:
-                    new_content['data'][tab] = []
-                
-                if tab not in new_content['diffs']:
-                    new_content['diffs'][tab] = []
-                    
-                if tab not in current_content["data"]:
-                    current_content["data"][tab]=[]
-                    current_content["columns"][tab]=None
+                #Initialize so the latest content have the same tab with the posted content
+                if tab not in latest_content["columns"]:
+                    latest_content["data"][tab]=[]
+                    latest_content["columns"][tab]=new_columns
                    
                 if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
                     #Special case for client who posted data instead of diffs
                     new_content["data"][tab] = request.json["data"][tab]
 
                     #Add new diffs to show that the content is rewritten
-                    if tab not in new_content["diffs"]:
-                        new_content["diffs"][tab]=[]
                     new_content["diffs"][tab].append({"added":[], "deleted": [], "modified":[], "rewritten":True})
 
                 elif(len(new_content["diffs"][tab]) > 0):
-                    #There's diffs in the posted content for this tab, apply them to current data
-                    current_columns = current_content["columns"].get(tab, None)
+                    #There's diffs in the posted content for this tab, apply them to latest data
+                    latest_columns = latest_content["columns"][tab]
                     
-                    if current_content['columns'][tab] is None:
-                        current_content['columns'][tab] = new_columns
-                    
-                    #TODO - transform data with new columns
-                    print current_content["data"][tab][3]
-                    transformed_data = transform_data(current_content['columns'][tab], new_columns, current_content["data"][tab])
-                    print transformed_data[3]
-                    
-                    """
-                    for diff in new_content['diffs'][tab]:
-                        for index, added_diff in enumerate(diff["added"]):
-                            diff["added"][index] = transform_data(current_content['columns'][tab], new_columns, added_diff)
-                        for index,modified_diff in enumerate(diff["modified"]):
-                            diff["modified"][index] = transform_data(current_content['columns'][tab], new_columns, modified_diff)
-                    print diff
-                    """
+                    transformed_latest_data = transform_data(latest_content['columns'][tab], new_columns, latest_content["data"][tab])
+                    merged_data = merge_diffs(new_columns, new_content['diffs'][tab], latest_columns, transformed_latest_data)
 
-                    new_content["data"][tab] = merge_diffs(new_columns, new_content['diffs'][tab], current_columns, transformed_data)
+                    new_content["data"][tab] = merged_data
                     new_content['columns'][tab] = new_columns
                 else:
                     #There's no diffs in the posted content for this tab, use the old data
-                    new_content["data"][tab] = current_content["data"][tab]
+                    new_content["data"][tab] = latest_content["data"][tab]
 
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", 
             (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
