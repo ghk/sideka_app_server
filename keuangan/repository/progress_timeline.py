@@ -11,3 +11,9 @@ class ProgressTimelineRepository(BaseRepository):
         return self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \
             .all()
+
+    def delete_by_region(self, region_id):
+        self.db.session.query(self.model) \
+            .filter(self.model.fk_region_id == region_id) \
+            .delete()
+        self.db.session.commit()

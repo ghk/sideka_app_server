@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-8" style="border-right: 1px solid #ddd;">
       <div class="content-header">
         Penerimaan Desa {{ region?.name }}
       </div>
@@ -81,10 +81,7 @@
           </tfoot>
         </table>
       </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-sm-12">
+
       <div class="content-header">
         Realisasi Desa {{ region?.name }}
       </div>
@@ -140,5 +137,15 @@
         </table>
       </div>
     </div>
+    <!-- col-sm-8 -->
+
+    <div class="col-sm-4">
+      <div style="position: fixed; width: 31%;">
+        <sk-progress-timeline></sk-progress-timeline>
+      </div>
+    </div>
+    <!-- col-sm-4 -->
+    
   </div>
+  <!-- row -->
 </div>

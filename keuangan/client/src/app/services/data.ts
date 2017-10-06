@@ -80,6 +80,23 @@ export class DataService {
       .catch(this.handleError)
   } 
 
+  getProgressTimelinesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {    
+    if (regionId === '0')
+      return this.getProgressTimelines(query, progressListener);
+
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'progress/timelines/region', regionId),
+      query,
+      progressListener
+    );
+    
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
   getSpendingTypes(query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,

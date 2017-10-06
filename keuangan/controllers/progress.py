@@ -2,14 +2,17 @@ from flask import Blueprint, jsonify, request
 from keuangan import db
 from keuangan.models import ProgressRecapitulationModelSchema, ProgressTimelineModelSchema
 from keuangan.repository import RegionRepository, ProgressRecapitulationRepository, ProgressTimelineRepository
-from keuangan.helpers import QueryHelper, Generator
+from keuangan.repository import SiskeudesSppRinciRepository, SiskeudesPenerimaanRinciRepository
+from keuangan.helpers import QueryHelper, Generator, ProgressTimelineTransformer
+from datetime import datetime
 
 
 app = Blueprint('progress', __name__)
 region_repository = RegionRepository(db)
 progress_recapitulation_repository = ProgressRecapitulationRepository(db)
 progress_timeline_repository = ProgressTimelineRepository(db)
-
+siskeudes_spp_rinci_repository = SiskeudesSppRinciRepository(db)
+siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
 
 @app.route('/progress/recapitulations', methods=['GET'])
 def get_progress_recapitulations():
@@ -58,12 +61,14 @@ def get_progress_timelines_by_region(region_id):
 
 @app.route('/progress/timelines/generate', methods=['GET'])
 def generate_progress_timelines():
+    year = datetime.now().year
     regions = region_repository.all()
-    months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
     for region in regions:
-        for month in months:
-            pt = Generator.generate_progress_timeline()
-            pt.month = month
-            pt.fk_region_id = region.id
-            db.session.add(pt)
+        progress_timeline_repository.delete_by_region(region.id)
+        penerimaan_rincis = siskeudes_penerimaan_rinci_repository.get_by_region(region.id)
+        spp_rincis = siskeudes_spp_rinci_repository.get_by_region(region.id)
+        pts = ProgressTimelineTransformer.transform(penerimaan_rincis, spp_rincis, year, region)
+        db.session.add_all(pts)
+
     db.session.commit()
