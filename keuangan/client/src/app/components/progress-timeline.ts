@@ -69,19 +69,19 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
         let transferredDdsDataset = {
             label: 'Penyaluran DDS',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [null, null, null, null, null, null, null, null, null, null, null, null]
         };
         let transferredAddDataset = {
             label: 'Penyaluran ADD',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [null, null, null, null, null, null, null, null, null, null, null, null]
         };
         let transferredPbhDataset = {
             label: 'Penyaluran PBH',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [null, null, null, null, null, null, null, null, null, null, null, null]
         };
         let realizedSpendingDataset = {
             label: 'Realisasi Desa',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            data: [null, null, null, null, null, null, null, null, null, null, null, null]
         }
 
         this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
@@ -94,7 +94,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
                     transferredAddDataset.data[result.month - 1] += result.transferred_add;
                     transferredPbhDataset.data[result.month - 1] += result.transferred_pbh;
                     realizedSpendingDataset.data[result.month - 1] += result.realized_spending;
-                })
+                })                
                 this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
                 this.rDatasets = [realizedSpendingDataset];
             },
@@ -104,7 +104,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
     }
-
+   
     progressListener(progress: Progress): void {
         this.progress = progress;
     }

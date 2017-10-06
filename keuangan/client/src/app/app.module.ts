@@ -40,7 +40,8 @@ import { SharedService } from './services/shared';
     RouterModule.forRoot([
       { path: '', redirectTo: 'progress/region/0', pathMatch: 'full' },
       { path: 'progress/region/:regionId', component: ProgressComponent }, 
-      { path: 'spending/region/:regionId', component: SpendingComponent }
+      { path: 'spending/region/:regionId', component: SpendingComponent },
+      { path: '**', redirectTo: 'progress/region/0' }
     ]),
   ],
   providers: [

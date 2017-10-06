@@ -13,11 +13,14 @@
                 <th class="money" style="text-align: center" colspan="2"> {{ spendingType.name }}</th>
               </ng-container>
             </tr>
-            <tr>
+            <!--
+            <tr>              
               <ng-container *ngFor="let spendingType of spendingTypes">
                 <th class="money" style="text-align: center">Anggaran</th>
                 <th class="money" style="text-align: center">Realisasi</th>
               </ng-container>
+            </tr>
+            -->
           </thead>
           <tbody>
             <tr *ngFor="let entity of entities">
@@ -25,8 +28,8 @@
                 <a [routerLink]="['/spending/region', entity[0].id]"><span>{{ entity[0].name }}</span></a>
               </td>
               <ng-container *ngFor="let data of entity[1]">
-                <td class="money">
-                  <div style="float:right;">{{ data | number:'3.0-0' }} </div>
+                <td class="money" colspan="2">
+                  <div class="money">{{ data | number:'3.0-0' }} </div>
                   <div class="bar-percent"> </div>
                 </td>
               </ng-container>

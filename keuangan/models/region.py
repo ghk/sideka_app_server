@@ -7,6 +7,7 @@ class Region(BaseModel):
     __tablename__ = 'regions'
     id = db.Column(db.String, primary_key=True)
     desa_id = db.Column(db.Integer)
+    siskeudes_code = db.Column(db.String)
     name = db.Column(db.Text)
     type = db.Column(db.Integer, nullable=False, default=False)
     domain = db.Column(db.Text)

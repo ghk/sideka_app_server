@@ -1,3 +1,3 @@
 from generator import Generator
 from query import QueryHelper
-from transformer import ContentTransformer
+from transformer import ContentTransformer, SpendingRecapitulationTransformer

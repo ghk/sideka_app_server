@@ -17,21 +17,21 @@
             <li><a href="/bhpr/33">Bagi Hasil PDRD</a></li>
           </ul>
         </li>
-        <li routerLinkActive="active">
+        <li [ngClass]="{'active': state === 'progress' ? true : false}">
           <a routerLink="/progress/region/{{region?.id}}">Pencapaian</a>
         </li>
-        <li routerLinkActive="active">
+        <li [ngClass]="{'active': state === 'spending' ? true : false}">
           <a routerLink="/spending/region/{{region?.id}}">Belanja</a>
         </li>
       </ul>
       <ul class="nav navbar-nav nav-region">
-        <li class="active">
+        <li [ngClass]="{'active': region?.id === '0' ? true : false}">
           <a routerLink="/{{state}}/region/0">DESA PRIORITAS</a>
         </li>
         <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}">
           <div class="gt hidden-xs">→</div>
         </li>
-        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}">
+        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}" [ngClass]="{'active': region?.id !== '0' ? true : false}">
           <a routerLink="/{{state}}/region/{{region?.id}}">{{region?.name}}</a>
         </li>
       </ul>      

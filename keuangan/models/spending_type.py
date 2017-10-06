@@ -6,6 +6,7 @@ from base import BaseModel
 class SpendingType(BaseModel):
     __tablename__ = 'spending_types'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
 
 

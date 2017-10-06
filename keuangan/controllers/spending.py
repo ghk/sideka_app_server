@@ -1,12 +1,14 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
 from keuangan.models import SpendingType, SpendingTypeModelSchema, SpendingRecapitulationModelSchema
-from keuangan.repository import RegionRepository, SpendingTypeRepository, SpendingRecapitulationRepository
-from keuangan.helpers import QueryHelper, Generator
-
+from keuangan.repository import RegionRepository, SpendingTypeRepository, SiskeudesPenganggaranRepository
+from keuangan.repository import SpendingRecapitulationRepository
+from keuangan.helpers import QueryHelper, SpendingRecapitulationTransformer
+from datetime import datetime
 
 app = Blueprint('spending', __name__)
 region_repository = RegionRepository(db)
+sp_repository = SiskeudesPenganggaranRepository(db)
 st_repository = SpendingTypeRepository(db)
 sr_repository = SpendingRecapitulationRepository(db)
 
@@ -21,12 +23,14 @@ def get_spending_types():
 
 @app.route('/spending/types/generate', methods=['GET'])
 def generate_spending_types():
-    spending_types = ['Pendapatan', 'Infrastruktur', 'Ekonomi dan Pembinaan Masyarakat',
-                      'Pendidikan dan Pelatihan', 'Belanja Pegawai', 'Pemerintahan Umum',
-                      'Pembangunan Kantor Desa']
+    spending_types = [('19.16.01', 'Penyelengaraan Pemerintahan Desa'),
+                      ('19.16.02', 'Pelaksanaan Pembangunan Desa'),
+                      ('19.16.03', 'Pembinaan Kemasyarakatan'),
+                      ('19.16.04', 'Pemberdayaan Masyarakat')]
     for spending_type in spending_types:
         st = SpendingType()
-        st.name = spending_type
+        st.code = spending_type[0];
+        st.name = spending_type[1];
         db.session.add(st)
     db.session.commit()
 
@@ -47,12 +51,12 @@ def get_spending_recapitulations_count():
 
 @app.route('/spending/recapitulations/generate', methods=['GET'])
 def generate_spending_recapitulations():
+    year = datetime.now().year
     regions = region_repository.all()
-    spending_types = db.session.query(SpendingType).all()
+    spending_types = st_repository.all()
     for region in regions:
-        for spending_type in spending_types:
-            sr = Generator.generate_spending_recapitulations()
-            sr.fk_region_id = region.id
-            sr.fk_type_id = spending_type.id
-            db.session.add(sr)
+        sr_repository.delete_by_region(region.id)
+        anggarans = sp_repository.get_by_region(region.id)
+        srs = SpendingRecapitulationTransformer.transform(anggarans, year, region, spending_types)
+        db.session.add_all(srs)
     db.session.commit()
