@@ -317,7 +317,6 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             latest_content["columns"] = request.json["columns"]
         else:
             latest_content = json.loads(latest_content_row[0])
-        print cur, content_type, content_subtype, desa_id, client_change_id, request.json["columns"]
         diffs = get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, request.json["columns"])
         return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
         
@@ -397,7 +396,6 @@ def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, cli
         for tab, value in content["diffs"].items():
             #only append diffs which exists posted tab
             if tab in client_columns:
-                print content
                 diff_tab_columns = content["columns"][tab]
                 client_tab_columns = client_columns[tab]
                 for diff in content["diffs"][tab]:
