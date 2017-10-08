@@ -246,8 +246,12 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         change_id = row[1]
         api_version = row[2]
 
-        return_data = {"success": True, "change_id": change_id, "api_version": api_version, "columns": content["columns"] }
 
+	if api_version == "1.0":
+	    v1_columns = ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pendidikan","agama","status_kawin","pekerjaan","pekerjaan_ped","kewarganegaraan","kompetensi","no_telepon","email","no_kitas","no_paspor","golongan_darah","status_penduduk","status_tinggal","kontrasepsi","difabilitas","no_kk","nama_ayah","nama_ibu","hubungan_keluarga","nama_dusun","rw","rt","alamat_jalan"]
+       	    return jsonify({"success": True, "change_id": 0, "api_version": api_version, "columns": v1_columns, "data":content["data"]})
+
+        return_data = {"success": True, "change_id": change_id, "api_version": api_version, "columns": content["columns"]}
         if client_change_id == 0:
             return_data["data"] = content["data"]
         elif change_id == client_change_id:
@@ -257,9 +261,6 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             return_data["diffs"] = diffs
 
         return jsonify(return_data)
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
