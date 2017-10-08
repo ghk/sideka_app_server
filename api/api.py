@@ -298,7 +298,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         #Initialize new content to be saved
         for tab, columns in request.json["columns"].items():
             new_content["data"][tab] = []
-            new_content["columns"][tab] = tab
+            new_content["columns"][tab] = columns
             if "diffs" in request.json and tab in request.json["diffs"]:
                 new_content["diffs"][tab] = request.json["diffs"][tab]
             else:
@@ -324,7 +324,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         if isinstance(latest_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
             #todo: merge diffs columns
-            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], latest_content["data"])
+            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], [])
         else:
             for tab, new_columns in request.json["columns"].items():
                 
@@ -409,7 +409,7 @@ def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, cli
                         for typ in ["added", "modified", "deleted"]:
                             transformed_diff[typ] = [transform_data(diff_columns, client_tab_columns, d) for d in diff[typ]]
                         diffs[tab].append(transformed_diff)
-    return tab
+    return diffs
 
 def transform_data(from_columns, to_columns, data):
     if from_columns == to_columns:
