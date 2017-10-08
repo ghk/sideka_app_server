@@ -330,8 +330,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                 
                 #Initialize so the latest content have the same tab with the posted content
                 if tab not in latest_content["columns"]:
-                    latest_content["data"][tab]=[]
                     latest_content["columns"][tab]=new_columns
+                if tab not in latest_content["data"]:
+                    latest_content["data"][tab]=[]
                    
                 if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
                     #Special case for client who posted data instead of diffs
