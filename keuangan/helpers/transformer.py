@@ -1,5 +1,6 @@
 import simplejson as json
-from keuangan.models import SpendingRecapitulation
+from keuangan.models import SpendingRecapitulation, ProgressTimeline
+from datetime import date
 
 class ContentTransformer:
 
@@ -50,5 +51,54 @@ class SpendingRecapitulationTransformer:
                 sr.budgeted = budgeted
 
             result.append(sr)
+
+        return result
+
+
+class ProgressTimelineTransformer:
+
+    @staticmethod
+    def transform(penerimaan_rincis, spp_rincis, year, region):
+        result = []
+        max_month = 1
+        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        data = {}
+
+        for month in months:
+            pt = ProgressTimeline()
+            pt.year = year
+            pt.month = month
+            pt.fk_region_id = region.id
+            pt.transferred_dds = 0
+            pt.transferred_add = 0
+            pt.transferred_pbh = 0
+            pt.realized_spending = 0
+            data[month] = pt
+
+        for rinci in penerimaan_rincis:
+            month = rinci.penerimaan.tanggal.month
+            if (max_month < month):
+                max_month = month
+
+            for mon in range(month, 12, 1):
+                sumber_dana = str(rinci.sumber_dana).strip()
+                if sumber_dana == 'DDS':
+                    data[mon].transferred_dds += rinci.nilai
+                elif sumber_dana == 'ADD':
+                    data[mon].transferred_add += rinci.nilai
+                elif sumber_dana == 'PBH':
+                    data[mon].transferred_pbh += rinci.nilai
+
+        for rinci in spp_rincis:
+            month = rinci.spp.tanggal.month
+            if (max_month < month):
+                max_month = month
+
+            for mon in range(month, 12, 1):
+                data[mon].realized_spending += rinci.nilai
+
+        for key, datum in data.iteritems():
+            if (key <= max_month):
+                result.append(datum)
 
         return result

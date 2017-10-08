@@ -4,6 +4,7 @@ import { Progress } from 'angular-progress-http';
 import { BaseChartDirective } from 'ng2-charts/ng2-charts';
 
 import { DataService } from '../services/data';
+import { SharedService} from '../services/shared';
 import { Query } from '../models/query';
 
 @Component({
@@ -13,8 +14,7 @@ import { Query } from '../models/query';
 
 export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
-    @Input() type: string;
-
+    region: any;
     private _tDatasets = new BehaviorSubject<any[]>([]);
     private _rDatasets = new BehaviorSubject<any[]>([]);
 
@@ -59,11 +59,18 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
     progress: Progress;
 
     constructor(
-        private _zone: NgZone,
-        private _dataService: DataService
+        private _dataService: DataService,
+        private _sharedService: SharedService
     ) { }
 
-    ngOnInit(): void {
+    ngOnInit(): void {       
+        this._sharedService.getRegion().subscribe(region => {
+            this.region = region;
+            this.getData();
+        });
+    }
+
+    getData(): void {
         let query: Query = {
         };
 
@@ -87,7 +94,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
         this.rDatasets = [realizedSpendingDataset];
 
-        this._dataService.getProgressTimelines(query, this.progressListener.bind(this)).subscribe(
+        this._dataService.getProgressTimelinesByRegion(this.region.id, query, this.progressListener.bind(this)).subscribe(
             results => {
                 results.forEach(result => {
                     transferredDdsDataset.data[result.month - 1] += result.transferred_dd;

@@ -21,6 +21,8 @@ class SiskeudesPenerimaanRinci(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
+    penerimaan = db.relationship('SiskeudesPenerimaan', primaryjoin='SiskeudesPenerimaan.no == SiskeudesPenerimaanRinci.no_tbp', foreign_keys=[no_tbp], lazy='select')
+
 
 class SiskeudesPenerimaanRinciModelSchema(ma.ModelSchema):
     class Meta:
