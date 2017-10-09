@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 from keuangan import db
-from keuangan.models import SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanRinciModelSchema
+from keuangan.models import SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanModelSchemaIso, SiskeudesPenerimaanRinciModelSchema
 from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesPenerimaanRepository, SiskeudesPenerimaanRinciRepository
 from keuangan.helpers import QueryHelper, ContentTransformer
@@ -17,7 +17,7 @@ siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
 def get_siskeudes_penerimaans():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = siskeudes_penerimaan_repository.all(page_sort_params)
-    result = SiskeudesPenerimaanModelSchema(many=True).dump(entities)
+    result = SiskeudesPenerimaanModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
@@ -30,7 +30,7 @@ def get_siskeudes_penerimaans_count():
 @app.route('/siskeudes/penerimaans/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_penerimaans_by_region(region_id):
     entities = siskeudes_penerimaan_repository.get_by_region(region_id)
-    result = SiskeudesPenerimaanModelSchema(many=True).dump(entities)
+    result = SiskeudesPenerimaanModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 

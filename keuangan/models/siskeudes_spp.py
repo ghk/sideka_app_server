@@ -2,7 +2,7 @@ from keuangan import db
 from keuangan import ma
 from base import BaseModel
 from region import RegionModelSchema
-from marshmallow import fields
+
 
 class SiskeudesSpp(BaseModel):
     __tablename__ = 'siskeudes_spps'
@@ -27,8 +27,16 @@ class SiskeudesSppModelSchema(ma.ModelSchema):
         model = SiskeudesSpp
         include_fk = True
 
+    tanggal = ma.DateTime(format='%d/%m/%Y')
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
 
+
+class SiskeudesSppModelSchemaIso(ma.ModelSchema):
+    class Meta:
+        model = SiskeudesSpp
+        include_fk = True
+
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
 
 # class SiskeudesSppSchema(ma.Schema):
 #     pid = fields.Integer()

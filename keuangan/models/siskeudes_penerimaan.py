@@ -35,4 +35,13 @@ class SiskeudesPenerimaanModelSchema(ma.ModelSchema):
         model = SiskeudesPenerimaan
         include_fk = True
 
+    tanggal = ma.DateTime(format='%d/%m/%Y')
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+
+
+class SiskeudesPenerimaanModelSchemaIso(ma.ModelSchema):
+    class Meta:
+        model = SiskeudesPenerimaan
+        include_fk = True
+
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))

@@ -33,4 +33,13 @@ class SiskeudesSppBuktiModelSchema(ma.ModelSchema):
         model = SiskeudesSppBukti
         include_fk = True
 
+    tanggal = ma.DateTime(format='%d/%m/%Y')
+    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+
+
+class SiskeudesSppBuktiModelSchemaIso(ma.ModelSchema):
+    class Meta:
+        model = SiskeudesSppBukti
+        include_fk = True
+
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))

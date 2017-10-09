@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 from keuangan import db
-from keuangan.models import SiskeudesSppModelSchema, SiskeudesSppBuktiModelSchema, SiskeudesSppRinciModelSchema
+from keuangan.models import SiskeudesSppModelSchema, SiskeudesSppModelSchemaIso, SiskeudesSppRinciModelSchema
+from keuangan.models import SiskeudesSppBuktiModelSchema, SiskeudesSppBuktiModelSchemaIso
 from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesSppRepository, SiskeudesSppBuktiRepository, SiskeudesSppRinciRepository
 from keuangan.helpers import QueryHelper, ContentTransformer
@@ -31,7 +32,7 @@ def get_siskeudes_spps_count():
 @app.route('/siskeudes/spps/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_spps_by_region(region_id):
     entities = siskeudes_spp_repository.get_by_region(region_id)
-    result = SiskeudesSppModelSchema(many=True).dump(entities)
+    result = SiskeudesSppModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
@@ -39,7 +40,7 @@ def get_siskeudes_spps_by_region(region_id):
 def get_siskeudes_spps_buktis():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = siskeudes_spp_bukti_repository.all(page_sort_params)
-    result = SiskeudesSppBuktiModelSchema(many=True).dump(entities)
+    result = SiskeudesSppBuktiModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
@@ -52,7 +53,7 @@ def get_siskeudes_spps_buktis_count():
 @app.route('/siskeudes/spps/buktis/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_spps_buktis_by_region(region_id):
     entities = siskeudes_spp_bukti_repository.get_by_region(region_id)
-    result = SiskeudesSppBuktiModelSchema(many=True).dump(entities)
+    result = SiskeudesSppBuktiModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
