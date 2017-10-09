@@ -5,7 +5,7 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
-from phpass import PasswordHash
+from common.phpass import PasswordHash
 
 import MySQLdb
 import os
@@ -71,7 +71,7 @@ def login():
         logs(user_id, desa_id, token, "login", None, None)
         return jsonify(
             {'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token, 'user_id': user_id,
-             'user_nicename': user_nicename, 'api_version': app.config["API_VERSION"]})
+             'user_nicename': user_nicename, 'apiVersion': app.config["API_VERSION"]})
     except Exception as e:
         print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
@@ -246,7 +246,11 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         change_id = row[1]
         api_version = row[2]
 
-        return_data = {"success": True, "change_id": change_id, "api_version": api_version, "columns": content["columns"] }
+	if api_version == "1.0":
+	    content["columns"] = ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pendidikan","agama","status_kawin","pekerjaan","pekerjaan_ped","kewarganegaraan","kompetensi","no_telepon","email","no_kitas","no_paspor","golongan_darah","status_penduduk","status_tinggal","kontrasepsi","difabilitas","no_kk","nama_ayah","nama_ibu","hubungan_keluarga","nama_dusun","rw","rt","alamat_jalan"]
+
+        return_data = {"success": True, "changeId": change_id, "apiVersion": api_version, "columns": content["columns"] }
+        return_data["change_id"] = change_id #TODO: remove this later
 
         if client_change_id == 0:
             return_data["data"] = content["data"]
@@ -257,9 +261,6 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             return_data["diffs"] = diffs
 
         return jsonify(return_data)
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -273,7 +274,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         client_change_id = 0
         result = None
 
-        if request.args.get("change_id", 0) is not None:
+        if request.args.get("changeId", 0) is not None:
             client_change_id = int(request.args.get("changeId", "0"))
 
         if user_id is None:
@@ -297,7 +298,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         #Initialize new content to be saved
         for tab, columns in request.json["columns"].items():
             new_content["data"][tab] = []
-            new_content["columns"][tab] = tab
+            new_content["columns"][tab] = columns
             if "diffs" in request.json and tab in request.json["diffs"]:
                 new_content["diffs"][tab] = request.json["diffs"][tab]
             else:
@@ -317,21 +318,21 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             latest_content["columns"] = request.json["columns"]
         else:
             latest_content = json.loads(latest_content_row[0])
-
         diffs = get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, request.json["columns"])
-        return_data = {"success": True, "change_id": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
+        return_data = {"success": True, "changeId": new_change_id, "diffs": diffs, "columns": request.json["columns"] }
         
         if isinstance(latest_content["data"], list) and content_type == "penduduk":
             #v1 penduduk content
             #todo: merge diffs columns
-            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], latest_content["data"])
+            new_content["data"]["penduduk"] = merge_diffs(new_content["columns"]["penduduk"], new_content["diffs"]["penduduk"], [])
         else:
             for tab, new_columns in request.json["columns"].items():
                 
                 #Initialize so the latest content have the same tab with the posted content
                 if tab not in latest_content["columns"]:
-                    latest_content["data"][tab]=[]
                     latest_content["columns"][tab]=new_columns
+                if tab not in latest_content["data"]:
+                    latest_content["data"][tab]=[]
                    
                 if "data" in request.json and tab in request.json["data"] and content_type in ["perencanaan", "penganggaran", "penerimaan", "spp"]:
                     #Special case for client who posted data instead of diffs
@@ -357,7 +358,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
             (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
         logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
+
         return_data['success'] = True
+        return_data["change_id"] = return_data["changeId"] #TODO: remove this later
         
         return jsonify(return_data)
     finally:
@@ -375,7 +378,7 @@ def get_all_desa():
     finally:
         cur.close()
 
-def get_diffs_newer_than_client(curr, content_type, content_subtype, desa_id, client_change_id, client_columns):
+def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, client_columns):
     diffs = {}
     for tab, columns in client_columns.items():
         diffs[tab] = []
@@ -407,7 +410,7 @@ def get_diffs_newer_than_client(curr, content_type, content_subtype, desa_id, cl
                         for typ in ["added", "modified", "deleted"]:
                             transformed_diff[typ] = [transform_data(diff_columns, client_tab_columns, d) for d in diff[typ]]
                         diffs[tab].append(transformed_diff)
-    return tab
+    return diffs
 
 def transform_data(from_columns, to_columns, data):
     if from_columns == to_columns:
