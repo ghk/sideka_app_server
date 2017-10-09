@@ -80,7 +80,7 @@ class ProgressTimelineTransformer:
             if (max_month < month):
                 max_month = month
 
-            for mon in range(month, 12, 1):
+            for mon in range(month, 13, 1):
                 sumber_dana = str(rinci.sumber_dana).strip()
                 if sumber_dana == 'DDS':
                     data[mon].transferred_dds += rinci.nilai
@@ -94,7 +94,7 @@ class ProgressTimelineTransformer:
             if (max_month < month):
                 max_month = month
 
-            for mon in range(month, 12, 1):
+            for mon in range(month, 13, 1):
                 data[mon].realized_spending += rinci.nilai
 
         for key, datum in data.iteritems():

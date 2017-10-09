@@ -97,7 +97,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         this._dataService.getProgressTimelinesByRegion(this.region.id, query, this.progressListener.bind(this)).subscribe(
             results => {
                 results.forEach(result => {
-                    transferredDdsDataset.data[result.month - 1] += result.transferred_dd;
+                    transferredDdsDataset.data[result.month - 1] += result.transferred_dds;
                     transferredAddDataset.data[result.month - 1] += result.transferred_add;
                     transferredPbhDataset.data[result.month - 1] += result.transferred_pbh;
                     realizedSpendingDataset.data[result.month - 1] += result.realized_spending;
