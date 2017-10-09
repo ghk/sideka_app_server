@@ -1,11 +1,9 @@
 from flask import Blueprint, jsonify, request
-from datetime import datetime
 from keuangan import db
-from keuangan.models import SiskeudesPenganggaranModelSchema
-from keuangan.models import SiskeudesKegiatanModelSchema
+from keuangan.models import SiskeudesPenganggaranModelSchema, SiskeudesPenganggaranSchema
 from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesPenganggaranRepository, SiskeudesKegiatanRepository
-from keuangan.helpers import QueryHelper, ContentTransformer
+from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('penganggaran', __name__)
 region_repository = RegionRepository(db)
@@ -37,24 +35,6 @@ def get_siskeudes_penganggarans_by_region(region_id):
 
 @app.route('/siskeudes/penganggarans/fetch', methods=['GET'])
 def fetch_siskeudes_penganggarans():
-    year = str(datetime.now().year)
-    regions = region_repository.all()
-
-    for region in regions:
-        siskeudes_penganggaran_repository.delete_by_region(region.id)
-        siskeudes_kegiatan_repository.delete_by_region(region.id)
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
-        contents = ContentTransformer.transform(sd_content.content)
-
-        # Hack
-        for content_rab in contents['rab']:
-            if not bool(content_rab['perubahan'] and content_rab['perubahan'].strip()):
-                content_rab['perubahan'] = None
-
-        sps = SiskeudesPenganggaranModelSchema(many=True).load(contents['rab'])
-        sks = SiskeudesKegiatanModelSchema(many=True).load(contents['kegiatan'])
-        siskeudes_penganggaran_repository.add_all(sps.data, region, year)
-        siskeudes_kegiatan_repository.add_all(sks.data, region, year)
-
+    SiskeudesFetcher.fetch_penganggarans()
     return jsonify({'success': True})
 

@@ -8,6 +8,7 @@
     "start:hmr": "ng serve --hmr -e=hmr",
     "start:ckan": "ng serve --hmr -e=ckan --host 10.10.10.107",
     "build": "ng build",
+    "build:prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

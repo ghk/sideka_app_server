@@ -1,3 +1,4 @@
+from admin import app as AdminController
 from kegiatan import app as KegiatanController
 from penerimaan import app as PenerimaanController
 from penganggaran import app as PenganggaranController

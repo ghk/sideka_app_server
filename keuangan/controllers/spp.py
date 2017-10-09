@@ -1,11 +1,10 @@
 from flask import Blueprint, jsonify, request
-from datetime import datetime
 from keuangan import db
-from keuangan.models import SiskeudesSppModelSchema, SiskeudesSppModelSchemaIso, SiskeudesSppRinciModelSchema
-from keuangan.models import SiskeudesSppBuktiModelSchema, SiskeudesSppBuktiModelSchemaIso
+from keuangan.models import SiskeudesSppModelSchema, SiskeudesSppBuktiModelSchema, SiskeudesSppRinciModelSchema
+from keuangan.models import SiskeudesSppModelSchemaIso, SiskeudesSppBuktiModelSchemaIso
 from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesSppRepository, SiskeudesSppBuktiRepository, SiskeudesSppRinciRepository
-from keuangan.helpers import QueryHelper, ContentTransformer
+from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('spp', __name__)
 region_repository = RegionRepository(db)
@@ -80,23 +79,5 @@ def get_siskeudes_spps_rincis_by_region(region_id):
 
 @app.route('/siskeudes/spps/fetch', methods=['GET'])
 def fetch_siskeudes_spps():
-    year = str(datetime.now().year)
-    regions = region_repository.all()
-
-    for region in regions:
-        # delete all spp, spp bukti and spp rinci
-        siskeudes_spp_repository.delete_by_region(region.id)
-        siskeudes_spp_bukti_repository.delete_by_region(region.id)
-        siskeudes_spp_rinci_repository.delete_by_region(region.id)
-
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
-        contents = ContentTransformer.transform(sd_content.content)
-
-        spps = SiskeudesSppModelSchema(many=True).load(contents['spp'])
-        sppbs = SiskeudesSppBuktiModelSchema(many=True).load(contents['spp_bukti'])
-        spprs = SiskeudesSppRinciModelSchema(many=True).load(contents['spp_rinci'])
-        siskeudes_spp_repository.add_all(spps.data, region, year)
-        siskeudes_spp_bukti_repository.add_all(sppbs.data, region, year)
-        siskeudes_spp_rinci_repository.add_all(spprs.data, region, year)
-
+    SiskeudesFetcher.fetch_spps()
     return jsonify({'success': True})
