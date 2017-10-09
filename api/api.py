@@ -5,7 +5,7 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
-from phpass import PasswordHash
+from common.phpass import PasswordHash
 
 import MySQLdb
 import os
