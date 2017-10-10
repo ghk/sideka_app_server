@@ -36,6 +36,7 @@ def get_siskeudes_penerimaans_by_region(region_id):
 @app.route('/siskeudes/penerimaans/fetch', methods=['GET'])
 def fetch_siskeudes_penerimaans():
     SiskeudesFetcher.fetch_penerimaans()
+    db.session.commit()
     return jsonify({'success': True})
 
 

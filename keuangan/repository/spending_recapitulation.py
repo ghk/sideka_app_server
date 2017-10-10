@@ -7,8 +7,12 @@ class SpendingRecapitulationRepository(BaseRepository):
         self.db = db
         self.model = SpendingRecapitulation
 
+    def get_by_region(self, region_id):
+        return self.db.session.query(self.model) \
+            .filter(self.model.fk_region_id == region_id) \
+            .all()
+
     def delete_by_region(self, region_id):
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \
             .delete()
-        self.db.session.commit()

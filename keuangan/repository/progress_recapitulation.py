@@ -15,4 +15,3 @@ class ProgressRecapitulationRepository(BaseRepository):
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \
             .delete()
-        self.db.session.commit()

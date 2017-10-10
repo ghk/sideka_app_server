@@ -1,0 +1,18 @@
+<div *ngIf="progress?.percentage < 100" style="margin: auto; width: 50%; height:100vh; text-align:center; padding-top:50%;">
+    <img src="/assets/images/loading.gif">
+    <br>
+    <br> Memuat data...
+  </div>
+  
+  <div *ngIf="progress?.percentage === 100">
+    <div class="content-header">
+      Alokasi Anggaran {{ region?.name }}
+    </div>
+    <br />
+    <div>
+      <canvas baseChart [data]="sData" [labels]="labels" [options]="options" [chartType]="chartType" [colors]="colors">
+      </canvas>
+    </div>
+    <br />    
+  </div>
+  

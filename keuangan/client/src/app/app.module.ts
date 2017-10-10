@@ -15,6 +15,7 @@ import { ProgressDetailComponent } from './components/progress-detail';
 import { SpendingComponent } from './components/spending';
 import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
 import { SpendingDetailComponent } from './components/spending-detail';
+import { SpendingChartComponent } from './components/spending-chart';
 
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
@@ -29,7 +30,8 @@ import { SharedService } from './services/shared';
     ProgressDetailComponent,
     SpendingComponent,
     SpendingRecapitulationComponent,
-    SpendingDetailComponent
+    SpendingDetailComponent,
+    SpendingChartComponent
   ],
   imports: [
     BrowserModule,

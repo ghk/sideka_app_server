@@ -42,6 +42,13 @@ def get_spending_recapitulations_count():
     return jsonify(result)
 
 
+@app.route('/spending/recapitulations/region/<string:region_id>', methods=['GET'])
+def get_spending_recapitulations_by_region(region_id):
+    entities = spending_recapitulation_repository.get_by_region(region_id)
+    result = SpendingRecapitulationModelSchema(many=True).dump(entities)
+    return jsonify(result.data)
+
+
 @app.route('/spending/recapitulations/generate', methods=['GET'])
 def generate_spending_recapitulations():
     spending_recapitulations = Generator.generate_spending_recapitulations()

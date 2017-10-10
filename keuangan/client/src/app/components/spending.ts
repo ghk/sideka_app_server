@@ -29,8 +29,6 @@ export class SpendingComponent implements OnInit, OnDestroy {
             this.regionId = params['regionId'];     
             if (!this._sharedService.region || this._sharedService.region.id !== this.regionId)       
                 this._dataService.getRegion(this.regionId, null, null).subscribe(region => {
-                    console.log('spending');
-                    console.log(region);
                     this._sharedService.setRegion(region);
                 })            
         });

@@ -40,7 +40,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
             mode: 'index',
             callbacks: {
                 label: function (tooltipItem, data) {
-                    return tooltipItem.yLabel.toLocaleString('id-ID');;
+                    return tooltipItem.yLabel.toLocaleString('id-ID');
                 }
             }
         },
@@ -52,6 +52,11 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
                     }
                 }
             }]
+        },
+        elements: {
+            line: {
+                tension: 0
+            }
         }
     };
     chartType: string = 'line';
@@ -96,17 +101,33 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
         this._dataService.getProgressTimelinesByRegion(this.region.id, query, this.progressListener.bind(this)).subscribe(
             results => {
-                results.forEach(result => {
+                results.forEach(result => {                                        
                     transferredDdsDataset.data[result.month - 1] += result.transferred_dds;
                     transferredAddDataset.data[result.month - 1] += result.transferred_add;
                     transferredPbhDataset.data[result.month - 1] += result.transferred_pbh;
-                    realizedSpendingDataset.data[result.month - 1] += result.realized_spending;
+                    realizedSpendingDataset.data[result.month - 1] += result.realized_spending;                    
                 })                
+
+                this.normalizeData(transferredDdsDataset.data);
+                this.normalizeData(transferredAddDataset.data);
+                this.normalizeData(transferredPbhDataset.data);
+                this.normalizeData(realizedSpendingDataset.data);
+
                 this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
                 this.rDatasets = [realizedSpendingDataset];
             },
             error => { }
         );
+    }
+
+    normalizeData(data: number[]): void {
+        var currentValue = 0;       
+        data.forEach((datum, index) => {
+            if (datum && datum < currentValue) {
+                data[index] = currentValue
+            }
+            currentValue = data[index];            
+        })
     }
 
     ngOnDestroy(): void {

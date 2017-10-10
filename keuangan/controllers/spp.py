@@ -80,4 +80,5 @@ def get_siskeudes_spps_rincis_by_region(region_id):
 @app.route('/siskeudes/spps/fetch', methods=['GET'])
 def fetch_siskeudes_spps():
     SiskeudesFetcher.fetch_spps()
+    db.session.commit()
     return jsonify({'success': True})

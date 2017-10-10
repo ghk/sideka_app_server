@@ -15,7 +15,6 @@ class SiskeudesRepository():
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \
             .delete()
-        self.db.session.commit()
 
     def add_all(self, contents, region, year):
         #t0 = time()
@@ -26,7 +25,6 @@ class SiskeudesRepository():
             content.fk_region_id = region.id
             i += 1
             self.db.session.add(content)
-        self.db.session.commit()
         #print('\x1b[6;30;42m' + 'Total Time: ' + str(time() - t0) + ' seconds' + '\x1b[0m')
 
     def bulk_add_all(self, contents, region, year):
@@ -39,6 +37,5 @@ class SiskeudesRepository():
             i += 1
 
         self.db.session.bulk_save_objects(contents)
-        self.db.session.commit()
         #print('\x1b[6;30;42m' + 'Total Time: ' + str(time() - t0) + ' seconds' + '\x1b[0m')
 

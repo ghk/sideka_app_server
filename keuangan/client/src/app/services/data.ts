@@ -125,6 +125,23 @@ export class DataService {
       .catch(this.handleError)
   }
 
+  getSpendingRecapitulationsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    if (regionId === '0')
+      return this.getSpendingRecapitulations(query, progressListener);
+      
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'spending/recapitulations/region', regionId),
+      query,
+      progressListener
+    )
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
   getSiskeudesPenerimaanByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {    
     let request = RequestHelper.generateHttpRequest(
       this._http,

@@ -10,6 +10,7 @@ def fetch_all():
     SiskeudesFetcher.fetch_penerimaans()
     SiskeudesFetcher.fetch_penganggarans()
     SiskeudesFetcher.fetch_spps()
+    db.session.commit()
     return jsonify({'success': True})
 
 
