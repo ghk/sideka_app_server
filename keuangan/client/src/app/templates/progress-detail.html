@@ -124,7 +124,7 @@
               <td></td>              
               <td></td>
               <td class="money">{{ totalSpending | number:'3.0-0' }}</td>
-              <td></td>
+              <!-- <td></td> -->
             </tr>
           </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">
@@ -142,9 +142,7 @@
     <!-- col-sm-8 -->
 
     <div class="col-sm-4">
-      <div style="position: fixed; width: 31%;">
-        <sk-progress-timeline></sk-progress-timeline>
-      </div>
+      <sk-progress-timeline></sk-progress-timeline>
     </div>
     <!-- col-sm-4 -->
     
