@@ -1,4 +1,4 @@
-from time import time
+from keuangan.helpers import QueryHelper
 
 class SiskeudesRepository():
     def get(self, pid):
@@ -6,10 +6,10 @@ class SiskeudesRepository():
             .filter(self.model.pid == pid) \
             .first()
 
-    def get_by_region(self, region_id):
-        return self.db.session.query(self.model) \
-            .filter(self.model.fk_region_id == region_id) \
-            .all()
+    def get_by_region(self, region_id, page_sort_params=None):
+        query = self.db.session.query(self.model)
+        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
+        return query.filter(self.model.fk_region_id == region_id).all()
 
     def delete_by_region(self, region_id):
         self.db.session.query(self.model) \

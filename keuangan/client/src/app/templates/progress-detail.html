@@ -1,8 +1,13 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-8" style="border-right: 1px solid #ddd;">
+      <ul class="nav nav-tabs front-numbers">
+        <li>
+          <span class="number">DESA {{ region?.name }} <a href="region?.domain" style="font-size:14px;">Web Desa</a></span>
+        </li>
+      </ul>
       <div class="content-header">
-        Penerimaan Desa {{ region?.name }}
+        Penerimaan
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
@@ -17,7 +22,7 @@
               <th style="text-align: center">Alamat Pengirim</th>
               <th style="text-align: center">TTD Pengirim</th>
               <th style="text-align: center">Nomor Rekening</th>
-              <th style="text-align: center">Nama Bank</th> -->             
+              <th style="text-align: center">Nama Bank</th> -->
             </tr>
           </thead>
           <tbody>
@@ -61,9 +66,9 @@
           <tfoot [hidden]="progress?.percentage !== 100 && revenues.length <= 0">
             <tr class="success">
               <td><a href>Total</a></td>
-              <td></td>              
               <td></td>
-              <td class="money">{{ totalRevenue | number:'3.0-0' }}</td>              
+              <td></td>
+              <td class="money">{{ totalRevenue | number:'3.0-0' }}</td>
               <!-- <td></td>
               <td></td>
               <td></td>
@@ -85,7 +90,7 @@
       </div>
 
       <div class="content-header">
-        Realisasi Desa {{ region?.name }}
+        Realisasi
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
@@ -121,7 +126,7 @@
           <tfoot [hidden]="progress?.percentage !== 100 && spendings.length <= 0">
             <tr class="success">
               <td>Total</td>
-              <td></td>              
+              <td></td>
               <td></td>
               <td class="money">{{ totalSpending | number:'3.0-0' }}</td>
               <!-- <td></td> -->
@@ -145,7 +150,7 @@
       <sk-progress-timeline></sk-progress-timeline>
     </div>
     <!-- col-sm-4 -->
-    
+
   </div>
   <!-- row -->
 </div>

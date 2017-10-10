@@ -1,69 +1,78 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-8" style="border-right: 1px solid #ddd;">
+      <ul class="nav nav-tabs front-numbers">
+        <li>
+          <span class="number">DESA {{ region?.name }} <a href="region?.domain" style="font-size:14px;">Web Desa</a></span>
+        </li>
+      </ul>
       <div class="content-header">
-        Realisasi Desa {{ region?.name }}
+        Realisasi
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
-              <th style="text-align: center">Kode Rekening</th>
-              <th style="text-align: center">No Bidang / Kegiatan</th>
+              <th style="text-align: center">Kode</th>
               <th style="text-align: center">Uraian</th>
               <th style="text-align: center">Sumber Dana</th>
-              <th style="text-align: center">Jumlah Satuan</th>
-              <th style="text-align: center">Satuan</th>
-              <th style="text-align: center">Harga Satuan</th>
-              <th style="text-align: center">Anggaran</th>
-              <th style="text-align: center">Jumlah Satuan PAK</th>
-              <th style="text-align: center">Satuan</th>
-              <th style="text-align: center">Harga Satuan PAK</th>
-              <th style="text-align: center">Anggaran PAK</th>
-              <th style="text-align: center">Perubahan</th>
+              <ng-container *ngIf="!is_pak">
+                <th style="text-align: center">Jumlah Satuan</th>
+                <th style="text-align: center">Satuan</th>
+                <th style="text-align: center">Harga Satuan</th>
+                <th style="text-align: center">Anggaran</th>
+              </ng-container>
+              <ng-container *ngIf="is_pak">
+                <th style="text-align: center">Jumlah Satuan PAK</th>
+                <th style="text-align: center">Satuan</th>
+                <th style="text-align: center">Harga Satuan PAK</th>
+                <th style="text-align: center">Anggaran PAK</th>
+              </ng-container>
+              <!-- <th style="text-align: center">Perubahan</th> -->
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let entity of entities">
               <td>
-                <div>{{ entity.kode_rekening }}</div>
-              </td>
-              <td>
-                <div>{{ entity.kode_bidang_or_kegiatan }}</div>
-              </td>
+                <div [innerHTML]="entity.kode_rekening"></div>
+              </td>         
               <td>
                 <div [innerHTML]="entity.uraian"></div>
               </td>
               <td>
                 <div>{{ entity.sumber_dana }}</div>
               </td>
-              <td>
-                <div>{{ entity.jumlah_satuan }}</div>
-              </td>
-              <td>
-                <div>{{ entity.satuan }}</div>
-              </td>
-              <td class="money">
-                <div>{{ entity.harga_satuan | number:'3.0-0' }}</div>
-              </td>
-              <td class="money">
-                <div>{{ entity.anggaran | number:'3.0-0' }}</div>
-              </td>
-              <td>
-                <div>{{ entity.jumlah_satuan_pak }}</div>
-              </td>
-              <td>
-                <div>{{ entity.satuan }}</div>
-              </td>
-              <td class="money">
-                <div>{{ entity.harga_satuan_pak | number:'3.0-0' }}</div>
-              </td>
-              <td class="money">
-                <div>{{ entity.anggaran_pak | number:'3.0-0' }}</div>
-              </td>
-              <td class="money">
+              <ng-container *ngIf="!is_pak">
+                <td>
+                  <div>{{ entity.jumlah_satuan }}</div>
+                </td>
+                <td>
+                  <div>{{ entity.satuan }}</div>
+                </td>
+                <td class="money">
+                  <div>{{ entity.harga_satuan | number:'3.0-0' }}</div>
+                </td>
+                <td class="money">
+                  <div>{{ entity.anggaran | number:'3.0-0' }}</div>
+                </td>
+              </ng-container>
+              <ng-container *ngIf="is_pak">
+                <td>
+                  <div>{{ entity.jumlah_satuan_pak }}</div>
+                </td>
+                <td>
+                  <div>{{ entity.satuan }}</div>
+                </td>
+                <td class="money">
+                  <div>{{ entity.harga_satuan_pak | number:'3.0-0' }}</div>
+                </td>
+                <td class="money">
+                  <div>{{ entity.anggaran_pak | number:'3.0-0' }}</div>
+                </td>
+              </ng-container>
+              <!-- <td class="money">
                 <div>{{ entity.perubahan | number:'3.0-0' }}</div>
-              </td>
+              </td> -->
             </tr>
           </tbody>
           <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
