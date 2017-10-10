@@ -59,7 +59,7 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
             position: 'outside',
             precision: 2
         },
-        maintainAspectRatio: true     
+        aspectRatio: 1
     };
     chartType: string = 'pie';
 
