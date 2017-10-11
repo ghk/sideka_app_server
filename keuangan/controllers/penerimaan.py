@@ -1,10 +1,9 @@
 from flask import Blueprint, jsonify, request
-from datetime import datetime
 from keuangan import db
 from keuangan.models import SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanModelSchemaIso, SiskeudesPenerimaanRinciModelSchema
 from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesPenerimaanRepository, SiskeudesPenerimaanRinciRepository
-from keuangan.helpers import QueryHelper, ContentTransformer
+from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('penerimaan', __name__)
 region_repository = RegionRepository(db)
@@ -36,22 +35,8 @@ def get_siskeudes_penerimaans_by_region(region_id):
 
 @app.route('/siskeudes/penerimaans/fetch', methods=['GET'])
 def fetch_siskeudes_penerimaans():
-    year = str(datetime.now().year)
-    regions = region_repository.all()
-
-    for region in regions:
-        # delete all penerimaan and penerimaan rincis
-        siskeudes_penerimaan_repository.delete_by_region(region.id)
-        siskeudes_penerimaan_rinci_repository.delete_by_region(region.id)
-
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, region.desa_id)
-        contents = ContentTransformer.transform(sd_content.content)
-
-        sps = SiskeudesPenerimaanModelSchema(many=True).load(contents['tbp'])
-        sprs = SiskeudesPenerimaanRinciModelSchema(many=True).load(contents['tbp_rinci'])
-        siskeudes_penerimaan_repository.add_all(sps.data, region, year)
-        siskeudes_penerimaan_rinci_repository.add_all(sprs.data, region, year)
-
+    SiskeudesFetcher.fetch_penerimaans()
+    db.session.commit()
     return jsonify({'success': True})
 
 

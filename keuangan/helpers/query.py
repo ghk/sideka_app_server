@@ -1,8 +1,7 @@
 from sqlalchemy import asc, desc
-from sqlalchemy.orm import RelationshipProperty
+
 
 class QueryHelper:
-
     @staticmethod
     def page(query, page, per_page):
         if page <= 0:
@@ -10,7 +9,6 @@ class QueryHelper:
         if per_page <= 0:
             raise AttributeError('per_page needs to be >= 1')
         return query.limit(per_page).offset((page - 1) * per_page)
-
 
     @staticmethod
     def sort(query, model, *args):
@@ -32,14 +30,12 @@ class QueryHelper:
                 query = query.order_by(func(sub_attr))
         return query
 
-
     @staticmethod
     def build_page_query(query, page, per_page):
         if (page is not None and per_page is not None):
             return QueryHelper.page(query, int(page), int(per_page))
         else:
             return query
-
 
     @staticmethod
     def build_sort_query(query, model, sort):
@@ -50,14 +46,12 @@ class QueryHelper:
         else:
             return query
 
-
     @staticmethod
     def build_page_sort_query(query, model, page_sort_params):
         if (page_sort_params is not None):
             query = QueryHelper.build_sort_query(query, model, page_sort_params['sort'])
             query = QueryHelper.build_page_query(query, page_sort_params['page'], page_sort_params['per_page'])
         return query
-
 
     @staticmethod
     def get_page_sort_params_from_request(request):

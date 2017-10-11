@@ -1,3 +1,5 @@
-from generator import Generator
 from query import QueryHelper
-from transformer import ContentTransformer, SpendingRecapitulationTransformer, ProgressTimelineTransformer
+from generator import Generator
+from transformer import ContentTransformer, SpendingRecapitulationTransformer, \
+    ProgressTimelineTransformer, ProgressRecapitulationTransformer
+from fetcher import SiskeudesFetcher

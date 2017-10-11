@@ -8,6 +8,7 @@
     "start:hmr": "ng serve --hmr -e=hmr",
     "start:ckan": "ng serve --hmr -e=ckan --host 10.10.10.107",
     "build": "ng build",
+    "build:prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -25,7 +26,8 @@
     "@angular/router": "^4.3.6",
     "angular-progress-http": "^0.5.1",
     "bootstrap": "^3.3.7",
-    "chart.js": "^2.6.0",
+    "chart.js": "^2.7.0",
+    "chart.piecelabel.js": "^0.8.1",
     "core-js": "^2.5.0",
     "fs-jetpack": "^1.2.0",
     "jquery": "^3.2.1",

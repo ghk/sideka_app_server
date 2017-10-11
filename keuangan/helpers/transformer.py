@@ -1,9 +1,8 @@
 import simplejson as json
-from keuangan.models import SpendingRecapitulation, ProgressTimeline
-from datetime import date
+from keuangan.models import SpendingRecapitulation, ProgressTimeline, ProgressRecapitulation
+
 
 class ContentTransformer:
-
     @staticmethod
     def transform(content):
         serialized_content = json.loads(content)
@@ -23,7 +22,6 @@ class ContentTransformer:
 
 
 class SpendingRecapitulationTransformer:
-
     @staticmethod
     def transform(anggarans, year, region, spending_types):
         result = []
@@ -56,7 +54,6 @@ class SpendingRecapitulationTransformer:
 
 
 class ProgressTimelineTransformer:
-
     @staticmethod
     def transform(penerimaan_rincis, spp_rincis, year, region):
         result = []
@@ -102,3 +99,39 @@ class ProgressTimelineTransformer:
                 result.append(datum)
 
         return result
+
+
+class ProgressRecapitulationTransformer:
+    @staticmethod
+    def transform(anggarans, penerimaan_rincis, spp_rincis, year, region):
+        pr = ProgressRecapitulation()
+        pr.year = year
+        pr.fk_region_id = region.id
+        pr.budgeted_revenue = 0
+        pr.transferred_revenue = 0
+        pr.realized_spending = 0
+
+        budgeted_revenue = 0
+        budgeted_revenue_pak = 0
+
+        for rinci in penerimaan_rincis:
+            sumber_dana = str(rinci.sumber_dana).strip()
+            if sumber_dana == 'DDS' or sumber_dana == 'ADD' or sumber_dana == 'PBH':
+                pr.transferred_revenue += rinci.nilai
+
+        for rinci in spp_rincis:
+            pr.realized_spending += rinci.nilai
+
+        for anggaran in anggarans:
+            if (anggaran.kode_rekening.startswith('4.')):
+                if (anggaran.jumlah_satuan is not None and anggaran.harga_satuan is not None):
+                    budgeted_revenue += anggaran.jumlah_satuan * anggaran.harga_satuan
+                if (anggaran.jumlah_satuan_pak is not None and anggaran.harga_satuan_pak is not None):
+                    budgeted_revenue_pak += anggaran.jumlah_satuan_pak * anggaran.harga_satuan_pak
+
+        if budgeted_revenue_pak > 0:
+            pr.budgeted_revenue = budgeted_revenue_pak
+        else:
+            pr.budgeted_revenue = budgeted_revenue
+
+        return pr

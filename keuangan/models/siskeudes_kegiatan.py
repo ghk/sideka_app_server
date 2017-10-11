@@ -2,7 +2,7 @@ from keuangan import db
 from keuangan import ma
 from base import BaseModel
 from region import RegionModelSchema
-from marshmallow import fields
+from marshmallow import fields, post_load
 
 
 class SiskeudesKegiatan(BaseModel):
@@ -50,3 +50,7 @@ class SiskeudesKegiatanSchema(ma.Schema):
     pagu = fields.Decimal(allow_none=True)
     pagu_pak = fields.Decimal(allow_none=True)
     fk_region_id = fields.Integer()
+
+    @post_load
+    def make(self, data):
+        return SiskeudesKegiatan(**data)

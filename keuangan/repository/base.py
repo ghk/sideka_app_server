@@ -21,9 +21,7 @@ class BaseRepository:
 
     def add(self, entity):
         self.db.session.add(entity)
-        self.db.session.commit()
 
     def delete_all(self):
         self.db.session.query(self.model) \
             .delete()
-        self.db.session.commit()
