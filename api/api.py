@@ -66,7 +66,7 @@ def login():
             desa_name = opt[0]
 
         token = os.urandom(64).encode('hex')
-        cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, login["info"]))
+        cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, ""))
         mysql.connection.commit()
         logs(user_id, desa_id, token, "login", None, None)
         return jsonify(
