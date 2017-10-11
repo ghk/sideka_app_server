@@ -58,6 +58,7 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
         this.entities.forEach(entity => {            
             // remove trailing dot
             entity.kode_rekening = entity.kode_rekening.replace(/\.$/, '');
+            entity.kode_kegiatan = entity.kode_kegiatan.replace(/\.$/, '');
 
             if (entity.jumlah_satuan || entity.harga_satuan) {
                 entity.anggaran += entity.jumlah_satuan * entity.harga_satuan;
@@ -74,7 +75,8 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
 
         this.entities.forEach(entity => {
             if (entity.satuan) {
-                this.recursiveSum(entities, entity.kode_rekening, entity.row_number, entity.anggaran, entity.anggaran_pak);
+                this.recursiveSum(entities, entity.kode_rekening, entity.kode_kegiatan,
+                    entity.row_number, entity.anggaran, entity.anggaran_pak);
             }
         });
 
@@ -88,12 +90,16 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
         }); 
     }
 
-    recursiveSum(entities, kode_rekening, row_number, value, value_pak): void {        
+    recursiveSum(entities, kode_rekening, kode_kegiatan, row_number, value, value_pak): void {        
         let new_kode_rekening = kode_rekening.split('.').slice(0, -1).join('.');  
+        let new_kode_kegiatan = kode_kegiatan.split('.').slice(0, -1).join('.');
         if (!new_kode_rekening)
             return;                
+        
         let filtered_entities = entities.filter(entity => entity.kode_rekening === new_kode_rekening);                
-        let ent = this.findNearestEntity(row_number, filtered_entities);        
+        let filtered_kegiatan_entites = entities.filter(entity => entity.kode_kegiatan && entity.kode_kegiatan === kode_kegiatan);
+        let ent = this.findNearestEntity(row_number, filtered_entities, false);        
+        let kegiatan_ent = this.findNearestEntity(row_number, filtered_kegiatan_entites, true); 
         if (ent) {  
             if (!ent.anggaran)
                 ent.anggaran = 0;
@@ -102,14 +108,28 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
             ent.anggaran += value;
             ent.anggaran_pak += value_pak;        
         }
-        this.recursiveSum(entities, new_kode_rekening, row_number, value, value_pak);
+
+        if (kegiatan_ent) {
+            console.log(filtered_kegiatan_entites);
+            console.log(kegiatan_ent);
+            if (!kegiatan_ent.anggaran)
+                kegiatan_ent.anggaran = 0;
+            if (!kegiatan_ent.anggaran_pak)
+                kegiatan_ent.anggaran_pak = 0;        
+            kegiatan_ent.anggaran += value;
+            kegiatan_ent.anggaran_pak += value_pak;        
+        }
+
+        this.recursiveSum(entities, new_kode_rekening, new_kode_kegiatan, row_number, value, value_pak);
     }
 
-    findNearestEntity(row_number, entities) {        
+    findNearestEntity(row_number, entities, is_kegiatan) {        
         let current = entities[0];
         entities.forEach(ent => {
-            if ((ent.row_number < row_number) && (ent.row_number > current.row_number))
+            if (is_kegiatan && ent.kode_rekening === '' && ent.row_number < row_number && ent.row_number > current.row_number)
                 current = ent;
+            if (!is_kegiatan && ent.row_number < row_number && ent.row_number > current.row_number)
+                current = ent;            
         });
         return current;
     }
