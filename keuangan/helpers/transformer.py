@@ -183,7 +183,7 @@ class SiskeudesPenganggaranTransformer:
             if (value_pak is not None):
                 if (entity.anggaran_pak is None or not entity.anggaran_pak):
                     entity.anggaran_pak = 0
-                entity.anggaran_pak += value
+                entity.anggaran_pak += value_pak
 
         if (kegiatan_entity is not None):
             if (value is not None):
@@ -194,7 +194,7 @@ class SiskeudesPenganggaranTransformer:
             if (value_pak is not None):
                 if (kegiatan_entity.anggaran_pak is None or not kegiatan_entity.anggaran_pak):
                     kegiatan_entity.anggaran_pak = 0
-                kegiatan_entity.anggaran_pak += value
+                kegiatan_entity.anggaran_pak += value_pak
 
         SiskeudesPenganggaranTransformer.recursive_sum(anggarans, new_kode_rekening, new_kode_kegiatan, row_number,
                                                        value, value_pak)

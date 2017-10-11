@@ -40,3 +40,11 @@ def fetch_siskeudes_penganggarans():
     db.session.commit()
     return jsonify({'success': True})
 
+
+
+@app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>', methods=['GET'])
+def fetch_siskeudes_penganggarans_by_region(region_id):
+    region = region_repository.get(region_id)
+    SiskeudesFetcher.fetch_penganggaran_by_region(region)
+    db.session.commit()
+    return jsonify({'success': True})

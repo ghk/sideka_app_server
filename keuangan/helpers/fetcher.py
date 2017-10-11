@@ -27,8 +27,11 @@ class SiskeudesFetcher:
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         contents = ContentTransformer.transform(sd_content.content)
 
-
+        i = 1
         for content_rab in contents['rab']:
+            content_rab['row_number'] = i
+            i += 1
+
             # Hack, why? because there is an empty string instead of null
             if isinstance(content_rab['perubahan'], basestring):
                 content_rab['perubahan'] = None
