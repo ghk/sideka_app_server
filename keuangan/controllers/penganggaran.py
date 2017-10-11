@@ -29,7 +29,7 @@ def get_siskeudes_penganggarans_count():
 @app.route('/siskeudes/penganggarans/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_penganggarans_by_region(region_id):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_penganggaran_repository.get_by_region(region_id)
+    entities = siskeudes_penganggaran_repository.get_by_region(region_id, page_sort_params)
     result = SiskeudesPenganggaranModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 

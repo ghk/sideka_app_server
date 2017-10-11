@@ -55,11 +55,8 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
     }
 
     transformData(entities): void {
+        /*
         this.entities.forEach(entity => {            
-            // remove trailing dot
-            entity.kode_rekening = entity.kode_rekening.replace(/\.$/, '');
-            entity.kode_kegiatan = entity.kode_kegiatan.replace(/\.$/, '');
-
             if (entity.jumlah_satuan || entity.harga_satuan) {
                 entity.anggaran += entity.jumlah_satuan * entity.harga_satuan;
             }
@@ -78,7 +75,7 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
                 this.recursiveSum(entities, entity.kode_rekening, entity.kode_kegiatan,
                     entity.row_number, entity.anggaran, entity.anggaran_pak);
             }
-        });
+        });*/
 
         this.entities.forEach(entity => {
             let rekeningDepth = entity.kode_rekening.split('.').length - 1;

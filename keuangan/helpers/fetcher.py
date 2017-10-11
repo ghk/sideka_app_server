@@ -27,8 +27,9 @@ class SiskeudesFetcher:
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         contents = ContentTransformer.transform(sd_content.content)
 
-        # Hack, why? because there is an empty string instead of null
+
         for content_rab in contents['rab']:
+            # Hack, why? because there is an empty string instead of null
             if isinstance(content_rab['perubahan'], basestring):
                 content_rab['perubahan'] = None
             if isinstance(content_rab['jumlah_satuan'], basestring):
@@ -41,9 +42,11 @@ class SiskeudesFetcher:
                 content_rab['harga_satuan_pak'] = None
 
         sps = SiskeudesPenganggaranModelSchema(many=True).load(contents['rab'])
+        sps_data = SiskeudesPenganggaranTransformer.transform(sps.data)
         sks = SiskeudesKegiatanModelSchema(many=True).load(contents['kegiatan'])
-        siskeudes_penganggaran_repository.add_all(sps.data, region, year)
+        siskeudes_penganggaran_repository.add_all(sps_data, region, year)
         siskeudes_kegiatan_repository.add_all(sks.data, region, year)
+
 
     @staticmethod
     def fetch_penerimaan_by_region(region):
