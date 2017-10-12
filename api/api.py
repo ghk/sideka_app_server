@@ -408,7 +408,7 @@ def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, cli
                     else:
                         transformed_diff = {}
                         for typ in ["added", "modified", "deleted"]:
-                            transformed_diff[typ] = [transform_data(diff_columns, client_tab_columns, d) for d in diff[typ]]
+                            transformed_diff[typ] = transform_data(diff_tab_columns, client_tab_columns, diff[typ])
                         diffs[tab].append(transformed_diff)
     return diffs
 
