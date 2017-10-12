@@ -96,6 +96,7 @@ class SiskeudesFetcher:
             try:
                 SiskeudesFetcher.fetch_penganggaran_by_region(region)
             except Exception as e:
+                print "Error on region %d" % region.id
             	traceback.print_exc()
 
     @staticmethod
@@ -103,6 +104,7 @@ class SiskeudesFetcher:
         regions = region_repository.all()
         for region in regions:
             try:
+                print "Error on region %d" % region.id
             	SiskeudesFetcher.fetch_penerimaan_by_region(region)
             except Exception as e:
             	traceback.print_exc()
@@ -112,6 +114,7 @@ class SiskeudesFetcher:
         regions = region_repository.all()
         for region in regions:
             try:
+                print "Error on region %d" % region.id
                 SiskeudesFetcher.fetch_spp_by_region(region)
             except Exception as e:
             	traceback.print_exc()
