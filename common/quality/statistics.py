@@ -86,6 +86,7 @@ def get_penduduk_statistics(cur, desa_id):
 	penduduk={}
 	other_layers=["mutasi" , "logSurat"]
 	result["score_last_modified"]=0
+	result["score"] = 0
 	if sql_row_penduduk is not None:
 		last_modified={}
 		last_modified["date"] = str(sql_row_penduduk["date_created"])
@@ -126,7 +127,7 @@ def get_penduduk_statistics(cur, desa_id):
 		penduduk["score"]=0.2*last_modified["score"] + 0.4*penduduk["quantity"]["score"] + 0.4* penduduk["quality"]["score"]
 		result["last_modified"]=last_modified
 		result["penduduk"]=penduduk
-		result["total"]=0.4*penduduk["score"]+0.6*layer_score_sum
+		result["score"]=0.4*penduduk["score"]+0.6*layer_score_sum
 
 	return result
 
@@ -424,8 +425,8 @@ def get_statistics(cur, desa_id):
 	functions = {}
 	#result["blog"] = get_blog_statistics(cur, desa_id)
 	functions["penduduk"] = get_penduduk_statistics
-	functions["keuangan"] = get_keuangan_statistics
-	functions["Pemetaan"] = get_pemetaan_statistics
+	#functions["keuangan"] = get_keuangan_statistics
+	#functions["Pemetaan"] = get_pemetaan_statistics
 	for key, fn in functions.items():
 		try:
 			result[key]=fn(cur, desa_id)
@@ -436,7 +437,7 @@ def get_statistics(cur, desa_id):
 
 
 if __name__ == "__main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,
 			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,
@@ -458,7 +459,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "___main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,
 			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,

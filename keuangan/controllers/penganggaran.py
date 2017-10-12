@@ -29,7 +29,7 @@ def get_siskeudes_penganggarans_count():
 @app.route('/siskeudes/penganggarans/region/<string:region_id>', methods=['GET'])
 def get_siskeudes_penganggarans_by_region(region_id):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_penganggaran_repository.get_by_region(region_id)
+    entities = siskeudes_penganggaran_repository.get_by_region(region_id, page_sort_params)
     result = SiskeudesPenganggaranModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
@@ -40,3 +40,11 @@ def fetch_siskeudes_penganggarans():
     db.session.commit()
     return jsonify({'success': True})
 
+
+
+@app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>', methods=['GET'])
+def fetch_siskeudes_penganggarans_by_region(region_id):
+    region = region_repository.get(region_id)
+    SiskeudesFetcher.fetch_penganggaran_by_region(region)
+    db.session.commit()
+    return jsonify({'success': True})

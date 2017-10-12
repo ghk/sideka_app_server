@@ -1,4 +1,5 @@
 import simplejson as json
+import numbers
 from keuangan.models import SpendingRecapitulation, ProgressTimeline, ProgressRecapitulation
 
 
@@ -135,3 +136,81 @@ class ProgressRecapitulationTransformer:
             pr.budgeted_revenue = budgeted_revenue
 
         return pr
+
+
+class SiskeudesPenganggaranTransformer:
+    @staticmethod
+    def transform(anggarans):
+        for anggaran in anggarans:
+            anggaran.kode_rekening = anggaran.kode_rekening.rstrip('.')
+            anggaran.kode_kegiatan = anggaran.kode_kegiatan.rstrip('.')
+
+            if (anggaran.jumlah_satuan is not None and anggaran.harga_satuan is not None):
+                anggaran.anggaran = anggaran.jumlah_satuan * anggaran.harga_satuan
+            if (anggaran.jumlah_satuan_pak is not None and anggaran.harga_satuan_pak is not None):
+                anggaran.anggaran_pak = anggaran.jumlah_satuan_pak * anggaran.harga_satuan_pak
+            if (isinstance(anggaran.anggaran_pak, numbers.Number)):
+                anggaran.perubahan = anggaran.anggaran_pak - anggaran.anggaran
+
+        for anggaran in anggarans:
+            if anggaran.satuan:
+                SiskeudesPenganggaranTransformer.recursive_sum(anggarans, anggaran.kode_rekening,
+                                                               anggaran.kode_kegiatan, anggaran.row_number,
+                                                               anggaran.anggaran, anggaran.anggaran_pak)
+
+        return anggarans
+
+    @staticmethod
+    def recursive_sum(anggarans, kode_rekening, kode_kegiatan, row_number, value, value_pak):
+        new_kode_rekening = '.'.join(kode_rekening.split('.')[:-1])
+        new_kode_kegiatan = '.'.join(kode_kegiatan.split('.')[:-1])
+        if not new_kode_rekening:
+            return
+
+        filtered_rekening_anggarans = [anggaran for anggaran in anggarans if
+                                       anggaran.kode_rekening == new_kode_rekening]
+        filtered_kegiatan_anggarans = [anggaran for anggaran in anggarans if
+                                       anggaran.kode_kegiatan and anggaran.kode_kegiatan == kode_kegiatan]
+        entity = SiskeudesPenganggaranTransformer.find_nearest(filtered_rekening_anggarans, row_number, False)
+        kegiatan_entity = SiskeudesPenganggaranTransformer.find_nearest(filtered_kegiatan_anggarans, row_number, True)
+
+        if (entity is not None):
+            if (value is not None):
+                if (entity.anggaran is None or not entity.anggaran):
+                    entity.anggaran = 0
+                entity.anggaran += value
+
+            if (value_pak is not None):
+                if (entity.anggaran_pak is None or not entity.anggaran_pak):
+                    entity.anggaran_pak = 0
+                entity.anggaran_pak += value_pak
+
+        if (kegiatan_entity is not None):
+            if (value is not None):
+                if (kegiatan_entity.anggaran is None or not kegiatan_entity.anggaran):
+                    kegiatan_entity.anggaran = 0
+                kegiatan_entity.anggaran += value
+
+            if (value_pak is not None):
+                if (kegiatan_entity.anggaran_pak is None or not kegiatan_entity.anggaran_pak):
+                    kegiatan_entity.anggaran_pak = 0
+                kegiatan_entity.anggaran_pak += value_pak
+
+        SiskeudesPenganggaranTransformer.recursive_sum(anggarans, new_kode_rekening, new_kode_kegiatan, row_number,
+                                                       value, value_pak)
+
+    @staticmethod
+    def find_nearest(anggarans, row_number, is_kegiatan):
+        if len(anggarans) == 0:
+            return None
+
+        current = anggarans[0]
+        for anggaran in anggarans:
+            if (is_kegiatan and
+                    not anggaran.kode_rekening and
+                        anggaran.row_number < row_number and
+                        anggaran.row_number > current.row_number):
+                current = anggaran
+            if (not is_kegiatan and anggaran.row_number < row_number and anggaran.row_number > current.row_number):
+                current = anggaran
+        return current
