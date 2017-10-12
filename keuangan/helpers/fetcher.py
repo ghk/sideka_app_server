@@ -3,6 +3,7 @@ from keuangan import db
 from keuangan.models import *
 from keuangan.repository import *
 from transformer import *
+import traceback
 
 region_repository = RegionRepository(db)
 sideka_content_repository = SidekaContentRepository(db)
@@ -86,16 +87,25 @@ class SiskeudesFetcher:
     def fetch_penganggarans():
         regions = region_repository.all()
         for region in regions:
-            SiskeudesFetcher.fetch_penganggaran_by_region(region)
+            try:
+                SiskeudesFetcher.fetch_penganggaran_by_region(region)
+            except Exception as e:
+            	traceback.print_exc()
 
     @staticmethod
     def fetch_penerimaans():
         regions = region_repository.all()
         for region in regions:
-            SiskeudesFetcher.fetch_penerimaan_by_region(region)
+            try:
+            	SiskeudesFetcher.fetch_penerimaan_by_region(region)
+            except Exception as e:
+            	traceback.print_exc()
 
     @staticmethod
     def fetch_spps():
         regions = region_repository.all()
         for region in regions:
-            SiskeudesFetcher.fetch_spp_by_region(region)
+            try:
+                SiskeudesFetcher.fetch_spp_by_region(region)
+            except Exception as e:
+            	traceback.print_exc()
