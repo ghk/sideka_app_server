@@ -437,7 +437,7 @@ def get_statistics(cur, desa_id):
 
 
 if __name__ == "__main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,
 			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,
@@ -459,7 +459,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "___main__":
-	conf = open_cfg('app.cfg')
+	conf = open_cfg('../app.cfg')
 	db = MySQLdb.connect(host=conf.MYSQL_HOST,
 			     user=conf.MYSQL_USER,
 			     passwd=conf.MYSQL_PASSWORD,
