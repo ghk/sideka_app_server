@@ -2,7 +2,7 @@
 .vscode
 venv
 node_modules
-logs/*.log
+!logs/.gitkeep
 common/app.cfg
 *.pyc
 *.swp
