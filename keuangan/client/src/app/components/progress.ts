@@ -26,7 +26,7 @@ export class ProgressComponent implements OnInit, OnDestroy {
     ngOnInit(): void {        
         this._sharedService.setState('progress');
         this._routeSubscription = this._route.params.subscribe(params => {
-            this.regionId = params['regionId'];     
+            this.regionId = params['regionId']; 
             if (!this._sharedService.region || this._sharedService.region.id !== this.regionId)
                 this._dataService.getRegion(this.regionId, null, null).subscribe(region => {
                     this._sharedService.setRegion(region);
