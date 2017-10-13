@@ -2,10 +2,12 @@
 .vscode
 venv
 node_modules
-!logs/.gitkeep
 common/app.cfg
 *.pyc
 *.swp
 npm-debug.log.*
 npm-debug.log
 package-lock.json
+
+keuangan/logs/*
+!keuangan/logs/.gitkeep
