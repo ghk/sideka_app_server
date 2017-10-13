@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, current_app
 from time import time
 from keuangan import db
 from keuangan.helpers import SiskeudesFetcher, Generator
@@ -13,7 +13,7 @@ def fetch_all():
     SiskeudesFetcher.fetch_penganggarans()
     SiskeudesFetcher.fetch_spps()
     db.session.commit()
-    print('\x1b[6;30;42m' + 'Total Time: ' + str(time() - t0) + ' seconds' + '\x1b[0m')
+    current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
 
@@ -29,5 +29,5 @@ def generate_all():
     db.session.add_all(pts)
     db.session.add_all(srs)
     db.session.commit()
-    print('\x1b[6;30;42m' + 'Total Time: ' + str(time() - t0) + ' seconds' + '\x1b[0m')
+    current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})

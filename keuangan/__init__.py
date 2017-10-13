@@ -10,7 +10,7 @@ from controllers import *
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask('keuangan')
 
     app.config.from_pyfile('../common/app.cfg')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

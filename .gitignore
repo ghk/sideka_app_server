@@ -2,6 +2,7 @@
 .vscode
 venv
 node_modules
+logs/*.log
 common/app.cfg
 *.pyc
 *.swp
