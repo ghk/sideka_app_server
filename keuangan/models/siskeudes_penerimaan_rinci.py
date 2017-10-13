@@ -23,6 +23,10 @@ class SiskeudesPenerimaanRinci(BaseModel):
 
     penerimaan = db.relationship('SiskeudesPenerimaan', primaryjoin='SiskeudesPenerimaan.no == SiskeudesPenerimaanRinci.no_tbp', foreign_keys=[no_tbp], lazy='joined')
 
+    __table_args__ = (
+        db.Index('spr_ix_fk_region_id', 'fk_region_id'),
+    )
+
 
 class SiskeudesPenerimaanRinciModelSchema(ma.ModelSchema):
     class Meta:

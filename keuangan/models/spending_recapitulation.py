@@ -20,6 +20,7 @@ class SpendingRecapitulation(BaseModel):
 
     __table_args__ = (
         db.Index('sr_ix_fk_type_id', 'fk_type_id'),
+        db.Index('sr_ix_fk_region_id', 'fk_region_id'),
         db.Index('sr_ix_fk_region_id_fk_type_id', 'fk_region_id', 'fk_type_id')
     )
 
