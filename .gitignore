@@ -8,3 +8,6 @@ common/app.cfg
 npm-debug.log.*
 npm-debug.log
 package-lock.json
+
+keuangan/logs/*
+!keuangan/logs/.gitkeep

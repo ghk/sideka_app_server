@@ -11,7 +11,6 @@ class Region(BaseModel):
     name = db.Column(db.Text)
     type = db.Column(db.Integer, nullable=False, default=False)
     domain = db.Column(db.Text)
-    url_key = db.Column(db.Text)
     is_kelurahan = db.Column(db.Boolean, nullable=False, default=False)
     is_in_scope = db.Column(db.Boolean, nullable=False, default=False)
     is_lokpri = db.Column(db.Boolean, nullable=False, default=False)
@@ -21,7 +20,6 @@ class Region(BaseModel):
 
     __table_args__ = (
         db.Index('regions_ix_fk_parent_id', 'fk_parent_id'),
-        db.Index('regions_ix_url_key', 'url_key'),
         db.Index('regions_ix_id_is_lokpri', 'id', 'is_lokpri'),
         db.Index('regions_ix_is_lokpri', 'is_lokpri'),
     )

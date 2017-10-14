@@ -20,7 +20,11 @@ class SiskeudesSppRinci(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
-    spp = db.relationship('SiskeudesSpp', primaryjoin='SiskeudesSpp.no == SiskeudesSppRinci.no_spp', foreign_keys=[no_spp], lazy='select')
+    spp = db.relationship('SiskeudesSpp', primaryjoin='SiskeudesSpp.no == SiskeudesSppRinci.no_spp', foreign_keys=[no_spp], lazy='joined')
+
+    __table_args__ = (
+        db.Index('ssppr_ix_fk_region_id', 'fk_region_id'),
+    )
 
 
 class SiskeudesSppRinciModelSchema(ma.ModelSchema):
