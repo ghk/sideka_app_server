@@ -246,8 +246,8 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
         change_id = row[1]
         api_version = row[2]
 
-	if api_version == "1.0":
-	    content["columns"] = ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pendidikan","agama","status_kawin","pekerjaan","pekerjaan_ped","kewarganegaraan","kompetensi","no_telepon","email","no_kitas","no_paspor","golongan_darah","status_penduduk","status_tinggal","kontrasepsi","difabilitas","no_kk","nama_ayah","nama_ibu","hubungan_keluarga","nama_dusun","rw","rt","alamat_jalan"]
+        if api_version == "1.0":
+            content["columns"] = ["nik","nama_penduduk","tempat_lahir","tanggal_lahir","jenis_kelamin","pendidikan","agama","status_kawin","pekerjaan","pekerjaan_ped","kewarganegaraan","kompetensi","no_telepon","email","no_kitas","no_paspor","golongan_darah","status_penduduk","status_tinggal","kontrasepsi","difabilitas","no_kk","nama_ayah","nama_ibu","hubungan_keluarga","nama_dusun","rw","rt","alamat_jalan"]
 
         return_data = {"success": True, "changeId": change_id, "apiVersion": api_version, "columns": content["columns"] }
         return_data["change_id"] = change_id #TODO: remove this later
@@ -260,6 +260,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             diffs = get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, content["columns"])
             return_data["diffs"] = diffs
 
+        logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
         return jsonify(return_data)
     finally:
         cur.close()
@@ -378,6 +379,14 @@ def get_all_desa():
     finally:
         cur.close()
 
+@app.route('/user/<int:desa_id>', methods=["GET"])
+def get_users(desa_id):
+    pass
+
+@app.route('/user/<int:desa_id>', methods=["POST"])
+def post_user(desa_id):
+    pass
+
 def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, client_columns):
     diffs = {}
     for tab, columns in client_columns.items():
@@ -468,12 +477,18 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
     if (token == ""):
         token = request.headers.get('X-Auth-Token', None)
 
-        cur = mysql.connection.cursor()
+    version = request.headers.get('X-Sideka-Version', None)
+    platform = request.headers.get('X-Platform', None)
+    ip = request.remote_addr
+
+    cur = mysql.connection.cursor()
+    try:
         print content_type
         cur.execute(
-            "INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype) VALUES (%s, %s, now(), %s, %s, %s, %s)",
+            "INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype, version, ip, platform) VALUES (%s, %s, now(), %s, %s, %s, %s, %s, %s, %s)",
             (user_id, desa_id, token, action, content_type, content_subtype))
         mysql.connection.commit()
+    finally:
         cur.close();
 
 if __name__ == '__main__':
