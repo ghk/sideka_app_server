@@ -478,15 +478,15 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
         token = request.headers.get('X-Auth-Token', None)
 
     version = request.headers.get('X-Sideka-Version', None)
-    platform = request.headers.get('X-Platform', None)
     ip = request.remote_addr
+    platform = request.headers.get('X-Platform', None)
 
     cur = mysql.connection.cursor()
     try:
         print content_type
         cur.execute(
             "INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype, version, ip, platform) VALUES (%s, %s, now(), %s, %s, %s, %s, %s, %s, %s)",
-            (user_id, desa_id, token, action, content_type, content_subtype))
+            (user_id, desa_id, token, action, content_type, content_subtype, version, ip, platform))
         mysql.connection.commit()
     finally:
         cur.close();
