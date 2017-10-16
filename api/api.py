@@ -479,7 +479,7 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
 
     version = request.headers.get('X-Sideka-Version', None)
     ip = request.remote_addr
-    platform = request.headers.get('X-Platform', None)
+    platform = request.headers.get('X-Platform', request.headers.get('X-Platfrom', None)) #TODO: remove Platfrom typo
 
     cur = mysql.connection.cursor()
     try:
