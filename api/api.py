@@ -13,6 +13,7 @@ import json
 import time
 import base64
 import uuid
+import phpserialize
 
 import logging, sys
 logging.basicConfig(stream=sys.stderr)
@@ -380,7 +381,8 @@ def get_all_desa():
 
 @app.route('/user/<int:desa_id>', methods=["GET"])
 def get_users(desa_id):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+    cur = mysql.connection.cursor()
+    dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 
     try:
         user_id = get_auth(desa_id, cur)
@@ -388,8 +390,8 @@ def get_users(desa_id):
             return jsonify({}), 403
 
         users_query = "select * from wp_usermeta inner join wp_users on wp_usermeta.user_id = wp_users.ID where meta_key = %s"
-        cur.execute(user_ids_query, ("wp_%d_capabilities" % desa_id))
-        user_rows = list(cur.fetchall())
+        dictcur.execute(users_query, (("wp_%d_capabilities" % desa_id),))
+        user_rows = list(dictcur.fetchall())
 
         results = []
         for user_row in user_rows:
@@ -398,18 +400,20 @@ def get_users(desa_id):
             for column in mapped_columns:
                 user[column] = user_row[column]
             user["user_pass"] = None
-            user["roles"] = phpserialize.dict_to_list(phpserialize.loads(user_row["meta_value"]))
+            user["roles"] = phpserialize.loads(user_row["meta_value"])
             results.append(user)
 
-        logs(user_id, desa_id, token, "get_user", None, None)
-        return results
+        logs(user_id, desa_id, "", "get_user", None, None)
+        return jsonify(results)
 
     finally:
         cur.close()
+        dictcur.close()
 
 @app.route('/user/<int:desa_id>', methods=["POST"])
 def post_user(desa_id):
-    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+    cur = mysql.connection.cursor()
+    dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     try:
         user_id = get_auth(desa_id, cur)
         if user_id is None:
@@ -419,8 +423,8 @@ def post_user(desa_id):
         if posted_user["ID"] != user_id:
             #Check whether current user is administrator
             current_user_roles_query = "select * from wp_usermeta where user_id = %s and meta_key = %s"
-            cur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
-            current_user_roles_row = cur.fetchone()
+            dictcur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
+            current_user_roles_row = dictcur.fetchone()
             current_user_roles = []
             if current_user_roles_row is not None:
                 current_user_roles = phpserialize.dict_to_list(phpserialize.loads(current_user_roles_row["meta_value"]))
@@ -448,7 +452,7 @@ def post_user(desa_id):
 
         mysql.connection.commit()
 
-        logs(user_id, desa_id, token, "save_user", None, None)
+        logs(user_id, desa_id, "", "save_user", None, None)
         return jsonify({"success": True})
 
     finally:
