@@ -112,7 +112,6 @@ def get_content_subtype(desa_id, content_type):
     cur = mysql.connection.cursor()
     try:
         user_id = get_auth(desa_id, cur)
-
         if user_id is None:
             return jsonify({}), 403
 
@@ -134,10 +133,10 @@ def get_content(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
         user_id = get_auth(desa_id, cur)
-        result = None
-
         if user_id is None:
             return jsonify({}), 403
+
+        result = None
 
         timestamp = int(request.args.get('timestamp', "0"))
         query = "SELECT content from sd_contents where desa_id = %s and timestamp > %s and type = %s and subtype = %s and api_version = '1.0' order by timestamp desc"
@@ -167,7 +166,11 @@ def post_content(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
         success = False
+
         user_id = get_auth(desa_id, cur)
+        if user_id is None:
+            return jsonify({'success': False}), 403
+
         api_version = app.config["API_VERSION"]
 
         cur.execute("SELECT COUNT(*) FROM sd_contents WHERE desa_id = %s AND type = %s AND api_version = %s",
@@ -176,9 +179,6 @@ def post_content(desa_id, content_type, content_subtype=None):
 
         if total_data_api > 0:
             return jsonify({"error": "Sideka desktop needs to be updated"}), 500
-
-        if user_id is None:
-            return jsonify({'success': False}), 403
 
         max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s"
 
@@ -224,7 +224,6 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
         user_id = get_auth(desa_id, cur)
-
         if user_id is None:
             return jsonify({}), 403
 
@@ -272,15 +271,15 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
         user_id = get_auth(desa_id, cur)
-        client_change_id = 0
-        result = None
-
-        if request.args.get("changeId", 0) is not None:
-            client_change_id = int(request.args.get("changeId", "0"))
-
         if user_id is None:
             return jsonify({}), 403
 
+        result = None
+
+        client_change_id = 0
+        if request.args.get("changeId", 0) is not None:
+            client_change_id = int(request.args.get("changeId", "0"))
+        
         #Find max change id
         max_change_id_query = "SELECT MAX(change_id) FROM sd_contents WHERE type=%s AND subtype=%s AND desa_id=%s"
         if content_subtype is None:
@@ -381,11 +380,79 @@ def get_all_desa():
 
 @app.route('/user/<int:desa_id>', methods=["GET"])
 def get_users(desa_id):
-    pass
+    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+
+    try:
+        user_id = get_auth(desa_id, cur)
+        if user_id is None:
+            return jsonify({}), 403
+
+        users_query = "select * from wp_usermeta inner join wp_users on wp_usermeta.user_id = wp_users.ID where meta_key = %s"
+        cur.execute(user_ids_query, ("wp_%d_capabilities" % desa_id))
+        user_rows = list(cur.fetchall())
+
+        results = []
+        for user_row in user_rows:
+            user = {}
+            mapped_columns = ["ID", "user_login", "user_email", "user_registered", "display_name"]
+            for column in mapped_columns:
+                user[column] = user_row[column]
+            user["user_pass"] = None
+            user["roles"] = phpserialize.dict_to_list(phpserialize.loads(user_row["meta_value"]))
+            results.append(user)
+
+        logs(user_id, desa_id, token, "get_user", None, None)
+        return results
+
+    finally:
+        cur.close()
 
 @app.route('/user/<int:desa_id>', methods=["POST"])
 def post_user(desa_id):
-    pass
+    cur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+    try:
+        user_id = get_auth(desa_id, cur)
+        if user_id is None:
+            return jsonify({}), 403
+
+        posted_user = request.json 
+        if posted_user["ID"] != user_id:
+            #Check whether current user is administrator
+            current_user_roles_query = "select * from wp_usermeta where user_id = %s and meta_key = %s"
+            cur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
+            current_user_roles_row = cur.fetchone()
+            current_user_roles = []
+            if current_user_roles_row is not None:
+                current_user_roles = phpserialize.dict_to_list(phpserialize.loads(current_user_roles_row["meta_value"]))
+
+            if "administrator" not in current_user_roles:
+                return jsonify({}), 403
+
+            #Create new user 
+            if posted_user["ID"] is None:
+                create_query = "insert into wp_users() values ()"
+                return jsonify({}), 512
+
+            #Save roles
+            posted_user_roles = phpserialize.dumps(posted_user["roles"])
+            update_query = "update wp_usermeta set meta_value= '%s' where user_id = %s and meta_key = %s"
+            cur.execute(update_query, (posted_user_roles, posted_user["ID"], "wp_%d_capabilities" % desa_id))
+
+        update_query = "update wp_users set user_email = '%s', display_name = %s, user_nicename = %s where ID = %s"
+        cur.execute(update_query, (posted_user["user_email"], posted_user["display_name"], posted_user["user_nicename"], posted_user["ID"]))
+
+        if posted_user["user_pass"] is not None:
+            update_query = "update wp_users set user_pass = '%s' where ID = %s"
+            password = phasher.hash_password(posted_user["user_pass"])
+            cur.execute(update_query, (password, posted_user["ID"]))
+
+        mysql.connection.commit()
+
+        logs(user_id, desa_id, token, "save_user", None, None)
+        return jsonify({"success": True})
+
+    finally:
+        cur.close()
 
 def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, client_columns):
     diffs = {}
@@ -483,7 +550,7 @@ def logs(user_id, desa_id, token, action, content_type, content_subtype):
 
     cur = mysql.connection.cursor()
     try:
-        print content_type
+        print (user_id, desa_id, token, action, content_type, content_subtype, version, ip, platform)
         cur.execute(
             "INSERT INTO sd_logs (user_id, desa_id, date_accessed, token, action, type, subtype, version, ip, platform) VALUES (%s, %s, now(), %s, %s, %s, %s, %s, %s, %s)",
             (user_id, desa_id, token, action, content_type, content_subtype, version, ip, platform))
