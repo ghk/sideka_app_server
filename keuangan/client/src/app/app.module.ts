@@ -14,7 +14,7 @@ import { ProgressTimelineComponent } from './components/progress-timeline';
 import { ProgressDetailComponent } from './components/progress-detail';
 import { SpendingComponent } from './components/spending';
 import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
-import { SpendingDetailComponent } from './components/spending-detail';
+import { SpendingDetailComponent, HideBudgetDetailPipe, BudgetTypePipe } from './components/spending-detail';
 import { SpendingChartComponent } from './components/spending-chart';
 
 import { DataService } from './services/data';
@@ -31,7 +31,9 @@ import { SharedService } from './services/shared';
     SpendingComponent,
     SpendingRecapitulationComponent,
     SpendingDetailComponent,
-    SpendingChartComponent
+    SpendingChartComponent,
+    HideBudgetDetailPipe,
+    BudgetTypePipe,
   ],
   imports: [
     BrowserModule,

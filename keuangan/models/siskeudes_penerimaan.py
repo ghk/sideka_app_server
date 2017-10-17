@@ -29,6 +29,10 @@ class SiskeudesPenerimaan(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
+    __table_args__ = (
+        db.Index('sp_ix_fk_region_id', 'fk_region_id'),
+    )
+
 
 class SiskeudesPenerimaanModelSchema(ma.ModelSchema):
     class Meta:

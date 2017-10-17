@@ -3,6 +3,40 @@ import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+    name: 'hideBudgetDetail',
+    pure: true
+})
+export class HideBudgetDetailPipe implements PipeTransform {
+    transform(items: any[], filter: Object): any {
+        if (!items || !filter) {
+            return items;
+        }
+        let results = items.filter(item => 
+		!item.harga_satuan && !item.harga_satuan_pak &&
+		(  (item.kode_rekening && item.kode_rekening.startsWith("4") && item.kode_rekening.split(".").length <= 3)
+		|| !item.kode_rekening || item.kode_rekening == "5"
+		|| (item.kode_rekening && item.kode_rekening.startsWith("6") && item.kode_rekening.split(".").length <= 3))
+	);
+	return results;
+    }
+}
+
+@Pipe({
+    name: 'budgetType',
+    pure: true
+})
+export class BudgetTypePipe implements PipeTransform {
+    transform(items: any[], type: Object): any {
+        if (!items || !type) {
+            return items;
+        }
+        let results = items.filter(item => (type == '5' && !item.kode_rekening ) || (item.kode_rekening && item.kode_rekening.startsWith(type)));
+        return results;
+    }
+}
 
 @Component({
     selector: 'sk-spending-detail',
@@ -15,6 +49,13 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
     is_pak: boolean = false;
     progress: Progress;
     entities: any[] = [];
+    hideBudgetDetail: boolean = true;
+    budgetType = "5";
+    budgetTypeNames = {
+        "4": "PENDAPATAN",
+        "5": "BELANJA",
+        "6": "PEMBIAYAAN",
+    };
 
     constructor(
         private _dataService: DataService,
@@ -79,11 +120,13 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
 
         this.entities.forEach(entity => {
             let rekeningDepth = entity.kode_rekening.split('.').length - 1;
+            if (entity.kode_kegiatan && entity.kode_kegiatan.length){
+                rekeningDepth += entity.kode_kegiatan.split('.').length - 2;
+            }
             if (rekeningDepth < 0)
                 return;
             let append = '&nbsp;'.repeat(rekeningDepth * 4);
-            entity.kode_rekening = append + entity.kode_rekening;
-            entity.uraian = append + entity.uraian;
+	    entity.append = append;
         }); 
     }
 
