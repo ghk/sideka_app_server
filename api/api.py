@@ -400,7 +400,7 @@ def get_users(desa_id):
             for column in mapped_columns:
                 user[column] = user_row[column]
             user["user_pass"] = None
-            user["roles"] = phpserialize.loads(user_row["meta_value"])
+            user["roles"] = phpserialize.loads(user_row["meta_value"]).keys()
             results.append(user)
 
         logs(user_id, desa_id, "", "get_user", None, None)
