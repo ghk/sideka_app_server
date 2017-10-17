@@ -1,14 +1,8 @@
 import MySQLdb
-import itertools
-import csv
-import os
-import types
-import sys
 import traceback
 import json
 import math
 from datetime import datetime, timedelta
-from ckanapi import RemoteCKAN
 
 from utils import open_cfg, query_single 
 
@@ -80,44 +74,55 @@ def quality_penduduk(row, column_indexes):
 
 	
 def get_penduduk_statistics(cur, desa_id):
-	result = {}
+	result = {"penduduk": {"score": 0.0, "logSurat": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "last_modified": {"date": None, "count": None, "score": 0.0}, "penduduk": {"score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "mutasi": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score_last_modified": 0}}
 	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penduduk' and api_version='2.0' order by timestamp desc", (desa_id,))
 	sql_row_penduduk =  cur.fetchone()
 	penduduk={}
 	other_layers=["mutasi" , "logSurat"]
 	result["score_last_modified"]=0
 	result["score"] = 0
+
+
 	if sql_row_penduduk is not None:
 		last_modified={}
 		last_modified["date"] = str(sql_row_penduduk["date_created"])
 		last_modified["count"] = str(datetime.now() -sql_row_penduduk["date_created"])
 		last_modified["score"]= get_scale(7 -(datetime.now() - sql_row_penduduk["date_created"]).days , 7)
 		penduduk_cur = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')["data"]
-		
 		for layer in other_layers:
 			tab = []
 			if layer in penduduk_cur:
 				tab = penduduk_cur[layer]
+			if tab is None:
+				layer_score["quantity"]["score"]=0
+				result["score_last_modified"]=0
+				layer_score["quality"]["score"]=0
 			layer_score = {}
 			layer_score["score"]=0
-			count = len(tab)
-			quantity_score = get_scale(count, 10)
-			layer_score["quantity"] = {"count": count, "score": quantity_score}
-			quality= mean([quality(row) for row in tab])
-			quality_score = get_scale(quality, 6)
-			layer_score["quality"]= {"quality" : quality , "score" : quality_score}
+			quantity_count = len(tab)
+			quantity_score = get_scale(quantity_count, 10)
+			layer_score["quantity"] = {"count": quantity_count, "score": quantity_score}
+			quality_count= mean([quality(row) for row in tab])
+			quality_score = get_scale(quality_count, 6)
+			layer_score["quality"]= {"quality" : quality_count , "score" : quality_score}
+			#layer_score["quantity"]["score"]=0
+			#layer_score["quality"]["score"]=0
 			layer_score["score"]= 0.2*result["score_last_modified"] + 0.4*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
 			result[layer]=layer_score
 		layer_score_sum=layer_score["score"]/2
-		penduduk_uncounted=[ "pekerjaan_ped" , "kewarganegaraan" , "kompetensi", "no_telepon" , "email", "no_kitas" , "no_paspor" , "golongan_darah" , "status_penduduk" , "status_tinggal" , "kontrasepsi", "difabilitas"]
+		penduduk_uncounted=["pekerjaan_ped" , "kewarganegaraan" , "kompetensi", "no_telepon" , "email", "no_kitas" , "no_paspor" , "golongan_darah" , "status_penduduk" , "status_tinggal" , "kontrasepsi", "difabilitas"]
 		penduduk_cur_ = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')
-		columns = penduduk_cur_['columns']['penduduk']
-		column_indexes= [columns.index(i)  for i in penduduk_uncounted]
+		if penduduk_cur_ is None:
+			last_modified["score"]=0
+			penduduk["quantity"]["score"]=0
+			penduduk["quality"]["score"]=0
+		columns = penduduk_cur_['columns']["penduduk"]
+		column_indexes= [columns.index(i)  for i in penduduk_uncounted if i in columns]
 		penduduk ["score"]=0
 		count_p=len(columns)
 		quality_p = mean([quality_penduduk(row,column_indexes) for row in columns])
 		max_quality= len(penduduk_uncounted) * 0.8 + (len(columns) - len(penduduk_uncounted)) * 1
-		if count in [1130, 1131, 1132, 2260]:
+		if quantity_count in [1130, 1131, 1132, 2260]:
 			count_p=0
 			quality_p=0
 		quantity_score_p=get_scale(count_p, 1000)
@@ -157,7 +162,7 @@ def get_apbdes_statistics(cur, desa_id):
 		score = json.loads(apbdes["score"], encoding='ISO-8859-1')
 		s_row = get_scale(score["rows"], 200)
 		s_income = 1.0 if score["pendapatan"] is not None and score["pendapatan"] > 300000000 else 0.0
-		s_esxpense = 1.0 if score["belanja"] is not None and score["belanja"] > 300000000 else 0.0
+		s_expense = 1.0 if score["belanja"] is not None and score["belanja"] > 300000000 else 0.0
 		total_quality += 0.3 * s_row + 0.35 * s_income + 0.35 * s_expense
 
 	result["score_quality"] = total_quality / len(apbdeses) if len(apbdeses) > 0 else 0
