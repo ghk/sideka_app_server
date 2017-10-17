@@ -440,7 +440,7 @@ def post_user(desa_id):
             if posted_user["ID"] is None:
                 create_query = "insert into wp_users(user_login, user_pass, user_nicename, user_email, user_registered, user_status, display_name) values (%s, %s, %s, %s, %s, %s, %s)"
                 new_password = phasher.hash_password(posted_user['user_pass'])
-                cur.execute(create_query, (posted_user['user_login'], new_password, posted_user['display_name'], posted_user['user_email'], posted_user['user_registered'], 0, posted_user['display_name']))
+                cur.execute(create_query, (posted_user['user_login'], new_password, posted_user['display_name'], posted_user['user_email'], posted_user['user_registered'], 1, posted_user['display_name']))
                 
                 #Save roles
                 create_meta_query = 'insert into wp_usermeta(user_id, meta_key, meta_value) values(%s, %s, %s)'
