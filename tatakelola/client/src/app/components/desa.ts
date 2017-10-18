@@ -2,25 +2,24 @@ import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular
 
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
+import * as $ from 'jquery';
 
 @Component({
-    selector: 'st-map',
-    templateUrl: '../templates/map.html',
+     selector: 'desa',
+     templateUrl: '../templates/desa.html'
 })
 
-export class MapComponent implements OnInit, OnDestroy {
-
+export class DesaComponent implements OnInit, OnDestroy { 
     leafletOptions: any;
-    leafletLayers: L.Layer[];
-    map: L.Map;
+    isStatisticShown: boolean;
+    isSidebarShown: boolean;
 
-    @ViewChild('map')
-    leafletComponent: ngxLeaflet.LeafletDirective
-    
-    constructor() { }
+    constructor() {}
 
-    ngOnInit(): void { 
-        this.leafletOptions = {
+    ngOnInit(): void {
+       this.isStatisticShown = false;
+       this.isSidebarShown = true;
+       this.leafletOptions = {
             layers: [
                 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
                     maxZoom: 18,
@@ -28,14 +27,12 @@ export class MapComponent implements OnInit, OnDestroy {
                     id: 'mapbox.streets'
                 })
             ],
-            zoom: 5,
-            center: L.latLng([-0.7893, 113.9213])
+            zoom: 12,
+            center: L.latLng([1.0470057, 102.7549526])
         }      
+
+        $('.leaflet-control-zoom').css({display: 'none'});
     }
 
-    ngOnDestroy(): void { }
-
-    onMapReady(map): void {
-       this.map = map;
-    }
+    ngOnDestroy(): void {}
 }

@@ -1,6 +1,7 @@
 <div id="map" #map leaflet 
     [leafletOptions]="leafletOptions"  
-    [leafletLayers]="leafletLayers">
+    [leafletLayers]="leafletLayers"
+    (leafletMapReady)="onMapReady($event)">
 </div>
 
 <st-search></st-search>

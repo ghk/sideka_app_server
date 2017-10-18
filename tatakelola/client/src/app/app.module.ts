@@ -6,6 +6,7 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
+import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
 
@@ -13,6 +14,7 @@ import { SidebarComponent } from './components/sidebar';
   declarations: [
     AppComponent,
     MapComponent,
+    DesaComponent,
     SearchComponent,
     SidebarComponent
   ],
@@ -22,7 +24,8 @@ import { SidebarComponent } from './components/sidebar';
     LeafletModule.forRoot(),    
     RouterModule.forRoot([
       { path: '', redirectTo: 'map', pathMatch: 'full' },
-      { path: 'map', component: MapComponent }
+      { path: 'map', component: MapComponent },
+      { path: 'desa', component: DesaComponent }
     ])
   ],
   providers: [

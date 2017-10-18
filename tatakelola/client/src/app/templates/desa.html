@@ -1,0 +1,139 @@
+<div id="map" #map leaflet 
+    [leafletOptions]="leafletOptions"  
+    [leafletLayers]="leafletLayers">
+</div>
+<st-search></st-search>
+<div class="prevnext" style="float:right;">
+    <button class="prev">⇦ Desa Sebelum</button>
+    <button class="next">Desa Berikut ⇨</button>
+</div>
+
+<div class="show-hide-side">
+    <button class="shide" (click)="isSidebarShown = !isSidebarShown" id="shide">Rincian ▾</button>
+</div>
+
+<div class="sidebar" id="sidebar" *ngIf="isSidebarShown">
+   <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-money"></i></div>
+            <div class="desc">
+                <h4>Rp 971 Juta (APBDes 2016)</h4>
+            </div>
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-map"></i></div>
+            <div class="desc">
+                <h4>200 km2</h4>
+            </div>
+
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-male"></i></div>
+            <div class="desc">
+                <h4><i class="fa fa-mars"></i> 743 &nbsp;&nbsp; <i class="fa fa-venus"></i> 707</h4>
+            </div>
+
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-building"></i></div>
+            <div class="desc">
+                <h4>3 SD &nbsp;&nbsp; 1 SMP &nbsp;&nbsp; 0 SMA</h4>
+            </div>
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-plug"></i></div>
+            <div class="desc">
+                <h4>120 dari 488 KK</h4>
+            </div>
+
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-tint"></i></div>
+            <div class="desc">
+                <h4>Mengandalkan 1 unit system</h4>
+            </div>
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-phone"></i></div>
+            <div class="desc">
+                <h4>Telkomsel, Alas, Telemor, TLS TT, Telkomcell</h4>
+            </div>
+        </div>
+    </a>
+    <a href="#">
+        <div class="side">
+            <div class="icon"><i class="fa fa-leaf"></i></div>
+            <div class="desc">
+                <h4>Pertanian : <br> Jagung, kacang tanah, bawang merah, bawang putih, dan kacang hijau <br><br> Peternakan :<br> Sapi</h4>
+            </div>
+        </div>
+    </a>
+</div>
+<div class="dropdown" style="float: right;">
+    <button class="dropbtn">☰</button>
+    <div class="dropdown-content">
+        <a href="#"><img src="../../assets/res/graph1.svg">Dashboard Keuangan</a>
+        <a href="#"><img src="../../assets/res/graph2.svg">Dashboard Monitoring</a>
+        <a href="#"><img src="../../assets/res/news.svg">Kabar Desa</a>
+    </div>
+</div>
+
+<div class="show-hide-stat">
+    <button class="statsb" (click)="isStatisticShown = !isStatisticShown" id="shide">Statistik ▾</button>
+</div>
+
+<div class="statistic" id="statistic" *ngIf="isStatisticShown">
+    <img src="../../assets/res/stats.png">
+</div>
+
+<div class="legend">
+    <div>
+        <input type="checkbox" id="check1" checked="checked">
+        <label for="check1">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/corn.svg"> Jagung
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="check2" checked="checked">
+        <label for="check2">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/nut.svg"> Kacang Tanah
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="check3" checked="checked">
+        <label for="check3">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/onion.svg"> Bawang Merah
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="check4" checked="checked">
+        <label for="check4">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/garlic.svg"> Bawang Putih
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="check5" checked="checked">
+        <label for="check5">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/beans.svg"> Kacang Hijau
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="check6" checked="checked">
+        <label for="check6">
+          <div><i class="fa fa-check"></i></div> <img src="../../assets/res/cow.svg"> Sapi
+        </label>
+    </div>
+</div>
+
