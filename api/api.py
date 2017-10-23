@@ -422,29 +422,37 @@ def post_user(desa_id):
             dictcur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
             current_user_roles_row = dictcur.fetchone()
             current_user_roles = []
+
             if current_user_roles_row is not None:
-                current_user_roles = phpserialize.dict_to_list(phpserialize.loads(current_user_roles_row["meta_value"]))
+                for key, value in phpserialize.loads(current_user_roles_row["meta_value"]).iteritems():
+                    current_user_roles.append(key)
 
             if "administrator" not in current_user_roles:
                 return jsonify({}), 403
+            
+            posted_user_roles = phpserialize.dumps(posted_user["roles"])
 
             #Create new user 
             if posted_user["ID"] is None:
-                create_query = "insert into wp_users() values ()"
-                return jsonify({}), 512
+                create_query = "insert into wp_users(user_login, user_pass, user_nicename, user_email, user_registered, user_status, display_name) values (%s, %s, %s, %s, %s, %s, %s)"
+                new_password = phasher.hash_password(posted_user['user_pass'])
+                cur.execute(create_query, (posted_user['user_login'], new_password, posted_user['display_name'], posted_user['user_email'], posted_user['user_registered'], 1, posted_user['display_name']))
+                
+                #Save roles
+                create_meta_query = 'insert into wp_usermeta(user_id, meta_key, meta_value) values(%s, %s, %s)'
+                cur.execute(create_meta_query, (cur.lastrowid, 'wp_%d_capabilities' % desa_id, posted_user_roles))
+            else:
+                update_query = "update wp_users set user_email = %s, display_name = %s, user_nicename = %s where ID = %s"
+                cur.execute(update_query, (posted_user["user_email"], posted_user["display_name"], posted_user["display_name"], posted_user["ID"]))
+               
+                #Save roles
+                update_query = "update wp_usermeta set meta_value= %s where user_id = %s and meta_key = %s"
+                cur.execute(update_query, (posted_user_roles, posted_user["ID"], "wp_%d_capabilities" % desa_id))
 
-            #Save roles
-            posted_user_roles = phpserialize.dumps(posted_user["roles"])
-            update_query = "update wp_usermeta set meta_value= '%s' where user_id = %s and meta_key = %s"
-            cur.execute(update_query, (posted_user_roles, posted_user["ID"], "wp_%d_capabilities" % desa_id))
-
-        update_query = "update wp_users set user_email = '%s', display_name = %s, user_nicename = %s where ID = %s"
-        cur.execute(update_query, (posted_user["user_email"], posted_user["display_name"], posted_user["user_nicename"], posted_user["ID"]))
-
-        if posted_user["user_pass"] is not None:
-            update_query = "update wp_users set user_pass = '%s' where ID = %s"
-            password = phasher.hash_password(posted_user["user_pass"])
-            cur.execute(update_query, (password, posted_user["ID"]))
+                if posted_user["user_pass"] is not None:
+                    update_query = "update wp_users set user_pass = '%s' where ID = %s"
+                    password = phasher.hash_password(posted_user["user_pass"])
+                    cur.execute(update_query, (password, posted_user["ID"]))
 
         mysql.connection.commit()
 
@@ -520,11 +528,11 @@ def merge_diffs(columns, diffs, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if item[id_idx] == modified[id_idx]:
+                if item[0] == modified[id_idx]:
                     data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if item[id_idx] == deleted[id_idx]:
+                if item[0] == deleted[id_idx]:
                     data.remove(item)
     return data
 

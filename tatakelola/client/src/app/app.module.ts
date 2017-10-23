@@ -3,9 +3,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-
+import { HttpModule } from '@angular/http';
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
+import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
 
@@ -13,16 +14,19 @@ import { SidebarComponent } from './components/sidebar';
   declarations: [
     AppComponent,
     MapComponent,
+    DesaComponent,
     SearchComponent,
     SidebarComponent
   ],
   imports: [    
     BrowserModule,
-    BrowserAnimationsModule,    
+    BrowserAnimationsModule,   
+    HttpModule, 
     LeafletModule.forRoot(),    
     RouterModule.forRoot([
       { path: '', redirectTo: 'map', pathMatch: 'full' },
-      { path: 'map', component: MapComponent }
+      { path: 'map', component: MapComponent },
+      { path: 'desa', component: DesaComponent }
     ])
   ],
   providers: [

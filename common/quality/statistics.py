@@ -82,21 +82,17 @@ def get_penduduk_statistics(cur, desa_id):
 	result["score_last_modified"]=0
 	result["score"] = 0
 
-
 	if sql_row_penduduk is not None:
 		last_modified={}
 		last_modified["date"] = str(sql_row_penduduk["date_created"])
 		last_modified["count"] = str(datetime.now() -sql_row_penduduk["date_created"])
 		last_modified["score"]= get_scale(7 -(datetime.now() - sql_row_penduduk["date_created"]).days , 7)
 		penduduk_cur = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')["data"]
+
 		for layer in other_layers:
 			tab = []
 			if layer in penduduk_cur:
 				tab = penduduk_cur[layer]
-			if tab is None:
-				layer_score["quantity"]["score"]=0
-				result["score_last_modified"]=0
-				layer_score["quality"]["score"]=0
 			layer_score = {}
 			layer_score["score"]=0
 			quantity_count = len(tab)
@@ -105,26 +101,23 @@ def get_penduduk_statistics(cur, desa_id):
 			quality_count= mean([quality(row) for row in tab])
 			quality_score = get_scale(quality_count, 6)
 			layer_score["quality"]= {"quality" : quality_count , "score" : quality_score}
-			#layer_score["quantity"]["score"]=0
-			#layer_score["quality"]["score"]=0
 			layer_score["score"]= 0.2*result["score_last_modified"] + 0.4*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
 			result[layer]=layer_score
 		layer_score_sum=layer_score["score"]/2
+
 		penduduk_uncounted=["pekerjaan_ped" , "kewarganegaraan" , "kompetensi", "no_telepon" , "email", "no_kitas" , "no_paspor" , "golongan_darah" , "status_penduduk" , "status_tinggal" , "kontrasepsi", "difabilitas"]
 		penduduk_cur_ = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')
-		if penduduk_cur_ is None:
-			last_modified["score"]=0
-			penduduk["quantity"]["score"]=0
-			penduduk["quality"]["score"]=0
 		columns = penduduk_cur_['columns']["penduduk"]
 		column_indexes= [columns.index(i)  for i in penduduk_uncounted if i in columns]
 		penduduk ["score"]=0
 		count_p=len(columns)
 		quality_p = mean([quality_penduduk(row,column_indexes) for row in columns])
 		max_quality= len(penduduk_uncounted) * 0.8 + (len(columns) - len(penduduk_uncounted)) * 1
+
 		if quantity_count in [1130, 1131, 1132, 2260]:
 			count_p=0
 			quality_p=0
+
 		quantity_score_p=get_scale(count_p, 1000)
 		quality_score_p=get_scale(quality_p, max_quality)
 		penduduk["quantity"]={"count": count_p, "score":quantity_score_p }
