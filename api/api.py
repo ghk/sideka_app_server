@@ -60,19 +60,14 @@ def login():
             return jsonify({"success": False, "message": 'Primary blog is not found'}), 403
 
         desa_id = int(primary_blog[0])
-        cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % desa_id)
-        opt = cur.fetchone()
-
-        if opt is not None:
-            desa_name = opt[0]
 
         token = os.urandom(64).encode('hex')
         cur.execute("INSERT INTO sd_tokens VALUES (%s, %s, %s, %s, now())", (token, user[0], desa_id, ""))
         mysql.connection.commit()
         logs(user_id, desa_id, token, "login", None, None)
-        return jsonify(
-            {'success': success, 'desa_id': desa_id, 'desa_name': desa_name, 'token': token, 'user_id': user_id,
-             'user_nicename': user_nicename, 'apiVersion': app.config["API_VERSION"]})
+        result = {'success': success, 'desa_id': desa_id, 'token': token, 'user_id': user_id, 'user_nicename': user_nicename, 'apiVersion': app.config["API_VERSION"]}
+        fill_complete_auth(result, cur)
+        return jsonify(result)
     except Exception as e:
         print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
@@ -100,6 +95,7 @@ def check_auth(desa_id):
     cur = mysql.connection.cursor()
     try:
         auth = get_auth(desa_id, cur)
+        fill_complete_auth(auth, cur)
         return jsonify(auth)
     except Exception as e:
         print str(e)
@@ -543,6 +539,21 @@ def get_auth(desa_id, cur):
             return {"user_id": user[0], "desa_id": user[1], "token": token}
     return None
 
+def fill_complete_auth(auth, cur):
+        cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % auth["desa_id"])
+        opt = cur.fetchone()
+
+        if opt is not None:
+            auth["desa_name"] = opt[0]
+
+        cur.execute("SELECT display_name FROM wp_users where ID = %s", (auth["user_id"],))
+        user_row = cur.fetchone()
+        auth["user_display_name"] = user_row[0]
+
+        meta_query = "select meta_value from wp_usermeta where  user_id = %s and meta_key = %s"
+        cur.execute(meta_query, (auth["user_id"], ("wp_%d_capabilities" % auth["desa_id"])))
+        meta_row = cur.fetchone()
+        auth["roles"] = phpserialize.loads(meta_row[0]).keys()
 
 def logs(user_id, desa_id, token, action, content_type, content_subtype):
     if (token == ""):
