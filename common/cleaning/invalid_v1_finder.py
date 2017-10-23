@@ -13,6 +13,7 @@ if __name__ == "__main__":
     query="select blog_id, domain from sd_desa"
     cur.execute(query)
     desas = list(cur.fetchall())
+    count = 0
     for desa in desas:
         cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id=%s and  type = 'penduduk' and api_version<>'2.0' order by timestamp desc limit 1",(desa["blog_id"],))
         sql_row_penduduk = cur.fetchone()
@@ -21,5 +22,7 @@ if __name__ == "__main__":
             for row in data:
                 if isinstance(row, dict):
                     print "%d - %s %d %s" % (desa["blog_id"], desa["domain"], sql_row_penduduk["id"], str(row))
+                    count += 1
                     break
+    print count
     db.close()
