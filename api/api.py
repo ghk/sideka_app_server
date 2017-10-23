@@ -375,93 +375,6 @@ def get_all_desa():
     finally:
         cur.close()
 
-@app.route('/user/<int:desa_id>', methods=["GET"])
-def get_users(desa_id):
-    cur = mysql.connection.cursor()
-    dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-
-    try:
-        auth = get_auth(desa_id, cur)
-        if auth is None:
-            return jsonify({}), 403
-
-        users_query = "select * from wp_usermeta inner join wp_users on wp_usermeta.user_id = wp_users.ID where meta_key = %s"
-        dictcur.execute(users_query, (("wp_%d_capabilities" % desa_id),))
-        user_rows = list(dictcur.fetchall())
-
-        results = []
-        for user_row in user_rows:
-            user = {}
-            mapped_columns = ["ID", "user_login", "user_email", "user_registered", "display_name"]
-            for column in mapped_columns:
-                user[column] = user_row[column]
-            user["user_pass"] = None
-            user["roles"] = phpserialize.loads(user_row["meta_value"]).keys()
-            results.append(user)
-
-        logs(auth["user_id"], desa_id, "", "get_user", None, None)
-        return jsonify(results)
-
-    finally:
-        cur.close()
-        dictcur.close()
-
-@app.route('/user/<int:desa_id>', methods=["POST"])
-def post_user(desa_id):
-    cur = mysql.connection.cursor()
-    dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    try:
-        auth = get_auth(desa_id, cur)
-        if auth is None:
-            return jsonify({}), 403
-
-        posted_user = request.json 
-        if posted_user["ID"] != auth["user_id"]:
-            #Check whether current user is administrator
-            current_user_roles_query = "select * from wp_usermeta where user_id = %s and meta_key = %s"
-            dictcur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
-            current_user_roles_row = dictcur.fetchone()
-            current_user_roles = []
-
-            if current_user_roles_row is not None:
-                for key, value in phpserialize.loads(current_user_roles_row["meta_value"]).iteritems():
-                    current_user_roles.append(key)
-
-            if "administrator" not in current_user_roles:
-                return jsonify({}), 403
-            
-            posted_user_roles = phpserialize.dumps(posted_user["roles"])
-
-            #Create new user 
-            if posted_user["ID"] is None:
-                create_query = "insert into wp_users(user_login, user_pass, user_nicename, user_email, user_registered, user_status, display_name) values (%s, %s, %s, %s, %s, %s, %s)"
-                new_password = phasher.hash_password(posted_user['user_pass'])
-                cur.execute(create_query, (posted_user['user_login'], new_password, posted_user['display_name'], posted_user['user_email'], posted_user['user_registered'], 1, posted_user['display_name']))
-                
-                #Save roles
-                create_meta_query = 'insert into wp_usermeta(user_id, meta_key, meta_value) values(%s, %s, %s)'
-                cur.execute(create_meta_query, (cur.lastrowid, 'wp_%d_capabilities' % desa_id, posted_user_roles))
-            else:
-                update_query = "update wp_users set user_email = %s, display_name = %s, user_nicename = %s where ID = %s"
-                cur.execute(update_query, (posted_user["user_email"], posted_user["display_name"], posted_user["display_name"], posted_user["ID"]))
-               
-                #Save roles
-                update_query = "update wp_usermeta set meta_value= %s where user_id = %s and meta_key = %s"
-                cur.execute(update_query, (posted_user_roles, posted_user["ID"], "wp_%d_capabilities" % desa_id))
-
-                if posted_user["user_pass"] is not None:
-                    update_query = "update wp_users set user_pass = '%s' where ID = %s"
-                    password = phasher.hash_password(posted_user["user_pass"])
-                    cur.execute(update_query, (password, posted_user["ID"]))
-
-        mysql.connection.commit()
-
-        logs(auth["user_id"], desa_id, "", "save_user", None, None)
-        return jsonify({"success": True})
-
-    finally:
-        cur.close()
-
 def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, client_columns):
     diffs = {}
     for tab, columns in client_columns.items():
@@ -550,9 +463,12 @@ def get_auth(desa_id, cur):
 def fill_complete_auth(auth, cur):
         cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'blogname'" % auth["desa_id"])
         opt = cur.fetchone()
-
         if opt is not None:
             auth["desa_name"] = opt[0]
+
+        cur.execute("SELECT option_value FROM wp_%d_options where option_name = 'siteurl'" % auth["desa_id"])
+        opt = cur.fetchone()
+        auth["siteurl"] = opt[0]
 
         cur.execute("SELECT display_name FROM wp_users where ID = %s", (auth["user_id"],))
         user_row = cur.fetchone()
