@@ -299,7 +299,125 @@ button.side:hover .text span {
     box-shadow: 1px 1px 1px #888;
 }
 
-input {
+.leaflet-control-zoom {
+    margin-top: 580px!important;
+    margin-left: 20px!important;
+}
+
+.show-hide-stat {
+    position: absolute;
+    top: 5px;
+    left: 305px;
+    display: inline-block;
+}
+
+.show-hide-side {
+    position: absolute;
+    top: 85px;
+    left: 0px;
+    display: inline-block;
+}
+
+.statsb {
+    width: 100px;
+    padding: 2px 10px;
+    background-color: #3B8686;
+    border: none;
+    box-shadow: 1px 1px 1px #888;
+    transition: .3s ease;
+    font-size: 8pt;
+    color: #fff;
+}
+
+.shide {
+    width: 300px;
+    padding: 2px 10px;
+    background-color: #3B8686;
+    border: none;
+    box-shadow: 1px 1px 1px #888;
+    transition: .3s ease;
+    font-size: 8pt;
+    color: #fff;
+}
+
+.shide:active {
+    background-color: #2c3e50;
+    color: #fff;
+    transition: 0s;
+}
+
+/* -- SIDEBAR -- */
+
+.sidebar {
+    position: absolute;
+    display: inline-block;
+    top: 105px;
+    width: 300px;
+    background: #fff;
+    box-shadow: 1px 1px 1px #888888;
+}
+
+.sidebar>a {
+    text-decoration: none;
+}
+
+.side {
+    width: 300px;
+    background-color: #ffffff;
+    color: #535353;
+    border: none;
+    position: relative;
+    z-index: 10;
+    left: 0px;
+    transition: .3s ease;
+    padding: 10px 20px;
+    border-bottom: solid 1px #cccccc;
+    display: table;
+}
+
+.side:hover {
+    background-color: #3B8686;
+    color: #ffffff;
+}
+
+.side:active {
+    background-color: #2c3e50;
+    transition: 0s;
+    color: #fff;
+}
+
+.icon {
+    width: 10%;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.icon i {
+    font-size: 12pt;
+}
+
+.desc {
+    width: 90%;
+    padding-left: 10px;
+    display: table-cell;
+}
+
+.desc h4 {
+    font-size: 10pt;
+}
+
+/* -- LEGEND -- */
+.legend {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    padding: 10px 15px;
+    background-color: #fff;
+    box-shadow: 1px 1px 1px #888;
+}
+
+input[type="checkbox"] {
     display: none;
 }
 
@@ -345,3 +463,41 @@ input:checked+label div {
     border: 1px solid #16a085;
 }
 
+
+.prevnext {
+    position: absolute;
+    top: 50px;
+    left: 0px;
+    display: inline-block;
+}
+
+.prev, .next {
+    width: 148px;
+    padding: 7px 10px;
+    background-color: #fff;
+    border: none;
+    box-shadow: 1px 1px 1px #888;
+    transition: .3s ease;
+    font-size: 10pt;
+    color: #535353;
+}
+
+.prev:hover, .next:hover {
+    background-color: #16a085;
+    color: #fff;
+}
+
+.prev:active, .next:active {
+    background-color: #2c3e50;
+    color: #fff;
+    transition: 0s;
+}
+
+/* -- STATISTIC -- */
+.statistic {
+    position: absolute;
+    left: 305px;
+    top: 25px;
+    display: inline-block;
+    box-shadow: 1px 1px 1px #888;
+}

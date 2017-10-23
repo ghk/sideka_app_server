@@ -12,6 +12,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     leafletOptions: any;
     leafletLayers: L.Layer[];
+    map: L.Map;
 
     @ViewChild('map')
     leafletComponent: ngxLeaflet.LeafletDirective
@@ -33,4 +34,8 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void { }
+
+    onMapReady(map): void {
+       this.map = map;
+    }
 }

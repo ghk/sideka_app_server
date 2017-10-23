@@ -532,11 +532,11 @@ def merge_diffs(columns, diffs, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if item[id_idx] == modified[id_idx]:
+                if item[0] == modified[id_idx]:
                     data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if item[id_idx] == deleted[id_idx]:
+                if item[0] == deleted[id_idx]:
                     data.remove(item)
     return data
 

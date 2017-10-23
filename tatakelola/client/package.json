@@ -22,7 +22,7 @@
     "@angular/platform-browser": "^4.3.6",
     "@angular/platform-browser-dynamic": "^4.3.6",
     "@angular/router": "^4.3.6",
-    "@asymmetrik/ngx-leaflet": "^2.4.0",
+    "@asymmetrik/ngx-leaflet": "^2.4.1",
     "bootstrap": "^3.3.7",
     "core-js": "^2.5.0",
     "font-awesome": "^4.7.0",
