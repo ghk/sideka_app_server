@@ -1,11 +1,5 @@
 {
    "pembangunan": [{"spatialId": "", "metadata": {} }],
    "batas": [{"spatialId": "qOd5P9PMI3m5dmFZzEgsl.", "metadata": {"admin_level":7, "status":"indicative"} }],
-   "potensi": [{ "spatialId": "Pn30qktiG_e6VAKKjDaPVk", "metadata": {} }, 
-                 { "spatialId": "53lzgnfQGoHbqQjVCmB3i.", "metadata": {} },
-                 { "spatialId": "7ek1Zks_Fu1ipYlf1Qu_Ak", "metadata": {} },
-                 { "spatialId": "_FfD_VthGf1ACHgJxkaLNk", "metadata": {} },
-                 { "spatialId": "k0w4bT2hFc19PSSaVWRABF", "metadata": {} },
-                 { "spatialId": "nIjUOQ_WIT1dX3GTsklymk", "metadata": {} },
-                 { "spatialId": "vhRERD8dF1Lt7UT1r25YI.", "metadata": {} }]
+   "potensi": [{ "spatial": [], "metadata": {} }]
 }

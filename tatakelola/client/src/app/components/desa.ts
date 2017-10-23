@@ -39,7 +39,7 @@ export class DesaComponent implements OnInit, OnDestroy {
   
        this.geojsonOptions = {
           style: (feature) => {
-              return { color: '#000', weight: feature.geometry.type === 'LineString' ? 3 : 1 }
+              return { color: '#000', weight: feature.geometry.type === 'LineString' ? 2 : 1 }
           },
 
           onEachFeature: (feature, layer) => {
@@ -58,7 +58,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                             element = current;
                             break;
                         }
-                    }
+                     }
                   }
 
                   if (!element)
@@ -71,25 +71,15 @@ export class DesaComponent implements OnInit, OnDestroy {
               }
           }
        }
-
+       this.extractData();
        this.loadBigConfig();
        this.loadMapData();
-       this.loadMapLayout();
-
+      
        $('.leaflet-control-zoom').css({display: 'none'});
-    }
-    
-    loadMapLayout(): void {
-        this.http.get('assets/mapLayout.json').map(res => res.json()).subscribe(
-           result => {
-              this.mapLayout = result;
-           },
-           error => {}
-        )
     }
 
     loadMapData(): void {
-        this.http.get('assets/mapData.json').map(res => res.json()).subscribe(
+        this.http.get('assets/data.json').map(res => res.json()).subscribe(
            result => {
               this.mapData = result;
            },
@@ -112,10 +102,37 @@ export class DesaComponent implements OnInit, OnDestroy {
           result => {
              let indicators = Object.keys(result.data).filter(e => e !== 'log_pembangunan');
              let mapLayout = [];
+             
+             let data = {
+                "potensi": [],
+                "pembangunan": [],
+                "batas": []
+             }
 
              indicators.forEach(indicator => {
-                 mapLayout = mapLayout.concat(result.data[indicator]);
+                result.data[indicator].forEach(item => {
+                   let landuse = item.properties ? item.properties['landuse']: null;
+                   let boundary = item.indicator === 'boundary' ? item.indicator : null;
+
+                   if(landuse) {
+                     if(landuse === 'farmland' || landuse === 'orchard' || landuse === 'forest') {
+                        data.potensi.push({
+                            "spatial": item,
+                            "metadata": item.properties
+                        });
+                     }
+                   }
+                   
+                   else if(boundary) {
+                       data.batas.push({
+                           "spatial": item,
+                           "metadata": item.properties
+                       })
+                   }
+                });
              });
+
+             console.log(JSON.stringify(data));
           },
           error => {}
        )
@@ -135,20 +152,14 @@ export class DesaComponent implements OnInit, OnDestroy {
           case 'pembangunan':
             break;
           case 'batas':
-            for(let i=0; i<this.mapData.batas.length; i++) {
-               let data = this.mapData.batas[i];
-               let feature = this.mapLayout.filter(e => e.id == data.spatialId)[0];
-
-               geojson.features.push(feature);
-            }
             break;
           case 'potensi': 
-            for(let i=0; i<this.mapData.potensi.length; i++) {
-               let data = this.mapData.potensi[i];
-               let feature = this.mapLayout.filter(e => e.id == data.spatialId)[0];
+            let spatials = this.mapData.potensi.map(e => e.spatial);
 
-               geojson.features.push(feature);
-            }
+            spatials.forEach(spatial => {
+               geojson.features.push(MapUtils.createFeature(spatial.geometry.coordinates, spatial.geometry.type, spatial.properties));
+            });
+           
             break;
        }
 
