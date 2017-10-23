@@ -99,8 +99,8 @@ def logout():
 def check_auth(desa_id):
     cur = mysql.connection.cursor()
     try:
-        user_id = get_auth(desa_id, cur)
-        return jsonify({'user_id': user_id})
+        auth = get_auth(desa_id, cur)
+        return jsonify(auth)
     except Exception as e:
         print str(e)
         return jsonify({"success": False, "message": str(e)}), 500
@@ -112,8 +112,8 @@ def check_auth(desa_id):
 def get_content_subtype(desa_id, content_type):
     cur = mysql.connection.cursor()
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         query = "SELECT distinct(subtype) from sd_contents where desa_id = %s and type = %s order by timestamp desc"
@@ -133,8 +133,8 @@ def get_content_subtype(desa_id, content_type):
 def get_content(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         result = None
@@ -151,7 +151,7 @@ def get_content(desa_id, content_type, content_subtype=None):
         if content is None:
             return jsonify({}), 404
 
-        logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
+        logs(auth["user_id"], desa_id, "", "get_content", content_type, content_subtype)
         result = json.loads(content[0])
         return jsonify(result)
     except Exception as e:
@@ -168,8 +168,8 @@ def post_content(desa_id, content_type, content_subtype=None):
     try:
         success = False
 
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({'success': False}), 403
 
         api_version = app.config["API_VERSION"]
@@ -208,9 +208,9 @@ def post_content(desa_id, content_type, content_subtype=None):
 
         cur.execute(
             "INSERT INTO sd_contents (desa_id, type, subtype, content, timestamp, date_created, created_by, change_id, api_version) VALUES (%s, %s, %s, %s, %s, now(), %s, %s, %s)",
-            (desa_id, content_type, content_subtype, request.data, timestamp, user_id, new_change_id, '1.0'))
+            (desa_id, content_type, content_subtype, request.data, timestamp, auth["user_id"], new_change_id, '1.0'))
         mysql.connection.commit()
-        logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
+        logs(auth["user_id"], desa_id, "", "save_content", content_type, content_subtype)
         return jsonify({'success': True})
     except Exception as e:
         print str(e)
@@ -224,8 +224,8 @@ def post_content(desa_id, content_type, content_subtype=None):
 def get_content_v2(desa_id, content_type, content_subtype=None):
     cur = mysql.connection.cursor()
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         client_change_id = 0
@@ -260,7 +260,7 @@ def get_content_v2(desa_id, content_type, content_subtype=None):
             diffs = get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, client_change_id, content["columns"])
             return_data["diffs"] = diffs
 
-        logs(user_id, desa_id, "", "get_content", content_type, content_subtype)
+        logs(auth["user_id"], desa_id, "", "get_content", content_type, content_subtype)
         return jsonify(return_data)
     finally:
         cur.close()
@@ -271,8 +271,8 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
     print "post content %d, %s, %s" % (desa_id, content_type, content_subtype)
     cur = mysql.connection.cursor()
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         result = None
@@ -356,9 +356,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     new_content["data"][tab] = latest_content["data"][tab]
 
         cur.execute("INSERT INTO sd_contents(desa_id, type, subtype, content, date_created, created_by, change_id, api_version) VALUES(%s, %s, %s, %s, now(), %s, %s, %s)", 
-            (desa_id, content_type, content_subtype, json.dumps(new_content), user_id, new_change_id, app.config["API_VERSION"]))
+            (desa_id, content_type, content_subtype, json.dumps(new_content), auth["user_id"], new_change_id, app.config["API_VERSION"]))
         mysql.connection.commit()    
-        logs(user_id, desa_id, "", "save_content", content_type, content_subtype)
+        logs(auth["user_id"], desa_id, "", "save_content", content_type, content_subtype)
 
         return_data['success'] = True
         return_data["change_id"] = return_data["changeId"] #TODO: remove this later
@@ -385,8 +385,8 @@ def get_users(desa_id):
     dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         users_query = "select * from wp_usermeta inner join wp_users on wp_usermeta.user_id = wp_users.ID where meta_key = %s"
@@ -403,7 +403,7 @@ def get_users(desa_id):
             user["roles"] = phpserialize.loads(user_row["meta_value"]).keys()
             results.append(user)
 
-        logs(user_id, desa_id, "", "get_user", None, None)
+        logs(auth["user_id"], desa_id, "", "get_user", None, None)
         return jsonify(results)
 
     finally:
@@ -415,12 +415,12 @@ def post_user(desa_id):
     cur = mysql.connection.cursor()
     dictcur = mysql.connection.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     try:
-        user_id = get_auth(desa_id, cur)
-        if user_id is None:
+        auth = get_auth(desa_id, cur)
+        if auth is None:
             return jsonify({}), 403
 
         posted_user = request.json 
-        if posted_user["ID"] != user_id:
+        if posted_user["ID"] != auth["user_id"]:
             #Check whether current user is administrator
             current_user_roles_query = "select * from wp_usermeta where user_id = %s and meta_key = %s"
             dictcur.execute(current_user_roles_query, (user_id, "wp_%d_capabilities" % desa_id))
@@ -452,7 +452,7 @@ def post_user(desa_id):
 
         mysql.connection.commit()
 
-        logs(user_id, desa_id, "", "save_user", None, None)
+        logs(auth["user_id"], desa_id, "", "save_user", None, None)
         return jsonify({"success": True})
 
     finally:
@@ -536,11 +536,11 @@ def get_auth(desa_id, cur):
     token = request.headers.get('X-Auth-Token', None)
 
     if token is not None:
-        cur.execute("SELECT user_id FROM sd_tokens where token = %s and desa_id = %s", (token, desa_id))
+        cur.execute("SELECT user_id, desa_id, token FROM sd_tokens where token = %s and desa_id = %s", (token, desa_id))
         user = cur.fetchone()
 
         if user is not None:
-            return user[0]
+            return {"user_id": user[0], "desa_id": user[1], "token": token}
     return None
 
 
