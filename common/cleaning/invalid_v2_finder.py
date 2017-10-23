@@ -14,9 +14,8 @@ if __name__ == "__main__":
     cur.execute(query)
     desas = list(cur.fetchall())
     for desa in desas:
-        cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id=%s and  type = 'penduduk' and api_version='1.0' order by timestamp desc limit 1",(desa["blog_id"],))
+        cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id=%s and  type = 'penduduk' and api_version='2.0' order by timestamp desc limit 1",(desa["blog_id"],))
         sql_row_penduduk = cur.fetchone()
-        #print "%d - %s" % (desa["blog_id"], desa["domain"])
         if sql_row_penduduk is not None:
             data = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')["data"]
             if isinstance(data, list):

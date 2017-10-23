@@ -18,6 +18,8 @@ if __name__ == "__main__":
         sql_row_penduduk = cur.fetchone()
         if sql_row_penduduk is not None:
             data = json.loads(sql_row_penduduk["content"], encoding='ISO-8859-1')["data"]
-            if isinstance(data, list):
-                print "%d - %s %d" % (desa["blog_id"], desa["domain"], sql_row_penduduk["id"])
+            for row in data:
+                if isinstance(row, dict):
+                    print "%d - %s %d %s" % (desa["blog_id"], desa["domain"], sql_row_penduduk["id"], str(row))
+                    break
     db.close()
