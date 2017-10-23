@@ -30,8 +30,8 @@ var columns = [
 	renderer: scoreRenderer
       },
       {
-	data: 'apbdes.score',
-	header: 'Anggaran',
+	data: 'keuangan.score',
+	header: 'Keuangan',
 	type: 'numeric',
 	format: '0.00',
 	renderer: scoreRenderer
