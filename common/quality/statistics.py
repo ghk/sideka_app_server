@@ -257,7 +257,7 @@ def get_keuangan_statistics(cur, desa_id):
 
 
 	#Calculate SPP
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'spp' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'spp' and subtype = '2017' order by date_created desc", (desa_id,))
 	sql_row_spp = cur.fetchone()
 	spp_score={}
 	spp_datas=["spp" , "spp_bukti" ,"spp_rinci"]
@@ -308,7 +308,7 @@ def get_keuangan_statistics(cur, desa_id):
 	result["spp"]=spp_score
 
 	#Calculate Penerimaan
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penerimaan' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penerimaan' order by change_id desc", (desa_id,))
 	sql_row_penerimaan=cur.fetchone()
 	penerimaan={}
 	penerimaan_datas=["tbp" , "tbp_rinci"]
