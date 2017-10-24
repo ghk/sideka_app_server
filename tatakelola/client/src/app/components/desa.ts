@@ -52,7 +52,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                   for(let j=0; j<indicator.elements.length; j++) {
                       let current = indicator.elements[j];
 
-                    if(current.values){
+                     if(current.values) {
                         let valueKeys = Object.keys(current.values);
                         if(valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])){
                             element = current;
