@@ -274,7 +274,7 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         permission = content_type
         if content_type in ["perencanaan", "penganggaran", "spp", "penerimaan"]:
             permission = "keuangan"
-        if "administrator" not in auth.roles and permission not in auth.roles:
+        if "administrator" not in auth["roles"] and permission not in auth["roles"]:
             return jsonify({"message": "your account doesn't have the permission"}), 403
 
         result = None
