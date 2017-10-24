@@ -269,7 +269,13 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
     try:
         auth = get_auth(desa_id, cur)
         if auth is None:
-            return jsonify({}), 403
+            return jsonify({"message": "invalid or no token"}), 403
+        
+        permission = content_type
+        if content_type in ["perencanaan", "penganggaran", "spp", "penerimaan"]:
+            permission = "keuangan"
+        if "administrator" not in auth.roles and permission not in auth.roles:
+            return jsonify({"message": "your account doesn't have the permission"}), 403
 
         result = None
 
@@ -457,7 +463,15 @@ def get_auth(desa_id, cur):
         user = cur.fetchone()
 
         if user is not None:
-            return {"user_id": user[0], "desa_id": user[1], "token": token}
+            auth = {"user_id": user[0], "desa_id": user[1], "token": token}
+
+            meta_query = "select meta_value from wp_usermeta where  user_id = %s and meta_key = %s"
+            cur.execute(meta_query, (auth["user_id"], ("wp_%d_capabilities" % auth["desa_id"])))
+            meta_row = cur.fetchone()
+            auth["roles"] = phpserialize.loads(meta_row[0]).keys()
+
+            return auth
+
     return None
 
 def fill_complete_auth(auth, cur):
@@ -474,10 +488,6 @@ def fill_complete_auth(auth, cur):
         user_row = cur.fetchone()
         auth["user_display_name"] = user_row[0]
 
-        meta_query = "select meta_value from wp_usermeta where  user_id = %s and meta_key = %s"
-        cur.execute(meta_query, (auth["user_id"], ("wp_%d_capabilities" % auth["desa_id"])))
-        meta_row = cur.fetchone()
-        auth["roles"] = phpserialize.loads(meta_row[0]).keys()
 
 def logs(user_id, desa_id, token, action, content_type, content_subtype):
     if (token == ""):
