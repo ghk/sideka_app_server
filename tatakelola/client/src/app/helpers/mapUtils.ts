@@ -28,7 +28,7 @@ export default class MapUtils {
         return resultStyle;
     }
 
-      static getStyleColor(configStyle, defaultColor=null){
+    static getStyleColor(configStyle, defaultColor=null){
         if(configStyle['cmykColor'])
             return this.cmykToRgbString(configStyle['cmykColor']);
         if(configStyle['rgbColor'])
@@ -49,4 +49,43 @@ export default class MapUtils {
         let r = rgb[0], g = rgb[1], b = rgb[2];
         return "rgb(" + r + "," + g + "," + b + ")";
     }
+
+    static getCentroid(coordinates): any[] {
+        let result = [0, 0];
+
+        if(coordinates.length === 0)
+            return result;
+
+        let xCoordinates = [];
+        let yCoordinates = [];
+       
+        for(let i=0; i<coordinates.length; i++){
+            let coordinate = coordinates[i];
+
+            for(let j=0; j<coordinate.length; j++){
+                if(coordinate[j][0] instanceof Array){
+                    for(let k=0; k<coordinate[j].length; k++){
+                        xCoordinates.push(coordinate[j][k][0]);
+                        yCoordinates.push(coordinate[j][k][1]);
+                    }
+                }
+                else{
+                    xCoordinates.push(coordinate[j][0]);
+                    yCoordinates.push(coordinate[j][1]);
+                }
+            }
+        }
+
+        let xLength = xCoordinates.length;
+        let yLength = yCoordinates.length;
+
+        let sumX = xCoordinates.reduce((a, b) => { return a + b; });
+        let sumY = yCoordinates.reduce((a, b) => { return a + b; });
+        
+        result[0] = sumX /xLength;
+        result[1] = sumY /yLength;
+
+        return result;
+    }
+
 }
