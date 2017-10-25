@@ -51,3 +51,10 @@ def generate_all():
     db.session.commit()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
+
+
+@app.route('/admin/run/all', methods=['GET'])
+def run_all():
+    fetch_result = fetch_all()
+    generate_result = generate_all()
+    return generate_result;
