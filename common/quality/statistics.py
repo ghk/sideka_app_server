@@ -215,7 +215,7 @@ def get_keuangan_statistics(cur, desa_id):
 		rkp_score= 0
 		sum_quality_rkp = 0
 		sum_quantity_rkp = 0
-		for i in range (1,6):
+		for i in range (1,7):
 			rkp_name="rkp"+str(i)
 			rkp_tab=perencanaan_cur[rkp_name]
 			rkp_quantity_count = len(rkp_tab)
@@ -228,11 +228,9 @@ def get_keuangan_statistics(cur, desa_id):
 			sum_quantity_rkp += result["perencanaan"]["rkp"]["quantity_"+rkp_name]["score"]
 		result["perencanaan"]["rkp"]["total_score_quality"] = sum_quality_rkp/6.0
 		result["perencanaan"]["rkp"]["total_score_quantity"] = sum_quantity_rkp/6.0
-		result["perencanaan"]["rkp"]["total_score"]=0.4*result["perencanaan"]["rkp"]["total_score_quality"] + 0.6*result["perencanaan"]["rkp"]["total_score_quantity"]
+		result["perencanaan"]["rkp"]["total_score"]=0.8*result["perencanaan"]["rkp"]["total_score_quality"] + 0.2*result["perencanaan"]["rkp"]["total_score_quantity"]
 
-	result["perencanaan"]["score"] = 0.3 * result["perencanaan"]["renstra"]["score"] + 0.3 * result["perencanaan"]["rpjm"]["total_score"] + 0.3 * result["perencanaan"]["rkp"]["total_score"] + 0.1 * result["perencanaan"]["last_modified_perencanaan"]["score"]
-
-
+	result["perencanaan"]["score"] = 0.1 * result["perencanaan"]["renstra"]["score"] + 0.4 * result["perencanaan"]["rpjm"]["total_score"] + 0.4 * result["perencanaan"]["rkp"]["total_score"] + 0.1 * result["perencanaan"]["last_modified_perencanaan"]["score"]
 
 	#Calculate Penganggaran
 	rab = {}
@@ -253,7 +251,7 @@ def get_keuangan_statistics(cur, desa_id):
 		rab_score_quality = get_scale(rab_quality_count, 15)
 		result["pengangaran"]["rab"]["quantity"]={"count":rab_quantity_count , "score":rab_score_quantity}
 		result["pengangaran"]["rab"]["quality"]={"count":rab_quality_count, "score":rab_score_quality}
-	result["pengangaran"]["score"] = 0.4 *result["pengangaran"]["rab"]["quality"]["score"] + 0.4 * result["pengangaran"]["rab"]["quantity"]["score"] + 0.2 * result["pengangaran"]["last_modified_penganggaran"]["score"]
+	result["pengangaran"]["score"] = 0.2 *result["pengangaran"]["rab"]["quality"]["score"] + 0.7 * result["pengangaran"]["rab"]["quantity"]["score"] + 0.1 * result["pengangaran"]["last_modified_penganggaran"]["score"]
 
 
 	#Calculate SPP
@@ -294,7 +292,7 @@ def get_keuangan_statistics(cur, desa_id):
 			sum_quality_spp+=data_score["quality"]["score"]
 		spp_quantity_avg=sum_quantity_spp/3.0
 		spp_quality_avg=sum_quality_spp/3.0
-		spp_score_datas= 0.4*spp_quantity_avg + 0.6*spp_quality_avg
+		spp_score_datas= 0.9*spp_quantity_avg + 0.1*spp_quality_avg
 		date_spp={}
 		spp_cur_=spp_cur["spp"]
 		#date_array=[r[3] for r in spp_cur]
@@ -304,7 +302,7 @@ def get_keuangan_statistics(cur, desa_id):
 		date_spp["score"]=get_scale(7 -(datetime.now() - date_spp["max"]).days , 7)
 		spp_score["last_modified"]=last_modified_spp
 		spp_score["date_spp"]=str(date_spp)
-		spp_score["score"]=0.2*last_modified_spp["score"] + 0.6*spp_score_datas + 0.2*date_spp["score"]
+		spp_score["score"]=0.1*last_modified_spp["score"] + 0.8*spp_score_datas + 0.1*date_spp["score"]
 	result["spp"]=spp_score
 
 	#Calculate Penerimaan
@@ -346,7 +344,7 @@ def get_keuangan_statistics(cur, desa_id):
 			sum_quality_penerimaan+=data_score["quality"]["score"]
 		penerimaan_quantity_avg=sum_quantity_penerimaan/2.0
 		penerimaan_quality_avg=sum_quality_penerimaan/2.0
-		penerimaan_score_datas= 0.4*penerimaan_quantity_avg + 0.6*penerimaan_quality_avg
+		penerimaan_score_datas= 0.8*penerimaan_quantity_avg + 0.2*penerimaan_quality_avg
 		date_tbp={}
 		tbp_cur=penerimaan_cur["tbp"]
 		#date_array=[r[3] for r in spp_cur]
@@ -356,11 +354,11 @@ def get_keuangan_statistics(cur, desa_id):
 		date_tbp["score"]=get_scale(7 -(datetime.now() - date_tbp["max"]).days , 7)
 		penerimaan["last_modified"]=last_modified_penerimaan
 		penerimaan["date_tbp"]=str(date_tbp)
-		penerimaan["score"]=0.2*last_modified_penerimaan["score"] + 0.6*penerimaan_score_datas + 0.2*date_tbp["score"]
+		penerimaan["score"]=0.1*last_modified_penerimaan["score"] + 0.8*penerimaan_score_datas + 0.1*date_tbp["score"]
 	result["penerimaan"]=penerimaan
 
 		#Calculate Total
-	result["score"]=0.2*result["perencanaan"]["score"] + 0.2*result["pengangaran"]["score"] + 0.3*result["spp"]["score"] + 0.3*result["penerimaan"]["score"]
+	result["score"]=0.1*result["perencanaan"]["score"] + 0.4*result["pengangaran"]["score"] + 0.3*result["spp"]["score"] + 0.2*result["penerimaan"]["score"]
 	return result
  
 def get_pemetaan_statistics(cur, desa_id):

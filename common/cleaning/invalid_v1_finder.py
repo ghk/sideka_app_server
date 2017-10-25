@@ -4,9 +4,9 @@ import json
 from utils import open_cfg, query_single
 
 def fix_content(old_content):
-    if "columns" not in old_content:
-        print "cannot fix, no column"
-        return old_content
+    #if "columns" not in old_content:
+     #   print "cannot fix, no column"
+      #  return old_content
 
     new_content = {}
     new_content["columns"] = old_content["columns"]
