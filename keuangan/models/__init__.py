@@ -12,4 +12,4 @@ from siskeudes_spp import SiskeudesSpp, SiskeudesSppModelSchema, SiskeudesSppMod
 from siskeudes_spp_bukti import SiskeudesSppBukti, SiskeudesSppBuktiModelSchema, SiskeudesSppBuktiModelSchemaIso
 from siskeudes_spp_rinci import SiskeudesSppRinci, SiskeudesSppRinciModelSchema
 
-from common.models import SdContent, SdContentSchema
+from common.models import SdContent, SdContentSchema, SdDesa, SdDesaSchema
