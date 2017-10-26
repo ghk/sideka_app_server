@@ -55,6 +55,10 @@ class SiskeudesFetcher:
             if (len(sps.data) < 1):
                 continue
 
+            has_kode_desa = getattr(sps.data[0], 'kode_desa', None);
+            if (has_kode_desa is None):
+                continue
+
             kode_desa = sps.data[0].kode_desa
             kode_desa = str(kode_desa).rstrip().rstrip('.')
             region = region_repository.get_by_desa_id(sd_content.desa_id)
