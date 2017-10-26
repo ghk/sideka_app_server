@@ -4,9 +4,9 @@ import json
 from utils import open_cfg, query_single
 
 def fix_content(old_content):
-    #if "columns" not in old_content:
-     #   print "cannot fix, no column"
-      #  return old_content
+    if "columns" not in old_content:
+        print "cannot fix, no column"
+        return old_content
 
     new_content = {}
     new_content["columns"] = old_content["columns"]
@@ -24,8 +24,6 @@ def fix_content(old_content):
         else:
             print "cannot handle %s" % str(old_row)
 
-    #new_content={"timestamp": None , "data": [{"0":None, "1":None ,"2":None, "3":None,"4":None ,"5":None, "6":None, "7":None, "8":None, "9":None, "10":None, "11":None, "12":None, "13":None, "14":None, "15":None, "16":None, "17":None, "18":None, "19":None, "20":None, "21":None, "22":None, "23":None, "24":None, "25":None, "26":None, "27":None, "28":None]}.format(**old_content)
-    #new_content = old_content
     return new_content
 
 if __name__ == "__main__":
@@ -56,8 +54,8 @@ if __name__ == "__main__":
                 content_str = json.dumps(new_content, encoding='ISO-8859-1')
                 print sql_row_penduduk["content"]
                 print content_str
-                #cur.execute("update sd_contents set content = %s where id = %s", (content_str, sql_row_penduduk["id"]))
-                #db.commit()
+                cur.execute("update sd_contents set content = %s where id = %s", (content_str, sql_row_penduduk["id"]))
+                db.commit()
 
 
     print count
