@@ -74,11 +74,11 @@ def quality_penduduk(row, column_indexes):
 
 	
 def get_penduduk_statistics(cur, desa_id):
-	result = { "logSurat": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "last_modified": {"date": None, "count": None, "score": 0.0}, "penduduk": {"score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "mutasi": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score_last_modified": 0 , "score" :0.0}
+	result = { "log_surat": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "last_modified": {"date": None, "count": None, "score": 0.0}, "penduduk": {"score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "mutasi": {"score": 0.0, "quality": {"score": 0.0, "quality": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score_last_modified": 0 , "score" :0.0}
 	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penduduk' and api_version='2.0' order by timestamp desc", (desa_id,))
 	sql_row_penduduk =  cur.fetchone()
 	penduduk={}
-	other_layers=["mutasi" , "logSurat"]
+	other_layers=["mutasi" , "log_surat"]
 	result["score_last_modified"]=0
 	result["score"] = 0
 
@@ -172,8 +172,8 @@ def get_renstra_category_score(renstra, category):
 	return 0
 
 def get_keuangan_statistics(cur, desa_id):
-	#result={"spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None, "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None, "last_modified": {"date": None, "count": None, "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None, "count": None, "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "pengangaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}}
-	result = {"score" : 0.0, "spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None , "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None , "last_modified": {"date": None , "count": None , "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None , "count": None , "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "pengangaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}
+	#result={"spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None, "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None, "last_modified": {"date": None, "count": None, "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None, "count": None, "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "penganggaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}}
+	result = {"score" : 0.0, "spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None , "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None , "last_modified": {"date": None , "count": None , "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None , "count": None , "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "penganggaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}
 	#perencanaan = {}
 	#penganggaran = {}
 	#renstra = {}
@@ -239,9 +239,9 @@ def get_keuangan_statistics(cur, desa_id):
 	sql_row_penganggaran = cur.fetchone()
 	#result["last_modified_penganggaran"]["score"] = 0
 	if sql_row_penganggaran is not None:
-		result["pengangaran"]["last_modified_penganggaran"]["date"] = str(sql_row_penganggaran["date_created"])
-		result["pengangaran"]["last_modified_penganggaran"]["count"] = str(datetime.now() - sql_row_penganggaran["date_created"])
-		result["pengangaran"]["last_modified_penganggaran"]["score"] = get_scale(7 -(datetime.now() - sql_row_penganggaran["date_created"]).days , 7)
+		result["penganggaran"]["last_modified_penganggaran"]["date"] = str(sql_row_penganggaran["date_created"])
+		result["penganggaran"]["last_modified_penganggaran"]["count"] = str(datetime.now() - sql_row_penganggaran["date_created"])
+		result["penganggaran"]["last_modified_penganggaran"]["score"] = get_scale(7 -(datetime.now() - sql_row_penganggaran["date_created"]).days , 7)
 		penganggaran_cur = json.loads(sql_row_penganggaran["content"], encoding='ISO-8859-1')["data"]
 		rab_tab= penganggaran_cur["rab"]
 		penganggaran_score = 0
@@ -249,9 +249,9 @@ def get_keuangan_statistics(cur, desa_id):
 		rab_quality_count = mean([quality(row) for row in rab_tab])
 		rab_score_quantity = get_scale(rab_quantity_count,300)
 		rab_score_quality = get_scale(rab_quality_count, 15)
-		result["pengangaran"]["rab"]["quantity"]={"count":rab_quantity_count , "score":rab_score_quantity}
-		result["pengangaran"]["rab"]["quality"]={"count":rab_quality_count, "score":rab_score_quality}
-	result["pengangaran"]["score"] = 0.25 *result["pengangaran"]["rab"]["quality"]["score"] + 0.7 * result["pengangaran"]["rab"]["quantity"]["score"] + 0.05 * result["pengangaran"]["last_modified_penganggaran"]["score"]
+		result["penganggaran"]["rab"]["quantity"]={"count":rab_quantity_count , "score":rab_score_quantity}
+		result["penganggaran"]["rab"]["quality"]={"count":rab_quality_count, "score":rab_score_quality}
+	result["penganggaran"]["score"] = 0.25 *result["penganggaran"]["rab"]["quality"]["score"] + 0.7 * result["penganggaran"]["rab"]["quantity"]["score"] + 0.05 * result["penganggaran"]["last_modified_penganggaran"]["score"]
 
 
 	#Calculate SPP
@@ -358,7 +358,7 @@ def get_keuangan_statistics(cur, desa_id):
 	result["penerimaan"]=penerimaan
 
 		#Calculate Total
-	result["score"]=0.1*result["perencanaan"]["score"] + 0.4*result["pengangaran"]["score"] + 0.3*result["spp"]["score"] + 0.2*result["penerimaan"]["score"]
+	result["score"]=0.1*result["perencanaan"]["score"] + 0.4*result["penganggaran"]["score"] + 0.3*result["spp"]["score"] + 0.2*result["penerimaan"]["score"]
 	return result
  
 def get_pemetaan_statistics(cur, desa_id):
