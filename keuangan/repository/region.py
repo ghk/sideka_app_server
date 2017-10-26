@@ -13,6 +13,11 @@ class RegionRepository(BaseRepository):
             .filter(self.model.id == id) \
             .first()
 
+    def get_by_desa_id(self, desa_id):
+        return self.db.session.query(self.model) \
+            .filter(self.model.desa_id == desa_id) \
+            .first()
+
     def all(self, is_lokpri=True, page_sort_params=None):
         query = self.db.session.query(self.model) \
             .filter(self.model.is_lokpri == is_lokpri)
