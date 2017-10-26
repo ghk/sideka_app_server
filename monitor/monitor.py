@@ -183,9 +183,9 @@ def get_dashboard_data():
             cur.execute(stats_query % (end,))
             stats = [combine(c) for c in cur.fetchall()]
             weekly_penduduk.append(
-                len(list(filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.6, stats))))
+                len(list(filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))))
             weekly_keuangan.append(
-                len(list(filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.6, stats))))
+                len(list(filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))))
 
         weekly = {}
         weekly["desa"] = weekly_desa
@@ -365,9 +365,9 @@ def get_weekly_panel():
         cur.execute(stats_query)
         stats = [combine(c) for c in cur.fetchall()]
         results["penduduk"] = list(
-            filter(lambda s: s["penduduk"]["score"] > 0.6, stats))
+            filter(lambda s: s["penduduk"]["score"] > 0.5, stats))
         results["keuangan"] = list(
-            filter(lambda s: s["keuangan"]["score"] > 0.6, stats))
+            filter(lambda s: s["keuangan"]["score"] > 0.5, stats))
 
         return jsonify(results)
     finally:
