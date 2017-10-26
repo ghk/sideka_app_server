@@ -1,5 +1,5 @@
 var dataDashboard, dataStatistics, cachedPanelData = {},cachedDailyGraphData = {}, map, markers = [], chartsPeity = [] ;
-var weekly = ["desa", "post", "penduduk", "apbdes"]
+var weekly = ["desa", "post", "penduduk", "keuangan"]
 var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
 var width = $(window).width();
 
@@ -52,8 +52,8 @@ var canvasDaily = document.getElementById('daily-graph');
 var dailyGraph = new Chart(getContext(canvasDaily), configDaily);
 var canvasDesa = document.getElementById('desa-graph')
 var desaGraph = new Chart(getContext(canvasDesa),configPanel)
-var canvasapbdes = document.getElementById('apbdes-graph');
-var apbdesGraph = new Chart(getContext(canvasapbdes),configPanel)
+var canvasKeuangan = document.getElementById('keuangan-graph');
+var keuanganGraph = new Chart(getContext(canvasKeuangan),configPanel)
 var canvasPost = document.getElementById('post-graph');
 var postGraph = new Chart(getContext(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
@@ -126,7 +126,7 @@ function onSupradesaChanged(supradesaId){
 				fill: false,
 				backgroundColor: fill[3],
 				borderColor: fill[3],
-				data: data.daily.apbdes,
+				data: data.daily.keuangan,
 			})
 		dailyGraph.update();
 			
@@ -221,20 +221,20 @@ function onPanelClicked(panelName,data){
 			thead = $('#table-penduduk-weekly thead');
 			tbody = $('#table-penduduk-weekly tbody');
 			break;
-		case "apbdes":
-			apbdesGraph.data.datasets = []			
-			apbdesGraph.update();						
-			apbdesGraph.data.datasets.push({
+		case "keuangan":
+			keuanganGraph.data.datasets = []			
+			keuanganGraph.update();						
+			keuanganGraph.data.datasets.push({
 				label: "Desa Berdata Keuangan",
 				backgroundColor: "#ffa000",
 				borderColor: "#ffa000",
 				borderWidth: 1,
-				data: dataDashboard["weekly"]["apbdes"],	
+				data: dataDashboard["weekly"]["keuangan"],	
 				fill:false					
 			})
-			apbdesGraph.update();
-			thead = $('#table-apbdes-weekly thead');
-			tbody = $('#table-apbdes-weekly tbody');
+			keuanganGraph.update();
+			thead = $('#table-keuangan-weekly thead');
+			tbody = $('#table-keuangan-weekly tbody');
 			break;
 	}	
 	if(panelName !=="desa"){
@@ -302,7 +302,7 @@ function addMarker(content,icon) {
 				  'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
-				  'Apbdes: '+(content.apbdes.score*100).toFixed(2);
+				  'Keuangan: '+(content.keuangan.score*100).toFixed(2);
 	var infowindow = new google.maps.InfoWindow();
 	google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
 		return function() {
