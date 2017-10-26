@@ -13,7 +13,6 @@ import 'chart.piecelabel.js';
     selector: 'sk-spending-chart',
     templateUrl: '../templates/spending-chart.html',
 })
-
 export class SpendingChartComponent implements OnInit, OnDestroy {
 
     region: any;

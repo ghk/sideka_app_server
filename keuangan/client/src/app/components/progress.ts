@@ -8,7 +8,6 @@ import { SharedService } from '../services/shared';
     selector: 'sk-progress',
     templateUrl: '../templates/progress.html',
 })
-
 export class ProgressComponent implements OnInit, OnDestroy {
 
     private _routeSubscription: Subscription;

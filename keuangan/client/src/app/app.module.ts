@@ -9,7 +9,7 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
 import { ProgressComponent } from './components/progress';
-import { ProgressRecapitulationComponent } from './components/progress-recapitulation';
+import { ProgressRecapitulationComponent, FormatCurrencyPipe } from './components/progress-recapitulation';
 import { ProgressTimelineComponent } from './components/progress-timeline';
 import { ProgressDetailComponent } from './components/progress-detail';
 import { SpendingComponent } from './components/spending';
@@ -34,6 +34,7 @@ import { SharedService } from './services/shared';
     SpendingChartComponent,
     HideBudgetDetailPipe,
     BudgetTypePipe,
+    FormatCurrencyPipe
   ],
   imports: [
     BrowserModule,

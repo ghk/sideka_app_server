@@ -11,7 +11,6 @@ import { Query } from '../models/query';
     selector: 'sk-progress-timeline',
     templateUrl: '../templates/progress-timeline.html',
 })
-
 export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
     region: any;
