@@ -68,9 +68,6 @@ def login():
         result = {'success': success, 'desa_id': desa_id, 'token': token, 'user_id': user_id, 'user_nicename': user_nicename, 'apiVersion': app.config["API_VERSION"]}
         fill_complete_auth(result, cur)
         return jsonify(result)
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -83,9 +80,6 @@ def logout():
         cur.execute("DELETE FROM sd_tokens where token = %s", (token,))
         mysql.connection.commit()
         return jsonify({'success': True})
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close()
 
@@ -95,11 +89,11 @@ def check_auth(desa_id):
     cur = mysql.connection.cursor()
     try:
         auth = get_auth(desa_id, cur)
+        if auth is None:
+            return jsonify(None)
+
         fill_complete_auth(auth, cur)
         return jsonify(auth)
-    except Exception as e:
-        print str(e)
-        return jsonify({"success": False, "message": str(e)}), 500
     finally:
         cur.close();
 
