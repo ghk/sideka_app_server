@@ -4,11 +4,10 @@ import json
 from utils import open_cfg, query_single
 
 def fix_content(old_content):
-    #if "columns" not in old_content:
-     #   print "cannot fix, no column"
-      #  return old_content
-
     new_content = {}
+    if "columns" not in old_content:
+        new_content["columns"]={"0":"nik","1":"nama_penduduk","2":"tempat_lahir","3":"tanggal_lahir","4":"jenis_kelamin","5":"pendidikan","6":"agama","7":"status_kawin","8":"pekerjaan","9":"pekerjaan_ped","10":"kewarganegaraan","11":"kompetensi","12":"no_telepon","13":"email","14":"no_kitas","15":"no_paspor","16":"golongan_darah","17":"status_penduduk","18":"status_tinggal","19":"kontrasepsi","20":"difabilitas","21":"no_kk","22":"nama_ayah","23":"nama_ibu","24":"hubungan_keluarga","25":"nama_dusun","26":"rw","27":"rt","28":"alamat_jalan"}
+        return new_content
     new_content["columns"] = old_content["columns"]
     new_content["timestamp"] = old_content["timestamp"]
     column_length = len(new_content["columns"])
@@ -23,7 +22,6 @@ def fix_content(old_content):
             new_content["data"].append(new_row)
         else:
             print "cannot handle %s" % str(old_row)
-
     #new_content={"timestamp": None , "data": [{"0":None, "1":None ,"2":None, "3":None,"4":None ,"5":None, "6":None, "7":None, "8":None, "9":None, "10":None, "11":None, "12":None, "13":None, "14":None, "15":None, "16":None, "17":None, "18":None, "19":None, "20":None, "21":None, "22":None, "23":None, "24":None, "25":None, "26":None, "27":None, "28":None]}.format(**old_content)
     #new_content = old_content
     return new_content
