@@ -4,7 +4,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   selector: 'st-app',
   templateUrl: '../templates/app.html',
 })
-
 export class AppComponent implements OnInit, OnDestroy {
 
   constructor() { }

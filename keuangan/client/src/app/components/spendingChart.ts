@@ -11,9 +11,8 @@ import 'chart.piecelabel.js';
 
 @Component({
     selector: 'sk-spending-chart',
-    templateUrl: '../templates/spending-chart.html',
+    templateUrl: '../templates/spendingChart.html',
 })
-
 export class SpendingChartComponent implements OnInit, OnDestroy {
 
     region: any;

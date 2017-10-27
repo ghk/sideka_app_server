@@ -3,7 +3,7 @@
     <div class="col-sm-8" style="border-right: 1px solid #ddd;">
       <ul class="nav nav-tabs front-numbers">
         <li>
-          <span class="number text-success">Rp. {{ total.budgetedRevenue | number:'3.0-0' }}</span>
+          <span class="number text-success">Rp. {{ total.budgetedRevenue | formatCurrency }}</span>
         </li>
         <li>
           <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.0-0' }}</span>
@@ -24,6 +24,7 @@
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
               <th>Desa</th>
+              <th>Kabupaten</th>
               <th class="money">Anggaran Desa</th>
               <th class="money">Tersalurkan Kabupaten</th>
               <th class="money">Terrealisasi Desa</th>
@@ -36,6 +37,7 @@
                                     <span>{{ entity.region.name }}</span> 
                                 </a>
               </td>
+              <td><span>{{ entity.region | regionType:2 }}</span></td>
               <td class="money">
                 <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
                 <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
@@ -54,6 +56,7 @@
           <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
             <tr class="success">
               <td><a href>Total</a></td>
+              <td></td>
               <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
               <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
               <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>

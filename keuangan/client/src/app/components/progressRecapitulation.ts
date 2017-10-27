@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Pipe, PipeTransform } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
@@ -6,13 +6,14 @@ import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
+
+
 @Component({
     selector: 'sk-progress-recapitulation',
-    templateUrl: '../templates/progress-recapitulation.html',
+    templateUrl: '../templates/progressRecapitulation.html',
 })
-
 export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
-    
+
     entities: any = [];
     progress: Progress;
     total: {

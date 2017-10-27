@@ -1,5 +1,5 @@
 from base import BaseModel
-from region import Region, RegionModelSchema
+from region import Region, RegionModelSchema, RegionCompleteModelSchema
 from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationModelSchema
 from progress_timeline import ProgressTimeline, ProgressTimelineModelSchema
 from spending_type import SpendingType, SpendingTypeModelSchema
@@ -12,4 +12,4 @@ from siskeudes_spp import SiskeudesSpp, SiskeudesSppModelSchema, SiskeudesSppMod
 from siskeudes_spp_bukti import SiskeudesSppBukti, SiskeudesSppBuktiModelSchema, SiskeudesSppBuktiModelSchemaIso
 from siskeudes_spp_rinci import SiskeudesSppRinci, SiskeudesSppRinciModelSchema
 
-from common.models import SdContent, SdContentSchema
+from common.models import SdContent, SdContentSchema, SdDesa, SdDesaSchema

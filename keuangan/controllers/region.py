@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
-from keuangan.models import RegionModelSchema
+from keuangan.models import RegionModelSchema, RegionCompleteModelSchema
 from keuangan.repository import RegionRepository
 from keuangan.helpers import QueryHelper
 
@@ -25,5 +25,5 @@ def get_regions_count():
 @app.route('/regions/<string:id>', methods=['GET'])
 def get_region(id):
     region = region_repository.get(id)
-    result = RegionModelSchema(many=False).dump(region)
+    result = RegionCompleteModelSchema(many=False).dump(region)
     return jsonify(result.data)

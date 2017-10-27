@@ -1,7 +1,7 @@
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionModelSchema
+from region import RegionCompleteModelSchema
 
 
 class ProgressRecapitulation(BaseModel):
@@ -24,4 +24,4 @@ class ProgressRecapitulationModelSchema(ma.ModelSchema):
         model = ProgressRecapitulation
         include_fk = True
 
-    region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+    region = ma.Nested(RegionCompleteModelSchema, many=False)

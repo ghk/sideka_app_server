@@ -8,6 +8,7 @@ from transformer import *
 
 region_repository = RegionRepository(db)
 sideka_content_repository = SidekaContentRepository(db)
+sideka_desa_repository = SidekaDesaRepository(db)
 siskeudes_kegiatan_repository = SiskeudesKegiatanRepository(db)
 siskeudes_penerimaan_repository = SiskeudesPenerimaanRepository(db)
 siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
@@ -20,6 +21,56 @@ logger = logging.getLogger('keuangan')
 
 
 class SiskeudesFetcher:
+    @staticmethod
+    def fetch_desas():
+        sd_desas = sideka_desa_repository.all()
+        for sd_desa in sd_desas:
+            if (sd_desa.kode is None or len(sd_desa.kode) == 0):
+                continue
+
+            region = region_repository.get(str(sd_desa.kode).rstrip())
+
+            if (region is None):
+                logger.warning('Desa<{0}> {1} does not have region'.format(sd_desa.desa, sd_desa.kode))
+                continue
+
+            region.domain = sd_desa.domain
+            region.desa_id = sd_desa.blog_id
+            db.session.add(region)
+
+    @staticmethod
+    def fetch_siskeudes_codes():
+        year = str(datetime.now().year)
+
+        # Why? Because penerimaan has kode desa
+        sd_contents = sideka_content_repository.get_latest_content('penerimaan', year)
+        for sd_content in sd_contents:
+            contents = ContentTransformer.transform(sd_content.content)
+            if not ('tbp' in contents):
+                logger.warning('Desa id: {0} does not have tbp'.format(sd_content.desa_id))
+                continue
+
+            sps = SiskeudesPenerimaanModelSchema(many=True).load(contents['tbp'])
+
+            if (len(sps.data) < 1):
+                continue
+
+            has_kode_desa = getattr(sps.data[0], 'kode_desa', None);
+            if (has_kode_desa is None):
+                continue
+
+            kode_desa = sps.data[0].kode_desa
+            kode_desa = str(kode_desa).rstrip().rstrip('.')
+            region = region_repository.get_by_desa_id(sd_content.desa_id)
+
+            if (region is None):
+                logger.warning('Desa id: {0} does not have region'.format(sd_content.desa_id))
+                continue
+
+            region.siskeudes_code = kode_desa
+            region.is_lokpri = True
+            db.session.add(region)
+
     @staticmethod
     def fetch_penganggaran_by_region(region):
         year = str(datetime.now().year)

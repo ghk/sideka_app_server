@@ -4,7 +4,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   selector: 'st-search',
   templateUrl: '../templates/search.html',
 })
-
 export class SearchComponent implements OnInit, OnDestroy {
 
   constructor() { }

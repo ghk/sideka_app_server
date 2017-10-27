@@ -2,6 +2,7 @@ from progress_recapitulation import ProgressRecapitulationRepository
 from progress_timeline import ProgressTimelineRepository
 from region import RegionRepository
 from sideka_content import SidekaContentRepository
+from sideka_desa import SidekaDesaRepository
 from siskeudes_kegiatan import SiskeudesKegiatanRepository
 from siskeudes_penerimaan import SiskeudesPenerimaanRepository
 from siskeudes_penerimaan_rinci import SiskeudesPenerimaanRinciRepository
