@@ -4,7 +4,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   selector: 'st-sidebar',
   templateUrl: '../templates/sidebar.html',
 })
-
 export class SidebarComponent implements OnInit, OnDestroy {
 
   constructor() { }

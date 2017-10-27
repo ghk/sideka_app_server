@@ -9,13 +9,18 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
 import { ProgressComponent } from './components/progress';
-import { ProgressRecapitulationComponent, FormatCurrencyPipe } from './components/progress-recapitulation';
-import { ProgressTimelineComponent } from './components/progress-timeline';
-import { ProgressDetailComponent } from './components/progress-detail';
+import { ProgressRecapitulationComponent } from './components/progressRecapitulation';
+import { ProgressTimelineComponent } from './components/progressTimeline';
+import { ProgressDetailComponent } from './components/progressDetail';
 import { SpendingComponent } from './components/spending';
-import { SpendingRecapitulationComponent } from './components/spending-recapitulation';
-import { SpendingDetailComponent, HideBudgetDetailPipe, BudgetTypePipe } from './components/spending-detail';
-import { SpendingChartComponent } from './components/spending-chart';
+import { SpendingRecapitulationComponent } from './components/spendingRecapitulation';
+import { SpendingDetailComponent } from './components/spendingDetail';
+import { SpendingChartComponent } from './components/spendingChart';
+
+import { FormatCurrencyPipe } from './pipes/formatCurrency';
+import { HideBudgetDetailPipe } from './pipes/hideBudgetDetail';
+import { BudgetTypePipe } from './pipes/budgetType';
+import { RegionTypePipe } from './pipes/regionType';
 
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
@@ -34,7 +39,8 @@ import { SharedService } from './services/shared';
     SpendingChartComponent,
     HideBudgetDetailPipe,
     BudgetTypePipe,
-    FormatCurrencyPipe
+    FormatCurrencyPipe,
+    RegionTypePipe
   ],
   imports: [
     BrowserModule,

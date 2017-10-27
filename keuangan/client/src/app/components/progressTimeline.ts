@@ -9,7 +9,7 @@ import { Query } from '../models/query';
 
 @Component({
     selector: 'sk-progress-timeline',
-    templateUrl: '../templates/progress-timeline.html',
+    templateUrl: '../templates/progressTimeline.html',
 })
 export class ProgressTimelineComponent implements OnInit, OnDestroy {
 

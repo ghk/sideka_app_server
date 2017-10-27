@@ -6,7 +6,7 @@ import { Query } from '../models/query';
 
 @Component({
   selector: 'sk-spending-recapitulation',
-  templateUrl: '../templates/spending-recapitulation.html',
+  templateUrl: '../templates/spendingRecapitulation.html',
 })
 
 export class SpendingRecapitulationComponent implements OnInit, OnDestroy {

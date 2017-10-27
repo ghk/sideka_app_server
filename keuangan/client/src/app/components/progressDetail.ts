@@ -7,7 +7,7 @@ import { Query } from '../models/query';
 
 @Component({
     selector: 'sk-progress-detail',
-    templateUrl: '../templates/progress-detail.html',
+    templateUrl: '../templates/progressDetail.html',
 })
 
 export class ProgressDetailComponent implements OnInit, OnDestroy {
