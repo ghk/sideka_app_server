@@ -1,5 +1,5 @@
 from base import BaseModel
-from region import Region, RegionModelSchema
+from region import Region, RegionModelSchema, RegionCompleteModelSchema
 from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationModelSchema
 from progress_timeline import ProgressTimeline, ProgressTimelineModelSchema
 from spending_type import SpendingType, SpendingTypeModelSchema

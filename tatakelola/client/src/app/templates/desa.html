@@ -13,7 +13,9 @@
 <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
     <a href="#" (click)="setActiveMenu('pembangunan')">
         <div class="side" [ngClass]="{'active': activeMenu === 'pembangunan' }">
-            <div class="icon"><i class="fa fa-money"></i></div>
+            <div class="icon">
+                <i class="fa fa-money"></i>
+            </div>
             <div class="desc">
                 <h4>Rp {{captions.pembangunan.total}} (APBDes {{captions.pembangunan.year}})</h4>
             </div>
@@ -21,7 +23,9 @@
     </a>
     <a href="#" (click)="setActiveMenu('batas')">
         <div class="side" [ngClass]="{'active': activeMenu === 'batas' }">
-            <div class="icon"><i class="fa fa-map"></i></div>
+            <div class="icon">
+                <i class="fa fa-map"></i>
+            </div>
             <div class="desc">
                 <h4>{{captions.batas}} km2</h4>
             </div>
@@ -30,24 +34,33 @@
     </a>
     <a href="#" (click)="setActiveMenu('gender')">
         <div class="side" [ngClass]="{'active': activeMenu === 'gender' }">
-            <div class="icon"><i class="fa fa-male"></i></div>
+            <div class="icon">
+                <i class="fa fa-male"></i>
+            </div>
             <div class="desc">
-                <h4><i class="fa fa-mars"></i> {{captions.genders.male}} &nbsp;&nbsp; <i class="fa fa-venus"></i> {{captions.genders.female}}</h4>
+                <h4>
+                    <i class="fa fa-mars"></i> {{captions.genders.male}} &nbsp;&nbsp;
+                    <i class="fa fa-venus"></i> {{captions.genders.female}}</h4>
             </div>
 
         </div>
     </a>
     <a href="#" (click)="setActiveMenu('education')">
         <div class="side" [ngClass]="{'active': activeMenu === 'education' }">
-            <div class="icon"><i class="fa fa-building"></i></div>
+            <div class="icon">
+                <i class="fa fa-building"></i>
+            </div>
             <div class="desc">
-                <h4>{{captions.education.tk}} TK &nbsp;&nbsp; {{captions.education.sd}} SD &nbsp;&nbsp; {{captions.education.smp}} SMP  &nbsp;&nbsp;  {{captions.education.sma}} SMA </h4>
+                <h4>{{captions.education.tk}} TK &nbsp;&nbsp; {{captions.education.sd}} SD &nbsp;&nbsp; {{captions.education.smp}}
+                    SMP &nbsp;&nbsp; {{captions.education.sma}} SMA </h4>
             </div>
         </div>
     </a>
     <a href="#" (click)="setActiveMenu('electricity')">
         <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
-            <div class="icon"><i class="fa fa-plug"></i></div>
+            <div class="icon">
+                <i class="fa fa-plug"></i>
+            </div>
             <div class="desc">
                 <h4>{{captions.electricity.detected}} dari {{captions.electricity.total}} KK</h4>
             </div>
@@ -56,7 +69,9 @@
     </a>
     <a href="#" (click)="setActiveMenu('misc')">
         <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
-            <div class="icon"><i class="fa fa-tint"></i></div>
+            <div class="icon">
+                <i class="fa fa-tint"></i>
+            </div>
             <div class="desc">
                 <h4>{{captions.misc}}</h4>
             </div>
@@ -64,7 +79,9 @@
     </a>
     <a href="#" (click)="setActiveMenu('network')">
         <div class="side" [ngClass]="{'active': activeMenu === 'network' }">
-            <div class="icon"><i class="fa fa-phone"></i></div>
+            <div class="icon">
+                <i class="fa fa-phone"></i>
+            </div>
             <div class="desc">
                 <h4>{{captions.networks}}</h4>
             </div>
@@ -72,9 +89,15 @@
     </a>
     <a href="#" (click)="setActiveMenu('potensi')">
         <div class="side" [ngClass]="{'active': activeMenu === 'potensi' }">
-            <div class="icon"><i class="fa fa-leaf"></i></div>
+            <div class="icon">
+                <i class="fa fa-leaf"></i>
+            </div>
             <div class="desc">
-                <h4>Pertanian : <br> {{captions.potention.farmland}} <br><br> Perkebunan :<br> {{captions.potention.orchard}}</h4>
+                <h4>Pertanian :
+                    <br> {{captions.potention.farmland}}
+                    <br>
+                    <br> Perkebunan :
+                    <br> {{captions.potention.orchard}}</h4>
             </div>
         </div>
     </a>
@@ -83,8 +106,11 @@
 <div class="dropdown" style="float: right;">
     <button class="dropbtn">☰</button>
     <div class="dropdown-content">
-        <a href="#"><img src="../../assets/res/graph1.svg">Dashboard Keuangan</a>
-        <a href="#"><img src="../../assets/res/graph2.svg">Dashboard Monitoring</a>
-        <a href="#"><img src="../../assets/res/news.svg">Kabar Desa</a>
+        <a href="#">
+            <img src="../../assets/res/graph1.svg">Dashboard Keuangan</a>
+        <a href="#">
+            <img src="../../assets/res/graph2.svg">Dashboard Monitoring</a>
+        <a href="#">
+            <img src="../../assets/res/news.svg">Kabar Desa</a>
     </div>
 </div>
