@@ -6,8 +6,6 @@ import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
-
-
 @Component({
     selector: 'sk-progress-recapitulation',
     templateUrl: '../templates/progressRecapitulation.html',

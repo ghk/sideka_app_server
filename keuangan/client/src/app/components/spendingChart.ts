@@ -1,5 +1,5 @@
 import { Component, ViewChild, Input, NgZone, OnInit, OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { BaseChartDirective } from 'ng2-charts/ng2-charts';
 
@@ -14,6 +14,8 @@ import 'chart.piecelabel.js';
     templateUrl: '../templates/spendingChart.html',
 })
 export class SpendingChartComponent implements OnInit, OnDestroy {
+
+    private _subscription: Subscription;
 
     region: any;
     private _sData = new BehaviorSubject<any[]>([]);
@@ -70,7 +72,7 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {       
-        this._sharedService.getRegion().subscribe(region => {
+        this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
         });
@@ -99,6 +101,7 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this._subscription.unsubscribe();
     }
    
     progressListener(progress: Progress): void {
