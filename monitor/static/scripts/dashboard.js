@@ -246,7 +246,7 @@ function onPanelClicked(panelName,data){
 		$.each(data[panelName],function(idx, content){
 			tr = $('<tr>');
 			$('<td>').html(idx+1).appendTo(tr);
-			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa)).appendTo(tr);
+			$('<td>').append($('<a>').attr("href", "/statistic/"+content.blog_id).text(content.desa ? content.desa : content.domain)).appendTo(tr);
 			$('<td>').html(content.propinsi).appendTo(tr);
 			$('<td>').html(content.kabupaten).appendTo(tr);					
 			$('<td>').html(content.kecamatan).appendTo(tr);
@@ -258,11 +258,13 @@ function onPanelClicked(panelName,data){
 // Maps Configuration
 function getStatistics(supradesaId){
 	initMaps(supradesaId);
+	var minScore = parseInt($("#min-score").val()) / 100.0;
 	$.getJSON('/api/statistics?supradesa_id='+supradesaId, function(data){
 		var icon = "blog";
 		dataStatistics = data;
 		$.each(data,function(idx,content){
-			if(content.latitude != null &&content.longitude)addMarker(content,icon);
+			if(content.latitude != null && content.longitude)
+				addMarker(content,icon, minScore);
 		})	
 	})
 }
@@ -288,7 +290,13 @@ function initMaps(supradesaId){
 	})	  
 }
 
-function addMarker(content,icon) {
+function addMarker(content,icon,minScore) {
+	if(!content.penduduk || !content.keuangan || !content.blog){
+		return;
+	}
+	if(content[icon].score < minScore){
+		return;
+	}
 	var host = window.location.origin;
 	var pathImage = "/static/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
 	var loc = {lat: content.latitude,lng:content.longitude}
@@ -313,11 +321,16 @@ function addMarker(content,icon) {
 	markers.push(marker);
 }
 
+var currentScoreType = "blog";
+
 function onButtonScoreClicked(buttonName){
+	currentScoreType = buttonName;
+	var minScore = parseInt($("#min-score").val()) / 100.0;
+	$("#min-score-value").html(minScore * 100.0);
 	clearMarkers();
 	$.each(dataStatistics,function(idx, content){
 		if(content.latitude != null && content.longitude != null)
-			addMarker(content,buttonName);
+			addMarker(content,buttonName, minScore);
 	})	
 	applyTableInMaps(buttonName);
 }
@@ -326,7 +339,10 @@ function applyTableInMaps(buttonClicked){
 	var header= ["No","Score","Desa", "Domain"];
 	var thead = $('#table-score-maps thead');
 	var tbody = $('#table-score-maps tbody');
-	var newData = dataStatistics.sort(function(data1,data2){ return data2[buttonClicked].score - data1[buttonClicked].score})
+	console.log(buttonClicked);
+	var newData = dataStatistics
+		.filter(function(data){return !!data[buttonClicked]; })
+		.sort(function(data1,data2){ return data2[buttonClicked].score - data1[buttonClicked].score})
 	var tr = $('<tr>')
 
 	applyTableHeader(header,thead);
@@ -343,8 +359,9 @@ function applyTableInMaps(buttonClicked){
 
 function clearMarkers() {
   for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
+    markers[i].setMap(null);
   }
+  markers = [];
 }
 
 function makeButtonScoring(score){
@@ -404,6 +421,10 @@ function onWidthChange(widthCurrent){
 $('#button-score button').click(function(){
 	var value = $(this).val();
 	onButtonScoreClicked(value)
+})
+$('#min-score').change(function(){
+	console.log(currentScoreType);
+	onButtonScoreClicked(currentScoreType);
 })
 
 $('#select-supradesa').change(function(){

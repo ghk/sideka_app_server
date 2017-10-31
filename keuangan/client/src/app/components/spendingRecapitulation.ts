@@ -81,22 +81,6 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
 
         let entities = {};
 
-        /*
-        this.spendingRecapitulations.forEach(sr => {
-            if (!entities[sr.region.id])
-                entities[sr.region.id] = {
-                    'region': sr.region,
-                    'data': new Array(this.spendingTypes.length * 2).fill(0)
-                }
-
-            this.spendingTypes.forEach((st, index) => {
-                if (sr.type.id === st.id) {                     
-                    entities[sr.region.id]['data'][2 * index + 1] = sr.realized
-                    entities[sr.region.id]['data'][2 * index] = sr.budgeted
-                }   
-            })
-        })
-        */
         this.spendingRecapitulations.forEach(sr => {
             if (!entities[sr.region.id])
                 entities[sr.region.id] = {

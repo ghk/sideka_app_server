@@ -318,3 +318,7 @@ and (min-width : 601px) {
 		display: block;
 	}
 }
+
+.uk-form.switch-score {
+	display: inline-block;
+}

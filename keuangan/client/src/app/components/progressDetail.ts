@@ -1,16 +1,19 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
+
 @Component({
     selector: 'sk-progress-detail',
     templateUrl: '../templates/progressDetail.html',
 })
-
 export class ProgressDetailComponent implements OnInit, OnDestroy {
+
+    private _subscription: Subscription;
 
     region: any;
     totalRevenue: number = 0;
@@ -27,7 +30,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._sharedService.getRegion().subscribe(region => {
+        this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
         })
@@ -60,6 +63,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this._subscription.unsubscribe();
     }
 
     progressListener(progress: Progress): void {
