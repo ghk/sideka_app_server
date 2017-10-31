@@ -66,12 +66,8 @@ def statistic_single(blog_id):
         return res
     cur = mysql.connection.cursor()
     try:
-        daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc"
         post_query = "select score from sd_post_scores p where p.blog_id = %s ORDER BY p.post_date desc"
         desa_query = "select desa, kecamatan, kabupaten, propinsi, domain from sd_desa d where d.blog_id = %s"
-
-        cur.execute(daily_query, (blog_id,))
-        content_data_quality = json.dumps([comb(c) for c in cur.fetchall()])
 
         cur.execute(post_query, (blog_id,))
         content_post_quality = json.dumps(
@@ -82,34 +78,47 @@ def statistic_single(blog_id):
         header = [column[0] for column in cur.description]
         info = json.dumps(dict(zip(header, values)))
 
-        daily = {}
+        activity_dict = {}
         post_query = "select unix_timestamp(date(ps.post_date)), count(*) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where d.blog_id = %s and ps.post_date is not null GROUP BY date(ps.post_date);"
         cur.execute(post_query, (blog_id,))
-        daily["post"] = dict(cur.fetchall())
+        activity_dict["post"] = dict(cur.fetchall())
         penduduk_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type='penduduk' GROUP BY date(date_accessed);"
         cur.execute(penduduk_query, (blog_id,))
-        daily["penduduk"] = dict(cur.fetchall())
-        keuangan_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type='keuangan' GROUP BY date(date_accessed);"
+        activity_dict["penduduk"] = dict(cur.fetchall())
+        keuangan_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type in ('perencanaan', 'penganggaran', 'spp', 'penerimaan') GROUP BY date(date_accessed);"
         cur.execute(keuangan_query, (blog_id,))
-        daily["keuangan"] = dict(cur.fetchall())
+        activity_dict["keuangan"] = dict(cur.fetchall())
 
-        def get_daily(typ, time):
-            if time in daily[typ]:
-                return daily[typ][time]
+        def get_daily_activity(typ, time):
+            if time in activity_dict[typ]:
+                return activity_dict[typ][time]
             return 0
-        results = {"label": [], "post": [], "penduduk": [], "keuangan": []}
+
+        score_query = "SELECT unix_timestamp(date(s.date)), s.statistics from sd_statistics s where s.blog_id = %s and s.date > DATE_SUB(NOW(), INTERVAL 60 DAY) ORDER BY s.date asc"
+        cur.execute(score_query, (blog_id,))
+	score_dict = dict(cur.fetchall())
+
+        def get_daily_score(time):
+            if time in score_dict:
+                return json.loads(score_dict[time])
+            return {"penduduk": {"score": 0}, "keuangan": {"score": 0}, "pemetaan": {"score": 0}, "blog": {"score": 0}}
+
+        activities = {"label": [], "post": [], "penduduk": [], "keuangan": []}
+	scores = []
         for i in range(63):
             d = datetime.datetime.today() - datetime.timedelta(days=62 - i)
             d = datetime.datetime(d.year, d.month, d.day)
             t = int(time.mktime(d.timetuple()))
-            results["label"].append(t)
-            results["post"].append(get_daily("post", t))
-            results["penduduk"].append(get_daily("penduduk", t))
-            results["keuangan"].append(get_daily("keuangan", t))
+            activities["label"].append(t)
+            activities["post"].append(get_daily_activity("post", t))
+            activities["penduduk"].append(get_daily_activity("penduduk", t))
+            activities["keuangan"].append(get_daily_activity("keuangan", t))
+            scores.append(get_daily_score(t))
 
-        content_data_daily = json.dumps(results)
+        activity_json = json.dumps(activities)
+        score_json = json.dumps(scores)
 
-        return render_template('statistic_single.html', active='statistics', content_data_quality=content_data_quality, content_post_quality=content_post_quality, content_data_daily=content_data_daily, info=info)
+        return render_template('statistic_single.html', active='statistics', score_json=score_json, content_post_quality=content_post_quality, activity_json=activity_json, info=info)
     finally:
         cur.close()
 
@@ -164,6 +173,7 @@ def get_dashboard_data():
         weekly_posts = []
         weekly_penduduk = []
         weekly_keuangan = []
+        weekly_pemetaan = []
         desa_query = "select count(*) from sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id where {0} and b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);".format(
             query_sd_desa)
         post_query = "select count(distinct(ps.blog_id)) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL %d WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL %d WEEK);".format(
@@ -186,12 +196,15 @@ def get_dashboard_data():
                 len(list(filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))))
             weekly_keuangan.append(
                 len(list(filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))))
+            weekly_pemetaan.append(
+                len(list(filter(lambda s: "pemetaan" in s and s["pemetaan"]["score"] > 0.3, stats))))
 
         weekly = {}
         weekly["desa"] = weekly_desa
         weekly["post"] = weekly_posts
         weekly["penduduk"] = weekly_penduduk
         weekly["keuangan"] = weekly_keuangan
+        weekly["pemetaan"] = weekly_pemetaan
         results["weekly"] = weekly
 
         daily = {}
@@ -202,14 +215,17 @@ def get_dashboard_data():
             "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='penduduk' GROUP BY date(date_accessed)".format(query_sd_desa))
         daily["penduduk"] = dict(cur.fetchall())
         cur.execute(
-            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='keuangan' GROUP BY date(date_accessed)".format(query_sd_desa))
+            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type in ('perencanaan', 'penganggaran', 'spp', 'penerimaan') GROUP BY date(date_accessed)".format(query_sd_desa))
         daily["keuangan"] = dict(cur.fetchall())
+        cur.execute(
+            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='pemetaan' GROUP BY date(date_accessed)".format(query_sd_desa))
+        daily["pemetaan"] = dict(cur.fetchall())
 
         def get_daily(typ, time):
             if time in daily[typ]:
                 return daily[typ][time]
             return 0
-        r = {"label": [], "post": [], "penduduk": [], "keuangan": []}
+        r = {"label": [], "post": [], "penduduk": [], "keuangan": [], "pemetaan": []}
         for i in range(63):
             d = datetime.datetime.today() - datetime.timedelta(days=62 - i)
             d = datetime.datetime(d.year, d.month, d.day)
@@ -218,6 +234,7 @@ def get_dashboard_data():
             r["post"].append(get_daily("post", t))
             r["penduduk"].append(get_daily("penduduk", t))
             r["keuangan"].append(get_daily("keuangan", t))
+            r["pemetaan"].append(get_daily("pemetaan", t))
 
         results["daily"] = r
 
@@ -365,9 +382,11 @@ def get_weekly_panel():
         cur.execute(stats_query)
         stats = [combine(c) for c in cur.fetchall()]
         results["penduduk"] = list(
-            filter(lambda s: s["penduduk"]["score"] > 0.5, stats))
+            filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))
         results["keuangan"] = list(
-            filter(lambda s: s["keuangan"]["score"] > 0.5, stats))
+            filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))
+        results["pemetaan"] = list(
+            filter(lambda s: "pemetaan" in s and s["pemetaan"]["score"] > 0.3, stats))
 
         return jsonify(results)
     finally:

@@ -36,6 +36,13 @@ var columns = [
 	format: '0.00',
 	renderer: scoreRenderer
       },
+	  {
+	data: 'pemetaan.score',
+	header: 'Pemetaan',
+	type: 'numeric',
+	format: '0.00',
+	renderer: scoreRenderer
+      },
       {
 	data: 'blog.score_quality',
 	header: 'B. Qlt',
@@ -87,6 +94,36 @@ var columns = [
       {
 	data: 'keuangan.penerimaan.score',
 	header: 'K. TBP',
+	type: 'numeric',
+	format: '0.00',
+      },
+	  {
+	data: 'pemetaan.network_transpotation.score',
+	header: 'Pt. NetTrans',
+	type: 'numeric',
+	format: '0.00',
+      },
+	  {
+	data: 'pemetaan.waters.score',
+	header: 'Pt.Waters',
+	type: 'numeric',
+	format: '0.00',
+      },
+	  {
+	data: 'pemetaan.facilities_infrastructures.score',
+	header: 'Pt.FacInf',
+	type: 'numeric',
+	format: '0.00',
+      },
+	  {
+	data: 'pemetaan.boundary.score',
+	header: 'Pt.Bound',
+	type: 'numeric',
+	format: '0.00',
+      },
+	  {
+	data: 'pemetaan.landuse.score',
+	header: 'Pt.Landuse',
 	type: 'numeric',
 	format: '0.00',
       },

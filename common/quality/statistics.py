@@ -362,7 +362,7 @@ def get_keuangan_statistics(cur, desa_id):
 	return result
  
 def get_pemetaan_statistics(cur, desa_id):
-	result = {}
+	result = {"score": 0.0, "network_transportation": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "waters": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "facilities_infrastructures": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "last_modified": {"date": None, "count": None, "score": 0.0}, "boundary": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "landuse": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}
 	layers = ["network_transportation", "boundary" , "landuse" , "facilities_infrastructures" , "waters"]
 	layer_upper_limits = {"network_transportation": 85, "boundary":4, "landuse" :120 , "facilities_infrastructures": 1000 ,"waters" :100}
 
@@ -375,7 +375,8 @@ def get_pemetaan_statistics(cur, desa_id):
 		last_modified["count"] = str(datetime.now() - sql_row_pemetaan["date_created"])
 		last_modified["score"] = get_scale(7 -(datetime.now() - sql_row_pemetaan["date_created"]).days , 7)
 		pemetaan_cur = json.loads(sql_row_pemetaan["content"], encoding='ISO-8859-1')["data"]
-
+		sum_quantity_pemetaan=0
+		sum_quality_pemetaan=0
 		#Calculate Layer
 		for layer in layers:
 			tab = pemetaan_cur[layer]
@@ -398,9 +399,15 @@ def get_pemetaan_statistics(cur, desa_id):
 			quantity=get_scale(quantity_count,upper_limit)
 			layer_score["quantity"]={"count":quantity_count ,"score":quantity }
 			layer_score["quality"]={"count" : quality_count , "score" : quality}
-			layer_score["score"]=0.2*last_modified["score"] + 0.3*layer_score["quantity"]["score"] + 0.5*layer_score["quality"]["score"]
-			layer_score["last_modified"]=last_modified
+			sum_quantity_pemetaan+=layer_score["quantity"]["score"]
+			sum_quality_pemetaan+=layer_score["quality"]["score"]
+			layer_score["score"]=0.1*last_modified["score"] + 0.5*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
+			result["last_modified"]=last_modified
 			result[layer] = layer_score
+		avg_pemetaan_quantity=sum_quantity_pemetaan/5.0
+		avg_pemetaan_quality=sum_quality_pemetaan/5.0
+		pemetaan_score_datas=0.5*avg_pemetaan_quantity + 0.4*avg_pemetaan_quality
+		result["score"]=0.05*last_modified["score"]+0.95*pemetaan_score_datas
 
 	return result
 
@@ -418,7 +425,7 @@ def get_statistics(cur, desa_id):
 	functions["blog"] = get_blog_statistics
 	functions["penduduk"] = get_penduduk_statistics
 	functions["keuangan"] = get_keuangan_statistics
-	#functions["Pemetaan"] = get_pemetaan_statistics
+	functions["pemetaan"] = get_pemetaan_statistics
 	for key, fn in functions.items():
 		try:
 			result[key]=fn(cur, desa_id)
@@ -439,7 +446,7 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		#if desa["blog_id"] != 14:
+		#if desa["blog_id"] != 38:
 		#	continue
 
 		stats = get_statistics(cur, desa["blog_id"])
