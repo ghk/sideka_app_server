@@ -365,9 +365,9 @@ def get_weekly_panel():
         cur.execute(stats_query)
         stats = [combine(c) for c in cur.fetchall()]
         results["penduduk"] = list(
-            filter(lambda s: s["penduduk"]["score"] > 0.5, stats))
+            filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))
         results["keuangan"] = list(
-            filter(lambda s: s["keuangan"]["score"] > 0.5, stats))
+            filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))
 
         return jsonify(results)
     finally:

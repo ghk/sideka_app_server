@@ -121,6 +121,19 @@
 						</div>
 					</h3>
 				</div>
+				<div class="md-card-toolbar-actions-left switch-score">
+					<input type="range" id="min-score" min="0" max="100" step="5" value="5" list="steplist" style="display: inline-block; width: 200px; margin-top: 18px; margin-left: 15px;">
+					<datalist id="steplist">
+					    <option>0</option>
+					    <option>25</option>
+					    <option>50</option>
+					    <option>75</option>
+					    <option>100</option>
+					</datalist>
+					<span style="vertical-align: top; margin-top: 20px; line-height: 25px; display: inline-block;">
+					Min: <span id="min-score-value">5</span>
+					</span>
+				</div>
 				<form class="uk-form switch-score">
 					<select class="uk-form-width-medium" style="margin:10px; padding: 5px; background-color: #fff;">
 						<option value="blog">Berita</option>
