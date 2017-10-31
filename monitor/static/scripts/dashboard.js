@@ -321,7 +321,7 @@ function addMarker(content,icon,minScore) {
 	markers.push(marker);
 }
 
-var currentScoreType = "penduduk";
+var currentScoreType = "blog";
 
 function onButtonScoreClicked(buttonName){
 	currentScoreType = buttonName;
