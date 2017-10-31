@@ -271,6 +271,34 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
         if "administrator" not in auth["roles"] and permission not in auth["roles"]:
             return jsonify({"message": "your account doesn't have the permission"}), 403
 
+        #Validate columns
+        def validate(columns, items, location):
+            for index, item in items:
+                if columns == "dict":
+                    if and not isinstance(item, dict):
+                        return jsonify({"message": "invalid item, dict expected, at row %d at %s" % (index, location)}), 400
+                else: 
+                    if not isinstance(item, list):
+                        return jsonify({"message": "invalid item, array expected, at row %d at %s" % (index, location)}), 400
+                    elif len(columns) != len(item):
+                        return jsonify({"message": "invalid item, expecting array of length %d instead of %d, at row %d at %s" % (len(columns), len(item), index, location)}), 400
+            return None
+
+        for tab, columns in request.json["columns"].items():
+            if "diffs" in request.json and tab in request.json["diffs"]:
+                for diff_index, diffs in enumerate(request.json["diffs"][tab]):
+                    for typ in ["added", "modified", "deleted"]:
+                        if typ in diffs:
+                            location = "Diff %d (%s) tab %s" % (diff_index, typ, tab)
+                            invalid = validate(diffs[typ], location) 
+                            if invalid is not None:
+                                return invalid
+            if "data" in request.json and tab in request.json["data"]:
+                location = "Data tab %s" % tab
+                invalid = validate(request.json["data"][tab], location) 
+                if invalid is not None:
+                    return invalid
+
         result = None
 
         client_change_id = 0
