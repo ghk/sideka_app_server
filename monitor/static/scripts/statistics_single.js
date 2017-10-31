@@ -87,20 +87,21 @@ function applyDatasets(graph,datasets,custom){
 }
 
 function applyGraph(){
-    var datasets=[contentDataQuality.map(function(c){return (c.blog.score * 100).toFixed(2)}),contentDataQuality.map(function(c){return (c.penduduk.score * 100).toFixed(2)}),contentDataQuality.map(function(c){return (c.apbdes.score * 100).toFixed(2)}),]
+    var datasets=[contentDataQuality.map(function(c){return (c.blog.score * 100).toFixed(2)}),contentDataQuality.map(function(c){return (c.penduduk ? c.penduduk.score * 100 : 0).toFixed(2)}),contentDataQuality.map(function(c){return (c.keuangan ? c.keuangan.score * 100 : 0).toFixed(2)}),]
     console.log(datasets);
     applyDatasets(dataQualityGraph,datasets)
     dataQualityGraph.data.labels = contentDataQuality.map(function(content, idx){return (idx%7 ==0)?moment(content.date).format("DD MMM YYYY"):"";}) 
     dataQualityGraph.update();
 
     var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan"]}
-    datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.apbdes]
+    datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.keuangan]
     applyDatasets(dataActivityGraph,datasets,custom)
     dataActivityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataActivityGraph.update();
 
     createInfo();
     applyTableContent();
+    var width = $(window).width();
     onWidthChange(width);
 }
 
@@ -114,16 +115,15 @@ function getStartSlice(widthCurrent, lengthLabel){
 		startSlice = lengthLabel - 35;					
 	else
 		startSlice = 0;
-    return startSlice;
+    return [startSlice, lengthLabel];
 }
 
-function sliceDataGraph(graph,startSlice, data){
+function sliceDataGraph(graph,startSlice, sliceLength, data){
     var result = {labels:[],datasets:[]}
-    var endSlice = data.labels.length;
-    result.labels = data.labels.slice(startSlice,endSlice)
+    result.labels = data.labels.slice(startSlice,startSlice+sliceLength)
 	$.each(data.datasets,function(idx,dataset){
 		var temp = $.extend(true, {}, dataset)
-		temp.data = temp.data.slice(startSlice,endSlice)
+		temp.data = temp.data.slice(startSlice,startSlice+sliceLength)
 		result.datasets.push(temp)
 	})
     graph.data.labels = result.labels;
@@ -132,13 +132,14 @@ function sliceDataGraph(graph,startSlice, data){
 
 function onWidthChange(widthCurrent){	
     if($.isEmptyObject(cachedDataQualityGraph))cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
-    var startSlice = getStartSlice(widthCurrent,cachedDataQualityGraph.labels.length)
-    sliceDataGraph(dataQualityGraph,startSlice,cachedDataQualityGraph)    
+    var sliceConfig = getStartSlice(widthCurrent,cachedDataQualityGraph.labels.length)
+    var startSlice = sliceConfig[0], sliceLength = sliceConfig[1];
+    sliceDataGraph(dataQualityGraph,startSlice, sliceLength,cachedDataQualityGraph)    
     dataQualityGraph.update()  
     
     if($.isEmptyObject(cachedDataActivityGraph))cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
-    var startSlice = getStartSlice(widthCurrent,cachedDataActivityGraph.labels.length)
-    sliceDataGraph(dataActivityGraph,startSlice,cachedDataActivityGraph)
+    startSlice = cachedDataActivityGraph.labels.length - sliceLength;
+    sliceDataGraph(dataActivityGraph,startSlice, sliceLength,cachedDataActivityGraph)
     dataActivityGraph.update()  
 }
 
@@ -179,12 +180,13 @@ function applyTableContent(){
         $('<td>').html(moment(content.date).format("DD MMM YYYY")).appendTo(tr);
         $('<td>').html(makeButtonScoring(content.blog.score)).appendTo(tr);
         $('<td>').html(makeButtonScoring(content.penduduk.score)).appendTo(tr)
-        $('<td>').html(makeButtonScoring(content.apbdes.score)).appendTo(tr)
+        $('<td>').html(makeButtonScoring(content.keuangan.score)).appendTo(tr)
         $('<td>').html(content.blog.score_quality.toFixed(2)).appendTo(tr)
         $('<td>').html(content.blog.score_frequency.toFixed(2)).appendTo(tr)
+	/*
         $('<td>').html(content.penduduk.score_quality.toFixed(2)).appendTo(tr)
         $('<td>').html(content.penduduk.score_quantity.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.apbdes.score_quality.toFixed(2)).appendTo(tr)
+        $('<td>').html(content.keuangan.score_quality.toFixed(2)).appendTo(tr)
         $('<td>').html(content.apbdes.score_quantity.toFixed(2)).appendTo(tr)
         $('<td>').html(moment(content.blog.last_post).format("DD MMM YYYY")).appendTo(tr)
         $('<td>').html(content.blog.count_24h).appendTo(tr)
@@ -194,6 +196,7 @@ function applyTableContent(){
         $('<td>').html(content.penduduk.count).appendTo(tr)
         $('<td>').html(moment(content.apbdes.last_modified).format("DD MMM YYYY")).appendTo(tr)
         $('<td>').html(content.apbdes.count).appendTo(tr)
+	*/
         tbody.append(tr);
     })
 

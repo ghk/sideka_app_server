@@ -66,7 +66,7 @@ def statistic_single(blog_id):
         return res
     cur = mysql.connection.cursor()
     try:
-        daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s ORDER BY s.date asc"
+        daily_query = "SELECT s.statistics, s.date from sd_statistics s where s.blog_id = %s and s.date > DATE_SUB(NOW(), INTERVAL 60 DAY) ORDER BY s.date asc"
         post_query = "select score from sd_post_scores p where p.blog_id = %s ORDER BY p.post_date desc"
         desa_query = "select desa, kecamatan, kabupaten, propinsi, domain from sd_desa d where d.blog_id = %s"
 
@@ -107,9 +107,9 @@ def statistic_single(blog_id):
             results["penduduk"].append(get_daily("penduduk", t))
             results["keuangan"].append(get_daily("keuangan", t))
 
-        content_data_daily = json.dumps(results)
+        content_data_activity = json.dumps(results)
 
-        return render_template('statistic_single.html', active='statistics', content_data_quality=content_data_quality, content_post_quality=content_post_quality, content_data_daily=content_data_daily, info=info)
+        return render_template('statistic_single.html', active='statistics', content_data_quality=content_data_quality, content_post_quality=content_post_quality, content_data_activity=content_data_activity, info=info)
     finally:
         cur.close()
 
