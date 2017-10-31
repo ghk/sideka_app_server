@@ -9,7 +9,8 @@ class SidekaContentRepository(BaseRepository):
         self.model = SdContent
 
     def get_latest_content(self, type, subtype):
-        subq = self.db.session.query(self.model, func.max(self.model.change_id).label('max_change_id')) \
+        subq = self.db.session.query(self.model, func.max(self.model.change_id).label('max_change_id'),
+                                     func.max(self.model.id).label('max_id')) \
             .filter(self.model.type == type) \
             .filter(self.model.subtype == subtype) \
             .group_by(self.model.desa_id) \
@@ -20,7 +21,8 @@ class SidekaContentRepository(BaseRepository):
             self.model.desa_id == subq.c.desa_id,
             self.model.type == subq.c.type,
             self.model.subtype == subq.c.subtype,
-            self.model.change_id == subq.c.max_change_id)) \
+            self.model.change_id == subq.c.max_change_id,
+            self.model.id == subq.c.max_id)) \
             .all()
 
         return result

@@ -1,14 +1,20 @@
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { NgModule, LOCALE_ID } from '@angular/core';
-import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { HttpModule } from '@angular/http';
+import { ProgressHttpModule } from 'angular-progress-http';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+
+
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
 import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
+
+import { DataService } from './services/data';
+import { SharedService } from './services/shared';
 
 @NgModule({
   declarations: [
@@ -18,11 +24,12 @@ import { SidebarComponent } from './components/sidebar';
     SearchComponent,
     SidebarComponent
   ],
-  imports: [    
+  imports: [
     BrowserModule,
-    BrowserAnimationsModule,   
-    HttpModule, 
-    LeafletModule.forRoot(),    
+    BrowserAnimationsModule,
+    HttpModule,
+    ProgressHttpModule,
+    LeafletModule.forRoot(),
     RouterModule.forRoot([
       { path: '', redirectTo: 'map', pathMatch: 'full' },
       { path: 'map', component: MapComponent },
@@ -30,6 +37,8 @@ import { SidebarComponent } from './components/sidebar';
     ])
   ],
   providers: [
+    DataService,
+    SharedService,
     { provide: LOCALE_ID, useValue: 'id-ID' }
   ],
   bootstrap: [AppComponent]
