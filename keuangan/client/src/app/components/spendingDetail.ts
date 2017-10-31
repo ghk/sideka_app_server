@@ -1,17 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
-
-
 
 @Component({
     selector: 'sk-spending-detail',
     templateUrl: '../templates/spendingDetail.html',
 })
 export class SpendingDetailComponent implements OnInit, OnDestroy {
+
+    private _subscription: Subscription;
 
     region: any;
     isPak: boolean = false;
@@ -31,7 +32,7 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        this._sharedService.getRegion().subscribe(region => {
+        this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
         })
@@ -59,6 +60,7 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this._subscription.unsubscribe();
     }
 
     transformData(entities): void {              
