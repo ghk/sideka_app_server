@@ -1,6 +1,6 @@
 var dataDashboard, dataStatistics, cachedPanelData = {},cachedDailyGraphData = {}, map, markers = [], chartsPeity = [] ;
-var weekly = ["desa", "post", "penduduk", "keuangan"]
-var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
+var weekly = ["desa", "post", "penduduk", "keuangan", "pemetaan"]
+var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000", "#9467bd"];
 var width = $(window).width();
 
 var configDaily = {
@@ -58,6 +58,8 @@ var canvasPost = document.getElementById('post-graph');
 var postGraph = new Chart(getContext(canvasPost),configPanel)
 var canvasPenduduk = document.getElementById('penduduk-graph');
 var pendudukGraph = new Chart(getContext(canvasPenduduk),configPanel);
+var canvasPemetaan = document.getElementById('pemetaan-graph');
+var pemetaanGraph = new Chart(getContext(canvasPemetaan),configPanel);
 	
 function convertDailyGraphDate(data){
 	return data.map(function(timestamp, idx){
@@ -127,6 +129,12 @@ function onSupradesaChanged(supradesaId){
 				backgroundColor: fill[3],
 				borderColor: fill[3],
 				data: data.daily.keuangan,
+			},{
+				label: "Pemetaan",
+				fill: false,
+				backgroundColor: fill[4],
+				borderColor: fill[4],
+				data: data.daily.pemetaan,
 			})
 		dailyGraph.update();
 			
@@ -236,6 +244,21 @@ function onPanelClicked(panelName,data){
 			thead = $('#table-keuangan-weekly thead');
 			tbody = $('#table-keuangan-weekly tbody');
 			break;
+		case "pemetaan":
+			pemetaanGraph.data.datasets = []			
+			pemetaanGraph.update();						
+			pemetaanGraph.data.datasets.push({
+				label: "Desa Berdata pemetaan",
+				backgroundColor: "#ffa000",
+				borderColor: "#ffa000",
+				borderWidth: 1,
+				data: dataDashboard["weekly"]["pemetaan"],	
+				fill:false					
+			})
+			pemetaanGraph.update();
+			thead = $('#table-pemetaan-weekly thead');
+			tbody = $('#table-pemetaan-weekly tbody');
+			break;
 	}	
 	if(panelName !=="desa"){
 		$("tr",thead).remove() ;
@@ -259,6 +282,7 @@ function onPanelClicked(panelName,data){
 function getStatistics(supradesaId){
 	initMaps(supradesaId);
 	var minScore = parseInt($("#min-score").val()) / 100.0;
+	$("#min-score-value").html(minScore * 100.0);
 	$.getJSON('/api/statistics?supradesa_id='+supradesaId, function(data){
 		var icon = "blog";
 		dataStatistics = data;

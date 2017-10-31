@@ -88,9 +88,8 @@ function applyDatasets(graph,datasets,custom){
 
 function applyGraph(){
     var datasets=[contentDataQuality.map(function(c){return (c.blog.score * 100).toFixed(2)}),contentDataQuality.map(function(c){return (c.penduduk ? c.penduduk.score * 100 : 0).toFixed(2)}),contentDataQuality.map(function(c){return (c.keuangan ? c.keuangan.score * 100 : 0).toFixed(2)}),]
-    console.log(datasets);
     applyDatasets(dataQualityGraph,datasets)
-    dataQualityGraph.data.labels = contentDataQuality.map(function(content, idx){return (idx%7 ==0)?moment(content.date).format("DD MMM YYYY"):"";}) 
+    dataQualityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataQualityGraph.update();
 
     var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan"]}
