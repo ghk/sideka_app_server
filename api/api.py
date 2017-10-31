@@ -273,9 +273,9 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
 
         #Validate columns
         def validate(columns, items, location):
-            for index, item in items:
+            for index, item in enumerate(items):
                 if columns == "dict":
-                    if and not isinstance(item, dict):
+                    if not isinstance(item, dict):
                         return jsonify({"message": "invalid item, dict expected, at row %d at %s" % (index, location)}), 400
                 else: 
                     if not isinstance(item, list):
@@ -290,12 +290,12 @@ def post_content_v2(desa_id, content_type, content_subtype=None):
                     for typ in ["added", "modified", "deleted"]:
                         if typ in diffs:
                             location = "Diff %d (%s) tab %s" % (diff_index, typ, tab)
-                            invalid = validate(diffs[typ], location) 
+                            invalid = validate(columns, diffs[typ], location) 
                             if invalid is not None:
                                 return invalid
             if "data" in request.json and tab in request.json["data"]:
                 location = "Data tab %s" % tab
-                invalid = validate(request.json["data"][tab], location) 
+                invalid = validate(columns, request.json["data"][tab], location) 
                 if invalid is not None:
                     return invalid
 
@@ -438,6 +438,10 @@ def get_diffs_newer_than_client(cur, content_type, content_subtype, desa_id, cli
     return diffs
 
 def transform_data(from_columns, to_columns, data):
+    #temporary dict fix
+    if to_columns == "dict":
+        from_columns = "dict"
+
     if from_columns == to_columns:
         return data
     
@@ -469,11 +473,13 @@ def merge_diffs(columns, diffs, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                if item[0] == modified[id_idx]:
+                print item
+                print modified
+                if item[id_idx] == modified[id_idx]:
                     data[index] = modified
         for deleted in diff["deleted"]:
             for item in data:
-                if item[0] == deleted[id_idx]:
+                if item[id_idx] == deleted[id_idx]:
                     data.remove(item)
     return data
 
