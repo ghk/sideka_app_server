@@ -1,18 +1,14 @@
-import 'rxjs/add/operator/map';
-
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
-
+import 'rxjs/add/operator/map';
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
 
+import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
 
-interface Data {
-    [key: string]: any[]
-}
 @Component({
-    selector: 'desa',
+    selector: 'st-desa',
     templateUrl: '../templates/desa.html'
 })
 export class DesaComponent implements OnInit, OnDestroy {
@@ -21,13 +17,16 @@ export class DesaComponent implements OnInit, OnDestroy {
     mapOptions: L.MapOptions;
     geoJSONOptions: L.GeoJSONOptions;
     geoJSON: L.GeoJSON;
-    data: Data;
+    data: any[];
     bigConfig: any[];
     pemetaan: any;
     sidebarCollapsed: boolean;
     captions: any;
 
-    constructor(private _http: Http) { }
+    constructor(
+        private _http: Http,
+        private _dataService: DataService
+    ) { }
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
@@ -88,42 +87,49 @@ export class DesaComponent implements OnInit, OnDestroy {
             error => { }
         )
 
-        this.extractDataFromPemetaan();
+        this._dataService.getGeojsonsByRegion('32.06.19.2010', null, null).subscribe(
+            data => {
+                this.data = data;
+                this.addGeoJSONToMap('facilities_infrastructures');
+            },
+            error => { }
+        )
     }
+
+    ngOnDestroy(): void { }
 
     setActiveMenu(menu: string): boolean {
         this.activeMenu = menu;
 
         switch (this.activeMenu) {
             case 'pembangunan':
-                this.setGeoJSONToMap('pembangunan');
+                this.addGeoJSONToMap('facilities_infrastructures');
                 break;
             case 'potensi':
-                this.setGeoJSONToMap('potensi');
+                this.addGeoJSONToMap('landuse');
                 break;
             case 'batas':
-                this.setGeoJSONToMap('batas');
+                this.addGeoJSONToMap('boundary');
                 break;
         }
 
         return false;
     }
 
-    ngOnDestroy(): void { }
-
-    setGeoJSONToMap(key: string): void {
+    addGeoJSONToMap(key: string): void {
         this.clearGeoJSON();
 
-        let selectedData = this.data[key];
-        let geoJson = MapUtils.createGeoJson();
+        let selectedData = null;
 
-        for (let i = 0; i < selectedData.length; i++) {
-            let spatial = selectedData[i].spatial;
-            let feature = MapUtils.createFeature(spatial, selectedData[i].metadata.featureType, selectedData[i].metadata.properties);
-            geoJson.features.push(feature);
+        this.data.forEach(datum => {
+            if (datum.type === key)
+                selectedData = datum;
+        });
+
+        if (selectedData) {
+            console.log(selectedData);
+            this.geoJSON = L.geoJSON(JSON.parse(selectedData.data), this.geoJSONOptions).addTo(this.activeMap);
         }
-
-        this.geoJSON = L.geoJSON(geoJson, this.geoJSONOptions).addTo(this.activeMap);
     }
 
     clearGeoJSON(): void {
@@ -135,40 +141,4 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.activeMap = map;
     }
 
-    extractDataFromPemetaan(): void {
-        this.data = { pembangunan: [], potensi: [], batas: [] };
-        this._http.get('assets/pemetaan.json').map(res => res.json()).subscribe(
-            data => {
-                this.pemetaan = data;
-
-                let indicatorKeys = Object.keys(this.pemetaan.data);
-
-                for (let i = 0; i < indicatorKeys.length; i++) {
-                    let key = indicatorKeys[i];
-
-                    if (key === 'log_pembangunan') {
-                        //DO SOMETHING
-                        continue;
-                    }
-
-                    let data = this.pemetaan.data[key];
-
-                    for (let j = 0; j < data.length; j++) {
-                        let dataItem = data[j];
-                        let metadata = { id: dataItem.id, properties: dataItem.properties, featureType: dataItem.geometry.type };
-                        let spatial = dataItem.geometry.coordinates;
-
-                        if (dataItem.indicator === 'landuse')
-                            this.data.potensi.push({ spatial: spatial, metadata: metadata });
-
-                        else if (dataItem.indicator === 'boundary')
-                            this.data.batas.push({ spatial: spatial, metadata: metadata });
-                    }
-                }
-
-                console.log(this.data);
-            },
-            error => { }
-        )
-    }
 }

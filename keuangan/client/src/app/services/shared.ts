@@ -8,7 +8,6 @@ export class SharedService {
     
     public region: any
     private _region$: ReplaySubject<any>
-    private _config: any
     private _config$: ReplaySubject<any>
     private _state$: ReplaySubject<string>
 
@@ -21,8 +20,7 @@ export class SharedService {
         if (!this._config$ || refresh) {
             if (!this._config$)
                 this._config$ = new ReplaySubject(1);      
-            this._config = environment;
-            this._config$.next(this._config);
+            this._config$.next(environment);
         }
         return this._config$;
     }
