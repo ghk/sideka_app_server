@@ -172,27 +172,18 @@ def get_renstra_category_score(renstra, category):
 	return 0
 
 def get_keuangan_statistics(cur, desa_id):
-	#result={"spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None, "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None, "last_modified": {"date": None, "count": None, "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None, "count": None, "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "penganggaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}}
 	result = {"score" : 0.0, "spp": {"spp_bukti": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "spp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "date_spp": None, "score": 0.0, "last_modified": {"date": None, "count": None , "score": 0.0}, "spp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "penerimaan": {"tbp": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "date_tbp": None , "last_modified": {"date": None , "count": None , "score": 0.0}, "tbp_rinci": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}, "perencanaan": {"last_modified_perencanaan": {"date": None , "count": None , "score": 0.0}, "rpjm": {"total_score": 0.0, "quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "score": 0.0, "rkp": {"total_score_quantity": 0.0, "total_score": 0.0, "quality_rkp5": {"count": 0.0, "score": 0.0}, "quality_rkp4": {"count": 0.0, "score": 0.0}, "quality_rkp3": {"count": 0.0, "score": 0.0}, "quality_rkp2": {"count": 0.0, "score": 0.0}, "quality_rkp1": {"count": 0.0, "score": 0.0}, "quantity_rkp2": {"count": 0, "score": 0.0}, "quantity_rkp3": {"count": 0, "score": 0.0}, "total_score_quality": 0.0, "quantity_rkp1": {"count": 0, "score": 0.0}, "quantity_rkp4": {"count": 0, "score": 0.0}, "quantity_rkp5": {"count": 0, "score": 0.0}}, "renstra": {"score": 0.0}}, "penganggaran": {"last_modified_penganggaran": {"date": None , "count": None , "score": 0.0}, "score": 0.0, "rab": {"quality": {"count": 0.0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}}
-	#perencanaan = {}
-	#penganggaran = {}
-	#renstra = {}
-	#rkp = {}
 
 	#Calculate Perencanaan
 	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'perencanaan' order by timestamp desc", (desa_id,))
 	sql_row_perencanaan =  cur.fetchone()
 
 	if sql_row_perencanaan is not None:
-		#last_modified_perencanaan={}
-		#result["last_modified_perencanaan"]["score"]=0
 		result["perencanaan"]["last_modified_perencanaan"]["date"] = str(sql_row_perencanaan["date_created"])
 		result["perencanaan"]["last_modified_perencanaan"]["count"] = str(datetime.now() - sql_row_perencanaan["date_created"])
 		result["perencanaan"]["last_modified_perencanaan"]["score"] = get_scale(7 -(datetime.now() - sql_row_perencanaan["date_created"]).days , 7)
 		perencanaan_cur = json.loads(sql_row_perencanaan["content"], encoding='ISO-8859-1')["data"]
-		#perencanaan["score"]=0
 		renstra_tab = perencanaan_cur["renstra"]
-		#result["perencanaan"]["renstra"]["score"] = 0
 		visi_score = get_renstra_category_score(renstra_tab, "Visi")
 		misi_score = get_renstra_category_score(renstra_tab, "Misi")
 		tujuan_score = get_renstra_category_score(renstra_tab, "Tujuuan")
@@ -200,9 +191,7 @@ def get_keuangan_statistics(cur, desa_id):
 		result["perencanaan"]["renstra"]["score"] = (visi_score+misi_score+tujuan_score+sasaran_score) / 4.0
 
 
-		rpjm = {}
 		rpjm_tab = perencanaan_cur["rpjm"]
-		rpjm_score = 0
 		rpjm_quantity_count = len(rpjm_tab)
 		rpjm_quality_count = mean([quality(row) for row in rpjm_tab])
 		rpjm_score_quantity = get_scale(rpjm_quantity_count, 10)
@@ -210,9 +199,7 @@ def get_keuangan_statistics(cur, desa_id):
 		result["perencanaan"]["rpjm"]["quantity"]={"count":rpjm_quantity_count , "score" : rpjm_score_quantity}
 		result["perencanaan"]["rpjm"]["quality"]= {"count": rpjm_quality_count, "score": rpjm_score_quality}
 		result["perencanaan"]["rpjm"]["total_score"] = 0.4 * result["perencanaan"]["rpjm"]["quality"]["score"] + 0.6 * result["perencanaan"]["rpjm"]["quantity"]["score"]
-		#perencanaan["rpjm"]=rpjm
-		
-		rkp_score= 0
+
 		sum_quality_rkp = 0
 		sum_quantity_rkp = 0
 		for i in range (1,7):
@@ -233,18 +220,15 @@ def get_keuangan_statistics(cur, desa_id):
 	result["perencanaan"]["score"] = 0.1 * result["perencanaan"]["renstra"]["score"] + 0.4 * result["perencanaan"]["rpjm"]["total_score"] + 0.4 * result["perencanaan"]["rkp"]["total_score"] + 0.1 * result["perencanaan"]["last_modified_perencanaan"]["score"]
 
 	#Calculate Penganggaran
-	rab = {}
-	#last_modified_penganggaran={}
 	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penganggaran' order by timestamp desc", (desa_id,))
 	sql_row_penganggaran = cur.fetchone()
-	#result["last_modified_penganggaran"]["score"] = 0
+
 	if sql_row_penganggaran is not None:
 		result["penganggaran"]["last_modified_penganggaran"]["date"] = str(sql_row_penganggaran["date_created"])
 		result["penganggaran"]["last_modified_penganggaran"]["count"] = str(datetime.now() - sql_row_penganggaran["date_created"])
 		result["penganggaran"]["last_modified_penganggaran"]["score"] = get_scale(7 -(datetime.now() - sql_row_penganggaran["date_created"]).days , 7)
 		penganggaran_cur = json.loads(sql_row_penganggaran["content"], encoding='ISO-8859-1')["data"]
 		rab_tab= penganggaran_cur["rab"]
-		penganggaran_score = 0
 		rab_quantity_count = len(rab_tab)
 		rab_quality_count = mean([quality(row) for row in rab_tab])
 		rab_score_quantity = get_scale(rab_quantity_count,300)
@@ -269,12 +253,8 @@ def get_keuangan_statistics(cur, desa_id):
 		last_modified_spp["count"] = str(datetime.now() - sql_row_spp["date_created"])
 		last_modified_spp["score"] = get_scale(7 -(datetime.now() - sql_row_spp["date_created"]).days , 7)
 		spp_cur = json.loads(sql_row_spp["content"], encoding='ISO-8859-1')["data"]
-		sum_spp_score=0
 		sum_quantity_spp=0
 		sum_quality_spp=0
-		spp_quantity_avg=0
-		spp_quality_avg=0
-		spp_score_datas=0
 
 		for data in spp_datas:
 			spp_tab=spp_cur[data]
@@ -295,7 +275,6 @@ def get_keuangan_statistics(cur, desa_id):
 		spp_score_datas= 0.7*spp_quantity_avg + 0.3*spp_quality_avg
 		date_spp={}
 		spp_cur_=spp_cur["spp"]
-		#date_array=[r[3] for r in spp_cur]
 		date_array_str=[datetime.strptime(r[3], '%d/%m/%Y') for r in spp_cur_]
 		date_spp["max"]=max(date_array_str)
 		date_spp["count"]=str(datetime.now() - date_spp["max"])
@@ -321,12 +300,8 @@ def get_keuangan_statistics(cur, desa_id):
 		last_modified_penerimaan["score"] = get_scale(7 -(datetime.now() - sql_row_penerimaan["date_created"]).days , 7)
 		penerimaan_cur = json.loads(sql_row_penerimaan["content"], encoding='ISO-8859-1')["data"]
 
-		sum_penerimaan_score=0
 		sum_quantity_penerimaan=0
 		sum_quality_penerimaan=0
-		penerimaan_quantity_avg=0
-		penerimaan_quality_avg=0
-		penerimaan_score_datas=0
 
 		for data in penerimaan_datas:
 			penerimaan_tab=penerimaan_cur[data]
@@ -347,7 +322,6 @@ def get_keuangan_statistics(cur, desa_id):
 		penerimaan_score_datas= 0.7*penerimaan_quantity_avg + 0.3*penerimaan_quality_avg
 		date_tbp={}
 		tbp_cur=penerimaan_cur["tbp"]
-		#date_array=[r[3] for r in spp_cur]
 		date_array_str_tbp=[datetime.strptime(d[3], '%d/%m/%Y') for d in tbp_cur]
 		date_tbp["max"]=max(date_array_str_tbp)
 		date_tbp["count"]=str(datetime.now() - date_tbp["max"])
