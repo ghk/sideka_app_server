@@ -52,10 +52,8 @@ if __name__ == "__main__":
                 print "fixing content %d for desa %s" % (sql_row_penduduk["id"], desa["domain"])
                 new_content = fix_content(content)
                 content_str = json.dumps(new_content, encoding='ISO-8859-1')
-                print sql_row_penduduk["content"]
-                print content_str
-                #cur.execute("update sd_contents set content = %s where id = %s", (content_str, sql_row_penduduk["id"]))
-                #db.commit()
+                cur.execute("update sd_contents set content = %s where id = %s", (content_str, sql_row_penduduk["id"]))
+                db.commit()
 
 
     print count
