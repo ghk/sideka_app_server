@@ -375,12 +375,12 @@ def get_pemetaan_statistics(cur, desa_id):
 			layer_score["quality"]={"count" : quality_count , "score" : quality}
 			sum_quantity_pemetaan+=layer_score["quantity"]["score"]
 			sum_quality_pemetaan+=layer_score["quality"]["score"]
-			layer_score["score"]=0.1*last_modified["score"] + 0.5*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
+			layer_score["score"]=0.6*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
 			result["last_modified"]=last_modified
 			result[layer] = layer_score
 		avg_pemetaan_quantity=sum_quantity_pemetaan/5.0
 		avg_pemetaan_quality=sum_quality_pemetaan/5.0
-		pemetaan_score_datas=0.5*avg_pemetaan_quantity + 0.4*avg_pemetaan_quality
+		pemetaan_score_datas=0.7*avg_pemetaan_quantity + 0.3*avg_pemetaan_quality
 		result["score"]=0.05*last_modified["score"]+0.95*pemetaan_score_datas
 
 	return result
@@ -420,7 +420,7 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		#if desa["blog_id"] != 38:
+		#if desa["blog_id"] != 50:
 		#	continue
 
 		stats = get_statistics(cur, desa["blog_id"])
