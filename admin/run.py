@@ -305,6 +305,7 @@ def desa_empty_latlong():
         .filter(SdDesa.latitude == None) \
         .filter(SdDesa.longitude == None) \
         .filter(SdDesa.kode <> None) \
+        .filter(SdDesa.desa <> None) \
         .filter(SdDesa.kode <> '')
 
     desas = query.all()
