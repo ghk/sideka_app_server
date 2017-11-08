@@ -473,8 +473,6 @@ def merge_diffs(columns, diffs, data):
             data.append(add)
         for modified in diff["modified"]:
             for index, item in enumerate(data):
-                print item
-                print modified
                 if item[id_idx] == modified[id_idx]:
                     data[index] = modified
         for deleted in diff["deleted"]:
