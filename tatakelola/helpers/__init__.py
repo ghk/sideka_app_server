@@ -1,3 +1,3 @@
 from common.helpers import QueryHelper
-from transformer import PemetaanContentTransformer, GeojsonTransformer
+from transformer import ContentTransformer, PemetaanContentTransformer, GeojsonTransformer
 from fetcher import TatakelolaFetcher

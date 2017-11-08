@@ -2,6 +2,29 @@ import simplejson as json
 import geojson
 
 
+class ContentTransformer:
+    @staticmethod
+    def transform(content):
+        serialized_content = json.loads(content)
+        columns = {}
+        result = {}
+
+        if (type(serialized_content['columns']) is list):
+            # TODO: LOG
+            return None
+
+        for column in serialized_content['columns'].keys():
+            columns[column] = serialized_content['columns'][column]
+            result[column] = []
+            for data in serialized_content['data'][column]:
+                obj = dict.fromkeys(columns[column])
+                for index, datum in enumerate(data):
+                    obj[columns[column][index]] = datum
+                result[column].append(obj)
+
+        return result
+
+
 class PemetaanContentTransformer:
     @staticmethod
     def transform(content):
@@ -13,7 +36,6 @@ class PemetaanContentTransformer:
             columns[column] = serialized_content['columns'][column]
             result[column] = []
             for data in serialized_content['data'][column]:
-                del data['id']
                 del data['indicator']
                 result[column].append(data)
 
