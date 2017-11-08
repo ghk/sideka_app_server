@@ -287,8 +287,11 @@ function getStatistics(supradesaId){
 		var icon = "blog";
 		dataStatistics = data;
 		$.each(data,function(idx,content){
-			if(content.latitude != null && content.longitude)
+			if(content.latitude && content.longitude){
 				addMarker(content,icon, minScore);
+			} else {
+				console.log("cannot show data", content);
+			}
 		})	
 	})
 }
@@ -316,6 +319,7 @@ function initMaps(supradesaId){
 
 function addMarker(content,icon,minScore) {
 	if(!content.penduduk || !content.keuangan || !content.blog){
+		console.log("data not complete cannot show data", content);
 		return;
 	}
 	if(content[icon].score < minScore){
