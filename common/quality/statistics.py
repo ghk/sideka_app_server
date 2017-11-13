@@ -344,15 +344,25 @@ def get_keuangan_statistics(cur, desa_id):
 	return result
  
 def get_pemetaan_statistics(cur, desa_id):
-	result = {"score": 0.0, "network_transportation": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "waters": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "facilities_infrastructures": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, "last_modified": {"date": None, "count": None, "score": 0.0}, "boundary": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, "landuse": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}}
+	result = {
+			"score": 0.0, 
+			"change_id": None, 
+			"network_transportation": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, 
+			"waters": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, 
+			"facilities_infrastructures": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, 
+			"last_modified": {"date": None, "count": None, "score": 0.0}, 
+			"boundary": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, 
+			"landuse": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}
+	}
 	layers = ["network_transportation", "boundary" , "landuse" , "facilities_infrastructures" , "waters"]
 	layer_upper_limits = {"network_transportation": 85, "boundary":4, "landuse" :120 , "facilities_infrastructures": 1000 ,"waters" :100}
 
 	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'pemetaan' order by change_id desc", (desa_id,))
 	sql_row_pemetaan = cur.fetchone()
-	last_modified = {}
+	last_modified = result["last_modified"]
 	last_modified["score"] = 0
 	if sql_row_pemetaan is not None:
+		result["change_id"] = sql_row_pemetaan["id"]
 		last_modified["date"] = str(sql_row_pemetaan["date_created"])
 		last_modified["count"] = str(datetime.now() - sql_row_pemetaan["date_created"])
 		last_modified["score"] = get_scale(7 -(datetime.now() - sql_row_pemetaan["date_created"]).days , 7)
@@ -362,7 +372,7 @@ def get_pemetaan_statistics(cur, desa_id):
 		#Calculate Layer
 		for layer in layers:
 			tab = pemetaan_cur[layer]
-			layer_score = {}
+			layer_score = result[layer]
 			layer_score["score"] = 0
 
 			properties_filled_count = 0
@@ -384,8 +394,6 @@ def get_pemetaan_statistics(cur, desa_id):
 			sum_quantity_pemetaan+=layer_score["quantity"]["score"]
 			sum_quality_pemetaan+=layer_score["quality"]["score"]
 			layer_score["score"]=0.6*layer_score["quantity"]["score"] + 0.4*layer_score["quality"]["score"]
-			result["last_modified"]=last_modified
-			result[layer] = layer_score
 		avg_pemetaan_quantity=sum_quantity_pemetaan/5.0
 		avg_pemetaan_quality=sum_quality_pemetaan/5.0
 		pemetaan_score_datas=0.7*avg_pemetaan_quantity + 0.3*avg_pemetaan_quality

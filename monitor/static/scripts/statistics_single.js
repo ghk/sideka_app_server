@@ -219,7 +219,7 @@ function applyTableContent(){
         $('<td>').html(score(content, "blog.score")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.score", "penduduk.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.score")).appendTo(tr);
-        $('<td>').html(score(content, "pemetaan.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.score", "pemetaan.content_id")).appendTo(tr);
         $('<td>').html(score(content, "blog.score_quality")).appendTo(tr);
         $('<td>').html(score(content, "blog.score_frequency")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.penduduk.score")).appendTo(tr);
