@@ -83,7 +83,7 @@ def get_penduduk_statistics(cur, desa_id):
         "score" :0.0, 
         "content_id": None
     }
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penduduk' and api_version='2.0' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'penduduk' and api_version='2.0' order by change_id desc", (desa_id,))
 	sql_row_penduduk =  cur.fetchone()
 	penduduk=result["penduduk"]
 	other_layers=["mutasi" , "log_surat"]
@@ -181,7 +181,7 @@ def get_keuangan_statistics(cur, desa_id):
     }
 
 	#Calculate Perencanaan
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'perencanaan' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'perencanaan' order by change_id desc", (desa_id,))
 	sql_row_perencanaan =  cur.fetchone()
 
 	if sql_row_perencanaan is not None:
@@ -227,7 +227,7 @@ def get_keuangan_statistics(cur, desa_id):
 	result["perencanaan"]["score"] = 0.1 * result["perencanaan"]["renstra"]["score"] + 0.4 * result["perencanaan"]["rpjm"]["total_score"] + 0.4 * result["perencanaan"]["rkp"]["total_score"] + 0.1 * result["perencanaan"]["last_modified"]["score"]
 
 	#Calculate Penganggaran
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penganggaran' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'penganggaran' order by change_id desc", (desa_id,))
 	sql_row_penganggaran = cur.fetchone()
 
 	if sql_row_penganggaran is not None:
@@ -247,7 +247,7 @@ def get_keuangan_statistics(cur, desa_id):
 
 
 	#Calculate SPP
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'spp' and subtype = '2017' order by date_created desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'spp' and subtype = '2017' order by change_id desc", (desa_id,))
 	sql_row_spp = cur.fetchone()
 	spp_score=result["spp"]
 	spp_datas=["spp" , "spp_bukti" ,"spp_rinci"]
@@ -292,7 +292,7 @@ def get_keuangan_statistics(cur, desa_id):
 		spp_score["score"]=0.05*last_modified_spp["score"] + 0.9*spp_score_datas + 0.05*date_spp["score"]
 
 	#Calculate Penerimaan
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'penerimaan' order by change_id desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'penerimaan' order by change_id desc", (desa_id,))
 	sql_row_penerimaan=cur.fetchone()
 	penerimaan=result["penerimaan"]
 	penerimaan_datas=["tbp" , "tbp_rinci"]
@@ -348,7 +348,7 @@ def get_pemetaan_statistics(cur, desa_id):
 	layers = ["network_transportation", "boundary" , "landuse" , "facilities_infrastructures" , "waters"]
 	layer_upper_limits = {"network_transportation": 85, "boundary":4, "landuse" :120 , "facilities_infrastructures": 1000 ,"waters" :100}
 
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'pemetaan' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'pemetaan' order by change_id desc", (desa_id,))
 	sql_row_pemetaan = cur.fetchone()
 	last_modified = {}
 	last_modified["score"] = 0
@@ -395,7 +395,7 @@ def get_pemetaan_statistics(cur, desa_id):
 
 def get_kemiskinan_statistics(cur, desa_id):
 	result = {}
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'kemiskinan' order by timestamp desc", (desa_id,))
+	cur.execute("select id, content, change_id, date_created from sd_contents where desa_id = %s and type = 'kemiskinan' order by change_id desc", (desa_id,))
 	sql_row_kemiskinan =  cur.fetchone()
 	result["last_modified_kemiskinan"] = 0
 	

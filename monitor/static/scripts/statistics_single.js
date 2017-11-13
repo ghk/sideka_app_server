@@ -153,7 +153,7 @@ function onWidthChange(widthCurrent){
     dataActivityGraph.update()  
 }
 
-function score(content, props){
+function score(content, props, content_id_props){
  	var classButton;
  	var buttonResult;
 	var s = content;
@@ -168,6 +168,20 @@ function score(content, props){
 		return "-";
 	}
  	s *=100;
+	link = null;
+	if(content_id_props){
+		content_id_props = content_id_props.split(".");
+		id = content;
+		for(var i = 0; i <content_id_props.length; i++){
+			if(!id){
+				break;
+			}
+			id = id[content_id_props[i]];
+		}
+		if(id){
+			link = "http://admin.sideka.id/contents/v2/"+id+"/data";
+		}
+	}
  	
  	if(s < 40)
  		classButton= 'uk-badge uk-badge-danger';
@@ -175,7 +189,10 @@ function score(content, props){
  		classButton ='uk-badge uk-badge-warning'; 
  	else
  		classButton ='uk-badge uk-badge-success';
- 	buttonResult = '<span class="'+classButton+'">'+s.toFixed(2)+'</span>';
+	if(!link){
+		link = "#";
+	}
+ 	buttonResult = '<a href="'+link+'" class="'+classButton+'">'+s.toFixed(2)+'</a>';
  	return buttonResult;
 }
 
@@ -200,7 +217,7 @@ function applyTableContent(){
         var tr = $('<tr>');
         $('<td>').html(moment(content.date * 1000).format("DD MMM YYYY")).appendTo(tr);
         $('<td>').html(score(content, "blog.score")).appendTo(tr);
-        $('<td>').html(score(content, "penduduk.score")).appendTo(tr);
+        $('<td>').html(score(content, "penduduk.score", "penduduk.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.score")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.score")).appendTo(tr);
         $('<td>').html(score(content, "blog.score_quality")).appendTo(tr);
@@ -208,10 +225,10 @@ function applyTableContent(){
         $('<td>').html(score(content, "penduduk.penduduk.score")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.log_surat.score")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.mutasi.score")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.perencanaan.score")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.pengaggaran.score")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.spp.score")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.penerimaan.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.perencanaan.score", "keuangan.perencanaan.content_id")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.pengaggaran.score", "keuangan.penganggaran.content_id")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.spp.score", "keuangan.spp.content_id")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.penerimaan.score", "keuangan.penerimaan.content_id")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.network_transportation.score")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.boundary.score")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.waters.score")).appendTo(tr);
