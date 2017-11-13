@@ -41,7 +41,7 @@ def get_blog_statistics(cur, desa_id):
 
 	result["score_frequency"] = 0.3 * result["score_last_modified"]  + 0.4 * result["score_weekly"] + 0.3 * result["score_monthly"]
 
-	maximum = datetime.now() - timedelta(days = 30)
+	maximum = datetime.now() - timedelta(days = 60)
 	query ="select avg(score_value) as avg from sd_post_scores where blog_id = %s and post_date > %s";
 	result["score_quality"] = query_single(cur, query,  "avg", (desa_id,maximum))
 	if result["score_quality"] is None:
@@ -420,7 +420,7 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		#if desa["blog_id"] != 50:
+		#if desa["blog_id"] != 14:
 		#	continue
 
 		stats = get_statistics(cur, desa["blog_id"])
