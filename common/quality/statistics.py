@@ -420,8 +420,8 @@ if __name__ == "__main__":
 	cur.execute(query)
 	desas = list(cur.fetchall())
 	for desa in desas:
-		#if desa["blog_id"] != 50:
-		#	continue
+		if desa["blog_id"] != 3874:
+			continue
 
 		stats = get_statistics(cur, desa["blog_id"])
 		stats["blog_id"] = desa["blog_id"]
