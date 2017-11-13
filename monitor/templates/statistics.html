@@ -1,7 +1,14 @@
 {% extends "monitor.html" %} 
 {% block body %}
-	<div id="sheet"></div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/0.29.0/handsontable.full.min.js"></script>
+	<div id="header"></div>
+	<div id="sheet" style="flex: 1; overflow: hidden;">
+	</div>
+<style>
+	body { padding-top: 0px; }
+	#page_content_inner { height: 100vh; display: flex; flex-direction: column; padding: 0px; }
+	#header { flex: 0 0 48px; }
+</style>
+        <script src="/static/content/js/handsontable.full.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 	<script src="/static/scripts/statistics.js"></script>
 {% endblock %}

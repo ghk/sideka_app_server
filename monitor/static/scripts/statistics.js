@@ -1,7 +1,7 @@
 var columns = [
 		{
 	data: 'blog_id',
-	header: 'Wordpress Id',
+	header: 'Id',
 	renderer: makeLinkRenderer(function(v){ return  "/statistic/"+v }, function(v) {return v; }),
 		},
 		{
@@ -195,12 +195,15 @@ function onSupradesaChanged(supradesaId){
 		var container = document.getElementById('sheet');
 
 		var hot = new Handsontable(container, {
-		data: data,
-		columns: columns,
-		columnSorting: true,
-		sortIndicator: true,
-		rowHeaders: true,
-		colHeaders: columns.map(function(c) { return c.header; }),
+			data: data,
+			columns: columns,
+			columnSorting: true,
+			sortIndicator: true,
+			rowHeaders: true,
+			schemaFilters: true,
+			renderAllRows: false,
+			dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+			colHeaders: columns.map(function(c) { return c.header; }),
 		});
 		setTimeout(function(){ hot.render() }, 0);
 	});	
