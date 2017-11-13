@@ -1,5 +1,5 @@
 contentDataQuality = contentDataQuality.filter(function(c){return c.date !=="None"}) 
-var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000"];
+var fill = ["#8bc34a", "#d84315", "#2196f3", "#ffa000", "#9467bd"];
 var width = $(window).width();
 var cachedDataQualityGraph={},cachedDataActivityGraph={};
 var configDataQualityGraph= {
@@ -22,6 +22,12 @@ var configDataQualityGraph= {
             label: "Anggaran",
             backgroundColor: fill[3],
             borderColor: fill[3],
+            data:[],
+            fill: false,
+        },{
+            label: "Pemetaan",
+            backgroundColor: fill[4],
+            borderColor: fill[4],
             data:[],
             fill: false,
         }],
@@ -87,13 +93,18 @@ function applyDatasets(graph,datasets,custom){
 }
 
 function applyGraph(){
-    var datasets=[contentDataQuality.map(function(c){return (c.blog.score * 100).toFixed(2)}),contentDataQuality.map(function(c){return (c.penduduk ? c.penduduk.score * 100 : 0).toFixed(2)}),contentDataQuality.map(function(c){return (c.keuangan ? c.keuangan.score * 100 : 0).toFixed(2)}),]
+    var datasets=[
+		contentDataQuality.map(function(c){return (c.blog.score * 100).toFixed(2)}),	
+		contentDataQuality.map(function(c){return (c.penduduk ? c.penduduk.score * 100 : 0).toFixed(2)}),
+		contentDataQuality.map(function(c){return (c.keuangan ? c.keuangan.score * 100 : 0).toFixed(2)}),
+		contentDataQuality.map(function(c){return (c.pemetaan ? c.pemetaan.score * 100 : 0).toFixed(2)})
+	];
     applyDatasets(dataQualityGraph,datasets)
     dataQualityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataQualityGraph.update();
 
-    var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan"]}
-    datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.keuangan]
+    var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan", "Pemetaan"]}
+    datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.keuangan, contentDataActivity.pemetaan]
     applyDatasets(dataActivityGraph,datasets,custom)
     dataActivityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataActivityGraph.update();
@@ -142,18 +153,29 @@ function onWidthChange(widthCurrent){
     dataActivityGraph.update()  
 }
 
-function makeButtonScoring(score){
+function score(content, props){
  	var classButton;
  	var buttonResult;
- 	score *=100;
+	var s = content;
+	props = props.split(".");
+	for(var i = 0; i <props.length; i++){
+		if(!s){
+			return "-";
+		}
+		s = s[props[i]];
+	}
+	if(!s || !s.toFixed){
+		return "-";
+	}
+ 	s *=100;
  	
- 	if(score < 40)
+ 	if(s < 40)
  		classButton= 'uk-badge uk-badge-danger';
- 	else if(score < 70) 
+ 	else if(s < 70) 
  		classButton ='uk-badge uk-badge-warning'; 
  	else
  		classButton ='uk-badge uk-badge-success';
- 	buttonResult = '<span class="'+classButton+'">'+score.toFixed(2)+'</span>';
+ 	buttonResult = '<span class="'+classButton+'">'+s.toFixed(2)+'</span>';
  	return buttonResult;
 }
 
@@ -167,8 +189,8 @@ function applyTableHeader(header,thead){
 }
 
 function applyTableContent(){    
-    var headerTableDaily = ["Tanggal","Berita","Penduduk","Anggaran","B.Qlt","B.Freq","P.Qlt","P.Qty","A.Qlt","A.Qty","Last Post", 
-                        "#Post 1D", "#Post 1W","#Post 30D","Penduduk last Modified","#Penduduk", "Apbdes Last Modified","#Apbdes"]
+    var headerTableDaily = ["Tanggal","Berita","Penduduk","Anggaran", "Pemetaan", "B.Qlt","B.Freq","P.Pen","P.Sur","P.Mut","K.Ren","K.Ang", 
+                        "K.SPP", "K.TBP","Pt. Tra","Pt. Bou","Pt. Wat", "Pt. Fac","Pt. Lan"]
     var headerTablePost = ["Score","Tanggal","Judul","#KBBI", "#Kalimat", "#Paragraph","%Gambar Utama","%Judul", "%KBBI","%Foto & Caption","%Kalimat","%Paragraph"]
     var tbody = $('#table-daily tbody');
     var thead = $('#table-daily thead');  
@@ -176,26 +198,25 @@ function applyTableContent(){
     applyTableHeader(headerTableDaily, thead)
     $.each(contentDataQuality.slice(0).reverse(), function(idx,content){
         var tr = $('<tr>');
-        $('<td>').html(moment(content.date).format("DD MMM YYYY")).appendTo(tr);
-        $('<td>').html(makeButtonScoring(content.blog.score)).appendTo(tr);
-        $('<td>').html(makeButtonScoring(content.penduduk.score)).appendTo(tr)
-        $('<td>').html(makeButtonScoring(content.keuangan.score)).appendTo(tr)
-        $('<td>').html(content.blog.score_quality.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.blog.score_frequency.toFixed(2)).appendTo(tr)
-	/*
-        $('<td>').html(content.penduduk.score_quality.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.penduduk.score_quantity.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.keuangan.score_quality.toFixed(2)).appendTo(tr)
-        $('<td>').html(content.apbdes.score_quantity.toFixed(2)).appendTo(tr)
-        $('<td>').html(moment(content.blog.last_post).format("DD MMM YYYY")).appendTo(tr)
-        $('<td>').html(content.blog.count_24h).appendTo(tr)
-        $('<td>').html(content.blog.count_1w).appendTo(tr)
-        $('<td>').html(content.blog.count_30d).appendTo(tr)
-        $('<td>').html(moment(content.penduduk.last_modified).format("DD MMM YYYY")).appendTo(tr)
-        $('<td>').html(content.penduduk.count).appendTo(tr)
-        $('<td>').html(moment(content.apbdes.last_modified).format("DD MMM YYYY")).appendTo(tr)
-        $('<td>').html(content.apbdes.count).appendTo(tr)
-	*/
+        $('<td>').html(moment(content.date * 1000).format("DD MMM YYYY")).appendTo(tr);
+        $('<td>').html(score(content, "blog.score")).appendTo(tr);
+        $('<td>').html(score(content, "penduduk.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.score")).appendTo(tr);
+        $('<td>').html(score(content, "blog.score_quality")).appendTo(tr);
+        $('<td>').html(score(content, "blog.score_frequency")).appendTo(tr);
+        $('<td>').html(score(content, "penduduk.penduduk.score")).appendTo(tr);
+        $('<td>').html(score(content, "penduduk.log_surat.score")).appendTo(tr);
+        $('<td>').html(score(content, "penduduk.mutasi.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.perencanaan.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.pengaggaran.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.spp.score")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.penerimaan.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.network_transportation.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.boundary.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.waters.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.facilities_infrastructures.score")).appendTo(tr);
+        $('<td>').html(score(content, "pemetaan.landuse.score")).appendTo(tr);
         tbody.append(tr);
     })
 
@@ -204,7 +225,7 @@ function applyTableContent(){
     applyTableHeader(headerTablePost, thead)
     $.each(contentDataPost,function(idx,content){
         var tr = $('<tr>');
-          $('<td>').html(makeButtonScoring(content.score)).appendTo(tr)
+          $('<td>').html(score(content, "score")).appendTo(tr)
         $('<td>').html(moment(content.date).format("DD MMM YYYY")).appendTo(tr);
         $('<td>').html('<a href="'+content.url+'">'+content.title.substring(0,50)+'</a>').appendTo(tr)      
         $('<td>').html(content.kbbi).appendTo(tr)
