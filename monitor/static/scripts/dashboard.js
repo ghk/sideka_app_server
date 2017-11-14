@@ -287,8 +287,11 @@ function getStatistics(supradesaId){
 		var icon = "blog";
 		dataStatistics = data;
 		$.each(data,function(idx,content){
-			if(content.latitude != null && content.longitude)
+			if(content.latitude && content.longitude){
 				addMarker(content,icon, minScore);
+			} else {
+				console.log("cannot show data", content);
+			}
 		})	
 	})
 }
@@ -315,9 +318,10 @@ function initMaps(supradesaId){
 }
 
 function addMarker(content,icon,minScore) {
-	/*if(!content.penduduk || !content.keuangan || !content.blog){
+	if(!content.penduduk || !content.keuangan || !content.blog){
+		console.log("data not complete cannot show data", content);
 		return;
-	}*/
+	}
 	if(content[icon].score < minScore){
 		return;
 	}
@@ -329,15 +333,12 @@ function addMarker(content,icon,minScore) {
 		map: map,
 		icon: host+pathImage
 	});
-	var beritaScore   = content.blog     ? content.blog.score*100 :0;
-	var pendudukScore = content.penduduk ? content.penduduk.score * 100 : 0;
-	var keuanganScore = content.keuangan ? content.keuangan.score*100 :0;
 
 	var content = 'Website: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
-				  'Berita: '+(beritaScore).toFixed(2)+'<br />'+
-				  'Kependudukan: '+(pendudukScore).toFixed(2)+'<br />'+
-				  'Keuangan: '+(keuanganScore).toFixed(2);
+				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
+				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
+				  'Keuangan: '+(content.keuangan.score*100).toFixed(2);
 	var infowindow = new google.maps.InfoWindow();
 	google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
 		return function() {
@@ -500,3 +501,4 @@ $(window).on('resize', function(){
 window.onload = function(){
 	onSupradesaChanged(hashUrl());
 }
+

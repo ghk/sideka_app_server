@@ -1,8 +1,10 @@
+import os, logging
+from logging.handlers import RotatingFileHandler
 from flask import request, jsonify
 from common import gzipped
 from tatakelola import create_app, db
 from tatakelola.helpers import TatakelolaFetcher, QueryHelper
-from tatakelola.models import Region, RegionModelSchema, Geojson, GeojsonModelSchema
+from tatakelola.models import Region, RegionModelSchema, Geojson, GeojsonModelSchema, Data, DataModelSchema
 
 app = create_app()
 
@@ -45,10 +47,45 @@ def get_geojson_by_type_and_region_id(type, region_id):
     return jsonify(result.data)
 
 
+@app.route('/data/region/<string:region_id>', methods=['GET'])
+def get_data_by_region_id(region_id):
+    data = db.session.query(Data).filter(Data.fk_region_id == region_id)
+    result = DataModelSchema(many=False).dump(data)
+    return jsonify(result.data)
+
+
 @app.route('/admin/fetch/geojsons', methods=['GET'])
 def fetch_geojsons():
     TatakelolaFetcher.fetch_geojsons()
+    return jsonify({'success': True})
+
+
+@app.route('/admin/fetch/data', methods=['GET'])
+def fetch_data():
+    TatakelolaFetcher.fetch_data()
+    return jsonify({'success': True})
+
+
+@app.route('/admin/test', methods=['GET'])
+def test():
+    query1 = '\'{"id": "oQM8YJSEHLDpTKrkfkZO9k"}\''
+    query2 = '\'{"id": "h5Gs6TfCIha.7HKyUeNitk"}\''
+    query = ','.join([query1, query2])
+    raw_query = "SELECT geojsons.fk_region_id, features FROM geojsons, jsonb_array_elements(data->'features') features WHERE features @> ANY (ARRAY[{0}]::jsonb[])".format(
+        query)
+    result_proxy = db.engine.execute(raw_query)
+    result = []
+    for row in result_proxy:
+        result.append([row[0], row[1]])
+    return jsonify(result)
 
 
 if __name__ == "__main__":
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs', 'tatakelola.log')
+    handler = RotatingFileHandler(log_file, maxBytes=1000000, backupCount=5)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+
     app.run(debug=True, host=app.config["HOST"], port=app.config["TATAKELOLA_PORT"])

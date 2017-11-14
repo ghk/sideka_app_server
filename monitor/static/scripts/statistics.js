@@ -1,7 +1,7 @@
 var columns = [
 		{
 	data: 'blog_id',
-	header: 'Wordpress Id',
+	header: 'Id',
 	renderer: makeLinkRenderer(function(v){ return  "/statistic/"+v }, function(v) {return v; }),
 		},
 		{
@@ -98,32 +98,32 @@ var columns = [
 	format: '0.00',
       },
 	  {
-	data: 'pemetaan.network_transpotation.score',
-	header: 'Pt. NetTrans',
+	data: 'pemetaan.network_transportation.score',
+	header: 'Pt. Tra',
 	type: 'numeric',
 	format: '0.00',
       },
 	  {
 	data: 'pemetaan.waters.score',
-	header: 'Pt.Waters',
+	header: 'Pt. Wat',
 	type: 'numeric',
 	format: '0.00',
       },
 	  {
 	data: 'pemetaan.facilities_infrastructures.score',
-	header: 'Pt.FacInf',
+	header: 'Pt. Fac',
 	type: 'numeric',
 	format: '0.00',
       },
 	  {
 	data: 'pemetaan.boundary.score',
-	header: 'Pt.Bound',
+	header: 'Pt. Bou',
 	type: 'numeric',
 	format: '0.00',
       },
 	  {
 	data: 'pemetaan.landuse.score',
-	header: 'Pt.Landuse',
+	header: 'Pt. Lan',
 	type: 'numeric',
 	format: '0.00',
       },
@@ -195,12 +195,15 @@ function onSupradesaChanged(supradesaId){
 		var container = document.getElementById('sheet');
 
 		var hot = new Handsontable(container, {
-		data: data,
-		columns: columns,
-		columnSorting: true,
-		sortIndicator: true,
-		rowHeaders: true,
-		colHeaders: columns.map(function(c) { return c.header; }),
+			data: data,
+			columns: columns,
+			columnSorting: true,
+			sortIndicator: true,
+			rowHeaders: true,
+			schemaFilters: true,
+			renderAllRows: false,
+			dropdownMenu: ['filter_by_condition', 'filter_action_bar'],
+			colHeaders: columns.map(function(c) { return c.header; }),
 		});
 		setTimeout(function(){ hot.render() }, 0);
 	});	

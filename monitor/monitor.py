@@ -88,6 +88,9 @@ def statistic_single(blog_id):
         keuangan_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type in ('perencanaan', 'penganggaran', 'spp', 'penerimaan') GROUP BY date(date_accessed);"
         cur.execute(keuangan_query, (blog_id,))
         activity_dict["keuangan"] = dict(cur.fetchall())
+        pemetaan_query = "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where d.blog_id = %s and l.date_accessed is not null and l.action = 'save_content' and l.type='pemetaan' GROUP BY date(date_accessed);"
+        cur.execute(pemetaan_query, (blog_id,))
+        activity_dict["pemetaan"] = dict(cur.fetchall())
 
         def get_daily_activity(typ, time):
             if time in activity_dict[typ]:
@@ -100,10 +103,12 @@ def statistic_single(blog_id):
 
         def get_daily_score(time):
             if time in score_dict:
-                return json.loads(score_dict[time])
-            return {"penduduk": {"score": 0}, "keuangan": {"score": 0}, "pemetaan": {"score": 0}, "blog": {"score": 0}}
+                result =  json.loads(score_dict[time])
+                result["date"] = time
+                return result
+            return {"penduduk": {"score": 0}, "keuangan": {"score": 0}, "pemetaan": {"score": 0}, "blog": {"score": 0}, "date": time}
 
-        activities = {"label": [], "post": [], "penduduk": [], "keuangan": []}
+        activities = {"label": [], "post": [], "penduduk": [], "keuangan": [], "pemetaan": []}
 	scores = []
         for i in range(63):
             d = datetime.datetime.today() - datetime.timedelta(days=62 - i)
@@ -113,6 +118,7 @@ def statistic_single(blog_id):
             activities["post"].append(get_daily_activity("post", t))
             activities["penduduk"].append(get_daily_activity("penduduk", t))
             activities["keuangan"].append(get_daily_activity("keuangan", t))
+            activities["pemetaan"].append(get_daily_activity("pemetaan", t))
             scores.append(get_daily_score(t))
 
         activity_json = json.dumps(activities)
