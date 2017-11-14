@@ -411,6 +411,8 @@ def get_kemiskinan_statistics(cur, desa_id):
 	return result
 def get_statistics(cur, desa_id):
 	result = {}
+	result["scoring_formula_version"] = 2
+	result["scoring_date"] = str(datetime.now())
 	functions = {}
 	functions["blog"] = get_blog_statistics
 	functions["penduduk"] = get_penduduk_statistics
