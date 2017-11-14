@@ -500,4 +500,3 @@ $(window).on('resize', function(){
 window.onload = function(){
 	onSupradesaChanged(hashUrl());
 }
-
