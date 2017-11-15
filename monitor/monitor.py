@@ -4,6 +4,8 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
+from flask_compress import Compress
+from flask_caching import Cache
 from common.phpass import PasswordHash
 import MySQLdb
 import os
@@ -12,7 +14,9 @@ import time
 import datetime
 
 app = Flask(__name__)
+Compress(app)
 mysql = MySQL(app)
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 # MySQL configurations
 app.config.from_pyfile('../common/app.cfg')
@@ -20,8 +24,7 @@ app.config.from_pyfile('../common/app.cfg')
 phasher = PasswordHash(8, True)
 
 
-def get_sd_desa_query(args):
-    supradesa_id = str(args.get("supradesa_id"))
+def get_sd_desa_query(supradesa_id):
     error_value = ["null", "undefined", None]
     cur = mysql.connection.cursor()
     try:
@@ -143,16 +146,15 @@ def apbdes_scores():
 def send_statics(path):
     return send_from_directory('statics', path)
 
-
-@app.route('/api/statistics', methods=['GET'])
-def get_statistics():
+@cache.memoize(timeout=600)
+def get_statistics_by_supradesa(supradesa_id):
     def combine(row):
         res = json.loads(row[1])
         res["desa"] = row[2]
         res["latitude"] = row[3]
         res["longitude"] = row[4]
         return res
-    query_sd_desa = get_sd_desa_query(request.args)
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     cur = mysql.connection.cursor()
     try:
         query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
@@ -164,6 +166,11 @@ def get_statistics():
     finally:
         cur.close()
 
+@app.route('/api/statistics', methods=['GET'])
+def get_statistics():
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_statistics_by_supradesa(supradesa_id)
+
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard_data():
@@ -172,7 +179,8 @@ def get_dashboard_data():
         res["blog_id"] = row[0]
         return res
     results = {}
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     cur = mysql.connection.cursor()
     try:
         weekly_desa = []
@@ -254,7 +262,8 @@ def get_post_scores():
     cur = mysql.connection.cursor()
     page = request.args.get('pagebegin')
     item_per_page = int(request.args.get('itemperpage'))
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     offset = 0
     if not page.isdigit():
         page = 1
@@ -273,7 +282,8 @@ def get_post_scores():
 @app.route('/api/count_post_scores', methods=["GET"])
 def get_count_post_scores():
     cur = mysql.connection.cursor()
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     try:
         query = "SELECT count(*) from sd_post_scores p left join sd_desa d on p.blog_id = d.blog_id where {0}".format(
             query_sd_desa)
@@ -287,7 +297,8 @@ def get_count_post_scores():
 @app.route('/api/apbdes_scores', methods=["GET"])
 def get_apbdes_scores():
     cur = mysql.connection.cursor()
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     try:
         query = "SELECT a.score from sd_apbdes_scores a left join sd_desa d on d.blog_id = a.blog_id where {0}".format(
             query_sd_desa)
@@ -300,7 +311,8 @@ def get_apbdes_scores():
 
 @app.route('/api/domain_weekly', methods=["GET"])
 def get_domain_weekly():
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     cur = mysql.connection.cursor()
     try:
 
@@ -361,7 +373,8 @@ def get_zoom():
 
 @app.route('/api/panel_weekly')
 def get_weekly_panel():
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     cur = mysql.connection.cursor()
     results = {}
     weekly_keuangan = []
