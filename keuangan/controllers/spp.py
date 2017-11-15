@@ -2,13 +2,10 @@ from flask import Blueprint, jsonify, request
 from keuangan import db
 from keuangan.models import SiskeudesSppModelSchema, SiskeudesSppBuktiModelSchema, SiskeudesSppRinciModelSchema
 from keuangan.models import SiskeudesSppModelSchemaIso, SiskeudesSppBuktiModelSchemaIso
-from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesSppRepository, SiskeudesSppBuktiRepository, SiskeudesSppRinciRepository
 from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('spp', __name__)
-region_repository = RegionRepository(db)
-sideka_content_repository = SidekaContentRepository(db)
 siskeudes_spp_repository = SiskeudesSppRepository(db)
 siskeudes_spp_bukti_repository = SiskeudesSppBuktiRepository(db)
 siskeudes_spp_rinci_repository = SiskeudesSppRinciRepository(db)
@@ -18,7 +15,7 @@ siskeudes_spp_rinci_repository = SiskeudesSppRinciRepository(db)
 def get_siskeudes_spps():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     entities = siskeudes_spp_repository.all(page_sort_params)
-    result = SiskeudesSppModelSchema(many=True).dump(entities)
+    result = SiskeudesSppModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 

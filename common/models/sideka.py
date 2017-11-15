@@ -1,6 +1,5 @@
 from common.database import db
 from common.marshmallow import ma
-from marshmallow import post_load
 from datetime import datetime
 from sqlalchemy.dialects.mysql import BIT
 

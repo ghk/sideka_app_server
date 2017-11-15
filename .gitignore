@@ -11,3 +11,6 @@ package-lock.json
 
 keuangan/logs/*
 !keuangan/logs/.gitkeep
+
+tatakelola/logs/*
+!tatakelola/logs/.gitkeep

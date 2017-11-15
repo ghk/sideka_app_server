@@ -1,11 +1,11 @@
-from keuangan import db
-from keuangan import ma
+from tatakelola import db
+from tatakelola import ma
 from base import BaseModel
 from region import RegionCompleteModelSchema
 
 
-class ProgressRecapitulation(BaseModel):
-    __tablename__ = 'progress_recapitulations'
+class Apbdes(BaseModel):
+    __tablename__ = 'apbdes'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     budgeted_revenue = db.Column(db.DECIMAL)
     transferred_revenue = db.Column(db.DECIMAL)
@@ -17,12 +17,13 @@ class ProgressRecapitulation(BaseModel):
     region = db.relationship('Region', lazy='joined')
 
     __table_args__ = (
-        db.Index('pr_ix_fk_region_id', 'fk_region_id'),
+        db.Index('apbdes_ix_fk_region_id', 'fk_region_id'),
     )
 
-class ProgressRecapitulationModelSchema(ma.ModelSchema):
+
+class ApbdesModelSchema(ma.ModelSchema):
     class Meta:
-        model = ProgressRecapitulation
+        model = Apbdes
         include_fk = True
 
     region = ma.Nested(RegionCompleteModelSchema, many=False)

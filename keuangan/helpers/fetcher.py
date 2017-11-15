@@ -36,6 +36,7 @@ class SiskeudesFetcher:
 
             region.domain = sd_desa.domain
             region.desa_id = sd_desa.blog_id
+            region.is_lokpri = bool(sd_desa.is_lokpri)
             db.session.add(region)
 
     @staticmethod
@@ -68,7 +69,6 @@ class SiskeudesFetcher:
                 continue
 
             region.siskeudes_code = kode_desa
-            region.is_lokpri = True
             db.session.add(region)
 
     @staticmethod
@@ -81,7 +81,7 @@ class SiskeudesFetcher:
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         if (sd_content is None):
             logger.warning('Region: {0}<{1}> does not have anggaran'.format(region.name, region.id))
-            return;
+            return
 
         contents = ContentTransformer.transform(sd_content.content)
 
@@ -118,7 +118,7 @@ class SiskeudesFetcher:
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, region.desa_id)
         if (sd_content is None):
             logger.info('Region: {0}<{1}> does not have penerimaan'.format(region.name, region.id))
-            return;
+            return
 
         contents = ContentTransformer.transform(sd_content.content)
 
@@ -139,7 +139,7 @@ class SiskeudesFetcher:
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
         if (sd_content is None):
             logger.info('Region: {0}<{1}> does not have spp'.format(region.name, region.id))
-            return;
+            return
 
         contents = ContentTransformer.transform(sd_content.content)
 

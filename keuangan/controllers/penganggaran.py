@@ -1,15 +1,12 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
 from keuangan.models import SiskeudesPenganggaranModelSchema, SiskeudesPenganggaranSchema
-from keuangan.repository import RegionRepository, SidekaContentRepository
-from keuangan.repository import SiskeudesPenganggaranRepository, SiskeudesKegiatanRepository
+from keuangan.repository import RegionRepository, SiskeudesPenganggaranRepository, SiskeudesKegiatanRepository
 from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('penganggaran', __name__)
 region_repository = RegionRepository(db)
-sideka_content_repository = SidekaContentRepository(db)
 siskeudes_penganggaran_repository = SiskeudesPenganggaranRepository(db)
-siskeudes_kegiatan_repository = SiskeudesKegiatanRepository(db)
 
 
 @app.route('/siskeudes/penganggarans', methods=['GET'])
@@ -39,7 +36,6 @@ def fetch_siskeudes_penganggarans():
     SiskeudesFetcher.fetch_penganggarans()
     db.session.commit()
     return jsonify({'success': True})
-
 
 
 @app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>', methods=['GET'])
