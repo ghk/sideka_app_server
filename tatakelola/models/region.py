@@ -30,7 +30,7 @@ class RegionModelSchema(ma.ModelSchema):
         model = Region
         include_fk = True
 
-    # parent = ma.Nested('self', many=False, exclude=('parent', ))
+        # parent = ma.Nested('self', many=False, exclude=('parent', ))
 
 
 class RegionCompleteModelSchema(ma.ModelSchema):

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
-from keuangan.models import SiskeudesKegiatan, SiskeudesKegiatanModelSchema
+from keuangan.models import SiskeudesKegiatanModelSchema
 from keuangan.repository import SiskeudesKegiatanRepository
 from keuangan.helpers import QueryHelper
 
