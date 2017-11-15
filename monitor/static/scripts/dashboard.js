@@ -334,11 +334,12 @@ function addMarker(content,icon,minScore) {
 		icon: host+pathImage
 	});
 
-	var content = 'Website: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
+	var content = 'Website: <a target="_blank" href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
-				  'Keuangan: '+(content.keuangan.score*100).toFixed(2);
+				  'Keuangan: '+(content.keuangan.score*100).toFixed(2)+'<br />'+
+				  'Pemetaan: '+(content.pemetaan.score*100).toFixed(2);
 	var infowindow = new google.maps.InfoWindow();
 	google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
 		return function() {
