@@ -6,3 +6,4 @@ from progress_recapitulation import ProgressRecapitulationRepository
 from region import RegionRepository
 from sideka_content import SidekaContentRepository
 from sideka_desa import SidekaDesaRepository
+from summary import SummaryRepository

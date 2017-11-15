@@ -1,5 +1,6 @@
-from common.database import db
-from common.marshmallow import ma
+from tatakelola import db
+from tatakelola import ma
+
 
 class ProgressRecapitulation(db.Model):
     __tablename__ = 'progress_recapitulations'

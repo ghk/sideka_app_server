@@ -9,7 +9,7 @@ class Generator:
     @staticmethod
     def generate_penduduk_summary_by_region(region):
         penduduks = penduduk_repository.get_by_region(region.id)
-        return SummaryTransformer.transform(penduduks)
+        return SummaryTransformer.transform(penduduks, region)
 
     @staticmethod
     def generate_penduduk_summaries():
