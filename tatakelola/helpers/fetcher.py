@@ -108,7 +108,7 @@ class TatakelolaFetcher():
             try:
                 TatakelolaFetcher.fetch_geojsons_by_region(region)
             except Exception as e:
-                logger.error("Error on region {0} - {1} - {2}".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
@@ -116,12 +116,12 @@ class TatakelolaFetcher():
     def fetch_data():
         regions = region_repository.all()
         #regions = list()
-        #regions.append(region_repository.get_by_desa_id(142))
+        #regions.append(region_repository.get_by_desa_id(3))
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_data_by_region(region)
             except Exception as e:
-                logger.error("Error on region {0} - {1} - {2}".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
@@ -132,6 +132,6 @@ class TatakelolaFetcher():
             try:
                 TatakelolaFetcher.fetch_apbdes_by_region(region)
             except Exception as e:
-                logging.error("Error on region {0} - {1} - {2}".format(region.id, region.name, region.desa_id))
+                logging.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
                 logging.error(e.message)
                 traceback.print_exc()

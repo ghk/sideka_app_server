@@ -18,9 +18,13 @@ class RegionRepository(BaseRepository):
             .filter(self.model.desa_id == desa_id) \
             .first()
 
-    def all(self, is_lokpri=True, page_sort_params=None):
+    def all(self, is_lokpri=True, is_siskeudes_code=False, page_sort_params=None):
         query = self.db.session.query(self.model) \
             .filter(self.model.is_lokpri == is_lokpri)
+
+        if (is_siskeudes_code):
+            query = query.filter(self.model.siskeudes_code is not None)
+
         query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
         return query.all()
 

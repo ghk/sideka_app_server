@@ -50,7 +50,7 @@ class Generator:
     @staticmethod
     def generate_progress_recapitulations():
         result = []
-        regions = region_repository.all()
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             pr = Generator.generate_progress_recapitulation_by_region(region)
             result.append(pr)
@@ -59,7 +59,7 @@ class Generator:
     @staticmethod
     def generate_progress_timelines():
         result = []
-        regions = region_repository.all()
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             pts = Generator.generate_progress_timeline_by_region(region)
             result += pts
@@ -68,7 +68,7 @@ class Generator:
     @staticmethod
     def generate_spending_recapitulations():
         result = []
-        regions = region_repository.all()
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             srs = Generator.generate_spending_recapitulation_by_region(region)
             result += srs

@@ -67,7 +67,7 @@ class GeojsonTransformer:
 
 class SummaryTransformer:
     @staticmethod
-    def transform(penduduks):
+    def transform(penduduks, region):
         summary = Summary()
         summary.penduduk_sex_male = 0
         summary.penduduk_sex_female = 0
@@ -84,7 +84,7 @@ class SummaryTransformer:
 
         ref = PendudukReference()
         for penduduk in penduduks:
-            if penduduk.jenis_kelamin == 'Laki-laki':
+            if penduduk.jenis_kelamin == 'Laki-Laki':
                 summary.penduduk_sex_male += 1
             elif penduduk.jenis_kelamin == 'Perempuan':
                 summary.penduduk_sex_female += 1
@@ -117,5 +117,7 @@ class SummaryTransformer:
                 summary.penduduk_job_karyawan += 1
             else:
                 summary.penduduk_job_lain += 1
+
+        summary.fk_region_id = region.id
 
         return summary

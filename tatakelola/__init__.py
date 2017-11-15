@@ -24,6 +24,7 @@ def create_app():
     app.register_blueprint(GeojsonController)
     app.register_blueprint(PendudukController)
     app.register_blueprint(RegionController)
+    app.register_blueprint(SummaryController)
 
     db.init_app(app)
     ma.init_app(app)
