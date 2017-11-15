@@ -6,13 +6,12 @@ import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
-
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
 import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
-
+import { DashboardComponent } from './components/dashboard';
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
 

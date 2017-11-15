@@ -152,6 +152,7 @@ def get_statistics():
         query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
 				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
 
+        print query
         cur.execute(query)
         results = [combine(c) for c in cur.fetchall()]
         return jsonify(results)
