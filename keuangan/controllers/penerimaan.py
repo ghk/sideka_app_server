@@ -1,13 +1,10 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db
 from keuangan.models import SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanModelSchemaIso, SiskeudesPenerimaanRinciModelSchema
-from keuangan.repository import RegionRepository, SidekaContentRepository
 from keuangan.repository import SiskeudesPenerimaanRepository, SiskeudesPenerimaanRinciRepository
 from keuangan.helpers import QueryHelper, SiskeudesFetcher
 
 app = Blueprint('penerimaan', __name__)
-region_repository = RegionRepository(db)
-sideka_content_repository = SidekaContentRepository(db)
 siskeudes_penerimaan_repository = SiskeudesPenerimaanRepository(db)
 siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
 

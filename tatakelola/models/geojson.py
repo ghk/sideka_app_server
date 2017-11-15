@@ -4,6 +4,7 @@ from base import BaseModel
 from region import RegionModelSchema
 from sqlalchemy.dialects.postgresql import JSONB
 
+
 class Geojson(BaseModel):
     __tablename__ = 'geojsons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -26,6 +27,3 @@ class GeojsonModelSchema(ma.ModelSchema):
         include_fk = True
 
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
-
-
-

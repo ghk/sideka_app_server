@@ -1,18 +1,13 @@
 from flask import Blueprint, jsonify, request
-from datetime import datetime
 from keuangan import db
 from keuangan.models import ProgressRecapitulationModelSchema, ProgressTimelineModelSchema
-from keuangan.repository import RegionRepository, ProgressRecapitulationRepository, ProgressTimelineRepository
-from keuangan.repository import SiskeudesPenganggaranRepository, SiskeudesSppRinciRepository, SiskeudesPenerimaanRinciRepository
-from keuangan.helpers import QueryHelper, ProgressTimelineTransformer, Generator
+from keuangan.repository import ProgressRecapitulationRepository, ProgressTimelineRepository
+from keuangan.helpers import QueryHelper, Generator
 
 app = Blueprint('progress', __name__)
-region_repository = RegionRepository(db)
 progress_recapitulation_repository = ProgressRecapitulationRepository(db)
 progress_timeline_repository = ProgressTimelineRepository(db)
-siskeudes_penganggaran_repository = SiskeudesPenganggaranRepository(db)
-siskeudes_spp_rinci_repository = SiskeudesSppRinciRepository(db)
-siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
+
 
 @app.route('/progress/recapitulations', methods=['GET'])
 def get_progress_recapitulations():

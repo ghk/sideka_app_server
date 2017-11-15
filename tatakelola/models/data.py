@@ -4,6 +4,7 @@ from base import BaseModel
 from region import RegionModelSchema
 from sqlalchemy.dialects.postgresql import JSONB
 
+
 class Data(BaseModel):
     __tablename__ = 'data'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -24,5 +25,3 @@ class DataModelSchema(ma.ModelSchema):
         include_fk = True
 
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
-
-

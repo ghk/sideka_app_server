@@ -1,6 +1,6 @@
 from keuangan.helpers import QueryHelper
 
-class SiskeudesRepository():
+class SiskeudesRepository:
     def get(self, pid):
         return self.db.session.query(self.model) \
             .filter(self.model.pid == pid) \
