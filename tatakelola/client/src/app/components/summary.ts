@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 
 @Component({
-    selector: 'st-dashboard',
-    templateUrl: '../templates/dashboard.html'
+    selector: 'st-summary',
+    templateUrl: '../templates/summary.html'
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class SummaryComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
 

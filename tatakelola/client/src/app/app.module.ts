@@ -11,7 +11,7 @@ import { MapComponent } from './components/map';
 import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
-import { DashboardComponent } from './components/dashboard';
+import { SummaryComponent } from './components/summary';
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
 
@@ -21,7 +21,8 @@ import { SharedService } from './services/shared';
     MapComponent,
     DesaComponent,
     SearchComponent,
-    SidebarComponent
+    SidebarComponent,
+    SummaryComponent
   ],
   imports: [
     BrowserModule,
@@ -30,7 +31,8 @@ import { SharedService } from './services/shared';
     ProgressHttpModule,
     LeafletModule.forRoot(),
     RouterModule.forRoot([
-      { path: '', redirectTo: 'map', pathMatch: 'full' },
+      { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },
+      { path: 'summary/region/:regionId', component: SummaryComponent },
       { path: 'map', component: MapComponent },
       { path: 'desa', component: DesaComponent }
     ])
