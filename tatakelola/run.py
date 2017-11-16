@@ -1,4 +1,9 @@
+import sys
 import os, logging
+
+moddir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
+sys.path.append(moddir)
+
 from logging.handlers import RotatingFileHandler
 from tatakelola import create_app
 

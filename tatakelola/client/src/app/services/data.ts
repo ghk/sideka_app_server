@@ -10,6 +10,8 @@ import { environment } from '../../environments/environment';
 
 import * as urljoin from 'url-join';
 
+import 'rxjs/add/operator/catch';
+
 @Injectable()
 export class DataService {
 
@@ -78,6 +80,28 @@ export class DataService {
       return request
         .map(res => res.json())
         .catch(this.handleError)
+  }
+
+  getSummariesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+     let request = RequestHelper.generateHttpRequest(this._http, 
+        'GET', 
+        urljoin(this._serverUrl, 'summaries/region', regionId),
+        query,
+        progressListener
+      );
+
+      return request.map(res => res.json()).catch(this.handleError);
+  }
+
+  getSummaries(query: Query, progressListener: any): Observable<any> {
+      let request = RequestHelper.generateHttpRequest(this._http, 
+          'GET', 
+          urljoin(this._serverUrl, 'summaries'),
+          query,
+          progressListener
+      );
+
+      return request.map(res => res.json()).catch(this.handleError);
   }
 
   private handleError(error: Response | any) {

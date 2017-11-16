@@ -26,24 +26,24 @@
         <table class="table table-condensed table-responsive table-bordered table-striped">
             <thead>
                 <tr>
-                    <th style="text-align: center; font-size: 12px;"> Desa </th>
-                    <th style="text-align: center; font-size: 12px;"> APBDes </th>
-                    <th style="text-align: center; font-size: 12px;"> Luas (Km<sup>2</sup>) </th>
-                    <th style="text-align: center; font-size: 12px;"> Penduduk </th>
-                    <th style="text-align: center; font-size: 12px;"> Pendidikan </th>
-                    <th style="text-align: center; font-size: 12px;"> Listrik </th>
-                    <th style="text-align: center; font-size: 12px;"> Pengairan </th>
-                    <th style="text-align: center; font-size: 12px;"> Jalur Komunikasi </th>
-                    <th style="text-align: center; font-size: 12px;"> Potensi Desa </th>
+                    <th> Desa </th>
+                    <th style="width: 10%;"> APBDes </th>
+                    <th style="width: 10%;"> Luas (Km<sup>2</sup>) </th>
+                    <th> Penduduk </th>
+                    <th> Pendidikan </th>
+                    <th> Listrik </th>
+                    <th> Pengairan </th>
+                    <th style="width: 10%;"> Jalur Komunikasi </th>
+                    <th style="width: 10%;"> Potensi Desa </th>
                 </tr>
             </thead>
             <tbody>
-                  <tr>
-                     <td> Mandalamekar </td>
+                  <tr *ngFor="let summary of summaries">
+                     <td><a href="#">{{summary.region.name}}</a></td>
                      <td> Rp 1.000.000,00 </td>
                      <td> 240 Km <sup>2</sup> </td>
-                     <td> 30400 </td>
-                     <td> 30400 </td>
+                     <td style="text-align: right;"> <a href="#">{{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </a> </td>
+                     <td style="text-align: right;"> <a href="#">{{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </a></td>
                      <td> 4572 dari 10280 KK </td>
                      <td> 18 Pipa, 20 Sumber Mata Air </td>
                      <td> Telkomsel </td>
