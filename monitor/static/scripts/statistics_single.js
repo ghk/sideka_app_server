@@ -206,7 +206,7 @@ function applyTableHeader(header,thead){
 }
 
 function applyTableContent(){    
-    var headerTableDaily = ["Tanggal","Berita","Penduduk","Anggaran", "Pemetaan", "B.Qlt","B.Freq","P.Pen","P.Sur","P.Mut","K.Ren","K.Ang", 
+    var headerTableDaily = ["Tanggal","Berita","Penduduk","Keuangan", "Pemetaan", "B.Qlt","B.Freq","P.Pen","P.Sur","P.Mut","K.Ren","K.Ang", 
                         "K.SPP", "K.TBP","Pt. Tra","Pt. Bou","Pt. Wat", "Pt. Fac","Pt. Lan"]
     var headerTablePost = ["Score","Tanggal","Judul","#KBBI", "#Kalimat", "#Paragraph","%Gambar Utama","%Judul", "%KBBI","%Foto & Caption","%Kalimat","%Paragraph"]
     var tbody = $('#table-daily tbody');
@@ -226,7 +226,7 @@ function applyTableContent(){
         $('<td>').html(score(content, "penduduk.log_surat.score")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.mutasi.score")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.perencanaan.score", "keuangan.perencanaan.content_id")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.pengaggaran.score", "keuangan.penganggaran.content_id")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.penganggaran.score", "keuangan.penganggaran.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.spp.score", "keuangan.spp.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.penerimaan.score", "keuangan.penerimaan.content_id")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.network_transportation.score")).appendTo(tr);
