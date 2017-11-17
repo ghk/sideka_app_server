@@ -19,6 +19,7 @@ class Generator:
     @staticmethod
     def generate_apbdes_summary_by_region(summary, region):
         apbdes = apbdes_repository.get_by_region(region.id)
+
         if len(apbdes) == 0:
             return summary
 
@@ -34,5 +35,6 @@ class Generator:
             summary = Summary()
             summary = Generator.generate_penduduk_summary_by_region(summary, region)
             summary = Generator.generate_apbdes_summary_by_region(summary, region)
+            summary.fk_region_id = region.id
             result.append(summary)
         return result

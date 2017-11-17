@@ -122,6 +122,13 @@ class SummaryPendudukTransformer:
 class SummaryApbdesTransformer:
     @staticmethod
     def transform(summary, apbdes):
-        summary.apbdes_total = 0;
+
+        summary.apbdes_total = 0
+
+        for apbdes_item in enumerate(apbdes):
+            print apbdes_item[1].budgeted_revenue
+            summary.apbdes_total = apbdes_item[1].budgeted_revenue
+            break
+
         return summary
 
