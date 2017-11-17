@@ -65,10 +65,9 @@ class GeojsonTransformer:
         return result
 
 
-class SummaryTransformer:
+class SummaryPendudukTransformer:
     @staticmethod
-    def transform(penduduks, region):
-        summary = Summary()
+    def transform(summary, penduduks):
         summary.penduduk_sex_male = 0
         summary.penduduk_sex_female = 0
         summary.penduduk_sex_unknown = 0
@@ -118,6 +117,11 @@ class SummaryTransformer:
             else:
                 summary.penduduk_job_lain += 1
 
-        summary.fk_region_id = region.id
-
         return summary
+
+class SummaryApbdesTransformer:
+    @staticmethod
+    def transform(summary, apbdes):
+        summary.apbdes_total = 0;
+        return summary
+
