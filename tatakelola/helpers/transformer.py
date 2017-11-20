@@ -2,6 +2,7 @@ import logging
 import simplejson as json
 import geojson
 from tatakelola.models import Summary, PendudukReference
+from area import area
 
 logger = logging.getLogger('tatakelola')
 
@@ -132,3 +133,41 @@ class SummaryApbdesTransformer:
 
         return summary
 
+class SummaryGeojsonTransformer:
+    @staticmethod
+    def transform(summary, data, type, propertyKey):
+        features = data['features'];
+
+        if type == 'boundary':
+            summary.pemetaan_area = CalculateBoundaryArea.calculate(features)
+        elif type == 'landuse':
+            summary.pemetaan_potential = ParseLandusePotential.parse(features)
+
+        return summary
+
+class CalculateBoundaryArea:
+    @staticmethod
+    def calculate(features):
+        for feature in features:
+            if feature['properties'].has_key('admin_level'):
+                if feature['properties']['admin_level'] == 7:
+                    return area(feature['geometry'])
+        return 0
+class ParseLandusePotential:
+    @staticmethod
+    def parse(features):
+        farmlandTotal = 0
+        forestTotal = 0
+        orchardTotal = 0
+
+        for feature in features:
+            properties = feature['properties']
+            if properties.has_key('landuse'):
+                if properties['landuse']:
+                    farmlandTotal += 1
+                elif properties['orchard']:
+                    orchardTotal += 1
+                elif properties ['forest']:
+                    forestTotal += 1
+
+        return farmlandTotal + ' Pertanian, ' + forestTotal + ' Hutan, ' + orchardTotal + ' Perkebunan'

@@ -41,10 +41,10 @@
             <tbody>
                   <tr *ngFor="let summary of summaries">
                      <td><a href="#">{{summary.region.name}}</a></td>
-                     <td style="text-align: right;"> Rp {{summary.apbdes_total }} </td>
-                     <td style="text-align: right;"> {{summary.pemetaan_area ? summary.pemetaan_area : 0}} </td>
-                     <td style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'penduduk')">{{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </a> </td>
-                     <td style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'education')">{{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </a></td>
+                     <td class="money" style="text-align: right;">{{summary.apbdes_total | number:'3.0-0'}} </td>
+                     <td class="money" style="text-align: right;"> {{summary.pemetaan_area / 1000 | number }} </td>
+                     <td class="money" style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'penduduk')">{{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </a> </td>
+                     <td class="money" style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'education')">{{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </a></td>
                      <td> {{summary.pemetaan_electricity}} </td>
                      <td> {{summary.pemetaan_water}} </td>
                      <td> {{summary.pemetaan_communication}} </td>
