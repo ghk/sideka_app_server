@@ -40,10 +40,37 @@ def get_statistics(cur, supradesa_id):
     query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
              st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
 
-    print query
     cur.execute(query)
     results = [combine(c) for c in cur.fetchall()]
     return results
+
+def get_map_statistics(cur, supradesa_id):
+    def get_score(stats, node):
+        res = {}
+        res["score"] = 0
+        if node in stats and "score" in stats[node]:
+            res["score"] = stats[node]["score"]
+        return res
+    
+    def combine(row):
+        stats = json.loads(row[1])
+        res = {}
+        for node in ["blog", "penduduk", "keuangan", "pemetaan"]:
+            res[node] = get_score(stats, node)
+        res["domain"] = stats["domain"]
+        res["blog_id"] = stats["blog_id"]
+        res["desa"] = row[2]
+        res["latitude"] = row[3]
+        res["longitude"] = row[4]
+        return res
+    query_sd_desa = get_sd_desa_query(cur, supradesa_id)
+    query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
+             st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
+
+    cur.execute(query)
+    results = [combine(c) for c in cur.fetchall()]
+    return results
+
 
 
 def get_dashboard(cur, supradesa_id):
@@ -188,6 +215,7 @@ def get_weekly_panel(cur, supradesa_id):
 functions = {}
 functions["dashboard"] = get_dashboard
 functions["statistics"] = get_statistics
+functions["map_statistics"] = get_map_statistics
 functions["weekly_domain"] = get_weekly_domain
 functions["weekly_panel"] = get_weekly_panel
 
@@ -207,6 +235,7 @@ if __name__ == "__main__":
 
         for typ, function in functions.items():
             _id = "%s_%d" % (typ, supradesa_id)
+            print _id
             value = function(cur, supradesa_id)
             content = json.dumps(value)
             cur.execute("REPLACE into sd_monitors (id, type, supradesa_id, content, date_created) VALUES (%s, %s, %s, %s, now())", (_id, typ, supradesa_id, content))

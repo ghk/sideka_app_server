@@ -171,6 +171,11 @@ def get_statistics():
     supradesa_id = str(request.args.get("supradesa_id"))
     return get_sd_monitor('statistics', supradesa_id)
 
+@app.route('/api/map_statistics', methods=['GET'])
+def get_map_statistics():
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('map_statistics', supradesa_id)
+
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard_data():
