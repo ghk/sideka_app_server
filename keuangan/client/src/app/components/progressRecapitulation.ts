@@ -36,16 +36,31 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         let query: Query = {
-            sort: 'region.name'
+            sort: 'region.id'
         }
 
         this._dataService.getProgressRecapitulations(query, this.progressListener.bind(this)).subscribe(
             result => {
                 this.entities = result;
+
+                for (let i = this.entities.length - 1; i >= 0; i--) {
+                    if (this.entities[i].budgeted_revenue === 0 &&
+                        this.entities[i].transferred_revenue === 0 &&
+                        this.entities[i].realized_spending === 0)
+                        this.entities.splice(i, 1);                  
+                    else {
+                        this.total.budgetedRevenue += this.entities[i].budgeted_revenue;
+                        this.total.transferredRevenue += this.entities[i].transferred_revenue;
+                        this.total.realizedSpending += this.entities[i].realized_spending;  
+                    }
+                }               
+
                 this.entities.forEach(entity => {
-                    this.total.budgetedRevenue += entity.budgeted_revenue;
-                    this.total.transferredRevenue += entity.transferred_revenue;
-                    this.total.realizedSpending += entity.realized_spending;
+                    entity.barPercent = {
+                        "budgetedRevenue": this.getBarPercent(entity.budgeted_revenue, this.total.budgetedRevenue),
+                        "transferredRevenue": this.getBarPercent(entity.transferred_revenue, entity.budgeted_revenue),
+                        "realizedSpending": this.getBarPercent(entity.realized_spending, entity.budgeted_revenue)
+                    }                
                 })
             },
             error => {
@@ -57,7 +72,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
     }
 
-    getBarPercent(numerator, denominator) {
+    getBarPercent(numerator, denominator) {  
         return {
             'width': (numerator / denominator) * 100 + '%'
         };

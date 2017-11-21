@@ -1,9 +1,12 @@
 from flask import Blueprint, jsonify, current_app
 from time import time
 from keuangan import db
-from keuangan.helpers import SiskeudesFetcher, Generator
+from keuangan.helpers import SiskeudesFetcher, Generator, SiskeudesPenganggaranTransformer
+from keuangan.repository import SiskeudesPenganggaranRepository
+from keuangan.models import SiskeudesPenganggaranModelSchema
 
 app = Blueprint('admin', __name__)
+spr = SiskeudesPenganggaranRepository(db)
 
 
 @app.route('/admin/fetch/desas', methods=['GET'])

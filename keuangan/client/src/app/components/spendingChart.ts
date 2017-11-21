@@ -84,7 +84,7 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
 
         this._dataService.getSpendingTypes(null, null).subscribe((types: any[]) => {
             this.labels = types.map(type => { return type.name });
-            this._dataService.getSpendingRecapitulationsByRegion(this.region.id, query, this.progressListener.bind(this)).subscribe(
+            this._dataService.getSpendingRecapitulationsByRegion(this.region.id, false, query, this.progressListener.bind(this)).subscribe(
                 results => {
                     let data = new Array(this.labels.length).fill(0);
                     results.forEach(result => {                                                                                                  

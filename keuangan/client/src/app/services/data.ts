@@ -111,11 +111,11 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getSpendingRecapitulations(query: Query, progressListener: any): Observable<any> {
+  getSpendingRecapitulations(isFullRegion: boolean, query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
       this._http,
       'GET',
-      urljoin(this._serverUrl, 'spending/recapitulations'),
+      urljoin(this._serverUrl, 'spending/recapitulations?is_full_region='+isFullRegion),
       query,
       progressListener
     )
@@ -125,9 +125,9 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getSpendingRecapitulationsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+  getSpendingRecapitulationsByRegion(regionId: string, isFullRegion: boolean, query: Query, progressListener: any): Observable<any> {
     if (regionId === '0')
-      return this.getSpendingRecapitulations(query, progressListener);
+      return this.getSpendingRecapitulations(isFullRegion, query, progressListener);
       
     let request = RequestHelper.generateHttpRequest(
       this._http,

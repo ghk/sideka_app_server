@@ -153,8 +153,10 @@ class SiskeudesPenganggaranTransformer:
             if (anggaran.jumlah_satuan_pak is not None and anggaran.harga_satuan_pak is not None):
                 anggaran.anggaran_pak = anggaran.jumlah_satuan_pak * anggaran.harga_satuan_pak
                 anggaran.perubahan = anggaran.anggaran_pak - anggaran.anggaran
-            if (anggaran.satuan is None):
-                filtered_anggarans.append(anggaran);
+
+            # This code is checking if bidang and kegiatan are already filled from sideka
+            if (anggaran.satuan is None and anggaran.anggaran is None):
+                filtered_anggarans.append(anggaran)
 
 
         for anggaran in anggarans:
@@ -191,6 +193,8 @@ class SiskeudesPenganggaranTransformer:
                     entity.anggaran_pak = 0
                 entity.anggaran_pak += value_pak
 
+            print(entity.kode_rekening)
+
         if (kegiatan_entity is not None):
             if (value is not None):
                 if (kegiatan_entity.anggaran is None or not kegiatan_entity.anggaran):
@@ -201,6 +205,8 @@ class SiskeudesPenganggaranTransformer:
                 if (kegiatan_entity.anggaran_pak is None or not kegiatan_entity.anggaran_pak):
                     kegiatan_entity.anggaran_pak = 0
                 kegiatan_entity.anggaran_pak += value_pak
+
+            #print(str(kegiatan_entity.row_number) + '-' + kegiatan_entity.kode_kegiatan)
 
         SiskeudesPenganggaranTransformer.recursive_sum(anggarans, new_kode_rekening, new_kode_kegiatan, row_number,
                                                        value, value_pak)
