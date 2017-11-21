@@ -19,8 +19,8 @@ def fetch_desa_ids():
 def fetch_all():
     t0 = time()
     #TatakelolaFetcher.fetch_desas()
-    #TatakelolaFetcher.fetch_geojsons()
-    TatakelolaFetcher.fetch_data()
+    TatakelolaFetcher.fetch_geojsons()
+    #TatakelolaFetcher.fetch_data()
     #TatakelolaFetcher.fetch_apbdes()
     db.session.commit()
     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
@@ -30,14 +30,13 @@ def fetch_all():
 @app.route('/admin/generate/all', methods=['GET'])
 def generate_all():
     t0 = time()
-    summaries = Generator.generate_penduduk_summaries()
+    summaries = Generator.generate_summaries()
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(summaries)
     db.session.commit()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
-
 
 @app.route('/admin/test', methods=['GET'])
 def test():

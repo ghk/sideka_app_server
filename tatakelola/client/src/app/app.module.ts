@@ -34,7 +34,7 @@ import { SharedService } from './services/shared';
       { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },
       { path: 'summary/region/:regionId', component: SummaryComponent },
       { path: 'map', component: MapComponent },
-      { path: 'desa', component: DesaComponent }
+      { path: 'desa/region/:regionId', component: DesaComponent }
     ])
   ],
   providers: [

@@ -19,6 +19,12 @@ class Summary(BaseModel):
     penduduk_job_pedagang = db.Column(db.Integer, nullable=True)
     penduduk_job_karyawan = db.Column(db.Integer, nullable=True)
     penduduk_job_lain = db.Column(db.Integer, nullable=True)
+    apbdes_total = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_area = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_electricity = db.Column(db.String, nullable=True)
+    pemetaan_water = db.Column(db.String, nullable=True)
+    pemetaan_communication = db.Column(db.String, nullable=True)
+    pemetaan_potential = db.Column(db.String, nullable=True)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

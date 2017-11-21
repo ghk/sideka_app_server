@@ -20,35 +20,59 @@
       </div>
    </div>
    <div class="content-header">
+      <a href="#" *ngIf="viewType == 'detail'" (click)="backToSummary()"> <i class="fa fa-arrow-left"></i> </a>
       STATISTIK DESA
    </div>
    <div class="table-responsive">
-        <table class="table table-condensed table-responsive table-bordered table-striped">
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'summary'">
             <thead>
                 <tr>
-                    <th style="text-align: center; font-size: 12px;"> Desa </th>
-                    <th style="text-align: center; font-size: 12px;"> APBDes </th>
-                    <th style="text-align: center; font-size: 12px;"> Luas (Km<sup>2</sup>) </th>
-                    <th style="text-align: center; font-size: 12px;"> Penduduk </th>
-                    <th style="text-align: center; font-size: 12px;"> Pendidikan </th>
-                    <th style="text-align: center; font-size: 12px;"> Listrik </th>
-                    <th style="text-align: center; font-size: 12px;"> Pengairan </th>
-                    <th style="text-align: center; font-size: 12px;"> Jalur Komunikasi </th>
-                    <th style="text-align: center; font-size: 12px;"> Potensi Desa </th>
+                    <th> Desa </th>
+                    <th style="width: 10%;"> APBDes </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('area')"> Luas (Km<sup>2</sup>) </a> </th>
+                    <th> <a href="#" (click)="loadDetail('penduduk')"> Penduduk </a> </th>
+                    <th> <a href="#" (click)="loadDetail('education')"> Pendidikan </a> </th>
+                    <th> <a href="#" (click)="loadDetail('electricity')"> Listrik </a> </th>
+                    <th> <a href="#" (click)="loadDetail('water')"> Pengairan </a> </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('water')">  Jalur Komunikasi </a> </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('water')"> Potensi Desa </a> </th>
                 </tr>
             </thead>
             <tbody>
-                  <tr>
-                     <td> Mandalamekar </td>
-                     <td> Rp 1.000.000,00 </td>
-                     <td> 240 Km <sup>2</sup> </td>
-                     <td> 30400 </td>
-                     <td> 30400 </td>
-                     <td> 4572 dari 10280 KK </td>
-                     <td> 18 Pipa, 20 Sumber Mata Air </td>
-                     <td> Telkomsel </td>
-                     <td> 14 Peternakan, 20 Pertanian, 18 Perkebunan </td>
+                  <tr *ngFor="let summary of summaries">
+                     <td><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
+                     <td class="money" style="text-align: right;"> {{ summary.apbdes_total | number:'3.0-0'}} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.pemetaan_area / 1000 | number }} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </td>
+                     <td> {{summary.pemetaan_electricity}} </td>
+                     <td> {{summary.pemetaan_water}} </td>
+                     <td> {{summary.pemetaan_communication}} </td>
+                     <td> {{summary.pemetaan_potential}} </td>
                   </tr>
+            </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+            <tr>
+              <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                <br>
+                <br> Memuat data...
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail'">
+            <thead>
+                <tr>
+                    <th *ngFor="let column of detailColumns[detailType]">
+                       {{column}}
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let detail of details">
+                    <td *ngFor="let row of detail.rows">{{row}}</td>
+                </tr>
             </tbody>
         </table>
    </div>

@@ -1,6 +1,12 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-8" style="border-right: 1px solid #ddd;">
+      <ul class="nav nav-tabs front-numbers">
+        <li>
+          <span class="number text-success">{{ entities.length }}</span>
+          <span class="text text-success">Total Desa</span>
+        </li>
+      </ul>
       <div class="content-header">
         ANGGARAN PENDAPATAN DAN BELANJA DESA (APBDES) BESERTA REALISASINYA
       </div>
@@ -9,28 +15,24 @@
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
               <th rowspan="2" style="text-align: center; vertical-align: middle;">Desa</th>
+              <th style="text-align: center">Kabupaten</th>
               <ng-container *ngFor="let spendingType of spendingTypes">
                 <th class="money" style="text-align: center" colspan="2"> {{ spendingType.name }}</th>
               </ng-container>
-            </tr>
-            <!--
-            <tr>              
-              <ng-container *ngFor="let spendingType of spendingTypes">
-                <th class="money" style="text-align: center">Anggaran</th>
-                <th class="money" style="text-align: center">Realisasi</th>
-              </ng-container>
-            </tr>
-            -->
+            </tr>            
           </thead>
           <tbody>
             <tr *ngFor="let entity of entities">
               <td>
-                <a [routerLink]="['/spending/region', entity[0].id]"><span>{{ entity[0].name }}</span></a>
+                <a [routerLink]="['/spending/region', entity[0].id]">
+                  <span>{{ entity[0].name }}</span>
+                </a>
               </td>
-              <ng-container *ngFor="let data of entity[1]">
+              <td><span>{{ entity[0].parent | regionType:2 }}</span></td>
+              <ng-container *ngFor="let data of entity[1]; let i = index">
                 <td class="money" colspan="2">
-                  <div class="money">{{ data | number:'3.0-0' }} </div>
-                  <div class="bar-percent"> </div>
+                  <div style="float:right;">{{ data | number:'3.0-0' }}</div>
+                  <div class="bar-percent" [ngStyle]="entity[2][i]"></div>
                 </td>
               </ng-container>
             </tr>

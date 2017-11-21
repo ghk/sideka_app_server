@@ -2,6 +2,7 @@ import logging
 import simplejson as json
 import geojson
 from tatakelola.models import Summary, PendudukReference
+from area import area
 
 logger = logging.getLogger('tatakelola')
 
@@ -46,7 +47,10 @@ class PemetaanContentTransformer:
             columns[column] = serialized_content['columns'][column]
             result[column] = []
             for data in serialized_content['data'][column]:
-                del data['indicator']
+                if isinstance(data, dict) == True:
+                    if data.has_key('indicator'):
+                        del data['indicator']
+
                 result[column].append(data)
 
         return result
@@ -65,10 +69,9 @@ class GeojsonTransformer:
         return result
 
 
-class SummaryTransformer:
+class SummaryPendudukTransformer:
     @staticmethod
-    def transform(penduduks, region):
-        summary = Summary()
+    def transform(summary, penduduks):
         summary.penduduk_sex_male = 0
         summary.penduduk_sex_female = 0
         summary.penduduk_sex_unknown = 0
@@ -118,6 +121,55 @@ class SummaryTransformer:
             else:
                 summary.penduduk_job_lain += 1
 
-        summary.fk_region_id = region.id
+        return summary
+
+class SummaryApbdesTransformer:
+    @staticmethod
+    def transform(summary, apbdes):
+
+        summary.apbdes_total = 0
+
+        for apbdes_item in enumerate(apbdes):
+            print apbdes_item[1].budgeted_revenue
+            summary.apbdes_total = apbdes_item[1].budgeted_revenue
+            break
 
         return summary
+
+class SummaryGeojsonTransformer:
+    @staticmethod
+    def transform(summary, data, type, propertyKey):
+        features = data['features'];
+
+        if type == 'boundary':
+            summary.pemetaan_area = CalculateBoundaryArea.calculate(features)
+        elif type == 'landuse':
+            summary.pemetaan_potential = ParseLandusePotential.parse(features)
+
+        return summary
+
+class CalculateBoundaryArea:
+    @staticmethod
+    def calculate(features):
+        for feature in features:
+            if feature['geometry']['type'] == 'Polygon':
+                return area(feature['geometry'])
+        return 0
+class ParseLandusePotential:
+    @staticmethod
+    def parse(features):
+        farmlandTotal = 0
+        forestTotal = 0
+        orchardTotal = 0
+
+        for feature in features:
+            properties = feature['properties']
+            if properties.has_key('landuse'):
+                if properties['landuse']:
+                    farmlandTotal += 1
+                elif properties['orchard']:
+                    orchardTotal += 1
+                elif properties ['forest']:
+                    forestTotal += 1
+
+        return str(farmlandTotal) + ' Pertanian, ' + str(forestTotal) + ' Hutan, ' + str(orchardTotal) + ' Perkebunan'
