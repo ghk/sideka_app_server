@@ -47,7 +47,10 @@ class PemetaanContentTransformer:
             columns[column] = serialized_content['columns'][column]
             result[column] = []
             for data in serialized_content['data'][column]:
-                del data['indicator']
+                if isinstance(data, dict) == True:
+                    if data.has_key('indicator'):
+                        del data['indicator']
+
                 result[column].append(data)
 
         return result
@@ -149,9 +152,8 @@ class CalculateBoundaryArea:
     @staticmethod
     def calculate(features):
         for feature in features:
-            if feature['properties'].has_key('admin_level'):
-                if feature['properties']['admin_level'] == 7:
-                    return area(feature['geometry'])
+            if feature['geometry']['type'] == 'Polygon':
+                return area(feature['geometry'])
         return 0
 class ParseLandusePotential:
     @staticmethod
@@ -170,4 +172,4 @@ class ParseLandusePotential:
                 elif properties ['forest']:
                     forestTotal += 1
 
-        return farmlandTotal + ' Pertanian, ' + forestTotal + ' Hutan, ' + orchardTotal + ' Perkebunan'
+        return str(farmlandTotal) + ' Pertanian, ' + str(forestTotal) + ' Hutan, ' + str(orchardTotal) + ' Perkebunan'

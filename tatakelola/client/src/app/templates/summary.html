@@ -29,28 +29,37 @@
                 <tr>
                     <th> Desa </th>
                     <th style="width: 10%;"> APBDes </th>
-                    <th style="width: 10%;"> Luas (Km<sup>2</sup>) </th>
-                    <th> Penduduk </th>
-                    <th> Pendidikan </th>
-                    <th> Listrik </th>
-                    <th> Pengairan </th>
-                    <th style="width: 10%;"> Jalur Komunikasi </th>
-                    <th style="width: 10%;"> Potensi Desa </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('area')"> Luas (Km<sup>2</sup>) </a> </th>
+                    <th> <a href="#" (click)="loadDetail('penduduk')"> Penduduk </a> </th>
+                    <th> <a href="#" (click)="loadDetail('education')"> Pendidikan </a> </th>
+                    <th> <a href="#" (click)="loadDetail('electricity')"> Listrik </a> </th>
+                    <th> <a href="#" (click)="loadDetail('water')"> Pengairan </a> </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('water')">  Jalur Komunikasi </a> </th>
+                    <th style="width: 10%;"> <a href="#" (click)="loadDetail('water')"> Potensi Desa </a> </th>
                 </tr>
             </thead>
             <tbody>
                   <tr *ngFor="let summary of summaries">
-                     <td><a href="#">{{summary.region.name}}</a></td>
-                     <td class="money" style="text-align: right;">{{summary.apbdes_total | number:'3.0-0'}} </td>
-                     <td class="money" style="text-align: right;"> {{summary.pemetaan_area / 1000 | number }} </td>
-                     <td class="money" style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'penduduk')">{{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </a> </td>
-                     <td class="money" style="text-align: right;"> <a href="#" (click)="loadDetail(summary, 'education')">{{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </a></td>
+                     <td><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
+                     <td class="money" style="text-align: right;"> {{ summary.apbdes_total | number:'3.0-0'}} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.pemetaan_area / 1000 | number }} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </td>
+                     <td class="money" style="text-align: right;"> {{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </td>
                      <td> {{summary.pemetaan_electricity}} </td>
                      <td> {{summary.pemetaan_water}} </td>
                      <td> {{summary.pemetaan_communication}} </td>
                      <td> {{summary.pemetaan_potential}} </td>
                   </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+            <tr>
+              <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                <br>
+                <br> Memuat data...
+              </td>
+            </tr>
+          </tfoot>
         </table>
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail'">
             <thead>
@@ -61,8 +70,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td *ngFor="let detail of details">{{detail}}</td>
+                <tr *ngFor="let detail of details">
+                    <td *ngFor="let row of detail.rows">{{row}}</td>
                 </tr>
             </tbody>
         </table>

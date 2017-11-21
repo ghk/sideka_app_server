@@ -1,4 +1,5 @@
 <div id="map" #map leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)"></div>
+
 <st-search></st-search>
 
 <div class="prevnext" style="float:right;">
@@ -17,7 +18,7 @@
         <i class="fa fa-money"></i>
       </div>
       <div class="desc">
-        <h4>Rp {{captions.pembangunan.total}} (APBDes {{captions.pembangunan.year}})</h4>
+        <h4>Rp {{summaries.apbdes_total | number:'3.0-0'}} </h4>
       </div>
     </div>
   </a>
@@ -27,7 +28,7 @@
         <i class="fa fa-map"></i>
       </div>
       <div class="desc">
-        <h4>{{captions.batas}} km2</h4>
+         <h4> {{summaries.pemetaan_area / 1000 | number }} km <sup>2</sup> </h4>
       </div>
 
     </div>
@@ -39,10 +40,9 @@
       </div>
       <div class="desc">
         <h4>
-          <i class="fa fa-mars"></i> {{captions.genders.male}} &nbsp;&nbsp;
-          <i class="fa fa-venus"></i> {{captions.genders.female}}</h4>
+          <i class="fa fa-mars"></i> {{summaries.penduduk_sex_male}}&nbsp;&nbsp;
+          <i class="fa fa-venus"></i> {{summaries.penduduk_sex_female}}</h4>
       </div>
-
     </div>
   </a>
   <a href="#" (click)="setActiveMenu('education')">
@@ -51,8 +51,7 @@
         <i class="fa fa-building"></i>
       </div>
       <div class="desc">
-        <h4>{{captions.education.tk}} TK &nbsp;&nbsp; {{captions.education.sd}} SD &nbsp;&nbsp; {{captions.education.smp}} SMP
-          &nbsp;&nbsp; {{captions.education.sma}} SMA </h4>
+        <h4>SD {{summaries.penduduk_edu_sd}} &nbsp; SMP {{summaries.penduduk_edu_smp}} &nbsp; SMA {{summaries.penduduk_edu_sma}} &nbsp; PT {{summaries.penduduk_edu_pt}}</h4>
       </div>
     </div>
   </a>
@@ -62,9 +61,8 @@
         <i class="fa fa-plug"></i>
       </div>
       <div class="desc">
-        <h4>{{captions.electricity.detected}} dari {{captions.electricity.total}} KK</h4>
+        <h4>{{summaries.pemetaan_electricity}}</h4>
       </div>
-
     </div>
   </a>
   <a href="#" (click)="setActiveMenu('misc')">
@@ -73,7 +71,7 @@
         <i class="fa fa-tint"></i>
       </div>
       <div class="desc">
-        <h4>{{captions.misc}}</h4>
+        <h4>{{summaries.pemetaan_water}}</h4>
       </div>
     </div>
   </a>
@@ -83,7 +81,7 @@
         <i class="fa fa-phone"></i>
       </div>
       <div class="desc">
-        <h4>{{captions.networks}}</h4>
+        <h4>{{summaries.pemetaan_communication}}</h4>
       </div>
     </div>
   </a>
@@ -93,11 +91,7 @@
         <i class="fa fa-leaf"></i>
       </div>
       <div class="desc">
-        <h4>Pertanian :
-          <br> {{captions.potention.farmland}}
-          <br>
-          <br> Perkebunan :
-          <br> {{captions.potention.orchard}}</h4>
+        <h4>{{summaries.pemetaan_potential}}</h4>
       </div>
     </div>
   </a>

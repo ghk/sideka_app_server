@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
-import 'rxjs/add/operator/map';
+import { Router, ActivatedRoute } from "@angular/router";
+import { DataService } from '../services/data';
+import { MapUtils } from '../helpers/mapUtils';
+
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
 
-import { DataService } from '../services/data';
-import { MapUtils } from '../helpers/mapUtils';
+import 'rxjs/add/operator/map';
 
 @Component({
     selector: 'st-desa',
@@ -22,24 +24,17 @@ export class DesaComponent implements OnInit, OnDestroy {
     pemetaan: any;
     sidebarCollapsed: boolean;
     captions: any;
+    summaries: any;
 
     constructor(
         private _http: Http,
-        private _dataService: DataService
+        private _dataService: DataService,
+        private _router: ActivatedRoute
     ) { }
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
-        this.captions = {
-            "pembangunan": { "total": 0, "year": 2016 },
-            "batas": 0,
-            "genders": { "female": 0, "male": 0 },
-            "education": { "tk": 0, "sd": 0, "smp": 0, "sma": 0, "universitas": 0 },
-            "electricity": { "detected": 0, "from": 0 },
-            "misc": "none",
-            "networks": "none",
-            "potention": { "farmland": "", "orchard": "", "forest": "" }
-        };
+        this.summaries = {};
 
         this.mapOptions = {
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
@@ -47,12 +42,27 @@ export class DesaComponent implements OnInit, OnDestroy {
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
 
+        this._http.get('assets/bigConfig.json').map(res => res.json()).subscribe(
+            data => {
+                this.bigConfig = data;
+            },
+            error => { }
+        )
+        
+        this._router.params.subscribe(
+           params => {
+               let regionId = params['regionId'];
+               this.loadGeojsonByRegion(regionId);
+               this.loadSummariesByRegion(regionId);  
+           }
+        )
+
         this.geoJSONOptions = {
             style: (feature) => {
                 return { color: '#000', weight: feature.geometry.type === 'LineString' ? 2 : 1 }
             },
             onEachFeature: (feature, layer) => {
-                for (let i = 0; i < this.bigConfig.length; i++) {
+                 for (let i = 0; i < this.bigConfig.length; i++) {
                     let indicator = this.bigConfig[i];
                     let element = null;
 
@@ -79,20 +89,27 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
         }
+    }
 
-        this._http.get('assets/bigConfig.json').map(res => res.json()).subscribe(
-            data => {
-                this.bigConfig = data;
-            },
-            error => { }
+    loadGeojsonByRegion(regionId): void {
+        this._dataService.getGeojsonsByRegion(regionId, {}, null).subscribe(
+            geojson => {
+                if(geojson.length === 0)
+                    return;
+
+                this.setMapLayout(geojson);
+            }
         )
+    }
 
-        this._dataService.getGeojsonsByRegion('32.06.19.2010', null, null).subscribe(
-            data => {
-                this.data = data;
-                this.addGeoJSONToMap('facilities_infrastructures');
-            },
-            error => { }
+    loadSummariesByRegion(regionId): void {
+        this._dataService.getSummariesByRegion(regionId, {}, null).subscribe(
+            summaries => {
+                if(summaries.length > 0)
+                    this.summaries = summaries[0];
+
+                console.log(this.summaries);
+            }
         )
     }
 
@@ -101,35 +118,23 @@ export class DesaComponent implements OnInit, OnDestroy {
     setActiveMenu(menu: string): boolean {
         this.activeMenu = menu;
 
-        switch (this.activeMenu) {
-            case 'pembangunan':
-                this.addGeoJSONToMap('facilities_infrastructures');
-                break;
-            case 'potensi':
-                this.addGeoJSONToMap('landuse');
-                break;
-            case 'batas':
-                this.addGeoJSONToMap('boundary');
-                break;
-        }
-
         return false;
     }
 
-    addGeoJSONToMap(key: string): void {
-        this.clearGeoJSON();
+    setMapLayout(geoJson): void {
+        let featureCollection = geoJson.filter(e => e.type !== 'log_pembangunan').map(e => e.data.features);
+        
+        let geoJsonLayer: any = MapUtils.createGeoJson();
 
-        let selectedData = null;
-
-        this.data.forEach(datum => {
-            if (datum.type === key)
-                selectedData = datum;
+        featureCollection.forEach(features => {
+            geoJsonLayer.features = geoJsonLayer.features.concat(features);
         });
+       
+        L.geoJSON(geoJsonLayer, this.geoJSONOptions).addTo(this.activeMap);
 
-        if (selectedData) {
-            console.log(selectedData);
-            this.geoJSON = L.geoJSON(JSON.parse(selectedData.data), this.geoJSONOptions).addTo(this.activeMap);
-        }
+        let center = MapUtils.getCentroid(geoJsonLayer.features);
+
+        this.activeMap.setView([center[1], center[0]], 14);
     }
 
     clearGeoJSON(): void {
@@ -140,5 +145,4 @@ export class DesaComponent implements OnInit, OnDestroy {
     onMapReady(map: L.Map): void {
         this.activeMap = map;
     }
-
 }

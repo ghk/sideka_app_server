@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { DataService } from '../services/data';
+import { Progress } from 'angular-progress-http';
+import { Router, ActivatedRoute } from "@angular/router";
 
 @Component({
     selector: 'st-summary',
@@ -13,12 +15,13 @@ export class SummaryComponent implements OnInit, OnDestroy {
     summaries: any;
     details: any;
     detailColumns: any;
+    progress: Progress;
 
-    constructor(dataService: DataService) {
+    constructor(dataService: DataService, private router: Router) {
         this._dataService = dataService;
         this.detailColumns = {
-            penduduk: ['Laki-Laki', 'Perempuan'],
-            education: ['TIdak Diketahui', 'SD', 'SMP', 'SMA', 'PT']
+            penduduk: ['Desa', 'Laki-Laki', 'Perempuan', 'Petani', 'Pedagang', 'Karyawan', 'Lainnya'],
+            education: ['Desa', 'TIdak Diketahui', 'SD', 'SMP', 'SMA', 'PT']
         }
     }
 
@@ -28,7 +31,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
     }
 
     loadSummaries(): void {
-        this._dataService.getSummaries({}, null).subscribe(
+        this._dataService.getSummaries({}, this.progressListener.bind(this)).subscribe(
             result => {
                 this.summaries = result;
             },
@@ -38,14 +41,20 @@ export class SummaryComponent implements OnInit, OnDestroy {
         )
     }
 
-    loadDetail(summary, type): boolean {
+    loadDetail(type): boolean {
+    this.details = [];
        switch(type) {
            case 'penduduk':
-              this.details = [summary.penduduk_sex_male, summary.penduduk_sex_female];
+                this.summaries.forEach(summary => {
+                    let rows = [summary.region.name, summary.penduduk_sex_male, summary.penduduk_sex_female, summary.penduduk_job_petani, summary.penduduk_job_pedagang, summary.penduduk_job_karyawan, summary.penduduk_job_lain];
+                    this.details.push({rows: rows});
+                });
               break;
             case 'education':
-              this.details = [summary.penduduk_edu_none, summary.penduduk_edu_sd, summary.penduduk_edu_smp, summary.penduduk_edu_sma,
-                 summary.penduduk_edu_pt];
+                this.summaries.forEach(summary => {
+                    let rows = [summary.region.name, summary.penduduk_edu_none, summary.penduduk_edu_sd, summary.penduduk_edu_smp, summary.penduduk_edu_sma, summary.penduduk_edu_pt];
+                    this.details.push({rows: rows});
+                });
               break;
        }
 
@@ -62,7 +71,13 @@ export class SummaryComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    ngOnDestroy(): void {
-        
+    goToDesa(regionId): void {
+        this.router.navigateByUrl('/desa/' + regionId);
+    }
+
+    ngOnDestroy(): void {}
+
+    progressListener(progress: Progress): void {
+        this.progress = progress;
     }
 }
