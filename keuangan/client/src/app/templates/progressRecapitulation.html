@@ -13,6 +13,10 @@
           <span class="number text-success">{{ total.realizedSpending / total.budgetedRevenue | percent:'2.0-0' }}</span>
           <span class="text text-success">Terrealisasi Desa</span>
         </li>
+        <li>
+          <span class="number text-success">{{ entities.length }}</span>
+          <span class="text text-success">Total Desa</span>
+        </li>
       </ul>
 
       <div class="content-header">
@@ -39,16 +43,16 @@
               </td>
               <td><span>{{ entity.region | regionType:2 }}</span></td>
               <td class="money">
-                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
+                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.budgetedRevenue"></div>
               </td>
               <td class="money">
-                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.transferred_revenue, entity.budgeted_revenue)"> </div>
+                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.transferredRevenue"></div>
               </td>
               <td class="money">
-                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.realized_spending, entity.budgeted_revenue)"> </div>
+                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.realizedSpending"></div>
               </td>
             </tr>
           </tbody>
