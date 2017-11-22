@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { DataService } from '../services/data';
+import { Progress } from 'angular-progress-http';
+import { Router, ActivatedRoute } from "@angular/router";
 
 @Component({
     selector: 'st-summary',
@@ -13,12 +15,16 @@ export class SummaryComponent implements OnInit, OnDestroy {
     summaries: any;
     details: any;
     detailColumns: any;
+    progress: Progress;
 
-    constructor(dataService: DataService) {
+    constructor(dataService: DataService, private router: Router) {
         this._dataService = dataService;
         this.detailColumns = {
-            penduduk: ['Laki-Laki', 'Perempuan'],
-            education: ['TIdak Diketahui', 'SD', 'SMP', 'SMA', 'PT']
+            penduduk: ['Desa', 'Laki-Laki', 'Perempuan', 'Petani', 'Pedagang', 'Karyawan', 'Lainnya'],
+            education: ['Desa', 'Tidak Diketahui', 'SD', 'SMP', 'SMA', 'PT'],
+            area: ['Desa', 'Luas Km2'],
+            waters: ['Desa', 'Mata Air', 'Sistem Pipa'],
+            potential: ['Desa', 'Pertanian', 'Perkebunan', 'Hutan']
         }
     }
 
@@ -27,8 +33,15 @@ export class SummaryComponent implements OnInit, OnDestroy {
        this.loadSummaries();
     }
 
+    isNumber(data): boolean {
+        if(isNaN(data))
+            return false;
+
+        return true;
+    }
+
     loadSummaries(): void {
-        this._dataService.getSummaries({}, null).subscribe(
+        this._dataService.getSummaries({}, this.progressListener.bind(this)).subscribe(
             result => {
                 this.summaries = result;
             },
@@ -38,20 +51,43 @@ export class SummaryComponent implements OnInit, OnDestroy {
         )
     }
 
-    loadDetail(summary, type): boolean {
-       switch(type) {
-           case 'penduduk':
-              this.details = [summary.penduduk_sex_male, summary.penduduk_sex_female];
-              break;
-            case 'education':
-              this.details = [summary.penduduk_edu_none, summary.penduduk_edu_sd, summary.penduduk_edu_smp, summary.penduduk_edu_sma,
-                 summary.penduduk_edu_pt];
-              break;
-       }
+    loadDetail(type): boolean {
+        this.details = [];
+        switch(type) {
+            case 'penduduk':
+                    this.summaries.forEach(summary => {
+                        let rows = [summary.region.name, summary.penduduk_sex_male, summary.penduduk_sex_female, summary.penduduk_job_petani, summary.penduduk_job_pedagang, summary.penduduk_job_karyawan, summary.penduduk_job_lain];
+                        this.details.push({rows: rows});
+                    });
+                break;
+                case 'education':
+                    this.summaries.forEach(summary => {
+                        let rows = [summary.region.name, summary.penduduk_edu_none, summary.penduduk_edu_sd, summary.penduduk_edu_smp, summary.penduduk_edu_sma, summary.penduduk_edu_pt];
+                        this.details.push({rows: rows});
+                    });
+                break;
+                case 'area':
+                    this.summaries.forEach(summary => {
+                        let rows = [summary.region.name, summary.pemetaan_desa_boundary / 1000];
+                        this.details.push({rows: rows});
+                    });
+                case 'waters':
+                    this.summaries.forEach(summary => {
+                        let rows = [summary.region.name, summary.pemetaan_water_spring, summary.pemetaan_water_ditch];
+                        this.details.push({rows: rows});
+                    });
+                    console.log(this.details);
+                case 'potential':
+                    this.summaries.forEach(summary => {     
+                        let rows = [summary.region.name, summary.pemetaan_potential_farmland, summary.pemetaan_potential_orchard, summary.pemetaan_potential_forest]
+                        this.details.push({rows: rows});
+                    });
+                break;
+        }
 
-       this.viewType = 'detail';
-       this.detailType =type;
-       return false;
+        this.viewType = 'detail';
+        this.detailType =type;
+        return false;
     }
 
     backToSummary(): boolean {
@@ -62,7 +98,13 @@ export class SummaryComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    ngOnDestroy(): void {
-        
+    goToDesa(regionId): void {
+        this.router.navigateByUrl('/desa/' + regionId);
+    }
+
+    ngOnDestroy(): void {}
+
+    progressListener(progress: Progress): void {
+        this.progress = progress;
     }
 }

@@ -47,7 +47,10 @@ class PemetaanContentTransformer:
             columns[column] = serialized_content['columns'][column]
             result[column] = []
             for data in serialized_content['data'][column]:
-                del data['indicator']
+                if isinstance(data, dict) == True:
+                    if data.has_key('indicator'):
+                        del data['indicator']
+
                 result[column].append(data)
 
         return result
@@ -81,9 +84,11 @@ class SummaryPendudukTransformer:
         summary.penduduk_job_pedagang = 0
         summary.penduduk_job_karyawan = 0
         summary.penduduk_job_lain = 0
+        summary.penduduk_total_kk = 0
 
         ref = PendudukReference()
         for penduduk in penduduks:
+
             if penduduk.jenis_kelamin == 'Laki-Laki':
                 summary.penduduk_sex_male += 1
             elif penduduk.jenis_kelamin == 'Perempuan':
@@ -124,11 +129,12 @@ class SummaryApbdesTransformer:
     @staticmethod
     def transform(summary, apbdes):
 
-        summary.apbdes_total = 0
+        summary.penganggaran_budgeted_revenue = 0
 
         for apbdes_item in enumerate(apbdes):
             print apbdes_item[1].budgeted_revenue
-            summary.apbdes_total = apbdes_item[1].budgeted_revenue
+            summary.penganggaran_budgeted_revenue = apbdes_item[1].budgeted_revenue
+            summary.penganggaran_year = apbdes_item[1].year
             break
 
         return summary
@@ -139,20 +145,34 @@ class SummaryGeojsonTransformer:
         features = data['features'];
 
         if type == 'boundary':
-            summary.pemetaan_area = CalculateBoundaryArea.calculate(features)
+            summary.pemetaan_desa_boundary = CalculateBoundaryArea.calculate(features)
         elif type == 'landuse':
-            summary.pemetaan_potential = ParseLandusePotential.parse(features)
+            potential = ParseLandusePotential.parse(features)
+            summary.pemetaan_potential_orchard = potential['orchard']
+            summary.pemetaan_potential_farmland = potential['farmland']
+            summary.pemetaan_potential_forest = potential['forest']
+        elif type == 'water':
+            summary.pemetaan_water_spring = 0
+            summary.pemetaan_water_river = 0
+            summary.pemetaan_water_ditch = 0
+        elif type == 'electricity':
+            summary.pemetaan_electricity_available_kk = 0
 
         return summary
 
 class CalculateBoundaryArea:
     @staticmethod
     def calculate(features):
+        desa_boundary = 0
+
         for feature in features:
-            if feature['properties'].has_key('admin_level'):
-                if feature['properties']['admin_level'] == 7:
-                    return area(feature['geometry'])
-        return 0
+            if feature['geometry']['type'] == 'Polygon':
+                if feature['properties'].has_key('admin_level'):
+                    if feature['properties']['admin_level'] == 7:
+                        desa_boundary = area(feature['geometry'])
+                        break
+
+        return desa_boundary
 class ParseLandusePotential:
     @staticmethod
     def parse(features):
@@ -170,4 +190,4 @@ class ParseLandusePotential:
                 elif properties ['forest']:
                     forestTotal += 1
 
-        return farmlandTotal + ' Pertanian, ' + forestTotal + ' Hutan, ' + orchardTotal + ' Perkebunan'
+        return {"farmland": farmlandTotal, "forest": forestTotal, "orchard": orchardTotal }

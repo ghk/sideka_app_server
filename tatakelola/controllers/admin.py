@@ -19,8 +19,8 @@ def fetch_desa_ids():
 def fetch_all():
     t0 = time()
     #TatakelolaFetcher.fetch_desas()
-    #TatakelolaFetcher.fetch_geojsons()
-    TatakelolaFetcher.fetch_data()
+    TatakelolaFetcher.fetch_geojsons()
+    #TatakelolaFetcher.fetch_data()
     #TatakelolaFetcher.fetch_apbdes()
     db.session.commit()
     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
@@ -37,7 +37,6 @@ def generate_all():
     db.session.commit()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
-
 
 @app.route('/admin/test', methods=['GET'])
 def test():

@@ -144,7 +144,7 @@ function onSupradesaChanged(supradesaId){
 	
 	markers= [];
 	cachedDailyGraphData = {};
-	getStatistics(supradesaId);
+	getMapStatistics(supradesaId);
 	
 }
 
@@ -279,11 +279,11 @@ function onPanelClicked(panelName,data){
 }
 
 // Maps Configuration
-function getStatistics(supradesaId){
+function getMapStatistics(supradesaId){
 	initMaps(supradesaId);
 	var minScore = parseInt($("#min-score").val()) / 100.0;
 	$("#min-score-value").html(minScore * 100.0);
-	$.getJSON('/api/statistics?supradesa_id='+supradesaId, function(data){
+	$.getJSON('/api/map_statistics?supradesa_id='+supradesaId, function(data){
 		var icon = "blog";
 		dataStatistics = data;
 		$.each(data,function(idx,content){

@@ -50,42 +50,44 @@ export class MapUtils {
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
-    static getCentroid(coordinates): any[] {
+     static getCentroid(data): any[] {
         let result = [0, 0];
 
-        if (coordinates.length === 0)
+        if(data.length === 0)
             return result;
 
         let xCoordinates = [];
         let yCoordinates = [];
+        let geometries = data.map(e => e.geometry);
+        let coordinates = geometries.map(e => e.coordinates);
 
-        for (let i = 0; i < coordinates.length; i++) {
-            let coordinate = coordinates[i];
-
-            for (let j = 0; j < coordinate.length; j++) {
-                if (coordinate[j][0] instanceof Array) {
-                    for (let k = 0; k < coordinate[j].length; k++) {
-                        xCoordinates.push(coordinate[j][k][0]);
-                        yCoordinates.push(coordinate[j][k][1]);
+        for(let i=0; i<coordinates.length; i++){
+            if(coordinates[i][0] instanceof Array) {
+                 for(let j=0; j<coordinates[i].length; j++) {
+                    if(coordinates[i][j][0] instanceof Array) {
+                         for(let k=0; k<coordinates[i][j].length; k++) {
+                            xCoordinates.push(parseFloat(coordinates[i][j][k][0]));
+                            yCoordinates.push(parseFloat(coordinates[i][j][k][1]));
+                         }
                     }
-                }
-                else {
-                    xCoordinates.push(coordinate[j][0]);
-                    yCoordinates.push(coordinate[j][1]);
-                }
+                    else {
+                         xCoordinates.push(parseFloat(coordinates[i][j][0]));
+                         yCoordinates.push(parseFloat(coordinates[i][j][1]));
+                     }
+                 }
+            }
+            else {
+                xCoordinates.push(parseFloat(coordinates[i][0]));
+                yCoordinates.push(parseFloat(coordinates[i][1]));
             }
         }
 
-        let xLength = xCoordinates.length;
-        let yLength = yCoordinates.length;
-
-        let sumX = xCoordinates.reduce((a, b) => { return a + b; });
-        let sumY = yCoordinates.reduce((a, b) => { return a + b; });
-
-        result[0] = sumX / xLength;
-        result[1] = sumY / yLength;
-
-        return result;
+        let minX = Math.min.apply(null, xCoordinates);
+        let maxX = Math.max.apply(null, xCoordinates);
+        let minY = Math.min.apply(null, yCoordinates);
+        let maxY = Math.min.apply(null, yCoordinates);
+        let centroid = [(maxX + minX) /2, (maxY + minY)/2];
+        return centroid;
     }
 
 }
