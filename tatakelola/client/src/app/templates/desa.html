@@ -2,13 +2,18 @@
 
 <st-search></st-search>
 
+<div class="center-div" [hidden]="progress?.percentage === 100">
+  <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+  <br>
+</div>
+
 <div class="prevnext" style="float:right;">
   <button class="prev">⇦ Desa Sebelum</button>
   <button class="next">Desa Berikut ⇨</button>
 </div>
 
 <div class="show-hide-side">
-  <button class="shide" (click)="isSidebarShown = !isSidebarShown" id="shide">Rincian ▾</button>
+  <button class="shide" (click)="sidebarCollapsed = !sidebarCollapsed" id="shide">Rincian ▾</button>
 </div>
 
 <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
@@ -18,7 +23,7 @@
         <i class="fa fa-money"></i>
       </div>
       <div class="desc">
-        <h4>Rp {{summaries.apbdes_total | number:'3.0-0'}} </h4>
+        <h4>Rp {{summaries.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{summaries.penganggaran_year}}) </h4>
       </div>
     </div>
   </a>
@@ -28,7 +33,7 @@
         <i class="fa fa-map"></i>
       </div>
       <div class="desc">
-         <h4> {{summaries.pemetaan_area / 1000 | number }} km <sup>2</sup> </h4>
+         <h4> {{summaries.pemetaan_desa_boundary / 1000 | number:'1.0-0' }} km <sup>2</sup> </h4>
       </div>
 
     </div>
@@ -51,7 +56,7 @@
         <i class="fa fa-building"></i>
       </div>
       <div class="desc">
-        <h4>SD {{summaries.penduduk_edu_sd}} &nbsp; SMP {{summaries.penduduk_edu_smp}} &nbsp; SMA {{summaries.penduduk_edu_sma}} &nbsp; PT {{summaries.penduduk_edu_pt}}</h4>
+        <h4> {{summaries.penduduk_edu_sd}} <strong>SD</strong>  {{summaries.penduduk_edu_smp}} <strong>SMP</strong>  {{summaries.penduduk_edu_sma}} <strong>SMA</strong>  {{summaries.penduduk_edu_pt}} <strong>PT</strong> </h4>
       </div>
     </div>
   </a>
@@ -61,7 +66,7 @@
         <i class="fa fa-plug"></i>
       </div>
       <div class="desc">
-        <h4>{{summaries.pemetaan_electricity}}</h4>
+        <h4>{{summaries.pemetaan_electricity_available_kk}} Dari {{summaries.penduduk_total_kk}} KK</h4>
       </div>
     </div>
   </a>
@@ -71,17 +76,7 @@
         <i class="fa fa-tint"></i>
       </div>
       <div class="desc">
-        <h4>{{summaries.pemetaan_water}}</h4>
-      </div>
-    </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('network')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'network' }">
-      <div class="icon">
-        <i class="fa fa-phone"></i>
-      </div>
-      <div class="desc">
-        <h4>{{summaries.pemetaan_communication}}</h4>
+        <h4>{{summaries.pemetaan_water_spring}} Mata Air, {{summaries.pemetaan_water_ditch}} Sistem Pipa</h4>
       </div>
     </div>
   </a>
@@ -91,7 +86,7 @@
         <i class="fa fa-leaf"></i>
       </div>
       <div class="desc">
-        <h4>{{summaries.pemetaan_potential}}</h4>
+        <h4>{{summaries.pemetaan_potential_farmland}} Pertanian, {{summaries.pemetaan_potential_orchard}} Perkebunan, {{summaries.pemetaan_potential_forest}} Hutan</h4>
       </div>
     </div>
   </a>

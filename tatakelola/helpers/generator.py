@@ -32,20 +32,20 @@ class Generator:
     def generate_geojson_summary_by_region(summary, region):
         boundaries = geojson_repository.get_by_type_and_region('boundary', region.id)
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
-        water = geojson_repository.get_by_type_and_region('water', region.id)
 
-        summary.pemetaan_area = 0
-        summary.pemetaan_potential = 'Belum Ada'
-        summary.pemetaan_communication = 'Belum Ada'
-        summary.pemetaan_electricity = 'Belum Ada'
-        summary.pemetaan_water = 'Belum Ada'
+        summary.pemetaan_desa_boundary = None
+        summary.pemetaan_potential_farmland = 0
+        summary.pemetaan_potential_forest = 0
+        summary.pemetaan_potential_orchard = 0
+        summary.pemetaan_water_spring = 0
+        summary.pemetaan_water_river = 0
+        summary.pemetaan_water_ditch = 0
+        summary.pemetaan_electricity_available_kk = 0
 
         if boundaries is not None:
             summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary', 'admin_level')
         if landuse is not None:
             summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse', 'landuse')
-        if water is not None:
-            summary = SummaryGeojsonTransformer.transform(summary, water.data, 'water', 'water')
 
         return summary
 

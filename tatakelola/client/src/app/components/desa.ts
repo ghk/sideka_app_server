@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import { Router, ActivatedRoute } from "@angular/router";
 import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
+import { Progress } from 'angular-progress-http';
 
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
@@ -21,10 +22,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJSON: L.GeoJSON;
     data: any[];
     bigConfig: any[];
-    pemetaan: any;
     sidebarCollapsed: boolean;
-    captions: any;
     summaries: any;
+    progress: Progress;
 
     constructor(
         private _http: Http,
@@ -59,7 +59,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.geoJSONOptions = {
             style: (feature) => {
-                return { color: '#000', weight: feature.geometry.type === 'LineString' ? 2 : 1 }
+                return { color: '#000', weight: 0.5 }
             },
             onEachFeature: (feature, layer) => {
                  for (let i = 0; i < this.bigConfig.length; i++) {
@@ -92,7 +92,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     loadGeojsonByRegion(regionId): void {
-        this._dataService.getGeojsonsByRegion(regionId, {}, null).subscribe(
+        this._dataService.getGeojsonsByRegion(regionId, {}, this.progressListener.bind(this)).subscribe(
             geojson => {
                 if(geojson.length === 0)
                     return;
@@ -117,22 +117,36 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     setActiveMenu(menu: string): boolean {
         this.activeMenu = menu;
-
+        switch(menu){
+            case 'pembangunan':
+            break;
+            case 'batas':
+            break;
+        }
         return false;
     }
 
     setMapLayout(geoJson): void {
-        let featureCollection = geoJson.filter(e => e.type !== 'log_pembangunan').map(e => e.data.features);
-        
+        let landuse = geoJson.filter(e => e.type === 'landuse')[0];
+        let transport = geoJson.filter(e => e.type === 'network_transportation')[0];
+        let facilities = geoJson.filter(e => e.type === 'facilities_infrastructures')[0];
+        let waters = geoJson.filter(e => e.type === 'waters')[0];
+        let boundary = geoJson.filter(e => e.type === 'boundary')[0];
+       
         let geoJsonLayer: any = MapUtils.createGeoJson();
 
-        featureCollection.forEach(features => {
-            geoJsonLayer.features = geoJsonLayer.features.concat(features);
-        });
-       
+        if(waters)
+            geoJsonLayer.features = geoJsonLayer.features.concat(waters.data.features);
+        if(transport)
+            geoJsonLayer.features = geoJsonLayer.features.concat(transport.data.features); 
+        if(landuse)
+            geoJsonLayer.features = geoJsonLayer.features.concat(landuse.data.features);
+        if(facilities)
+            geoJsonLayer.features = geoJsonLayer.features.concat(facilities.data.features);
+
         L.geoJSON(geoJsonLayer, this.geoJSONOptions).addTo(this.activeMap);
 
-        let center = MapUtils.getCentroid(geoJsonLayer.features);
+        let center = MapUtils.getCentroid(landuse.data.features);
 
         this.activeMap.setView([center[1], center[0]], 14);
     }
@@ -144,5 +158,9 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     onMapReady(map: L.Map): void {
         this.activeMap = map;
+    }
+
+    progressListener(progress: Progress): void {
+        this.progress = progress;
     }
 }
