@@ -25,6 +25,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     sidebarCollapsed: boolean;
     summaries: any;
     progress: Progress;
+    farmlands: string;
+    orchards: string;
+    trees: string;
 
     constructor(
         private _http: Http,
@@ -98,6 +101,36 @@ export class DesaComponent implements OnInit, OnDestroy {
                     return;
 
                 this.setMapLayout(geojson);
+
+                let landuse = geojson.filter(e => e.type === 'landuse')[0];
+                let farmlands = [];
+                let orchards = [];
+                let trees = [];
+
+                for(let i=0; i<landuse.data.features.length; i++) {
+                    let feature = landuse.data.features[i];
+                    let properties = feature.properties;
+                    
+                    if(properties['Landuse'] === 'farmland') {
+                        if(properties['crop'])
+                            farmlands.push(properties['crop']);
+                    }
+
+                    else if(properties['Landuse'] === 'orchard') {
+                        if(properties['crop'])
+                            orchards.push(properties['orchard']);
+                    }
+
+                    else if(properties['Landuse'] === 'forest') {
+                        if(properties['trees'])
+                            trees.push(properties['trees']);
+
+                    }
+                }
+                
+                this.farmlands = farmlands.length > 0 ? farmlands.join(',') : 'Padi, Jagung, Tiwul';
+                this.orchards = orchards.length > 0 ? orchards.join(',') : 'Jeruk, Mangga, Teh, Kopi';
+                this.trees = trees.length > 0 ? trees.join(',') : 'Toge';
             }
         )
     }
@@ -107,8 +140,6 @@ export class DesaComponent implements OnInit, OnDestroy {
             summaries => {
                 if(summaries.length > 0)
                     this.summaries = summaries[0];
-
-                console.log(this.summaries);
             }
         )
     }
@@ -133,22 +164,18 @@ export class DesaComponent implements OnInit, OnDestroy {
         let waters = geoJson.filter(e => e.type === 'waters')[0];
         let boundary = geoJson.filter(e => e.type === 'boundary')[0];
        
-        let geoJsonLayer: any = MapUtils.createGeoJson();
+        let geoJsonData: any = MapUtils.createGeoJson();
 
         if(waters)
-            geoJsonLayer.features = geoJsonLayer.features.concat(waters.data.features);
+            geoJsonData.features = geoJsonData.features.concat(waters.data.features);
         if(transport)
-            geoJsonLayer.features = geoJsonLayer.features.concat(transport.data.features); 
+            geoJsonData.features = geoJsonData.features.concat(transport.data.features); 
         if(landuse)
-            geoJsonLayer.features = geoJsonLayer.features.concat(landuse.data.features);
-        if(facilities)
-            geoJsonLayer.features = geoJsonLayer.features.concat(facilities.data.features);
+            geoJsonData.features = geoJsonData.features.concat(landuse.data.features);
+    
+        let geoJsonLayer: L.GeoJSON = L.geoJSON(geoJsonData, this.geoJSONOptions).addTo(this.activeMap);
 
-        L.geoJSON(geoJsonLayer, this.geoJSONOptions).addTo(this.activeMap);
-
-        let center = MapUtils.getCentroid(landuse.data.features);
-
-        this.activeMap.setView([center[1], center[0]], 14);
+        this.activeMap.setView(geoJsonLayer.getBounds().getCenter(), 15);
     }
 
     clearGeoJSON(): void {
