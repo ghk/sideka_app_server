@@ -286,13 +286,7 @@ function getMapStatistics(supradesaId){
 	$.getJSON('/api/map_statistics?supradesa_id='+supradesaId, function(data){
 		var icon = "blog";
 		dataStatistics = data;
-		$.each(data,function(idx,content){
-			if(content.latitude && content.longitude){
-				addMarker(content,icon, minScore);
-			} else {
-				console.log("cannot show data", content);
-			}
-		})	
+		onButtonScoreClicked(icon);
 	})
 }
 
@@ -320,10 +314,10 @@ function initMaps(supradesaId){
 function addMarker(content,icon,minScore) {
 	if(!content.penduduk || !content.keuangan || !content.blog){
 		console.log("data not complete cannot show data", content);
-		return;
+		return false;
 	}
 	if(content[icon].score < minScore){
-		return;
+		return false;
 	}
 	var host = window.location.origin;
 	var pathImage = "/static/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
@@ -348,19 +342,28 @@ function addMarker(content,icon,minScore) {
 		};
 	})(marker,content,infowindow));
 	markers.push(marker);
+	return true;
 }
 
 var currentScoreType = "blog";
+var desaCount = 0;
 
 function onButtonScoreClicked(buttonName){
 	currentScoreType = buttonName;
 	var minScore = parseInt($("#min-score").val()) / 100.0;
 	$("#min-score-value").html(minScore * 100.0);
 	clearMarkers();
+	desaCount = 0;
 	$.each(dataStatistics,function(idx, content){
-		if(content.latitude != null && content.longitude != null)
-			addMarker(content,buttonName, minScore);
+		if(content.latitude != null && content.longitude != null) {
+			if(addMarker(content,buttonName, minScore)){
+				desaCount += 1;
+			}
+		} else {
+			console.log("cannot show data", content);
+		}
 	})	
+	$("#desa-count-value").html(desaCount);
 	applyTableInMaps(buttonName);
 }
 
