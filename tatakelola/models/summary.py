@@ -30,6 +30,11 @@ class Summary(BaseModel):
     pemetaan_potential_farmland = db.Column(db.Integer, nullable=True)
     pemetaan_potential_forest = db.Column(db.Integer, nullable=True)
     pemetaan_potential_orchard = db.Column(db.Integer, nullable=True)
+    pemetaan_school_tk = db.Column(db.Integer, nullable=True)
+    pemetaan_school_sd = db.Column(db.Integer, nullable=True)
+    pemetaan_school_smp = db.Column(db.Integer, nullable=True)
+    pemetaan_school_sma = db.Column(db.Integer, nullable=True)
+    pemetaan_school_pt = db.Column(db.Integer, nullable=True)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

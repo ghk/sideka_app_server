@@ -157,8 +157,41 @@ class SummaryGeojsonTransformer:
             summary.pemetaan_water_ditch = 0
         elif type == 'electricity':
             summary.pemetaan_electricity_available_kk = 0
-
+        elif type == 'school':
+            schools = ParseSchoolsFromBuildings.parse(features)
+            summary.pemetaan_school_tk = schools['tk']
+            summary.pemetaan_school_sd = schools['sd']
+            summary.pemetaan_school_smp = schools['smp']
+            summary.pemetaan_school_sma = schools['sma']
+            summary.pemetaan_school_pt = schools['pt']
         return summary
+
+class ParseSchoolsFromBuildings:
+    @staticmethod
+    def parse(features):
+        tk = 0
+        sd = 0
+        smp = 0
+        sma = 0
+        pt = 0
+
+        for feature in features:
+            properties = feature['properties']
+            if properties.has_key('amenity'):
+                if properties['amenity'] == 'school':
+                    if properties.has_key('isced'):
+                        if properties['isced'] == 0:
+                            tk += 1
+                        elif properties['isced'] == 1:
+                            sd += 1
+                        elif properties['isced'] == 2:
+                            smp += 1
+                        elif properties['isced'] == 3:
+                            sma += 1
+                        elif properties['isced'] == 4:
+                            pt += 1
+
+        return {"tk": tk, "sd": sd, "smp": smp, "sma": sma, "pt": pt}
 
 class CalculateBoundaryArea:
     @staticmethod

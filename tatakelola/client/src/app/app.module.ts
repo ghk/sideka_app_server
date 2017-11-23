@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { NgPipesModule } from 'ngx-pipes';
 
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
@@ -29,6 +30,7 @@ import { SharedService } from './services/shared';
     BrowserAnimationsModule,
     HttpModule,
     ProgressHttpModule,
+    NgPipesModule,
     LeafletModule.forRoot(),
     RouterModule.forRoot([
       { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },

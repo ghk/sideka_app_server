@@ -16,20 +16,35 @@ export class SummaryComponent implements OnInit, OnDestroy {
     details: any;
     detailColumns: any;
     progress: Progress;
+    order: string;
 
     constructor(dataService: DataService, private router: Router) {
         this._dataService = dataService;
         this.detailColumns = {
-            penduduk: ['Desa', 'Laki-Laki', 'Perempuan', 'Petani', 'Pedagang', 'Karyawan', 'Lainnya'],
-            education: ['Desa', 'Tidak Diketahui', 'SD', 'SMP', 'SMA', 'PT'],
+            penduduk: ['Desa', 'Laki-Laki', 'Perempuan', 'Tidak Diketahui', 'SD', 'SMP', 'SMA', 'PT', 'Petani', 'Pedagang', 'Karyawan', 'Lainnya'],
+            education: ['Desa', 'TK', 'SD', 'SMP', 'SMA', 'PT'],
             area: ['Desa', 'Luas Km2'],
             waters: ['Desa', 'Mata Air', 'Sistem Pipa'],
             potential: ['Desa', 'Pertanian', 'Perkebunan', 'Hutan']
         }
     }
 
+    sort(order: string): boolean {
+        if (this.order.includes(order)) {
+            if (this.order.startsWith('-'))
+                this.order = this.order.substr(1);
+            else
+                this.order = '-' + this.order;
+        } else {
+            this.order = order;
+        }
+
+        return false;
+    }
+
     ngOnInit(): void {
        this.viewType = 'summary';
+       this.order = 'region.parent.id';
        this.loadSummaries();
     }
 
@@ -44,6 +59,16 @@ export class SummaryComponent implements OnInit, OnDestroy {
         this._dataService.getSummaries({}, this.progressListener.bind(this)).subscribe(
             result => {
                 this.summaries = result;
+
+                this.summaries.forEach(summary => {
+                    summary['penduduk_total'] = summary.penduduk_sex_unknown + summary.penduduk_sex_male + summary.penduduk_sex_female;
+                    summary['desa_edu_total'] = summary.pemetaan_school_tk + summary.pemetaan_school_sd + summary.pemetaan_school_smp + summary.pemetaan_school_sma + summary.pemetaan_school_pt;
+                    summary['desa_total_waters'] = summary.pemetaaan_water_spring + summary.pemetaan_water_ditch;
+                    summary['desa_total_potential'] = summary.pemetaan_potential_farmland + summary.pemetaan_potential_forest + summary.pemetaan_potential_orchard;
+                    summary['kk_not_using_electricity'] = summary.penduduk_total_kk - summary.pemetaan_electricity_available_kk;
+                });
+
+                console.log(this.summaries);
             },
             error => {
                 console.log(error);
@@ -51,50 +76,17 @@ export class SummaryComponent implements OnInit, OnDestroy {
         )
     }
 
-    loadDetail(type): boolean {
-        this.details = [];
-        switch(type) {
-            case 'penduduk':
-                    this.summaries.forEach(summary => {
-                        let rows = [summary.region.name, summary.penduduk_sex_male, summary.penduduk_sex_female, summary.penduduk_job_petani, summary.penduduk_job_pedagang, summary.penduduk_job_karyawan, summary.penduduk_job_lain];
-                        this.details.push({rows: rows});
-                    });
-                break;
-                case 'education':
-                    this.summaries.forEach(summary => {
-                        let rows = [summary.region.name, summary.penduduk_edu_none, summary.penduduk_edu_sd, summary.penduduk_edu_smp, summary.penduduk_edu_sma, summary.penduduk_edu_pt];
-                        this.details.push({rows: rows});
-                    });
-                break;
-                case 'area':
-                    this.summaries.forEach(summary => {
-                        let rows = [summary.region.name, summary.pemetaan_desa_boundary / 1000];
-                        this.details.push({rows: rows});
-                    });
-                case 'waters':
-                    this.summaries.forEach(summary => {
-                        let rows = [summary.region.name, summary.pemetaan_water_spring, summary.pemetaan_water_ditch];
-                        this.details.push({rows: rows});
-                    });
-                    console.log(this.details);
-                case 'potential':
-                    this.summaries.forEach(summary => {     
-                        let rows = [summary.region.name, summary.pemetaan_potential_farmland, summary.pemetaan_potential_orchard, summary.pemetaan_potential_forest]
-                        this.details.push({rows: rows});
-                    });
-                break;
-        }
-
+    loadDetail(type): void {
         this.viewType = 'detail';
-        this.detailType =type;
-        return false;
+        this.detailType = type;
     }
 
     backToSummary(): boolean {
         this.viewType = 'summary';
         this.detailType = null;
         this.details = null;
-
+        this.order = 'region.parent.id';
+        
         return false;
     }
 

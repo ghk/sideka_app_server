@@ -32,6 +32,7 @@ class Generator:
     def generate_geojson_summary_by_region(summary, region):
         boundaries = geojson_repository.get_by_type_and_region('boundary', region.id)
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
+        facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
 
         summary.pemetaan_desa_boundary = None
         summary.pemetaan_potential_farmland = 0
@@ -41,11 +42,18 @@ class Generator:
         summary.pemetaan_water_river = 0
         summary.pemetaan_water_ditch = 0
         summary.pemetaan_electricity_available_kk = 0
+        summary.pemetaan_school_tk = 0
+        summary.pemetaan_school_sd = 0
+        summary.pemetaan_school_smp = 0
+        summary.pemetaan_school_sma = 0
+        summary.pemetaan_school_pt = 0
 
         if boundaries is not None:
             summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary', 'admin_level')
         if landuse is not None:
             summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse', 'landuse')
+        if facilities is not None:
+            sumamry = SummaryGeojsonTransformer.transform(summary, facilities.data, 'facilities_infrastructures', 'school')
 
         return summary
 

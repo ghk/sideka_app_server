@@ -27,26 +27,40 @@
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'summary'">
             <thead>
                 <tr>
-                    <th style="width: 15%; font-size: 12px; text-align: center;"> Desa </th>
-                    <th style="width: 5%; font-size: 12px; text-align: center;"> <a href="#" (click)="loadDetail('apbdes')"> APBDes </a> </th>
-                    <th style="width: 10%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('area')"> Luas (Km<sup>2</sup>) </a> </th>
-                    <th style="width: 5%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('penduduk')"> Penduduk </a> </th>
-                    <th style="width: 5%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('education')"> Pendidikan </a> </th>
-                    <th style="width: 15%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('electricity')"> Listrik </a> </th>
-                    <th style="width: 15%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('waters')"> Pengairan </a> </th>
-                    <th style="width: 20%; font-size: 12px; text-align: center"> <a href="#" (click)="loadDetail('potential')"> Potensi Desa </a> </th>
+                    <th style="width: 15%; font-size: 12px; text-align: center;"> <a href="#" (click)="sort('region.name')">Desa</a> </th>
+                    <th style="width: 5%; font-size: 12px; text-align: center;"> <a href="#" (click)="sort('penganggaran_budgeted_revenue')"> APBDes </a> </th>
+                    <th style="width: 10%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('pemetaan_desa_boundary')"> Luas (Km<sup>2</sup>) </a> </th>
+                    <th style="width: 5%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('penduduk_total')"> Penduduk </a> </th>
+                    <th style="width: 5%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('desa_edu_total')"> Pendidikan </a> </th>
+                    <th style="width: 15%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('pemetaan_electricity_available_kk')"> Listrik </a> </th>
+                    <th style="width: 15%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('desa_total_waters')"> Pengairan </a> </th>
+                    <th style="width: 20%; font-size: 12px; text-align: center"> <a href="#" (click)="sort('desa_total_potential')"> Potensi Desa </a> </th>
                 </tr>
             </thead>
             <tbody>
-                  <tr *ngFor="let summary of summaries">
+                  <tr *ngFor="let summary of summaries | orderBy: order">
                      <td style="font-size: 12px;"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
-                     <td class="money" style="text-align: right; font-size: 12px;"> {{ summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px;"> {{ summary.pemetaan_desa_boundary / 1000 | number:'1.0-0'}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px;"> {{ summary.penduduk_sex_male + summary.penduduk_sex_female + summary.penduduk_sex_unknown }} </td>
-                     <td class="money" style="text-align: right; font-size: 12px;"> {{ summary.penduduk_edu_none + summary.penduduk_edu_pt + summary.penduduk_edu_sd + summary.penduduk_edu_sma + summary.penduduk_edu_smp }} </td>
-                     <td style="font-size: 12px;"> {{summary.pemetaan_electricity_available_kk}} Dari {{summary.penduduk_total_kk}} KK</td>
-                     <td style="font-size: 12px;"> {{summary.pemetaan_water_spring}} Mata Air, {{summary.pemetaan_water_ditch}} Sistem Pipa </td>
-                     <td style="font-size: 12px;"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
+                     
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
+                    
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000  | number:'1.0-0'}} </td>
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
+                     
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total}} </td>
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total === 0">  - </td>
+
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total}} </td>
+                     <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total === 0">  - </td>
+                     
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_available_kk > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_available_kk}} Dari {{summary.penduduk_total_kk}} KK</td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_available_kk === 0" (click)="loadDetail('electricity')"> - </td>
+                     
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_spring > 0 || summary.pemetaan_water_spring > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_spring}} Mata Air, {{summary.pemetaan_water_ditch}} Sistem Pipa </td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_spring === 0 && summary.pemetaan_water_spring === 0" (click)="loadDetail('waters')"> - </td>
+                     
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
                   </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
@@ -59,19 +73,212 @@
             </tr>
           </tfoot>
         </table>
-        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail'">
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'apbdes'">
             <thead>
                 <tr>
-                    <th *ngFor="let column of detailColumns[detailType]" style="width: 10%; font-size: 12px; text-align: center;">
-                       {{column}}
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_male')">APBDes</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_female')">Tahun</a>
                     </th> 
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let detail of details">
-                    <td *ngFor="let row of detail.rows" style="font-size: 12px;" [style.text-align]="isNumber(row) ? 'right' : 'left'" [ngClass]="{'money': isNumber(row) }">
-                         {{row}}
-                    </td>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}}</td>
+                    <td> {{summary.penganggaran_year}}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'area'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_desa_boundary')">Batas Desa (km<sup>2</sup>)</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_desa_boundary / 1000}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'penduduk'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_male')">Laki-Laki</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_female')">Perempuan</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_unknown')">Tidak Diketahui</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_edu_sd')">SD</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_edu_smp')">SMP</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_edu_sma')">SMA</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_edu_pt')">PT</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_job_petani')">Petani</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_job_pedagang')">Pedagang</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_job_karyawan')">Karyawan</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_job_lain')">Lainnya</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_male}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_female}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_unknown}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_sd}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_smp}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_sma}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_pt}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_petani}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_pedagang}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_karyawan}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_lain}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'education'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_school_tk')">TK</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_school_sd')">SD</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_school_smp')">SMP</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_school_sma')">SMA</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_school_pt')">PT</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_tk}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_sd}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_smp}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_sma}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_pt}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'electricity'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('penduduk_sex_male')">Menggunakan Listrik (KK)</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('kk_not_using_electricity')">Tidak Menggunakan Listrik (KK)</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_electricity_available_kk}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.kk_not_using_electricity}}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'waters'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_water_spring')">Mata Air</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_water_ditch')">Sistem Pipa</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_water_spring}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_water_ditch}}</td> 
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'potential'">
+            <thead>
+                <tr>
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                       <a href="#" (click)="sort('region.name')">Desa</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_potential_farmland')">Pertanian</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_potential_orchard')">Perkebunan</a>
+                    </th> 
+                    <th style="width: 10%; font-size: 12px; text-align: center;">
+                        <a href="#" (click)="sort('pemetaan_potential_forest')">Hutan</a>
+                    </th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order">
+                    <td> {{summary.region.name}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_farmland}}</td>
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_orchard}}</td> 
+                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_forest}}</td> 
                 </tr>
             </tbody>
         </table>
