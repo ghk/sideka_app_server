@@ -286,9 +286,16 @@ and (max-width : 1060px) {
 
 @media only screen 
 and (max-width : 600px) {
-	#range-score input[type='range'] {
-		width: 130px; 
+	.switch-score select {
+        width: 150px;
 	}
+	#range-score input[type='range'] {
+		width: 100px; 
+	}
+}
+
+.uk-navbar .navbar-brand {
+    padding: 15px 8px;
 }
 
 
