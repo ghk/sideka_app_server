@@ -19,11 +19,6 @@ logger = logging.getLogger('tatakelola')
 
 class TatakelolaFetcher():
     @staticmethod
-    def fetch_regions():
-        regions = region_repository.all(True)
-        for region in regions:
-            print region
-    @staticmethod
     def fetch_desas():
         sd_desas = sideka_desa_repository.all()
         for sd_desa in sd_desas:

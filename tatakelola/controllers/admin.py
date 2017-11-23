@@ -18,7 +18,6 @@ def fetch_desa_ids():
 @app.route('/admin/fetch/all', methods=['GET'])
 def fetch_all():
     t0 = time()
-    TatakelolaFetcher.fetch_regions()
     TatakelolaFetcher.fetch_desas()
     TatakelolaFetcher.fetch_geojsons()
     TatakelolaFetcher.fetch_data()
