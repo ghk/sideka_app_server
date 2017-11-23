@@ -1,4 +1,4 @@
-cdfrom flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app
 from time import time
 from tatakelola import db
 from tatakelola.helpers import TatakelolaFetcher, Generator
