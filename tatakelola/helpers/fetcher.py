@@ -27,9 +27,9 @@ class TatakelolaFetcher():
 
             region = region_repository.get(str(sd_desa.kode).rstrip())
 
-            #if (region is None):
-                #logger.warning('Desa<{0}> {1} does not have region'.format(sd_desa.desa, sd_desa.kode))
-                #continue
+            if (region is None):
+                logger.warning('Desa<{0}> {1} does not have region'.format(sd_desa.desa, sd_desa.kode))
+                continue
 
             region.domain = sd_desa.domain
             region.desa_id = sd_desa.blog_id
