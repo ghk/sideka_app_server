@@ -14,42 +14,42 @@
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
-              <th (click)="sort('[0].name')" rowspan="2" style="text-align: center; vertical-align: middle;">Desa
-                <ng-container *ngIf="order === '[0].name'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('region.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Desa
+                <ng-container *ngIf="order.includes('region.name')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('[0].parent.id')" style="text-align: center">Kabupaten
-                <ng-container *ngIf="order === '[0].parent.id'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('region.parent.id')" style="text-align: center; cursor: pointer;">Kabupaten
+                <ng-container *ngIf="order.includes('region.parent.id')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
               <ng-container *ngFor="let spendingType of spendingTypes;">
-                <th (click)="sort('[1].' + spendingType.id)" class="money" style="text-align: center" colspan="2">{{ spendingType.name }}
-                  <ng-container *ngIf="order === '[1].' + spendingType.id">
-                    <span [hidden]="reverse">▲</span>
-                    <span [hidden]="!reverse">▼</span>
+                <th (click)="sort('data.' + spendingType.id)" class="money" style="text-align: center; cursor: pointer;" colspan="2">{{ spendingType.name }}
+                  <ng-container *ngIf="order.includes('data.' + spendingType.id)">
+                    <span [hidden]="order.startsWith('-')">▲</span>
+                    <span [hidden]="!order.startsWith('-')">▼</span>
                   </ng-container>
                 </th>
               </ng-container>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let entity of entities | orderBy: order : reverse">
+            <tr *ngFor="let entity of entities | orderBy: order">
               <td>
-                <a [routerLink]="['/spending/region', entity[0].id]">
-                  <span>{{ entity[0].name }}</span>
+                <a [routerLink]="['/spending/region', entity.region.id]">
+                  <span>{{ entity.region.name }}</span>
                 </a>
               </td>
               <td>
-                <span>{{ entity[0].parent | regionType:2 }}</span>
+                <span>{{ entity.region.parent | regionType:2 }}</span>
               </td>
               <ng-container *ngFor="let spendingType of spendingTypes">
                 <td class="money" colspan="2">
-                  <div style="float:right;">{{ entity[1][spendingType.id] | number:'3.0-0' }}</div>
-                  <div class="bar-percent" [ngStyle]="entity[2][spendingType.id]"></div>
+                  <div style="float:right;">{{ entity.data[spendingType.id] | number:'3.0-0' }}</div>
+                  <div class="bar-percent" [ngStyle]="entity.barPercent[spendingType.id]"></div>
                 </td>
               </ng-container>
             </tr>
