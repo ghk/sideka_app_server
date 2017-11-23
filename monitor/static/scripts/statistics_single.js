@@ -13,13 +13,13 @@ var configDataQualityGraph= {
             data:[],
             fill: false,
         }, {
-            label: "Penduduk",       
+            label: "Kependudukan",       
             backgroundColor: fill[2],
             borderColor: fill[2],
             data:[],
             fill: false,
         },{
-            label: "Anggaran",
+            label: "Keuangan",
             backgroundColor: fill[3],
             borderColor: fill[3],
             data:[],
@@ -103,7 +103,7 @@ function applyGraph(){
     dataQualityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataQualityGraph.update();
 
-    var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan", "Pemetaan"]}
+    var custom = {property:"label",content:["Berita","Kependudukan","Keuangan", "Pemetaan"]}
     datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.keuangan, contentDataActivity.pemetaan]
     applyDatasets(dataActivityGraph,datasets,custom)
     dataActivityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
@@ -141,15 +141,19 @@ function sliceDataGraph(graph,startSlice, sliceLength, data){
 }
 
 function onWidthChange(widthCurrent){	
-    if($.isEmptyObject(cachedDataQualityGraph))cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
+    if($.isEmptyObject(cachedDataQualityGraph))
+	cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
+
+    if($.isEmptyObject(cachedDataActivityGraph))
+	cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
+
     var sliceConfig = getStartSlice(widthCurrent,cachedDataQualityGraph.labels.length)
     var startSlice = sliceConfig[0], sliceLength = sliceConfig[1];
-    sliceDataGraph(dataQualityGraph,startSlice, sliceLength,cachedDataQualityGraph)    
+
+    sliceDataGraph(dataQualityGraph, startSlice, sliceLength,cachedDataQualityGraph)    
     dataQualityGraph.update()  
     
-    if($.isEmptyObject(cachedDataActivityGraph))cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
-    startSlice = cachedDataActivityGraph.labels.length - sliceLength;
-    sliceDataGraph(dataActivityGraph,startSlice, sliceLength,cachedDataActivityGraph)
+    sliceDataGraph(dataActivityGraph, startSlice, sliceLength,cachedDataActivityGraph)
     dataActivityGraph.update()  
 }
 
