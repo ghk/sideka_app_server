@@ -13,20 +13,11 @@ export class SummaryComponent implements OnInit, OnDestroy {
     viewType: string;
     detailType: string;
     summaries: any;
-    details: any;
-    detailColumns: any;
     progress: Progress;
     order: string;
 
     constructor(dataService: DataService, private router: Router) {
         this._dataService = dataService;
-        this.detailColumns = {
-            penduduk: ['Desa', 'Laki-Laki', 'Perempuan', 'Tidak Diketahui', 'SD', 'SMP', 'SMA', 'PT', 'Petani', 'Pedagang', 'Karyawan', 'Lainnya'],
-            education: ['Desa', 'TK', 'SD', 'SMP', 'SMA', 'PT'],
-            area: ['Desa', 'Luas Km2'],
-            waters: ['Desa', 'Mata Air', 'Sistem Pipa'],
-            potential: ['Desa', 'Pertanian', 'Perkebunan', 'Hutan']
-        }
     }
 
     sort(order: string): boolean {
@@ -84,9 +75,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
     backToSummary(): boolean {
         this.viewType = 'summary';
         this.detailType = null;
-        this.details = null;
         this.order = 'region.parent.id';
-        
+
         return false;
     }
 
