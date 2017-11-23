@@ -5,7 +5,7 @@ import { NgModule, LOCALE_ID } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { ChartsModule } from 'ng2-charts/ng2-charts';
-import { OrderModule } from 'ngx-order-pipe';
+import { NgPipesModule } from 'ngx-pipes';
 
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
@@ -49,7 +49,7 @@ import { SharedService } from './services/shared';
     HttpModule,
     ProgressHttpModule,
     ChartsModule,
-    OrderModule,
+    NgPipesModule,
     RouterModule.forRoot([
       { path: '', redirectTo: 'progress/region/0', pathMatch: 'full' },
       { path: 'progress/region/:regionId', component: ProgressComponent }, 

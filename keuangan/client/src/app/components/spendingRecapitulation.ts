@@ -39,8 +39,7 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
         return this._spendingRecapitulations.getValue();
     }
         
-    order: string = '[0].parent.id';
-    reverse: boolean = false;
+    order: string = 'region.parent.id';
     progress: Progress;
 
     constructor(
@@ -112,10 +111,11 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
                     entities[key].barPercent[dataKey] = this.getBarPercent(entities[key].data[dataKey], entities[key].total);                    
                 })
 
-                let data = [];
-                data.push(entities[key]['region']);
-                data.push(entities[key]['data']);
-                data.push(entities[key]['barPercent']);
+                let data = {
+                    'region': entities[key]['region'],
+                    'data': entities[key]['data'],
+                    'barPercent': entities[key]['barPercent']
+                };
                 result.push(data);
             };
         })
@@ -133,10 +133,12 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     sort(order: string) {
-        if (this.order === order) {
-            this.reverse = !this.reverse;
+        if (this.order.includes(order)) {
+            if (this.order.startsWith('-'))
+                this.order = this.order.substr(1);
+            else
+                this.order = '-' + this.order;
         } else {
-            this.reverse = false;
             this.order = order;
         }
     }

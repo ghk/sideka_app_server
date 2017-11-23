@@ -20,9 +20,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
         transferredRevenue: number;
         realizedSpending: number;
     }
-
-    order: string = 'region.id'
-    reverse: boolean = false;
+    order: string = 'region.id';
 
     constructor(
         private _route: ActivatedRoute,
@@ -82,10 +80,12 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     sort(order: string) {
-        if (this.order === order) {
-            this.reverse = !this.reverse;
+        if (this.order.includes(order)) {
+            if (this.order.startsWith('-'))
+                this.order = this.order.substr(1);
+            else
+                this.order = '-' + this.order;
         } else {
-            this.reverse = false;
             this.order = order;
         }
     }

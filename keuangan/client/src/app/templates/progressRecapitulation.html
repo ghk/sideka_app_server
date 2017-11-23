@@ -27,40 +27,40 @@
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
-              <th (click)="sort('region.name')">Desa
-                <ng-container *ngIf="order === 'region.name'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('region.name')" style="cursor: pointer;">Desa
+                <ng-container *ngIf="order.includes('region.name')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('region.id')">Kabupaten
-                <ng-container *ngIf="order === 'region.id'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('region.id')" style="cursor: pointer;">Kabupaten
+                <ng-container *ngIf="order.includes('region.id')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('budgeted_revenue')" class="money">Anggaran Desa
-                <ng-container *ngIf="order === 'budgeted_revenue'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('budgeted_revenue')" class="money" style="cursor: pointer;">Anggaran Desa
+                <ng-container *ngIf="order.includes('budgeted_revenue')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('transferred_revenue')" class="money">Tersalurkan Kabupaten
-                <ng-container *ngIf="order === 'transferred_revenue'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('transferred_revenue')" class="money" style="cursor: pointer;">Tersalurkan Kabupaten
+                <ng-container *ngIf="order.includes('transferred_revenue')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('realized_spending')" class="money">Terrealisasi Desa
-                <ng-container *ngIf="order === 'realized_spending'">
-                  <span [hidden]="reverse">▲</span>
-                  <span [hidden]="!reverse">▼</span>
+              <th (click)="sort('realized_spending')" class="money" style="cursor: pointer;">Terrealisasi Desa
+                <ng-container *ngIf="order.includes('realized_spending')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let entity of entities | orderBy: order : reverse">
+            <tr *ngFor="let entity of entities | orderBy: order">
               <td>
                 <a [routerLink]="['/progress/region', entity.region.id]">
                   <span>{{ entity.region.name }}</span>
@@ -90,9 +90,9 @@
                 <a href>Total</a>
               </td>
               <td></td>
-              <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
-              <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
-              <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>
+              <td class="money">{{ total.budgetedRevenue | number:'3.0-0' }}</td>
+              <td class="money">{{ total.transferredRevenue | number:'3.0-0' }}</td>
+              <td class="money">{{ total.realizedSpending | number:'3.0-0' }}</td>
             </tr>
           </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">
