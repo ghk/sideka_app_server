@@ -12,7 +12,7 @@ import { Query } from '../models/query';
 })
 export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
 
-    entities: any = [];
+    entities: any = [];    
     progress: Progress;
     total: {
         text: string;
@@ -20,6 +20,9 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
         transferredRevenue: number;
         realizedSpending: number;
     }
+
+    order: string = 'region.id'
+    reverse: boolean = false;
 
     constructor(
         private _route: ActivatedRoute,
@@ -76,6 +79,15 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
         return {
             'width': (numerator / denominator) * 100 + '%'
         };
+    }
+
+    sort(order: string) {
+        if (this.order === order) {
+            this.reverse = !this.reverse;
+        } else {
+            this.reverse = false;
+            this.order = order;
+        }
     }
 
     progressListener(progress: Progress): void {

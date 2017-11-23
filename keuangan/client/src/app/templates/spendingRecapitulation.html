@@ -14,25 +14,42 @@
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
-              <th rowspan="2" style="text-align: center; vertical-align: middle;">Desa</th>
-              <th style="text-align: center">Kabupaten</th>
-              <ng-container *ngFor="let spendingType of spendingTypes">
-                <th class="money" style="text-align: center" colspan="2"> {{ spendingType.name }}</th>
+              <th (click)="sort('[0].name')" rowspan="2" style="text-align: center; vertical-align: middle;">Desa
+                <ng-container *ngIf="order === '[0].name'">
+                  <span [hidden]="reverse">▲</span>
+                  <span [hidden]="!reverse">▼</span>
+                </ng-container>
+              </th>
+              <th (click)="sort('[0].parent.id')" style="text-align: center">Kabupaten
+                <ng-container *ngIf="order === '[0].parent.id'">
+                  <span [hidden]="reverse">▲</span>
+                  <span [hidden]="!reverse">▼</span>
+                </ng-container>
+              </th>
+              <ng-container *ngFor="let spendingType of spendingTypes;">
+                <th (click)="sort('[1].' + spendingType.id)" class="money" style="text-align: center" colspan="2">{{ spendingType.name }}
+                  <ng-container *ngIf="order === '[1].' + spendingType.id">
+                    <span [hidden]="reverse">▲</span>
+                    <span [hidden]="!reverse">▼</span>
+                  </ng-container>
+                </th>
               </ng-container>
-            </tr>            
+            </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let entity of entities">
+            <tr *ngFor="let entity of entities | orderBy: order : reverse">
               <td>
                 <a [routerLink]="['/spending/region', entity[0].id]">
                   <span>{{ entity[0].name }}</span>
                 </a>
               </td>
-              <td><span>{{ entity[0].parent | regionType:2 }}</span></td>
-              <ng-container *ngFor="let data of entity[1]; let i = index">
+              <td>
+                <span>{{ entity[0].parent | regionType:2 }}</span>
+              </td>
+              <ng-container *ngFor="let spendingType of spendingTypes">
                 <td class="money" colspan="2">
-                  <div style="float:right;">{{ data | number:'3.0-0' }}</div>
-                  <div class="bar-percent" [ngStyle]="entity[2][i]"></div>
+                  <div style="float:right;">{{ entity[1][spendingType.id] | number:'3.0-0' }}</div>
+                  <div class="bar-percent" [ngStyle]="entity[2][spendingType.id]"></div>
                 </td>
               </ng-container>
             </tr>

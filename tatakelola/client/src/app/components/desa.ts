@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import { Router, ActivatedRoute } from "@angular/router";
 import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
+import { Progress } from 'angular-progress-http';
 
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
@@ -21,10 +22,12 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJSON: L.GeoJSON;
     data: any[];
     bigConfig: any[];
-    pemetaan: any;
     sidebarCollapsed: boolean;
-    captions: any;
     summaries: any;
+    progress: Progress;
+    farmlands: string;
+    orchards: string;
+    trees: string;
 
     constructor(
         private _http: Http,
@@ -59,7 +62,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.geoJSONOptions = {
             style: (feature) => {
-                return { color: '#000', weight: feature.geometry.type === 'LineString' ? 2 : 1 }
+                return { color: '#000', weight: 0.5 }
             },
             onEachFeature: (feature, layer) => {
                  for (let i = 0; i < this.bigConfig.length; i++) {
@@ -92,12 +95,42 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     loadGeojsonByRegion(regionId): void {
-        this._dataService.getGeojsonsByRegion(regionId, {}, null).subscribe(
+        this._dataService.getGeojsonsByRegion(regionId, {}, this.progressListener.bind(this)).subscribe(
             geojson => {
                 if(geojson.length === 0)
                     return;
 
                 this.setMapLayout(geojson);
+
+                let landuse = geojson.filter(e => e.type === 'landuse')[0];
+                let farmlands = [];
+                let orchards = [];
+                let trees = [];
+
+                for(let i=0; i<landuse.data.features.length; i++) {
+                    let feature = landuse.data.features[i];
+                    let properties = feature.properties;
+                    
+                    if(properties['Landuse'] === 'farmland') {
+                        if(properties['crop'])
+                            farmlands.push(properties['crop']);
+                    }
+
+                    else if(properties['Landuse'] === 'orchard') {
+                        if(properties['crop'])
+                            orchards.push(properties['orchard']);
+                    }
+
+                    else if(properties['Landuse'] === 'forest') {
+                        if(properties['trees'])
+                            trees.push(properties['trees']);
+
+                    }
+                }
+                
+                this.farmlands = farmlands.length > 0 ? farmlands.join(',') : 'Padi, Jagung, Tiwul';
+                this.orchards = orchards.length > 0 ? orchards.join(',') : 'Jeruk, Mangga, Teh, Kopi';
+                this.trees = trees.length > 0 ? trees.join(',') : 'Toge';
             }
         )
     }
@@ -107,8 +140,6 @@ export class DesaComponent implements OnInit, OnDestroy {
             summaries => {
                 if(summaries.length > 0)
                     this.summaries = summaries[0];
-
-                console.log(this.summaries);
             }
         )
     }
@@ -117,24 +148,34 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     setActiveMenu(menu: string): boolean {
         this.activeMenu = menu;
-
+        switch(menu){
+            case 'pembangunan':
+            break;
+            case 'batas':
+            break;
+        }
         return false;
     }
 
     setMapLayout(geoJson): void {
-        let featureCollection = geoJson.filter(e => e.type !== 'log_pembangunan').map(e => e.data.features);
-        
-        let geoJsonLayer: any = MapUtils.createGeoJson();
-
-        featureCollection.forEach(features => {
-            geoJsonLayer.features = geoJsonLayer.features.concat(features);
-        });
+        let landuse = geoJson.filter(e => e.type === 'landuse')[0];
+        let transport = geoJson.filter(e => e.type === 'network_transportation')[0];
+        let facilities = geoJson.filter(e => e.type === 'facilities_infrastructures')[0];
+        let waters = geoJson.filter(e => e.type === 'waters')[0];
+        let boundary = geoJson.filter(e => e.type === 'boundary')[0];
        
-        L.geoJSON(geoJsonLayer, this.geoJSONOptions).addTo(this.activeMap);
+        let geoJsonData: any = MapUtils.createGeoJson();
 
-        let center = MapUtils.getCentroid(geoJsonLayer.features);
+        if(waters)
+            geoJsonData.features = geoJsonData.features.concat(waters.data.features);
+        if(transport)
+            geoJsonData.features = geoJsonData.features.concat(transport.data.features); 
+        if(landuse)
+            geoJsonData.features = geoJsonData.features.concat(landuse.data.features);
+    
+        let geoJsonLayer: L.GeoJSON = L.geoJSON(geoJsonData, this.geoJSONOptions).addTo(this.activeMap);
 
-        this.activeMap.setView([center[1], center[0]], 14);
+        this.activeMap.setView(geoJsonLayer.getBounds().getCenter(), 15);
     }
 
     clearGeoJSON(): void {
@@ -144,5 +185,9 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     onMapReady(map: L.Map): void {
         this.activeMap = map;
+    }
+
+    progressListener(progress: Progress): void {
+        this.progress = progress;
     }
 }

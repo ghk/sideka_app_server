@@ -39,6 +39,8 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
         return this._spendingRecapitulations.getValue();
     }
         
+    order: string = '[0].parent.id';
+    reverse: boolean = false;
     progress: Progress;
 
     constructor(
@@ -87,15 +89,15 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
             if (!entities[sr.region.id])
                 entities[sr.region.id] = {
                     'region': sr.region,
-                    'data': new Array(this.spendingTypes.length).fill(0),
+                    'data': {},
                     'total': 0,
-                    'barPercent': new Array(this.spendingTypes.length).fill('')
+                    'barPercent': {}
                 };
 
             this.spendingTypes.forEach((st, index) => {
                 if (sr.type.id === st.id) {                     
                     //entities[sr.region.id]['data'][2 * index + 1] = sr.realized
-                    entities[sr.region.id]['data'][index] = sr.budgeted
+                    entities[sr.region.id]['data'][sr.type.id] = sr.budgeted
                     entities[sr.region.id]['total'] += sr.budgeted                    
                 }   
             });                  
@@ -106,9 +108,9 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
             if (entities[key].total == 0) {
                 delete entities[key];
             } else {
-                entities[key].data.forEach((datum, index) => {
-                    entities[key].barPercent[index] = this.getBarPercent(datum, entities[key].total);
-                });
+                Object.keys(entities[key].data).forEach(dataKey => {
+                    entities[key].barPercent[dataKey] = this.getBarPercent(entities[key].data[dataKey], entities[key].total);                    
+                })
 
                 let data = [];
                 data.push(entities[key]['region']);
@@ -128,6 +130,15 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
         return {
             'width': (numerator / denominator) * 100 + '%'
         };
+    }
+
+    sort(order: string) {
+        if (this.order === order) {
+            this.reverse = !this.reverse;
+        } else {
+            this.reverse = false;
+            this.order = order;
+        }
     }
 
     progressListener(progress: Progress): void {
