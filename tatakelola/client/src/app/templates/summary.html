@@ -53,11 +53,11 @@
                      <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total}} </td>
                      <td class="money" style="text-align: right; font-size: 12px;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total === 0">  - </td>
                      
-                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_available_kk > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_available_kk}} Dari {{summary.penduduk_total_kk}} KK</td>
-                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_available_kk === 0" (click)="loadDetail('electricity')"> - </td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
                      
-                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_spring > 0 || summary.pemetaan_water_spring > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_spring}} Mata Air, {{summary.pemetaan_water_ditch}} Sistem Pipa </td>
-                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_spring === 0 && summary.pemetaan_water_spring === 0" (click)="loadDetail('waters')"> - </td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
+                     <td style="font-size: 12px;" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
                      
                      <td style="font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
                      <td style="font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
@@ -111,7 +111,8 @@
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_desa_boundary / 1000}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_desa_boundary > 0"> {{summary.pemetaan_desa_boundary / 1000}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_desa_boundary === 0"> -</td>
                 </tr>
             </tbody>
         </table>
@@ -160,17 +161,38 @@
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_male}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_female}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_sex_unknown}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_sd}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_smp}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_sma}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_edu_pt}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_petani}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_pedagang}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_karyawan}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.penduduk_job_lain}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_male > 0"> {{summary.penduduk_sex_male}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_male === 0"> -</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_female > 0"> {{summary.penduduk_sex_female}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_female === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_unknown > 0"> {{summary.penduduk_sex_unknown}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_sex_unknown === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_sd > 0"> {{summary.penduduk_edu_sd}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_sd === 0"> -</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_smp > 0"> {{summary.penduduk_edu_smp}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_smp === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_sma > 0"> {{summary.penduduk_edu_sma}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_sma === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_pt > 0"> {{summary.penduduk_edu_pt}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_edu_pt === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_petani > 0"> {{summary.penduduk_job_petani}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_petani === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_pedagang > 0"> {{summary.penduduk_job_pedagang}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_pedagang === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_karyawan > 0"> {{summary.penduduk_job_karyawan}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_karyawan === 0"> -</td>
+
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_lain > 0"> {{summary.penduduk_job_lain}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.penduduk_job_lain === 0"> -</td>
                 </tr>
             </tbody>
         </table>
@@ -201,11 +223,20 @@
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_tk}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_sd}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_smp}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_sma}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_school_pt}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_tk > 0"> {{summary.pemetaan_school_tk}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_tk === 0">-</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_sd > 0"> {{summary.pemetaan_school_sd}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_sd === 0">-</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_smp > 0"> {{summary.pemetaan_school_smp}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_smp === 0">-</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_sma > 0"> {{summary.pemetaan_school_sma}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_sma === 0">-</td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_pt > 0"> {{summary.pemetaan_school_pt}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_school_pt === 0">-</td>
                 </tr>
             </tbody>
         </table>
@@ -227,8 +258,11 @@
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_electricity_available_kk}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.kk_not_using_electricity}}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_electricity_house > 0"> {{summary.pemetaan_electricity_house}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_electricity_house === 0"> - </td>
+                 
+                    <td class="money" style="text-align: right;" *ngIf="summary.kk_not_using_electricity > 0"> {{summary.kk_not_using_electricity}}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.kk_not_using_electricity === 0"> - </td>
                 </tr>
             </tbody>
         </table>
@@ -240,18 +274,21 @@
                        <a href="#" (click)="sort('region.name')">Desa</a>
                     </th> 
                     <th style="width: 10%; font-size: 12px; text-align: center;">
-                        <a href="#" (click)="sort('pemetaan_water_spring')">Mata Air</a>
+                        <a href="#" (click)="sort('pemetaan_water_spring')">Luas Mata Air (km <sup>2</sup>)</a>
                     </th> 
                     <th style="width: 10%; font-size: 12px; text-align: center;">
-                        <a href="#" (click)="sort('pemetaan_water_ditch')">Sistem Pipa</a>
+                        <a href="#" (click)="sort('pemetaan_water_ditch')">Rataan Lebar Pipa (m)</a>
                     </th> 
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_water_spring}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_water_ditch}}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_water_natural_area > 0"> {{summary.pemetaan_water_natural_area}}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_water_natural_area === 0"> - </td>
+                    
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_water_pipe_width_avg > 0"> {{summary.pemetaan_water_pipe_width_avg}}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_water_pipe_width_avg === 0"> - </td>
                 </tr>
             </tbody>
         </table>
@@ -263,22 +300,25 @@
                        <a href="#" (click)="sort('region.name')">Desa</a>
                     </th> 
                     <th style="width: 10%; font-size: 12px; text-align: center;">
-                        <a href="#" (click)="sort('pemetaan_potential_farmland')">Pertanian</a>
+                        <a href="#" (click)="sort('pemetaan_potential_farmland')">Luas Pertanian (km <sup>2</sup>)</a>
                     </th> 
                     <th style="width: 10%; font-size: 12px; text-align: center;">
-                        <a href="#" (click)="sort('pemetaan_potential_orchard')">Perkebunan</a>
+                        <a href="#" (click)="sort('pemetaan_potential_orchard')">Luas Perkebunan (km <sup>2</sup>)</a>
                     </th> 
                     <th style="width: 10%; font-size: 12px; text-align: center;">
-                        <a href="#" (click)="sort('pemetaan_potential_forest')">Hutan</a>
+                        <a href="#" (click)="sort('pemetaan_potential_forest')">Luas Hutan (km <sup>2</sup>)</a>
                     </th> 
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let summary of summaries | orderBy: order">
                     <td> {{summary.region.name}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_farmland}}</td>
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_orchard}}</td> 
-                    <td class="money" style="text-align: right;"> {{summary.pemetaan_potential_forest}}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_farmland_area > 0"> {{summary.pemetaan_potential_farmland_area / 1000 }}</td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_farmland_area === 0"> - </td>
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_orchard_area > 0"> {{summary.pemetaan_potential_orchard_area  / 1000 }}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_orchard_area === 0"> -</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_forest_area > 0"> {{summary.pemetaan_potential_forest_area  / 1000 }}</td> 
+                    <td class="money" style="text-align: right;" *ngIf="summary.pemetaan_potential_forest_area === 0"> -</td> 
                 </tr>
             </tbody>
         </table>

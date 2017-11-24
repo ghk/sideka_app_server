@@ -1,6 +1,8 @@
 import logging
 import simplejson as json
 import geojson
+import math
+
 from tatakelola.models import Summary, PendudukReference
 from area import area
 
@@ -141,86 +143,83 @@ class SummaryApbdesTransformer:
 
 class SummaryGeojsonTransformer:
     @staticmethod
-    def transform(summary, data, type, propertyKey):
+    def transform(summary, data, type):
         features = data['features'];
 
-        if type == 'boundary':
-            summary.pemetaan_desa_boundary = CalculateBoundaryArea.calculate(features)
-        elif type == 'landuse':
-            potential = ParseLandusePotential.parse(features)
-            summary.pemetaan_potential_orchard = potential['orchard']
-            summary.pemetaan_potential_farmland = potential['farmland']
-            summary.pemetaan_potential_forest = potential['forest']
-        elif type == 'water':
-            summary.pemetaan_water_spring = 0
-            summary.pemetaan_water_river = 0
-            summary.pemetaan_water_ditch = 0
-        elif type == 'electricity':
-            summary.pemetaan_electricity_available_kk = 0
-        elif type == 'school':
-            schools = ParseSchoolsFromBuildings.parse(features)
-            summary.pemetaan_school_tk = schools['tk']
-            summary.pemetaan_school_sd = schools['sd']
-            summary.pemetaan_school_smp = schools['smp']
-            summary.pemetaan_school_sma = schools['sma']
-            summary.pemetaan_school_pt = schools['pt']
+        return ParsePemetaanData.parse(features, type, summary)
+
+class ParsePemetaanData:
+    @staticmethod
+    def parse(features, type, summary):
+        pipe_count = 0
+
+        for feature in features:
+            if feature.has_key('properties') == False:
+                continue
+
+            properties = feature['properties']
+
+            if type == 'boundary':
+                if feature['geometry']['type'] != 'Polygon':
+                    continue
+                if feature['properties'].has_key('admin_level') == False:
+                    continue
+                if feature['properties']['admin_level'] != 7:
+                    continue
+                summary.pemetaan_desa_boundary += area(feature['geometry'])
+            elif type == 'landuse':
+                if properties.has_key('landuse') == False:
+                    continue
+                if properties['landuse'] == 'farmland':
+                    summary.pemetaan_potential_farmland += 1
+                    if feature['geometry']['type'] == 'Polygon':
+                        summary.pemetaan_potential_farmland_area += area(feature['geometry'])
+                elif properties['landuse'] == 'orchard':
+                    summary.pemetaan_potential_orchard += 1
+                    if feature['geometry']['type'] == 'Polygon':
+                        summary.pemetaan_potential_orchard_area += area(feature['geometry'])
+                elif properties['landuse'] == 'forest':
+                    summary.pemetaan_potential_forest += 1
+                    if feature['geometry']['type'] == 'Polygon':
+                        summary.pemetaan_potential_forest_area += area(feature['geometry'])
+            elif type == 'waters':
+                if properties.has_key('natural'):
+                    if properties['natural'] == 'spring':
+                        summary.pemetaan_water_natural += 1
+                        if feature['geometry']['type'] == 'Polygon':
+                            summary.pemetaan_water_natural_area += area(feature['geometry'])
+                elif properties.has_key('waterway'):
+                    if properties['waterway'] == 'pipe_system':
+                        summary.pemetaan_water_pipe += 1
+                        pipe_count += 1
+
+                        if math.isnan(properties['width']) == False:
+                            summary.pemetaan_water_pipe += int(properties['width'])
+            elif type == 'electricity':
+                if properties.has_key('electricity_watt'):
+                    if math.isnan(properties['electricity_watt']) == False:
+                        if int(properties['electricity_watt']) > 0:
+                            summary.pemetaan_electricity_house += 1
+            elif type == 'school':
+                if properties.has_key('amenity') == False:
+                    continue
+                if properties['amenity'] != 'school':
+                    continue
+                if properties.has_key('isced') == False:
+                    continue
+
+                if properties['isced'] == 0:
+                    summary.pemetaan_school_tk += 1
+                elif properties['isced'] == 1:
+                    summary.pemetaan_school_sd += 1
+                elif properties['isced'] == 2:
+                    summary.pemetaan_school_smp += 1
+                elif properties['isced'] == 3:
+                    summary.pemetaan_school_sma += 1
+                elif properties['isced'] == 4:
+                    summary.pemetaan_school_pt += 1
+
+        if pipe_count > 0:
+            summary.pemetaan_water_pipe_width_avg = summary.pemetaan_water_pipe_width_avg / pipe_count
+
         return summary
-
-class ParseSchoolsFromBuildings:
-    @staticmethod
-    def parse(features):
-        tk = 0
-        sd = 0
-        smp = 0
-        sma = 0
-        pt = 0
-
-        for feature in features:
-            properties = feature['properties']
-            if properties.has_key('amenity'):
-                if properties['amenity'] == 'school':
-                    if properties.has_key('isced'):
-                        if properties['isced'] == 0:
-                            tk += 1
-                        elif properties['isced'] == 1:
-                            sd += 1
-                        elif properties['isced'] == 2:
-                            smp += 1
-                        elif properties['isced'] == 3:
-                            sma += 1
-                        elif properties['isced'] == 4:
-                            pt += 1
-
-        return {"tk": tk, "sd": sd, "smp": smp, "sma": sma, "pt": pt}
-
-class CalculateBoundaryArea:
-    @staticmethod
-    def calculate(features):
-        desa_boundary = 0
-
-        for feature in features:
-            if feature['geometry']['type'] == 'Polygon':
-                if feature['properties'].has_key('admin_level'):
-                    if feature['properties']['admin_level'] == 7:
-                        desa_boundary = area(feature['geometry'])
-                        break
-
-        return desa_boundary
-class ParseLandusePotential:
-    @staticmethod
-    def parse(features):
-        farmlandTotal = 0
-        forestTotal = 0
-        orchardTotal = 0
-
-        for feature in features:
-            properties = feature['properties']
-            if properties.has_key('landuse'):
-                if properties['landuse']:
-                    farmlandTotal += 1
-                elif properties['orchard']:
-                    orchardTotal += 1
-                elif properties ['forest']:
-                    forestTotal += 1
-
-        return {"farmland": farmlandTotal, "forest": forestTotal, "orchard": orchardTotal }

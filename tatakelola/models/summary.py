@@ -22,14 +22,22 @@ class Summary(BaseModel):
     penduduk_job_lain = db.Column(db.Integer, nullable=True)
     penganggaran_budgeted_revenue = db.Column(db.DECIMAL, nullable=True)
     penganggaran_year = db.Column(db.String, nullable=True)
+
     pemetaan_desa_boundary = db.Column(db.DECIMAL, nullable=True)
-    pemetaan_electricity_available_kk = db.Column(db.Integer, nullable=True)
-    pemetaan_water_spring = db.Column(db.Integer, nullable=True)
-    pemetaan_water_river = db.Column(db.Integer, nullable=True)
-    pemetaan_water_ditch = db.Column(db.Integer, nullable=True)
+    pemetaan_electricity_house = db.Column(db.Integer, nullable=True)
+
+    pemetaan_water_natural = db.Column(db.Integer, nullable=True)
+    pemetaan_water_pipe = db.Column(db.Integer, nullable=True)
+    pemetaan_water_natural_area = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_water_pipe_width_avg = db.Column(db.Integer, nullable=True)
+
     pemetaan_potential_farmland = db.Column(db.Integer, nullable=True)
     pemetaan_potential_forest = db.Column(db.Integer, nullable=True)
     pemetaan_potential_orchard = db.Column(db.Integer, nullable=True)
+    pemetaan_potential_farmland_area = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_potential_forest_area = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_potential_orchard_area = db.Column(db.DECIMAL, nullable=True)
+
     pemetaan_school_tk = db.Column(db.Integer, nullable=True)
     pemetaan_school_sd = db.Column(db.Integer, nullable=True)
     pemetaan_school_smp = db.Column(db.Integer, nullable=True)
