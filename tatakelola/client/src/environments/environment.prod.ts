@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   hmr: false,
-  serverUrl: 'http://localhost:5004'
+  serverUrl: 'http://api.tatakelola.sideka.id'
 };

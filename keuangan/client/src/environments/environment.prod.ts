@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   hmr: false,
-  serverUrl: 'http://api.keuangan.sideka.id'
+  serverUrl: 'https://api.keuangan.sideka.id'
 };

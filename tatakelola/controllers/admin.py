@@ -18,10 +18,10 @@ def fetch_desa_ids():
 @app.route('/admin/fetch/all', methods=['GET'])
 def fetch_all():
     t0 = time()
-    #TatakelolaFetcher.fetch_desas()
+    TatakelolaFetcher.fetch_desas()
     TatakelolaFetcher.fetch_geojsons()
-    #TatakelolaFetcher.fetch_data()
-    #TatakelolaFetcher.fetch_apbdes()
+    TatakelolaFetcher.fetch_data()
+    TatakelolaFetcher.fetch_apbdes()
     db.session.commit()
     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})

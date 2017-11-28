@@ -5,6 +5,7 @@ import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
 import { Progress } from 'angular-progress-http';
 
+import BIG from '../helpers/bigConfig';
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
 
@@ -21,7 +22,6 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJSONOptions: L.GeoJSONOptions;
     geoJSON: L.GeoJSON;
     data: any[];
-    bigConfig: any[];
     sidebarCollapsed: boolean;
     summaries: any;
     progress: Progress;
@@ -44,13 +44,6 @@ export class DesaComponent implements OnInit, OnDestroy {
             zoom: 14,
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
-
-        this._http.get('assets/bigConfig.json').map(res => res.json()).subscribe(
-            data => {
-                this.bigConfig = data;
-            },
-            error => { }
-        )
         
         this._router.params.subscribe(
            params => {
@@ -65,8 +58,8 @@ export class DesaComponent implements OnInit, OnDestroy {
                 return { color: '#000', weight: 0.5 }
             },
             onEachFeature: (feature, layer) => {
-                 for (let i = 0; i < this.bigConfig.length; i++) {
-                    let indicator = this.bigConfig[i];
+                 for (let i = 0; i < BIG.length; i++) {
+                    let indicator = BIG[i];
                     let element = null;
 
                     for (let j = 0; j < indicator.elements.length; j++) {

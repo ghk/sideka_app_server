@@ -32,20 +32,32 @@ class Generator:
     def generate_geojson_summary_by_region(summary, region):
         boundaries = geojson_repository.get_by_type_and_region('boundary', region.id)
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
+        facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
 
-        summary.pemetaan_desa_boundary = None
-        summary.pemetaan_potential_farmland = 0
         summary.pemetaan_potential_forest = 0
+        summary.pemetaan_potential_farmland = 0
         summary.pemetaan_potential_orchard = 0
-        summary.pemetaan_water_spring = 0
-        summary.pemetaan_water_river = 0
-        summary.pemetaan_water_ditch = 0
-        summary.pemetaan_electricity_available_kk = 0
+        summary.pemetaan_potential_forest_area = 0
+        summary.pemetaan_potential_farmland_area = 0
+        summary.pemetaan_potential_orchard_area = 0
+        summary.pemetaan_water_natural_area = 0
+        summary.pemetaan_water_pipe = 0
+        summary.pemetaan_water_natural = 0
+        summary.pemetaan_water_pipe_width_avg = 0
+        summary.pemetaan_school_tk = 0
+        summary.pemetaan_school_sd = 0
+        summary.pemetaan_school_smp = 0
+        summary.pemetaan_school_sma = 0
+        summary.pemetaan_school_pt = 0
+        summary.pemetaan_desa_boundary = 0
+        summary.pemetaan_electricity_house = 0
 
         if boundaries is not None:
-            summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary', 'admin_level')
+            summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary')
         if landuse is not None:
-            summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse', 'landuse')
+            summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse')
+        if facilities is not None:
+            sumamry = SummaryGeojsonTransformer.transform(summary, facilities.data, 'facilities_infrastructures')
 
         return summary
 
