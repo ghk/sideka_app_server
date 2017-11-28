@@ -5,15 +5,15 @@ import { DataService } from '../services/data';
 import { Query } from '../models/query';
 
 @Component({
-  selector: 'sk-spending-recapitulation',
-  templateUrl: '../templates/spendingRecapitulation.html',
+  selector: 'sk-budget-recapitulation',
+  templateUrl: '../templates/budgetRecapitulation.html',
 })
 
-export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
+export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
 
     private _entities = new BehaviorSubject<any>([]);    
-    private _spendingTypes = new BehaviorSubject<any[]>([]);
-    private _spendingRecapitulations = new BehaviorSubject<any[]>([]);
+    private _budgetTypes = new BehaviorSubject<any[]>([]);
+    private _budgetRecapitulations = new BehaviorSubject<any[]>([]);
 
     @Input()
     set entities(value) {
@@ -24,19 +24,19 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     @Input()
-    set spendingTypes(value) {
-        this._spendingTypes.next(value);        
+    set budgetTypes(value) {
+        this._budgetTypes.next(value);        
     }
-    get spendingTypes() {
-        return this._spendingTypes.getValue();
+    get budgetTypes() {
+        return this._budgetTypes.getValue();
     }
 
     @Input()
-    set spendingRecapitulations(value) {
-        this._spendingRecapitulations.next(value);
+    set budgetRecapitulations(value) {
+        this._budgetRecapitulations.next(value);
     }
-    get spendingRecapitulations() {
-        return this._spendingRecapitulations.getValue();
+    get budgetRecapitulations() {
+        return this._budgetRecapitulations.getValue();
     }
         
     order: string = 'region.parent.id';
@@ -47,44 +47,57 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        let spendingTypeQuery: Query = {           
+        let year = new Date().getFullYear().toString();
+
+        let budgetTypeQuery: Query = {           
+            data: {
+                is_revenue: false
+            }
         };
 
-        let spendingRecapitulationsQuery: Query = {
-            sort: 'region.id'
+        let budgetRecapitulationsQuery: Query = {
+            sort: 'region.id',
+            data: {
+                is_full_region: true
+            }
         };
 
-        this._spendingTypes.subscribe(x => {
+        this._budgetTypes.subscribe(x => {
             this.transformData();
         });
 
-        this._spendingRecapitulations.subscribe(x => {
+        this._budgetRecapitulations.subscribe(x => {
             this.transformData();
         });
 
-        this._dataService.getSpendingTypes(spendingTypeQuery, null).subscribe(
+        this._dataService.getBudgetTypes(budgetTypeQuery, null).subscribe(
             result => {
-                this.spendingTypes = result;                
+                this.budgetTypes = result;                
             },
             error => {                
             }
         );
 
-        this._dataService.getSpendingRecapitulations(true, spendingRecapitulationsQuery, this.progressListener.bind(this)).subscribe(
+        this._dataService
+            .getBudgetRecapitulationsByYear(year, budgetRecapitulationsQuery, this.progressListener.bind(this))
+            .subscribe(
             result => {
-                this.spendingRecapitulations = result;
+                this.budgetRecapitulations = result;
             },
             error => {}
         );
     }
+    
+    ngOnDestroy(): void {
+    }  
 
     transformData(): void {
-        if (this.spendingTypes.length === 0 || this.spendingRecapitulations.length === 0)
+        if (this.budgetTypes.length === 0 || this.budgetRecapitulations.length === 0)
             return;
 
         let entities = {};
 
-        this.spendingRecapitulations.forEach(sr => {
+        this.budgetRecapitulations.forEach(sr => {
             if (!entities[sr.region.id])
                 entities[sr.region.id] = {
                     'region': sr.region,
@@ -93,8 +106,9 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
                     'barPercent': {}
                 };
 
-            this.spendingTypes.forEach((st, index) => {
-                if (sr.type.id === st.id) {                     
+            this.budgetTypes.forEach((st, index) => {
+                if (sr.type.id === st.id) {          
+                    console.log(sr);           
                     //entities[sr.region.id]['data'][2 * index + 1] = sr.realized
                     entities[sr.region.id]['data'][sr.type.id] = sr.budgeted
                     entities[sr.region.id]['total'] += sr.budgeted                    
@@ -102,7 +116,7 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
             });                  
         })
 
-        let result = [];
+        let result = [];        
         Object.keys(entities).forEach(key => {
             if (entities[key].total == 0) {
                 delete entities[key];
@@ -122,10 +136,7 @@ export class SpendingRecapitulationComponent implements OnInit, OnDestroy {
         
         this.entities = result;
     }
-
-    ngOnDestroy(): void {
-    }   
-
+ 
     getBarPercent(numerator, denominator) {
         return {
             'width': (numerator / denominator) * 100 + '%'

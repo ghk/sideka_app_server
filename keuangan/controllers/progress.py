@@ -9,17 +9,17 @@ progress_recapitulation_repository = ProgressRecapitulationRepository(db)
 progress_timeline_repository = ProgressTimelineRepository(db)
 
 
-@app.route('/progress/recapitulations', methods=['GET'])
-def get_progress_recapitulations():
+@app.route('/progress/recapitulations/year/<string:year>', methods=['GET'])
+def get_progress_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = progress_recapitulation_repository.all(page_sort_params)
+    entities = progress_recapitulation_repository.all_by_year(year, page_sort_params)
     result = ProgressRecapitulationModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/progress/recapitulations/count', methods=['GET'])
-def get_progress_recapitulations_count():
-    result = progress_recapitulation_repository.count()
+@app.route('/progress/recapitulations/year/<string:year>/count', methods=['GET'])
+def get_progress_recapitulations_count_by_year(year):
+    result = progress_recapitulation_repository.count_by_year(year)
     return jsonify(result)
 
 
@@ -31,23 +31,24 @@ def generate_progress_recapitulations():
     return jsonify({'success': True})
 
 
-@app.route('/progress/timelines', methods=['GET'])
-def get_progress_timelines():
+@app.route('/progress/timelines/year/<string:year>', methods=['GET'])
+def get_progress_timelines_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = progress_timeline_repository.all(page_sort_params)
+    entities = progress_timeline_repository.all_by_year(year, page_sort_params)
     result = ProgressTimelineModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/progress/timelines/count', methods=['GET'])
-def get_progress_timelines_count():
-    result = progress_timeline_repository.count()
+@app.route('/progress/timelines/year/<string:year>/count', methods=['GET'])
+def get_progress_timelines_count_by_year(year):
+    result = progress_timeline_repository.count_by_year(year)
     return jsonify(result)
 
 
-@app.route('/progress/timelines/region/<string:region_id>', methods=['GET'])
-def get_progress_timelines_by_region(region_id):
-    entities = progress_timeline_repository.get_by_region(region_id)
+@app.route('/progress/timelines/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def get_progress_timelines_by_region_and_year(region_id, year):
+    page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
+    entities = progress_timeline_repository.get_by_region_and_year(region_id, year, page_sort_params)
     result = ProgressTimelineModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 

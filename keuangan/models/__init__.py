@@ -2,9 +2,9 @@ from base import BaseModel
 from region import Region, RegionModelSchema, RegionCompleteModelSchema
 from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationModelSchema
 from progress_timeline import ProgressTimeline, ProgressTimelineModelSchema
-from spending_type import SpendingType, SpendingTypeModelSchema
-from spending_recapitulation import SpendingRecapitulation, SpendingRecapitulationModelSchema, \
-    SpendingRecapitulationCompleteModelSchema
+from budget_type import BudgetType, BudgetTypeModelSchema
+from budget_recapitulation import BudgetRecapitulation, BudgetRecapitulationModelSchema, \
+    BudgetRecapitulationCompleteModelSchema
 from siskeudes_kegiatan import SiskeudesKegiatan, SiskeudesKegiatanModelSchema, SiskeudesKegiatanSchema
 from siskeudes_penerimaan import SiskeudesPenerimaan, SiskeudesPenerimaanModelSchema, SiskeudesPenerimaanModelSchemaIso
 from siskeudes_penerimaan_rinci import SiskeudesPenerimaanRinci, SiskeudesPenerimaanRinciModelSchema

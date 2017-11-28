@@ -24,7 +24,7 @@ def create_app():
     app.register_blueprint(PenganggaranController)
     app.register_blueprint(ProgressController)
     app.register_blueprint(RegionController)
-    app.register_blueprint(SpendingController)
+    app.register_blueprint(BudgetController)
     app.register_blueprint(SppController)
     app.register_blueprint(AdminController)
 

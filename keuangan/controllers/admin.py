@@ -45,7 +45,7 @@ def generate_all():
     t0 = time()
     prs = Generator.generate_progress_recapitulations()
     pts = Generator.generate_progress_timelines()
-    srs = Generator.generate_spending_recapitulations()
+    srs = Generator.generate_budget_recapitulations()
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(prs)

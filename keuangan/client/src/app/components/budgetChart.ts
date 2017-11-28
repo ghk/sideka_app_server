@@ -4,16 +4,16 @@ import { Progress } from 'angular-progress-http';
 import { BaseChartDirective } from 'ng2-charts/ng2-charts';
 
 import { DataService } from '../services/data';
-import { SharedService} from '../services/shared';
+import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
 import 'chart.piecelabel.js';
 
 @Component({
-    selector: 'sk-spending-chart',
-    templateUrl: '../templates/spendingChart.html',
+    selector: 'sk-budget-chart',
+    templateUrl: '../templates/budgetChart.html',
 })
-export class SpendingChartComponent implements OnInit, OnDestroy {
+export class BudgetChartComponent implements OnInit, OnDestroy {
 
     private _subscription: Subscription;
 
@@ -29,31 +29,31 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
     }
 
     labels: any[] = [];
-    colors: any =  [{ 
+    colors: any = [{
         backgroundColor: [
             "#FF6384",
             "#4BC0C0",
             "#FFCE56",
             "#E7E9ED",
             "#36A2EB"
-        ],        
+        ],
     }];
-    options: any = {     
+    options: any = {
         tooltips: {
             callbacks: {
                 label: function (tooltipItem, data) {
                     let dataLabel = data.labels[tooltipItem.index];
-					let value: any = ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].toLocaleString('id-ID');
-					if (Array.isArray(dataLabel)) {
-						dataLabel = dataLabel.slice();
-						dataLabel[0] += value;
-					} else {
-						dataLabel += value;
-					}
-					return dataLabel;          
+                    let value: any = ': ' + data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].toLocaleString('id-ID');
+                    if (Array.isArray(dataLabel)) {
+                        dataLabel = dataLabel.slice();
+                        dataLabel[0] += value;
+                    } else {
+                        dataLabel += value;
+                    }
+                    return dataLabel;
                 }
             }
-        }, 
+        },
         pieceLabel: {
             render: 'percentage',
             arc: true,
@@ -71,7 +71,7 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
         private _sharedService: SharedService
     ) { }
 
-    ngOnInit(): void {       
+    ngOnInit(): void {
         this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
@@ -79,31 +79,44 @@ export class SpendingChartComponent implements OnInit, OnDestroy {
     }
 
     getData(): void {
-        let query: Query = {
+        let year = new Date().getFullYear().toString();
+
+        let budgetTypeQuery: Query = {
+            data: {
+                is_revenue: false
+            }
+        }
+
+        let budgetRecapitulationQuery: Query = {
+            data: {
+                is_full_region: false
+            }
         };
 
-        this._dataService.getSpendingTypes(null, null).subscribe((types: any[]) => {
+        this._dataService.getBudgetTypes(null, null).subscribe((types: any[]) => {
             this.labels = types.map(type => { return type.name });
-            this._dataService.getSpendingRecapitulationsByRegion(this.region.id, false, query, this.progressListener.bind(this)).subscribe(
+            this._dataService
+                .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, budgetRecapitulationQuery, this.progressListener.bind(this))
+                .subscribe(
                 results => {
                     let data = new Array(this.labels.length).fill(0);
-                    results.forEach(result => {                                                                                                  
+                    results.forEach(result => {
                         let dataIndex = this.labels.indexOf(result.type.name);
                         if (dataIndex === -1)
                             return;
                         data[dataIndex] += result.budgeted;
                         this.sData = data;
-                    })                
+                    })
                 },
                 error => { }
-            );
-        });        
+                );
+        });
     }
 
     ngOnDestroy(): void {
         this._subscription.unsubscribe();
     }
-   
+
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
