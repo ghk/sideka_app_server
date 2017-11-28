@@ -44,6 +44,17 @@ def get_statistics(cur, supradesa_id):
     results = [combine(c) for c in cur.fetchall()]
     return results
 
+def get_zoom(cur, supradesa_id):
+    results = {}
+    query = "select zoom,latitude, longitude from sd_supradesa where id = %s"
+    cur.execute(query, (supradesa_id,))
+    values = cur.fetchone()
+    if values is None:
+        return results
+    header = [column[0] for column in cur.description]
+    results = dict(zip(header, values))
+    return results
+
 def get_map_statistics(cur, supradesa_id):
     def get_score(stats, node):
         res = {}
@@ -148,6 +159,8 @@ def get_dashboard(cur, supradesa_id):
         r["pemetaan"].append(get_daily("pemetaan", t))
 
     results["daily"] = r
+    results["map_statistics"] = get_map_statistics(cur, supradesa_id)
+    results["zoom"] = get_zoom(cur, supradesa_id)
 
     return results
 
@@ -215,7 +228,7 @@ def get_weekly_panel(cur, supradesa_id):
 functions = {}
 functions["dashboard"] = get_dashboard
 functions["statistics"] = get_statistics
-functions["map_statistics"] = get_map_statistics
+#functions["map_statistics"] = get_map_statistics
 functions["weekly_domain"] = get_weekly_domain
 functions["weekly_panel"] = get_weekly_panel
 
