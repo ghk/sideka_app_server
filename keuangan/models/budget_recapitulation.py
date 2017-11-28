@@ -2,11 +2,11 @@ from keuangan import db
 from keuangan import ma
 from base import BaseModel
 from region import RegionModelSchema, RegionCompleteModelSchema
-from spending_type import SpendingTypeModelSchema
+from budget_type import BudgetTypeModelSchema
 
 
-class SpendingRecapitulation(BaseModel):
-    __tablename__ = 'spending_recapitulations'
+class BudgetRecapitulation(BaseModel):
+    __tablename__ = 'budget_recapitulations'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     year = db.Column(db.String, nullable=False)
     budgeted = db.Column(db.DECIMAL)
@@ -15,8 +15,8 @@ class SpendingRecapitulation(BaseModel):
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
 
-    fk_type_id = db.Column(db.Integer, db.ForeignKey('spending_types.id'))
-    type = db.relationship('SpendingType', lazy='joined')
+    fk_type_id = db.Column(db.Integer, db.ForeignKey('budget_types.id'))
+    type = db.relationship('BudgetType', lazy='joined')
 
     __table_args__ = (
         db.Index('sr_ix_fk_type_id', 'fk_type_id'),
@@ -25,19 +25,19 @@ class SpendingRecapitulation(BaseModel):
     )
 
 
-class SpendingRecapitulationCompleteModelSchema(ma.ModelSchema):
+class BudgetRecapitulationModelSchema(ma.ModelSchema):
     class Meta:
-        model = SpendingRecapitulation
-        include_fk = True
-
-    region = ma.Nested(RegionCompleteModelSchema, many=False)
-    type = ma.Nested(SpendingTypeModelSchema, many=False)
-
-
-class SpendingRecapitulationModelSchema(ma.ModelSchema):
-    class Meta:
-        model = SpendingRecapitulation
+        model = BudgetRecapitulation
         include_fk = True
 
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
-    type = ma.Nested(SpendingTypeModelSchema, many=False)
+    type = ma.Nested(BudgetTypeModelSchema, many=False)
+
+
+class BudgetRecapitulationCompleteModelSchema(ma.ModelSchema):
+    class Meta:
+        model = BudgetRecapitulation
+        include_fk = True
+
+    region = ma.Nested(RegionCompleteModelSchema, many=False)
+    type = ma.Nested(BudgetTypeModelSchema, many=False)

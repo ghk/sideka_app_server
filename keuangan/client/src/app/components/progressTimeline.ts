@@ -18,6 +18,11 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
     region: any;
     private _tDatasets = new BehaviorSubject<any[]>([]);
     private _rDatasets = new BehaviorSubject<any[]>([]);
+    
+    private _totalBudgetedDDS: number = 0;
+    private _totalBudgetedADD: number = 0;
+    private _totalBudgetedPBH: number = 0;
+    private _totalBudgetedSpending: number = 0;
 
     @Input()
     set tDatasets(value) {
@@ -41,7 +46,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
             mode: 'index',
             callbacks: {
                 label: function (tooltipItem, data) {
-                    return tooltipItem.yLabel.toLocaleString('id-ID');
+                    return tooltipItem.yLabel.toLocaleString('id-ID') + '%';
                 }
             }
         },
@@ -49,7 +54,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
             yAxes: [{
                 ticks: {
                     callback: function (value, index, values) {
-                        return value.toLocaleString('id-ID');
+                        return value.toLocaleString('id-ID') + '%';
                     }
                 }
             }]
@@ -76,7 +81,15 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         });
     }
 
-    getData(): void {
+    async getData(): Promise<void> {
+        let year = new Date().getFullYear().toString();
+
+        let budgetTypeQuery: Query = {
+            data: {
+                is_revenue: true
+            }
+        };
+
         let query: Query = {
         };
 
@@ -95,12 +108,33 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         let realizedSpendingDataset = {
             label: 'Realisasi Desa',
             data: [null, null, null, null, null, null, null, null, null, null, null, null]
-        }
+        };
 
         this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
         this.rDatasets = [realizedSpendingDataset];
 
-        this._dataService.getProgressTimelinesByRegion(this.region.id, query, this.progressListener.bind(this)).subscribe(
+        let budgetTypes = await this._dataService.getBudgetTypes(budgetTypeQuery, null).toPromise();
+        let budgetRecapitulations = await this._dataService
+            .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, null, null)
+            .toPromise();
+        this._totalBudgetedSpending = await this._dataService
+            .getSiskeudesPenganggaranTotalSpendingByRegionAndYear(this.region.id, year, null, null)
+            .toPromise();
+
+        budgetRecapitulations.forEach(br => {
+            budgetTypes.forEach(bt => {
+                if (bt.id !== br.fk_type_id)
+                    return;
+                if (bt.code === 'DDS')
+                    this._totalBudgetedDDS += br.budgeted;
+                if (bt.code === 'ADD')
+                    this._totalBudgetedADD += br.budgeted;
+                if (bt.code === 'PBH')
+                    this._totalBudgetedPBH += br.budgeted;
+            });
+        });
+
+        this._dataService.getProgressTimelinesByRegionAndYear(this.region.id, year, query, this.progressListener.bind(this)).subscribe(
             results => {
                 results.forEach(result => {                                        
                     transferredDdsDataset.data[result.month - 1] += result.transferred_dds;
@@ -109,10 +143,10 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
                     realizedSpendingDataset.data[result.month - 1] += result.realized_spending;                    
                 })                
 
-                this.normalizeData(transferredDdsDataset.data);
-                this.normalizeData(transferredAddDataset.data);
-                this.normalizeData(transferredPbhDataset.data);
-                this.normalizeData(realizedSpendingDataset.data);
+                this.transformData(transferredDdsDataset.data, this._totalBudgetedDDS);
+                this.transformData(transferredAddDataset.data, this._totalBudgetedADD);
+                this.transformData(transferredPbhDataset.data, this._totalBudgetedPBH);
+                this.transformData(realizedSpendingDataset.data, this._totalBudgetedSpending);
 
                 this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
                 this.rDatasets = [realizedSpendingDataset];
@@ -121,14 +155,16 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
         );
     }
 
-    normalizeData(data: number[]): void {
+    transformData(data: number[], total: number): void {
         var currentValue = 0;       
         data.forEach((datum, index) => {
-            if (datum && datum < currentValue) {
-                data[index] = currentValue
+            if (datum) {
+                data[index] = datum / total * 100;
+                if (data[index] < currentValue) 
+                    data[index] = currentValue;                
+                currentValue = data[index];
             }
-            currentValue = data[index];            
-        })
+        });
     }
 
     ngOnDestroy(): void {

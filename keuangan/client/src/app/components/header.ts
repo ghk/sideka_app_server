@@ -18,10 +18,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnInit(): void { 
     this._sharedService.getRegion().subscribe(region => {
       this.region = region;
-    })
+    });
+
     this._sharedService.getState().subscribe(state => {
       this.state = state;
-    })
+    });
   }
 
   ngOnDestroy(): void { }

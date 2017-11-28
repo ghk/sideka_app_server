@@ -10,7 +10,7 @@ from siskeudes_penganggaran import SiskeudesPenganggaranRepository
 from siskeudes_spp import SiskeudesSppRepository
 from siskeudes_spp_bukti import SiskeudesSppBuktiRepository
 from siskeudes_spp_rinci import SiskeudesSppRinciRepository
-from spending_recapitulation import SpendingRecapitulationRepository
-from spending_type import SpendingTypeRepository
+from budget_recapitulation import BudgetRecapitulationRepository
+from budget_type import BudgetTypeRepository
 
 

@@ -7,10 +7,10 @@ import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
 @Component({
-    selector: 'sk-spending-detail',
-    templateUrl: '../templates/spendingDetail.html',
+    selector: 'sk-budget-detail',
+    templateUrl: '../templates/budgetDetail.html',
 })
-export class SpendingDetailComponent implements OnInit, OnDestroy {
+export class BudgetDetailComponent implements OnInit, OnDestroy {
 
     private _subscription: Subscription;
 
@@ -38,17 +38,23 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
         })
     }
 
+    ngOnDestroy(): void {
+        this._subscription.unsubscribe();
+    }
+
     getData() {
+        let year = new Date().getFullYear().toString();
+
         let penganggaranQuery: Query = {
             sort: 'row_number'
-        }
+        };
 
         this._dataService.getRegion(this.region.id, null, null).subscribe(result => {
             this.region = result
-        })
+        });
 
         this._dataService
-            .getSiskeudesPenganggaranByRegion(this.region.id, penganggaranQuery, this.progressListener.bind(this))
+            .getSiskeudesPenganggaranByRegionAndYear(this.region.id, year, penganggaranQuery, this.progressListener.bind(this))
             .subscribe(
             result => {
                 this.entities = result
@@ -56,14 +62,10 @@ export class SpendingDetailComponent implements OnInit, OnDestroy {
             },
             error => {
             }
-            )
+        );
     }
 
-    ngOnDestroy(): void {
-        this._subscription.unsubscribe();
-    }
-
-    transformData(entities): void {              
+    transformData(entities): void {
         this.entities.forEach(entity => {
             if (!this.isPak && entity.anggaran_pak)
                 this.isPak = true;

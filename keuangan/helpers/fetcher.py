@@ -75,8 +75,8 @@ class SiskeudesFetcher:
     def fetch_penganggaran_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_penganggaran_repository.delete_by_region(region.id)
-        siskeudes_kegiatan_repository.delete_by_region(region.id)
+        siskeudes_penganggaran_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_kegiatan_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         if (sd_content is None):
@@ -112,8 +112,8 @@ class SiskeudesFetcher:
     def fetch_penerimaan_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_penerimaan_repository.delete_by_region(region.id)
-        siskeudes_penerimaan_rinci_repository.delete_by_region(region.id)
+        siskeudes_penerimaan_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_penerimaan_rinci_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, region.desa_id)
         if (sd_content is None):
@@ -132,9 +132,9 @@ class SiskeudesFetcher:
     def fetch_spp_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_spp_repository.delete_by_region(region.id)
-        siskeudes_spp_bukti_repository.delete_by_region(region.id)
-        siskeudes_spp_rinci_repository.delete_by_region(region.id)
+        siskeudes_spp_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_spp_bukti_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_spp_rinci_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
         if (sd_content is None):

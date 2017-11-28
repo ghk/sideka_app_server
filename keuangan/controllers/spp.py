@@ -11,65 +11,67 @@ siskeudes_spp_bukti_repository = SiskeudesSppBuktiRepository(db)
 siskeudes_spp_rinci_repository = SiskeudesSppRinciRepository(db)
 
 
-@app.route('/siskeudes/spps', methods=['GET'])
-def get_siskeudes_spps():
+@app.route('/siskeudes/spps/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_spp_repository.all(page_sort_params)
+    entities = siskeudes_spp_repository.all_by_year(year, page_sort_params)
     result = SiskeudesSppModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/spps/count', methods=['GET'])
-def get_siskeudes_spps_count():
-    result = siskeudes_spp_repository.count()
+@app.route('/siskeudes/spps/year/<string:year>/count', methods=['GET'])
+def get_siskeudes_spps_count_by_year(year):
+    result = siskeudes_spp_repository.count_by_year(year)
     return jsonify(result)
 
 
-@app.route('/siskeudes/spps/region/<string:region_id>', methods=['GET'])
-def get_siskeudes_spps_by_region(region_id):
-    entities = siskeudes_spp_repository.get_by_region(region_id)
+@app.route('/siskeudes/spps/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_by_region(region_id, year):
+    page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
+    entities = siskeudes_spp_repository.get_by_region_and_year(region_id, year, page_sort_params)
     result = SiskeudesSppModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/spps/buktis', methods=['GET'])
-def get_siskeudes_spps_buktis():
+@app.route('/siskeudes/spps/buktis/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_buktis_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_spp_bukti_repository.all(page_sort_params)
+    entities = siskeudes_spp_bukti_repository.all_by_year(year, page_sort_params)
     result = SiskeudesSppBuktiModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/spps/buktis/count', methods=['GET'])
-def get_siskeudes_spps_buktis_count():
-    result = siskeudes_spp_bukti_repository.count()
+@app.route('/siskeudes/spps/buktis/year/<string:year>/count', methods=['GET'])
+def get_siskeudes_spps_buktis_count_by_year(year):
+    result = siskeudes_spp_bukti_repository.count_by_year(year)
     return jsonify(result)
 
 
-@app.route('/siskeudes/spps/buktis/region/<string:region_id>', methods=['GET'])
-def get_siskeudes_spps_buktis_by_region(region_id):
-    entities = siskeudes_spp_bukti_repository.get_by_region(region_id)
+@app.route('/siskeudes/spps/buktis/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_buktis_by_region_and_year(region_id, year):
+    page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
+    entities = siskeudes_spp_bukti_repository.get_by_region_and_year(region_id, year, page_sort_params)
     result = SiskeudesSppBuktiModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/spps/rincis', methods=['GET'])
-def get_siskeudes_spps_rincis():
+@app.route('/siskeudes/spps/rincis/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_rincis_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_spp_rinci_repository.all(page_sort_params)
+    entities = siskeudes_spp_rinci_repository.all_by_year(year, page_sort_params)
     result = SiskeudesSppRinciModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
-@app.route('/siskeudes/spps/rincis/count', methods=['GET'])
-def get_siskeudes_spps_rincis_count():
-    result = siskeudes_spp_rinci_repository.count()
+@app.route('/siskeudes/spps/rincis/year/<string:year>/count', methods=['GET'])
+def get_siskeudes_spps_rincis_count_by_year(year):
+    result = siskeudes_spp_rinci_repository.count_by_year(year)
     return jsonify(result)
 
 
-@app.route('/siskeudes/spps/rincis/region/<string:region_id>', methods=['GET'])
-def get_siskeudes_spps_rincis_by_region(region_id):
-    entities = siskeudes_spp_rinci_repository.get_by_region(region_id)
+@app.route('/siskeudes/spps/rincis/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def get_siskeudes_spps_rincis_by_region_and_year(region_id, year):
+    entities = siskeudes_spp_rinci_repository.get_by_region_and_year(region_id, year)
     result = SiskeudesSppRinciModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
