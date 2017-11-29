@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -46,6 +47,7 @@ import { SharedService } from './services/shared';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    FormsModule,
     HttpModule,
     ProgressHttpModule,
     ChartsModule,

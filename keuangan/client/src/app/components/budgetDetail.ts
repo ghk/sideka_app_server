@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Pipe, PipeTransform } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, BehaviorSubject } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
@@ -12,18 +12,44 @@ import { Query } from '../models/query';
 })
 export class BudgetDetailComponent implements OnInit, OnDestroy {
 
-    private _subscription: Subscription;
+    private _subscriptions: Subscription[] = [];
+    private _budgetType = new BehaviorSubject<string>('5');
+    private _budgetTypes = new BehaviorSubject<any[]>([]);
+    private _budgetRecapitulations = new BehaviorSubject<any[]>([]);
+
+    @Input()
+    set budgetType(value) {
+        this._budgetType.next(value);
+    }
+    get budgetType() {
+        return this._budgetType.getValue();
+    }
+
+    @Input()
+    set budgetTypes(value) {
+        this._budgetTypes.next(value);        
+    }
+    get budgetTypes() {
+        return this._budgetTypes.getValue();
+    }
+
+    @Input()
+    set budgetRecapitulations(value) {
+        this._budgetRecapitulations.next(value);
+    }
+    get budgetRecapitulations() {
+        return this._budgetRecapitulations.getValue();
+    }
 
     region: any;
     isPak: boolean = false;
     progress: Progress;
     entities: any[] = [];
     hideBudgetDetail: boolean = true;
-    budgetType = "5";
     budgetTypeNames = {
-        "4": "PENDAPATAN",
-        "5": "BELANJA",
-        "6": "PEMBIAYAAN",
+        '4': 'PENDAPATAN',
+        '5': 'BELANJA',
+        '6': 'PEMBIAYAAN',
     };
 
     constructor(
@@ -32,14 +58,22 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        this._subscription = this._sharedService.getRegion().subscribe(region => {
+        let year = new Date().getFullYear().toString();
+
+        this._subscriptions[0] = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
-        })
+        });
+
+        this._subscriptions[1] = this._budgetType.subscribe(x => {
+            this.getBudgetTypes();
+        });
     }
 
     ngOnDestroy(): void {
-        this._subscription.unsubscribe();
+        this._subscriptions.forEach(sub => {
+            sub.unsubscribe();
+        })
     }
 
     getData() {
@@ -49,9 +83,14 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
             sort: 'row_number'
         };
 
-        this._dataService.getRegion(this.region.id, null, null).subscribe(result => {
-            this.region = result
-        });
+        this._dataService
+            .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, null, null)
+            .subscribe(
+            result => {
+                this.budgetRecapitulations = result;
+            },
+            error => {}
+        );
 
         this._dataService
             .getSiskeudesPenganggaranByRegionAndYear(this.region.id, year, penganggaranQuery, this.progressListener.bind(this))
@@ -79,6 +118,22 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
             let append = '&nbsp;'.repeat(rekeningDepth * 4);
             entity.append = append;
         });
+    }
+
+    getBudgetTypes(): void {
+        let budgetTypeQuery: Query = {           
+            data: {
+                is_revenue: this.budgetType === '5' ? false : true
+            }
+        };
+
+        this._dataService.getBudgetTypes(budgetTypeQuery, null).subscribe(
+            result => {                
+                this.budgetTypes = result;                     
+            },
+            error => {                
+            }
+        );
     }
 
     progressListener(progress: Progress): void {

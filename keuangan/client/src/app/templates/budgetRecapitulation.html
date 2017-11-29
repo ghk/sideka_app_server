@@ -8,7 +8,12 @@
         </li>
       </ul>
       <div class="content-header">
-        ANGGARAN PENDAPATAN DAN BELANJA DESA (APBDES) BESERTA REALISASINYA
+        <span>ANGGARAN&nbsp;&nbsp;</span>
+        <select [(ngModel)]="budgetType">            
+            <option value="5">BELANJA</option>
+            <option value="4">PENDAPATAN</option>
+        </select>
+        <span>DESA</span>
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
@@ -54,6 +59,15 @@
               </ng-container>
             </tr>
           </tbody>
+          <tfoot [hidden]="progress?.percentage !== 100">
+                <tr class="success">
+                  <td>
+                    <a href>Total</a>
+                  </td>
+                  <td></td>
+                  <td class="money" colspan="2" *ngFor="let t of total">{{ t | number:'3.0-0' }}</td>
+                </tr>
+              </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">
             <tr>
               <td style="padding: 80px 5px; text-align: center;" colspan="100">
@@ -67,7 +81,7 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <sk-budget-chart></sk-budget-chart>
+      <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
     </div>
   </div>
 </div>

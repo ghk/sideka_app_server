@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, Input, NgZone, OnInit, OnDestroy, SimpleChange } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { BaseChartDirective } from 'ng2-charts/ng2-charts';
@@ -14,9 +14,7 @@ import 'chart.piecelabel.js';
     templateUrl: '../templates/budgetChart.html',
 })
 export class BudgetChartComponent implements OnInit, OnDestroy {
-
-    private _subscription: Subscription;
-
+    
     region: any;
     private _sData = new BehaviorSubject<any[]>([]);
 
@@ -27,6 +25,10 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
     get sData() {
         return this._sData.getValue();
     }
+
+    @Input() budgetTypes: any[];
+    @Input() budgetRecapitulations: any[];
+    @Input() progress: any;
 
     labels: any[] = [];
     colors: any = [{
@@ -64,61 +66,42 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
     };
     chartType: string = 'pie';
 
-    progress: Progress;
-
-    constructor(
-        private _dataService: DataService,
-        private _sharedService: SharedService
-    ) { }
+    constructor() { }
 
     ngOnInit(): void {
-        this._subscription = this._sharedService.getRegion().subscribe(region => {
-            this.region = region;
-            this.getData();
-        });
     }
 
     getData(): void {
-        let year = new Date().getFullYear().toString();
+        this.labels.length = 0;
+        this.budgetTypes.forEach(budgetType => {
+            this.labels.push(budgetType.name);
+        });
 
-        let budgetTypeQuery: Query = {
-            data: {
-                is_revenue: false
-            }
-        }
-
-        let budgetRecapitulationQuery: Query = {
-            data: {
-                is_full_region: false
-            }
-        };
-
-        this._dataService.getBudgetTypes(null, null).subscribe((types: any[]) => {
-            this.labels = types.map(type => { return type.name });
-            this._dataService
-                .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, budgetRecapitulationQuery, this.progressListener.bind(this))
-                .subscribe(
-                results => {
-                    let data = new Array(this.labels.length).fill(0);
-                    results.forEach(result => {
-                        let dataIndex = this.labels.indexOf(result.type.name);
-                        if (dataIndex === -1)
-                            return;
-                        data[dataIndex] += result.budgeted;
-                        this.sData = data;
-                    })
-                },
-                error => { }
-                );
+        let data = new Array(this.labels.length).fill(0);
+        this.budgetRecapitulations.forEach(br => {
+            let dataIndex = this.labels.indexOf(br.type.name);
+            if (dataIndex === -1)
+                return;
+            data[dataIndex] += br.budgeted;
+            this.sData = data;
         });
     }
 
     ngOnDestroy(): void {
-        this._subscription.unsubscribe();
+    }
+
+    ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
+        if (changes['budgetTypes'])
+            this.budgetTypes = changes['budgetTypes'].currentValue;
+        if (changes['budgetRecapitulations'])
+            this.budgetRecapitulations = changes['budgetRecapitulations'].currentValue;            
+        if (this.budgetTypes.length > 0 && this.budgetRecapitulations.length > 0)
+            this.getData();
+        if (changes['progress'])
+            this.progress = changes['progress'].currentValue;
     }
 
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
-
 }

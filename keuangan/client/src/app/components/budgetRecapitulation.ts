@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Progress } from 'angular-progress-http';
 import { DataService } from '../services/data';
 import { Query } from '../models/query';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'sk-budget-recapitulation',
@@ -11,9 +12,19 @@ import { Query } from '../models/query';
 
 export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
 
+    private _budgetType = new BehaviorSubject<string>('5');
     private _entities = new BehaviorSubject<any>([]);    
     private _budgetTypes = new BehaviorSubject<any[]>([]);
     private _budgetRecapitulations = new BehaviorSubject<any[]>([]);
+    private _subscriptions: Subscription[] = [];
+
+    @Input()
+    set budgetType(value) {
+        this._budgetType.next(value);
+    }
+    get budgetType() {
+        return this._budgetType.getValue();
+    }
 
     @Input()
     set entities(value) {
@@ -39,6 +50,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
         return this._budgetRecapitulations.getValue();
     }
         
+    total: number[] = [];
     order: string = 'region.parent.id';
     progress: Progress;
 
@@ -49,11 +61,17 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         let year = new Date().getFullYear().toString();
 
-        let budgetTypeQuery: Query = {           
-            data: {
-                is_revenue: false
-            }
-        };
+        this._subscriptions[0] = this._budgetType.subscribe(x => {
+            this.getBudgetTypes();
+        })
+
+        this._subscriptions[1] = this._budgetTypes.subscribe(x => {
+            this.transformData();
+        });
+
+        this._subscriptions[2] = this._budgetRecapitulations.subscribe(x => {
+            this.transformData();
+        });
 
         let budgetRecapitulationsQuery: Query = {
             sort: 'region.id',
@@ -61,22 +79,6 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
                 is_full_region: true
             }
         };
-
-        this._budgetTypes.subscribe(x => {
-            this.transformData();
-        });
-
-        this._budgetRecapitulations.subscribe(x => {
-            this.transformData();
-        });
-
-        this._dataService.getBudgetTypes(budgetTypeQuery, null).subscribe(
-            result => {
-                this.budgetTypes = result;                
-            },
-            error => {                
-            }
-        );
 
         this._dataService
             .getBudgetRecapitulationsByYear(year, budgetRecapitulationsQuery, this.progressListener.bind(this))
@@ -89,9 +91,29 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
     }
     
     ngOnDestroy(): void {
+        this._subscriptions.forEach(sub => {
+            sub.unsubscribe();
+        })
     }  
 
-    transformData(): void {
+    getBudgetTypes(): void {
+        let budgetTypeQuery: Query = {           
+            data: {
+                is_revenue: this.budgetType === '5' ? false : true
+            }
+        };
+
+        this._dataService.getBudgetTypes(budgetTypeQuery, null).subscribe(
+            result => {                
+                this.total = new Array(result.length).fill(0);  
+                this.budgetTypes = result;                     
+            },
+            error => {                
+            }
+        );
+    }
+
+    transformData(): void {       
         if (this.budgetTypes.length === 0 || this.budgetRecapitulations.length === 0)
             return;
 
@@ -108,13 +130,13 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
 
             this.budgetTypes.forEach((st, index) => {
                 if (sr.type.id === st.id) {          
-                    console.log(sr);           
                     //entities[sr.region.id]['data'][2 * index + 1] = sr.realized
-                    entities[sr.region.id]['data'][sr.type.id] = sr.budgeted
-                    entities[sr.region.id]['total'] += sr.budgeted                    
+                    entities[sr.region.id]['data'][sr.type.id] = sr.budgeted;
+                    entities[sr.region.id]['total'] += sr.budgeted;
+                    this.total[index] += sr.budgeted;
                 }   
             });                  
-        })
+        });
 
         let result = [];        
         Object.keys(entities).forEach(key => {

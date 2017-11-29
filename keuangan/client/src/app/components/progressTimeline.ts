@@ -148,7 +148,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
                 this.transformData(transferredPbhDataset.data, this._totalBudgetedPBH);
                 this.transformData(realizedSpendingDataset.data, this._totalBudgetedSpending);
 
-                this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];
+                this.tDatasets = [transferredDdsDataset, transferredAddDataset, transferredPbhDataset];                
                 this.rDatasets = [realizedSpendingDataset];
             },
             error => { }
