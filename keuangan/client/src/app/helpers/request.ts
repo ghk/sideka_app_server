@@ -20,7 +20,13 @@ export class RequestHelper {
         if (query.sort)
             params.append('sort', query.sort);
         if (query.keywords)
-            params.append('keywords', query.keywords);        
+            params.append('keywords', query.keywords);    
+        if (query.data) {
+            Object.keys(query.data).forEach(key => {
+                params.append(key, query.data[key]);
+            })
+        }
+                  
         result.params = params;
         
         return result;

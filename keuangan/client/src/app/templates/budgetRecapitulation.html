@@ -8,7 +8,12 @@
         </li>
       </ul>
       <div class="content-header">
-        ANGGARAN PENDAPATAN DAN BELANJA DESA (APBDES) BESERTA REALISASINYA
+        <span>ANGGARAN&nbsp;&nbsp;</span>
+        <select [(ngModel)]="budgetType">            
+            <option value="5">BELANJA</option>
+            <option value="4">PENDAPATAN</option>
+        </select>
+        <span>DESA</span>
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
@@ -26,9 +31,9 @@
                   <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <ng-container *ngFor="let spendingType of spendingTypes;">
-                <th (click)="sort('data.' + spendingType.id)" class="money" style="text-align: center; cursor: pointer;" colspan="2">{{ spendingType.name }}
-                  <ng-container *ngIf="order.includes('data.' + spendingType.id)">
+              <ng-container *ngFor="let budgetType of budgetTypes;">
+                <th (click)="sort('data.' + budgetType.id)" class="money" style="text-align: center; cursor: pointer;" colspan="2">{{ budgetType.name }}
+                  <ng-container *ngIf="order.includes('data.' + budgetType.id)">
                     <span [hidden]="order.startsWith('-')">▲</span>
                     <span [hidden]="!order.startsWith('-')">▼</span>
                   </ng-container>
@@ -39,21 +44,30 @@
           <tbody>
             <tr *ngFor="let entity of entities | orderBy: order">
               <td>
-                <a [routerLink]="['/spending/region', entity.region.id]">
+                <a [routerLink]="['/budget/region', entity.region.id]">
                   <span>{{ entity.region.name }}</span>
                 </a>
               </td>
               <td>
                 <span>{{ entity.region.parent | regionType:2 }}</span>
               </td>
-              <ng-container *ngFor="let spendingType of spendingTypes">
+              <ng-container *ngFor="let budgetType of budgetTypes">
                 <td class="money" colspan="2">
-                  <div style="float:right;">{{ entity.data[spendingType.id] | number:'3.0-0' }}</div>
-                  <div class="bar-percent" [ngStyle]="entity.barPercent[spendingType.id]"></div>
+                  <div style="float:right;">{{ entity.data[budgetType.id] | number:'3.0-0' }}</div>
+                  <div class="bar-percent" [ngStyle]="entity.barPercent[budgetType.id]"></div>
                 </td>
               </ng-container>
             </tr>
           </tbody>
+          <tfoot [hidden]="progress?.percentage !== 100">
+                <tr class="success">
+                  <td>
+                    <a href>Total</a>
+                  </td>
+                  <td></td>
+                  <td class="money" colspan="2" *ngFor="let t of total">{{ t | number:'3.0-0' }}</td>
+                </tr>
+              </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">
             <tr>
               <td style="padding: 80px 5px; text-align: center;" colspan="100">
@@ -67,7 +81,7 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <sk-spending-chart></sk-spending-chart>
+      <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
     </div>
   </div>
 </div>

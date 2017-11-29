@@ -37,8 +37,10 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     getData() {
+        let year = new Date().getFullYear().toString();
+
         this._dataService
-            .getSiskeudesPenerimaanByRegion(this.region.id, null, this.progressListener.bind(this))
+            .getSiskeudesPenerimaanByRegionAndYear(this.region.id, year, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.revenues = results;
@@ -47,10 +49,10 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
                 })
             },
             error => { }
-            )
+        );
 
         this._dataService
-            .getSiskeudesSppByRegion(this.region.id, null, this.progressListener.bind(this))
+            .getSiskeudesSppByRegionAndYear(this.region.id, year, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.spendings = results
@@ -59,7 +61,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
                 })
             },
             error => { }
-            )
+        );
     }
 
     ngOnDestroy(): void {

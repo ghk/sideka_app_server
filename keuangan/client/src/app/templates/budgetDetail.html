@@ -9,7 +9,12 @@
         </li>
       </ul>
       <div class="content-header">
-        ANGGARAN {{budgetTypeNames[budgetType]}} DESA
+        <span>ANGGARAN&nbsp;&nbsp;</span>
+        <select [(ngModel)]="budgetType">            
+            <option value="5">BELANJA</option>
+            <option value="4">PENDAPATAN</option>
+        </select>
+        <span>DESA</span>
         <button class="btn btn-xs btn-primary" style="margin-left: 20px;" (click)="hideBudgetDetail = !hideBudgetDetail">{{ hideBudgetDetail ? "Tampilkan" : "Sembunyikan"}} rincian</button>
       </div>
       <div class="table-responsive">
@@ -107,7 +112,7 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <sk-spending-chart></sk-spending-chart>
+        <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
     </div>
   </div>
 </div>

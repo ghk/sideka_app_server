@@ -1,9 +1,8 @@
-from base import BaseRepository
-from siskeudes import SiskeudesRepository
+from base import BaseRepository, BaseRegionRepository, BaseSiskeudesRepository
 from keuangan.models import SiskeudesKegiatan
 
 
-class SiskeudesKegiatanRepository(BaseRepository, SiskeudesRepository):
+class SiskeudesKegiatanRepository(BaseRepository, BaseRegionRepository, BaseSiskeudesRepository):
     def __init__(self, db):
         self.db = db
         self.model = SiskeudesKegiatan

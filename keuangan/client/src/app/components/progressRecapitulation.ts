@@ -36,11 +36,13 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        let year = new Date().getFullYear().toString();
+
         let query: Query = {
             sort: 'region.id'
         }
 
-        this._dataService.getProgressRecapitulations(query, this.progressListener.bind(this)).subscribe(
+        this._dataService.getProgressRecapitulationsByYear(year, query, this.progressListener.bind(this)).subscribe(
             result => {
                 this.entities = result;
 
@@ -65,7 +67,6 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
                 })
             },
             error => {
-                console.log(error);
             }
         )
     }

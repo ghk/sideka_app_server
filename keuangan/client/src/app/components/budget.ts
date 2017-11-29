@@ -5,11 +5,11 @@ import { DataService } from '../services/data';
 import { SharedService } from '../services/shared';
 
 @Component({
-    selector: 'sk-spending',
-    templateUrl: '../templates/spending.html',
+    selector: 'sk-budget',
+    templateUrl: '../templates/budget.html',
 })
 
-export class SpendingComponent implements OnInit, OnDestroy {
+export class BudgetComponent implements OnInit, OnDestroy {
 
     private _routeSubscription: Subscription;
 
@@ -24,7 +24,7 @@ export class SpendingComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {        
-        this._sharedService.setState('spending');
+        this._sharedService.setState('budget');
         this._routeSubscription = this._route.params.subscribe(params => {
             this.regionId = params['regionId'];     
             if (!this._sharedService.region || this._sharedService.region.id !== this.regionId)       

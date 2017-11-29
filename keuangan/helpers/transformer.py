@@ -1,6 +1,6 @@
 import simplejson as json
 import numbers
-from keuangan.models import SpendingRecapitulation, ProgressTimeline, ProgressRecapitulation
+from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressRecapitulation
 
 
 class ContentTransformer:
@@ -22,14 +22,14 @@ class ContentTransformer:
         return result
 
 
-class SpendingRecapitulationTransformer:
+class BudgetRecapitulationTransformer:
     @staticmethod
-    def transform(anggarans, year, region, spending_types):
+    def transform(anggarans, year, region, budget_types):
         result = []
 
-        for spending_type in spending_types:
-            sr = SpendingRecapitulation()
-            sr.fk_type_id = spending_type.id
+        for budget_type in budget_types:
+            sr = BudgetRecapitulation()
+            sr.fk_type_id = budget_type.id
             sr.fk_region_id = region.id
             sr.year = year
 
@@ -37,8 +37,14 @@ class SpendingRecapitulationTransformer:
             budgeted_pak = 0
 
             for anggaran in anggarans:
-                if not anggaran.kode_kegiatan.startswith(region.siskeudes_code + '.' + spending_type.code):
-                    continue;
+                if budget_type.is_revenue:
+                    if anggaran.sumber_dana != budget_type.code:
+                        continue
+                    if not anggaran.kode_rekening.startswith('4.'):
+                        continue
+                elif not budget_type.is_revenue and not (anggaran.kode_kegiatan.startswith(region.siskeudes_code + '.' + budget_type.code)):
+                    continue
+
                 if anggaran.jumlah_satuan is not None and anggaran.harga_satuan is not None:
                     budgeted += anggaran.jumlah_satuan * anggaran.harga_satuan
                 if anggaran.jumlah_satuan_pak is not None and anggaran.harga_satuan_pak is not None:
@@ -56,7 +62,7 @@ class SpendingRecapitulationTransformer:
 
 class ProgressTimelineTransformer:
     @staticmethod
-    def transform(penerimaan_rincis, spp_rincis, year, region):
+    def transform(anggarans, penerimaan_rincis, spp_rincis, year, region):
         result = []
         max_month = 1
         months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]

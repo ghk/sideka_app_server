@@ -8,11 +8,6 @@ class RegionRepository(BaseRepository):
         self.db = db
         self.model = Region
 
-    def get(self, id):
-        return self.db.session.query(self.model) \
-            .filter(self.model.id == id) \
-            .first()
-
     def get_by_desa_id(self, desa_id):
         return self.db.session.query(self.model) \
             .filter(self.model.desa_id == desa_id) \

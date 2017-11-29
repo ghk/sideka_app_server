@@ -31,7 +31,7 @@ class SiskeudesFetcher:
             region = region_repository.get(str(sd_desa.kode).rstrip())
 
             if (region is None):
-                logger.warning('Desa<{0}> {1} does not have region'.format(sd_desa.desa, sd_desa.kode))
+                logger.warning('Desa: {0}<{1}><{2}> does not have region'.format(sd_desa.desa, sd_desa.blog_id, sd_desa.kode))
                 continue
 
             region.domain = sd_desa.domain
@@ -75,12 +75,12 @@ class SiskeudesFetcher:
     def fetch_penganggaran_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_penganggaran_repository.delete_by_region(region.id)
-        siskeudes_kegiatan_repository.delete_by_region(region.id)
+        siskeudes_penganggaran_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_kegiatan_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         if (sd_content is None):
-            logger.warning('Region: {0}<{1}> does not have anggaran'.format(region.name, region.id))
+            logger.warning('Region: {0}<{1}><{2}> does not have anggaran'.format(region.name, region.id, region.desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -112,12 +112,12 @@ class SiskeudesFetcher:
     def fetch_penerimaan_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_penerimaan_repository.delete_by_region(region.id)
-        siskeudes_penerimaan_rinci_repository.delete_by_region(region.id)
+        siskeudes_penerimaan_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_penerimaan_rinci_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, region.desa_id)
         if (sd_content is None):
-            logger.info('Region: {0}<{1}> does not have penerimaan'.format(region.name, region.id))
+            logger.info('Region: {0}<{1}><{2}> does not have penerimaan'.format(region.name, region.id, region.desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -132,13 +132,13 @@ class SiskeudesFetcher:
     def fetch_spp_by_region(region):
         year = str(datetime.now().year)
 
-        siskeudes_spp_repository.delete_by_region(region.id)
-        siskeudes_spp_bukti_repository.delete_by_region(region.id)
-        siskeudes_spp_rinci_repository.delete_by_region(region.id)
+        siskeudes_spp_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_spp_bukti_repository.delete_by_region_and_year(region.id, year)
+        siskeudes_spp_rinci_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
         if (sd_content is None):
-            logger.info('Region: {0}<{1}> does not have spp'.format(region.name, region.id))
+            logger.info('Region: {0}<{1}><{2}> does not have spp'.format(region.name, region.id, region.desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -158,7 +158,8 @@ class SiskeudesFetcher:
             try:
                 SiskeudesFetcher.fetch_penganggaran_by_region(region)
             except Exception as e:
-                print "Error on region %s - %s" % (region.id, region.name)
+                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error(e.message)
                 traceback.print_exc()
 
     @staticmethod
@@ -166,10 +167,10 @@ class SiskeudesFetcher:
         regions = region_repository.all()
         for region in regions:
             try:
-                print "Error on region %s - %s" % (region.id, region.name)
                 SiskeudesFetcher.fetch_penerimaan_by_region(region)
             except Exception as e:
-                # TODO: Log
+                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error(e.message)
                 traceback.print_exc()
 
     @staticmethod
@@ -177,8 +178,8 @@ class SiskeudesFetcher:
         regions = region_repository.all()
         for region in regions:
             try:
-                print "Error on region %s - %s" % (region.id, region.name)
                 SiskeudesFetcher.fetch_spp_by_region(region)
             except Exception as e:
-                # TODO: Log
+                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error(e.message)
                 traceback.print_exc()
