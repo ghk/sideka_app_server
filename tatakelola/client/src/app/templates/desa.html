@@ -1,15 +1,20 @@
 <div id="map" #map leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)"></div>
 
-<st-search></st-search>
+<div id="cari" style="display: inline-flex">
+  <a>
+    <img src="/assets/res/logobp3ti.png">
+  </a>
+  <h5 *ngIf="activeDesa"> {{activeDesa}} </h5>
+</div>
 
 <div class="center-div" [hidden]="progress?.percentage === 100">
   <img style="margin: 0 auto;" src="/assets/images/loading.gif">
   <br>
 </div>
 
-<div class="prevnext" style="float:right;">
-  <button class="prev">⇦ Desa Sebelum</button>
-  <button class="next">Desa Berikut ⇨</button>
+<div class="prevnext" style="float:right; margin-top: 2px;">
+  <button class="prev" (click)="prev()">⇦ Desa Sebelum</button>
+  <button class="next" (click)="next()">Desa Berikut ⇨</button>
 </div>
 
 <div class="show-hide-side">
@@ -87,13 +92,13 @@
       </div>
       <div class="desc">
         <div> 
-            <h4> Pertanian: <br> {{farmlands}}</h4>     
+            <h4> Pertanian: <br> {{summaries.pemetaan_potential_farmland_trees}}</h4>     
         </div>
         <div> 
-            <h4> Perkebunan: <br> {{orchards}}</h4>
+            <h4> Perkebunan: <br>  {{summaries.pemetaan_potential_orchard_orchards}}</h4>
         </div>
         <div> 
-            <h4> Pohon: <br> {{trees}} </h4>
+            <h4> Pohon: <br> {{summaries.pemetaan_potential_forest_trees}} </h4>
         </div>
       </div>
     </div>

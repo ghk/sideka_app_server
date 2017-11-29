@@ -1,5 +1,6 @@
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
@@ -31,6 +32,7 @@ import { SharedService } from './services/shared';
     HttpModule,
     ProgressHttpModule,
     NgPipesModule,
+    FormsModule,
     LeafletModule.forRoot(),
     RouterModule.forRoot([
       { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },

@@ -37,6 +37,9 @@ class Summary(BaseModel):
     pemetaan_potential_farmland_area = db.Column(db.DECIMAL, nullable=True)
     pemetaan_potential_forest_area = db.Column(db.DECIMAL, nullable=True)
     pemetaan_potential_orchard_area = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_potential_farmland_trees = db.Column(db.String, nullable=True)
+    pemetaan_potential_orchard_orchards = db.Column(db.String, nullable=True)
+    pemetaan_potential_forest_trees = db.Column(db.String, nullable=True)
 
     pemetaan_school_tk = db.Column(db.Integer, nullable=True)
     pemetaan_school_sd = db.Column(db.Integer, nullable=True)

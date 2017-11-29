@@ -23,7 +23,13 @@ def get_penduduks_count():
 
 
 @app.route('/summaries/region/<string:region_id>', methods=['GET'])
-def get_penduduks_by_region(region_id):
+def get_summaries_by_region(region_id):
     entities = summary_repository.get_by_region(region_id)
+    result = SummaryModelSchema(many=True).dump(entities)
+    return jsonify(result.data)
+
+@app.route('/summaries/region_available_maps', methods=['GET'])
+def get_summaries_by_region_available_maps():
+    entities = summary_repository.get_region_available_maps()
     result = SummaryModelSchema(many=True).dump(entities)
     return jsonify(result.data)

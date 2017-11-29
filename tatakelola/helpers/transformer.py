@@ -152,6 +152,9 @@ class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
         pipe_count = 0
+        farmland_trees = []
+        orchard_orchards = []
+        forest_trees = []
 
         for feature in features:
             if feature.has_key('properties') == False:
@@ -172,14 +175,20 @@ class ParsePemetaanData:
                     continue
                 if properties['landuse'] == 'farmland':
                     summary.pemetaan_potential_farmland += 1
+                    if properties.has_key('farmland'):
+                        farmland_trees.append(properties['farmland'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
                         summary.pemetaan_potential_farmland_area += area(feature['geometry'])
                 elif properties['landuse'] == 'orchard':
                     summary.pemetaan_potential_orchard += 1
+                    if properties.has_key('forest'):
+                        orchard_orchards.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
                         summary.pemetaan_potential_orchard_area += area(feature['geometry'])
                 elif properties['landuse'] == 'forest':
                     summary.pemetaan_potential_forest += 1
+                    if properties.has_key('forest'):
+                        forest_trees.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
                         summary.pemetaan_potential_forest_area += area(feature['geometry'])
             elif type == 'waters':
@@ -221,5 +230,9 @@ class ParsePemetaanData:
 
         if pipe_count > 0:
             summary.pemetaan_water_pipe_width_avg = summary.pemetaan_water_pipe_width_avg / pipe_count
+
+        summary.pemetaan_potential_farmland_trees = ','.join(map(str, farmland_trees))
+        summary.pemetaan_potential_orchard_orchards = ','.join(map(str, orchard_orchards))
+        summary.pemetaan_potential_forest_trees = ','.join(map(str, forest_trees))
 
         return summary

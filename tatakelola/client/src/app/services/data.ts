@@ -92,6 +92,17 @@ export class DataService {
 
       return request.map(res => res.json()).catch(this.handleError);
   }
+  
+  getRegionAvailableMaps( query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(this._http, 
+      'GET', 
+      urljoin(this._serverUrl, 'summaries/region_available_maps'),
+      query,
+      progressListener
+    );
+
+    return request.map(res => res.json()).catch(this.handleError);
+  }
 
   getSummaries(query: Query, progressListener: any): Observable<any> {
       let request = RequestHelper.generateHttpRequest(this._http, 

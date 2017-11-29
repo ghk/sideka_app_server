@@ -14,7 +14,7 @@
    <div style="display: inline-flex; width: 100%;">
       <div style="flex: 1; display: inline-flex;">
           <img src="/assets/images/bpppti.png" style="height: 35px; margin-top: -5px; margin-right: 10px; display: inline;">
-          <input type="text" class="form-control" placeholder="Cari Desa" style="height: 30px;" />   
+          <input type="text" class="form-control" name="query-search" [(ngModel)]="query" placeholder="Cari Desa" style="height: 30px;" />   
       </div>
       <div style="flex: 3; margin-left: 200px; padding-top: 5px;">
          <span style="font-size: 15px; text-align: center; font-weight: bold;"> DASHBOARD TATA KELOLA DESA </span>
@@ -28,55 +28,55 @@
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'summary'">
             <thead>
                 <tr>
-                    <th (click)="sort('region.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Desa
+                    <th (click)="sort('region.name')" rowspan="2" class="sortable-header">Desa
                         <ng-container *ngIf="order.includes('region.name')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('region.parent.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Kabupaten
+                    <th (click)="sort('region.parent.name')" rowspan="2" class="sortable-header">Kabupaten
                             <ng-container *ngIf="order.includes('region.parent.name')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                         </th>
-                    <th (click)="sort('penganggaran_budgeted_revenue')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">APBDes
+                    <th (click)="sort('penganggaran_budgeted_revenue')" rowspan="2" class="sortable-header">APBDes
                         <ng-container *ngIf="order.includes('penganggaran_budgeted_revenue')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas (Km<sup>2</sup>)
+                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" class="sortable-header">Luas (Km<sup>2</sup>)
                             <ng-container *ngIf="order.includes('pemetaan_desa_boundary')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('penduduk_total')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Penduduk
+                    <th (click)="sort('penduduk_total')" rowspan="2" class="sortable-header">Penduduk
                             <ng-container *ngIf="order.includes('penduduk_total')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('penduduk_total')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Pendidikan
+                    <th (click)="sort('penduduk_total')" rowspan="2" class="sortable-header">Pendidikan
                             <ng-container *ngIf="order.includes('desa_edu_total')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_electricity_available_kk')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Listrik
+                    <th (click)="sort('pemetaan_electricity_available_kk')" rowspan="2" class="sortable-header">Listrik
                             <ng-container *ngIf="order.includes('pemetaan_electricity_available_kk')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('desa_total_waters')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Pengairan
+                    <th (click)="sort('desa_total_waters')" rowspan="2" class="sortable-header">Pengairan
                             <ng-container *ngIf="order.includes('desa_total_waters')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('desa_total_potential')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Potensi
+                    <th (click)="sort('desa_total_potential')" rowspan="2" class="sortable-header">Potensi
                             <ng-container *ngIf="order.includes('desa_total_potential')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
@@ -85,30 +85,30 @@
                 </tr>
             </thead>
             <tbody>
-                  <tr *ngFor="let summary of summaries | orderBy: order">
-                     <td style="font-size: 12px;"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
-                     <td style="font-size: 12px;">{{summary.region.parent.name}}</td>
+                  <tr *ngFor="let summary of summaries | orderBy: order | filterBy: ['region.name']: query">
+                     <td class="data-column"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
+                     <td class="data-column">{{summary.region.parent.name}}</td>
                      
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
+                     <td class="money data-column-number" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
+                     <td class="money data-column-number" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
                     
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000  | number:'1.0-0'}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
+                     <td class="money data-column-number" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000  | number:'1.0-0'}} </td>
+                     <td class="money data-column-number" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
                      
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total === 0">  - </td>
+                     <td class="money data-column-number" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total}} </td>
+                     <td class="money data-column-number" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total === 0">  - </td>
 
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total}} </td>
-                     <td class="money" style="text-align: right; font-size: 12px; cursor: pointer;" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total === 0">  - </td>
+                     <td class="money data-column-number" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total}} </td>
+                     <td class="money data-column-number" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total === 0">  - </td>
                      
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
+                     <td class="data-column" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
+                     <td class="data-column" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
                      
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
+                     <td class="data-column" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
+                     <td class="data-column" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
                      
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
-                     <td style="font-size: 12px; cursor: pointer;" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
+                     <td class="data-column" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
+                     <td class="data-column" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
                   </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
