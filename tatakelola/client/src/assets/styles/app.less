@@ -536,3 +536,156 @@ td.money {
     top: 0;
     width: 10000px; 
 }
+
+.content-header {
+    border-top: 1px solid #337ab7;
+    border-bottom: 1px solid #337ab7;
+    color: #337ab7;
+    text-transform: uppercase;
+    padding: 0 0 0 10px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.summary-container {
+    margin: 15px 20px;
+}
+
+.summary-header {
+    display: inline-flex; 
+    width: 100%;
+}
+
+.summary-header .logo-search {
+    flex: 1; 
+    display: inline-flex;
+}
+
+.summary-header .logo-search .logo {
+    height: 35px; 
+    margin-top: -5px; 
+    margin-right: 10px; 
+    display: inline;
+}
+
+.summary-header .title {
+    flex: 3; 
+    margin-left: 200px; 
+    padding-top: 5px;
+}
+
+.summary-header .title span {
+    font-size: 15px; 
+    text-align: center; 
+    font-weight: bold;
+}
+
+.summary-header-mobile {
+    display: none;
+}
+
+.desktop {
+    display: block;
+}
+
+.mobile {
+    display: none;
+}
+
+@media only screen and (max-width: 675px) {
+    body,
+    html {
+        width: 100%;
+        height: 650px;
+        overflow-y: hidden;
+    }
+
+    .summary-header {
+        display: none;
+    }
+
+    .summary-header-mobile {
+        display: block;
+    }
+
+    .summary-header-mobile .search-input {
+        margin-top: 10px;
+        margin-left: 10px;
+        width: 250px;
+    }
+
+    .summary-header-mobile .title span {
+        font-size: 15px; 
+        text-align: center; 
+        font-weight: bold;
+        margin-left: 50px;
+    }
+    .summary-header-mobile .logo-search {
+        display: inline-flex;
+
+    }
+
+    .summary-header-mobile .logo-search .logo {
+        height: 60px;
+    }
+
+    .table-responsive {
+        height: 450px;
+        overflow-y: scroll;
+    }
+
+    .desktop {
+        display: none;
+    }
+    
+    .mobile {
+        display: block;
+    }
+
+    #map {
+        height: 250px;
+        width: auto;
+    }
+
+    #cari { 
+        position: relative;
+        width: 300px;
+        background: #fff;
+        box-shadow: 1px 1px 1px #888888;
+        font-size: 10pt;
+        border-radius: 0 0 5px 0;
+    }
+
+    .prevnext {
+        position: relative;
+        top: 5px;
+        left: 33px;
+        display: inline-block;
+    }
+
+    .side {
+        width: 360px;
+        position: none;
+    }
+
+    .center-div {    
+        position: fixed;
+        width: 300px;
+        height: 100px;   
+        left: 30%;
+        top: 50%; 
+        margin-left: 0px;
+        margin-top: -50px;
+        z-index: 100000;
+    }
+}
+
+@media only screen and (max-width: 350px) {
+    .summary-header-mobile .title span {
+        font-size: 12px; 
+    }
+    
+    .summary-header-mobile .search-input {
+        width: 202px;
+    }
+}

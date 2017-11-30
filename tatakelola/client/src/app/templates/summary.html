@@ -1,30 +1,27 @@
-<style>
-    .content-header {
-        border-top: 1px solid #337ab7;
-        border-bottom: 1px solid #337ab7;
-        color: #337ab7;
-        text-transform: uppercase;
-        padding: 0 0 0 10px;
-        font-size: 14px;
-        margin-top: 10px;
-    }
-</style>
-
-<div style="margin: 15px 20px;">
-   <div style="display: inline-flex; width: 100%;">
-      <div style="flex: 1; display: inline-flex;">
-          <img src="/assets/images/bpppti.png" style="height: 35px; margin-top: -5px; margin-right: 10px; display: inline;">
+<div class="summary-container">
+    <div class="summary-header-mobile">
+        <div class="title">
+            <span class="title-mobile"> DASHBOARD TATA KELOLA DESA </span>
+        </div>
+        <div class="logo-search">
+            <img src="/assets/images/bpppti.png" class="logo">
+            <input type="text" class="form-control search-input" name="query-search" [(ngModel)]="query" placeholder="Cari Desa" style="height: 30px;" />   
+        </div>
+    </div>
+   <div class="summary-header">
+      <div class="logo-search">
+          <img src="/assets/images/bpppti.png" class="logo">
           <input type="text" class="form-control" name="query-search" [(ngModel)]="query" placeholder="Cari Desa" style="height: 30px;" />   
       </div>
-      <div style="flex: 3; margin-left: 200px; padding-top: 5px;">
-         <span style="font-size: 15px; text-align: center; font-weight: bold;"> DASHBOARD TATA KELOLA DESA </span>
+      <div class="title">
+         <span> DASHBOARD TATA KELOLA DESA </span>
       </div>
    </div>
    <div class="content-header">
       <a href="#" *ngIf="viewType == 'detail'" (click)="backToSummary()"> <i class="fa fa-arrow-left"></i> </a>
-      STATISTIK DESA
+      RANGKUMAN DATA DESA
    </div>
-   <div class="table-responsive">
+   <div class="table-responsive desktop-table">
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'summary'">
             <thead>
                 <tr>
