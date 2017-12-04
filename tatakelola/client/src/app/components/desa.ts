@@ -119,36 +119,6 @@ export class DesaComponent implements OnInit, OnDestroy {
                     return;
 
                 this.setMapLayout(geojson);
-
-                let landuse = geojson.filter(e => e.type === 'landuse')[0];
-                let farmlands = [];
-                let orchards = [];
-                let trees = [];
-
-                for(let i=0; i<landuse.data.features.length; i++) {
-                    let feature = landuse.data.features[i];
-                    let properties = feature.properties;
-                    
-                    if(properties['Landuse'] === 'farmland') {
-                        if(properties['crop'])
-                            farmlands.push(properties['crop']);
-                    }
-
-                    else if(properties['Landuse'] === 'orchard') {
-                        if(properties['crop'])
-                            orchards.push(properties['orchard']);
-                    }
-
-                    else if(properties['Landuse'] === 'forest') {
-                        if(properties['trees'])
-                            trees.push(properties['trees']);
-
-                    }
-                }
-                
-                this.farmlands = farmlands.length > 0 ? farmlands.join(',') : 'Padi, Jagung, Tiwul';
-                this.orchards = orchards.length > 0 ? orchards.join(',') : 'Jeruk, Mangga, Teh, Kopi';
-                this.trees = trees.length > 0 ? trees.join(',') : 'Toge';
             }
         )
     }

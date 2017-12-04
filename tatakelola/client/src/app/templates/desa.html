@@ -126,6 +126,10 @@
       </a>
       <h5 *ngIf="activeDesa"> {{activeDesa}} </h5>
     </div>
+    <div class="center-div" [hidden]="progress?.percentage === 100">
+        <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+        <br>
+    </div>
     <div class="prevnext">
         <button class="prev" (click)="prev()">⇦ Desa Sebelum</button>
         <button class="next" (click)="next()">Desa Berikut ⇨</button>
@@ -214,8 +218,4 @@
               </div>
             </a>
     </div>
-</div>
-<div class="center-div" [hidden]="progress?.percentage === 100">
-    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
-    <br>
 </div>
