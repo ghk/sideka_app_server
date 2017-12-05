@@ -520,6 +520,11 @@ td.money {
 .data-column {
     text-align: left; 
     font-size: 12px; 
+}
+
+.data-column-pointer {
+    text-align: left; 
+    font-size: 12px; 
     cursor: pointer;
 }
 
@@ -680,41 +685,6 @@ td.money {
     }
 }
 
-/*
-td, th {
-    border: 1px solid #999;
-    padding: 10px;
-    position: relative;
-}
-
-th {
-  background-color:#fff;
-}
-
-//Row
-td:hover::before { 
-    background-color: #eee;
-    content: '';  
-    height: 100%;
-    left: -5000px;
-    position: absolute;  
-    top: 0;
-    width: 10000px;   
-    z-index: -2;        
-}
-
-//Column
-td:hover::after { 
-    background-color: #ffa;
-    content: '';  
-    height: 10000px;    
-    left: 0;
-    position: absolute;  
-    top: -5000px;
-    width: 100%;
-    z-index: -1;        
-}*/
-
   .table-column-hoverable {
     overflow: hidden;
   }
@@ -724,9 +694,10 @@ td:hover::after {
     position: relative;
     outline: 0;
   }
-  
+
+
   body:not(.nohover) .table-column-hoverable tbody tr:hover {
-    background-color: #ffa;
+    background-color: transparent;
   }
   
   .table-column-hoverable td:hover::after,
@@ -742,13 +713,13 @@ td:hover::after {
     z-index: -1;
   }
   
-  .table-column-hoverable td:hover::after,
-  .table-column-hoverable th:hover::after {
-    background-color: #ffa;
+  .table-column-hoverable .hoverable:hover::after,
+  .table-column-hoverable .hoverable-header:hover::after {
+    background-color: #66aae5;
   }
-  
-  .table-column-hoverable td:focus::after,
-  .table-column-hoverable th:focus::after {
+
+  .table-column-hoverable .hoverable:focus::after,
+  .table-column-hoverable .hoverable-header:focus::after {
     background-color: lightblue;
   }
   

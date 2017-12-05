@@ -24,6 +24,8 @@ class Summary(BaseModel):
     penganggaran_year = db.Column(db.String, nullable=True)
 
     pemetaan_desa_boundary = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_desa_circumference = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_dusun_total = db.Column(db.Integer, nullable=True)
     pemetaan_electricity_house = db.Column(db.Integer, nullable=True)
 
     pemetaan_water_natural = db.Column(db.Integer, nullable=True)
