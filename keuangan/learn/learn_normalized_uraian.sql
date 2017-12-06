@@ -1,0 +1,1 @@
+﻿select normalized_uraian, count(*), count(distinct kode_bidang), string_agg(distinct kode_bidang, ',') from learn_kegiatan group by normalized_uraian order by count(*) desc;
