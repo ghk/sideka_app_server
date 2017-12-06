@@ -4,6 +4,8 @@ sys.path.append('../common')
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
+from flask_compress import Compress
+from flask_caching import Cache
 from common.phpass import PasswordHash
 import MySQLdb
 import os
@@ -12,7 +14,9 @@ import time
 import datetime
 
 app = Flask(__name__)
+Compress(app)
 mysql = MySQL(app)
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 # MySQL configurations
 app.config.from_pyfile('../common/app.cfg')
@@ -20,8 +24,7 @@ app.config.from_pyfile('../common/app.cfg')
 phasher = PasswordHash(8, True)
 
 
-def get_sd_desa_query(args):
-    supradesa_id = str(args.get("supradesa_id"))
+def get_sd_desa_query(supradesa_id):
     error_value = ["null", "undefined", None]
     cur = mysql.connection.cursor()
     try:
@@ -43,6 +46,26 @@ def get_sd_desa_query(args):
         elif results["flag"] is not None and results["region_code"] == None:
             query_sd_desa = "{0} = true".format(results["flag"])
         return query_sd_desa
+    finally:
+        cur.close()
+
+@cache.memoize(timeout=60)
+def get_sd_monitor(typ, supradesa_id):
+    error_value = ["null", "undefined", None]
+    cur = mysql.connection.cursor()
+    try:
+        if supradesa_id in error_value:
+            supradesa_id = 0
+        else:
+            supradesa_id = int(supradesa_id)
+
+        query = "select content from sd_monitors where type = %s and supradesa_id = %s"
+        cur.execute(query, (typ, supradesa_id))
+        result = cur.fetchone()
+        if result is None:
+            return jsonify(None)
+
+        return jsonify(json.loads(result[0]))
     finally:
         cur.close()
 
@@ -143,110 +166,31 @@ def apbdes_scores():
 def send_statics(path):
     return send_from_directory('statics', path)
 
-
 @app.route('/api/statistics', methods=['GET'])
 def get_statistics():
-    def combine(row):
-        res = json.loads(row[1])
-        res["desa"] = row[2]
-        res["latitude"] = row[3]
-        res["longitude"] = row[4]
-        return res
-    query_sd_desa = get_sd_desa_query(request.args)
-    cur = mysql.connection.cursor()
-    try:
-        query = """SELECT s.blog_id, s.statistics, d.desa, d.latitude, d.longitude FROM sd_statistics s INNER JOIN (SELECT blog_id, max(date) as date FROM sd_statistics GROUP BY blog_id ) 
-				 st ON s.blog_id = st.blog_id AND s.date = st.date left JOIN sd_desa d ON s.blog_id = d.blog_id where {0}""".format(query_sd_desa)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('statistics', supradesa_id)
 
-        cur.execute(query)
-        results = [combine(c) for c in cur.fetchall()]
-        return jsonify(results)
-    finally:
-        cur.close()
+@app.route('/api/map_statistics', methods=['GET'])
+def get_map_statistics():
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('map_statistics', supradesa_id)
 
 
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard_data():
-    def combine(row):
-        res = json.loads(row[1])
-        res["blog_id"] = row[0]
-        return res
-    results = {}
-    query_sd_desa = get_sd_desa_query(request.args)
-    cur = mysql.connection.cursor()
-    try:
-        weekly_desa = []
-        weekly_posts = []
-        weekly_penduduk = []
-        weekly_keuangan = []
-        weekly_pemetaan = []
-        desa_query = "select count(*) from sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id where {0} and b.registered < ADDDATE(NOW(), INTERVAL %d WEEK);".format(
-            query_sd_desa)
-        post_query = "select count(distinct(ps.blog_id)) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL %d WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL %d WEEK);".format(
-            query_sd_desa)
-        stats_query = "select s.blog_id, statistics from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL %d WEEK);".format(
-            query_sd_desa)
-        for i in range(5):
-            start = 0 - i - 1
-            end = 0 - i
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('dashboard', supradesa_id)
 
-            cur.execute(desa_query % (end,))
-            weekly_desa.append(cur.fetchone()[0])
+@app.route('/api/domain_weekly', methods=["GET"])
+def get_domain_weekly():
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('weekly_domain', supradesa_id)
 
-            cur.execute(post_query % (start, end))
-            weekly_posts.append(cur.fetchone()[0])
-
-            cur.execute(stats_query % (end,))
-            stats = [combine(c) for c in cur.fetchall()]
-            weekly_penduduk.append(
-                len(list(filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))))
-            weekly_keuangan.append(
-                len(list(filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))))
-            weekly_pemetaan.append(
-                len(list(filter(lambda s: "pemetaan" in s and s["pemetaan"]["score"] > 0.3, stats))))
-
-        weekly = {}
-        weekly["desa"] = weekly_desa
-        weekly["post"] = weekly_posts
-        weekly["penduduk"] = weekly_penduduk
-        weekly["keuangan"] = weekly_keuangan
-        weekly["pemetaan"] = weekly_pemetaan
-        results["weekly"] = weekly
-
-        daily = {}
-        cur.execute(
-            "select unix_timestamp(date(ps.post_date)), count(*) from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date is not null GROUP BY date(ps.post_date)".format(query_sd_desa))
-        daily["post"] = dict(cur.fetchall())
-        cur.execute(
-            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='penduduk' GROUP BY date(date_accessed)".format(query_sd_desa))
-        daily["penduduk"] = dict(cur.fetchall())
-        cur.execute(
-            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type in ('perencanaan', 'penganggaran', 'spp', 'penerimaan') GROUP BY date(date_accessed)".format(query_sd_desa))
-        daily["keuangan"] = dict(cur.fetchall())
-        cur.execute(
-            "select unix_timestamp(date(l.date_accessed)), count(*) from sd_logs l left join sd_desa d on d.blog_id = l.desa_id where {0} and l.date_accessed is not null and l.action = 'save_content' and l.type='pemetaan' GROUP BY date(date_accessed)".format(query_sd_desa))
-        daily["pemetaan"] = dict(cur.fetchall())
-
-        def get_daily(typ, time):
-            if time in daily[typ]:
-                return daily[typ][time]
-            return 0
-        r = {"label": [], "post": [], "penduduk": [], "keuangan": [], "pemetaan": []}
-        for i in range(63):
-            d = datetime.datetime.today() - datetime.timedelta(days=62 - i)
-            d = datetime.datetime(d.year, d.month, d.day)
-            t = int(time.mktime(d.timetuple()))
-            r["label"].append(t)
-            r["post"].append(get_daily("post", t))
-            r["penduduk"].append(get_daily("penduduk", t))
-            r["keuangan"].append(get_daily("keuangan", t))
-            r["pemetaan"].append(get_daily("pemetaan", t))
-
-        results["daily"] = r
-
-        return jsonify(results)
-    finally:
-        cur.close()
+@app.route('/api/panel_weekly')
+def get_weekly_panel():
+    supradesa_id = str(request.args.get("supradesa_id"))
+    return get_sd_monitor('weekly_panel', supradesa_id)
 
 
 @app.route('/api/post_scores',  methods=["GET"])
@@ -254,7 +198,8 @@ def get_post_scores():
     cur = mysql.connection.cursor()
     page = request.args.get('pagebegin')
     item_per_page = int(request.args.get('itemperpage'))
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     offset = 0
     if not page.isdigit():
         page = 1
@@ -273,7 +218,8 @@ def get_post_scores():
 @app.route('/api/count_post_scores', methods=["GET"])
 def get_count_post_scores():
     cur = mysql.connection.cursor()
-    query_sd_desa = get_sd_desa_query(request.args)
+    supradesa_id = str(request.args.get("supradesa_id"))
+    query_sd_desa = get_sd_desa_query(supradesa_id)
     try:
         query = "SELECT count(*) from sd_post_scores p left join sd_desa d on p.blog_id = d.blog_id where {0}".format(
             query_sd_desa)
@@ -283,48 +229,6 @@ def get_count_post_scores():
     finally:
         cur.close()
 
-
-@app.route('/api/apbdes_scores', methods=["GET"])
-def get_apbdes_scores():
-    cur = mysql.connection.cursor()
-    query_sd_desa = get_sd_desa_query(request.args)
-    try:
-        query = "SELECT a.score from sd_apbdes_scores a left join sd_desa d on d.blog_id = a.blog_id where {0}".format(
-            query_sd_desa)
-        cur.execute(query)
-        results = [json.loads(c[0]) for c in cur.fetchall()]
-        return jsonify(results)
-    finally:
-        cur.close()
-
-
-@app.route('/api/domain_weekly', methods=["GET"])
-def get_domain_weekly():
-    query_sd_desa = get_sd_desa_query(request.args)
-    cur = mysql.connection.cursor()
-    try:
-
-        desa_query = "select count(*) from sd_desa as d inner join wp_blogs b on d.blog_id = b.blog_id where {0} and d.domain like %s and b.registered < ADDDATE(NOW(), INTERVAL %s WEEK);".format(
-            query_sd_desa)
-        sideka_domain = []
-        desa_domain = []
-        results = {}
-        for i in range(5):
-            end = 0 - i
-
-            domain = '%.sideka.id'
-            cur.execute(desa_query, (domain, end))
-            sideka_domain.append(cur.fetchone()[0])
-
-            domain = '%.desa.id'
-            cur.execute(desa_query, (domain, end))
-            desa_domain.append(cur.fetchone()[0])
-
-        results["sideka_domain"] = sideka_domain
-        results["desa_domain"] = desa_domain
-        return jsonify(results)
-    finally:
-        cur.close()
 
 
 @app.route('/api/supradesa')
@@ -359,44 +263,6 @@ def get_zoom():
         cur.close()
 
 
-@app.route('/api/panel_weekly')
-def get_weekly_panel():
-    query_sd_desa = get_sd_desa_query(request.args)
-    cur = mysql.connection.cursor()
-    results = {}
-    weekly_keuangan = []
-    weekly_penduduk = []
-    weekly_posts = []
-
-    def combine(row):
-        res = json.loads(row[1])
-        res.update(dict(blog_id=row[0], desa=row[2], kecamatan=row[3],
-                        kabupaten=row[4], propinsi=row[5], kode=[row[6]]))
-        return res
-    try:
-
-        post_query = "select distinct d.* from sd_post_scores ps left join sd_desa d on d.blog_id = ps.blog_id where {0} and ps.post_date > ADDDATE(NOW(), INTERVAL -1 WEEK) and ps.post_date < ADDDATE(NOW(), INTERVAL 0 WEEK);".format(
-            query_sd_desa)
-        stats_query = "select s.blog_id, statistics, d.desa, d.kecamatan, d.kabupaten, d.propinsi,d.kode from sd_statistics s left join sd_desa d on d.blog_id = s.blog_id where {0} and date =  ADDDATE((select max(date) from sd_statistics), INTERVAL 0 WEEK);".format(
-            query_sd_desa)
-
-        cur.execute(post_query)
-        header = [column[0] for column in cur.description]
-        values = cur.fetchall()
-        results["post"] = list(dict(zip(header, value)) for value in values)
-
-        cur.execute(stats_query)
-        stats = [combine(c) for c in cur.fetchall()]
-        results["penduduk"] = list(
-            filter(lambda s: "penduduk" in s and s["penduduk"]["score"] > 0.5, stats))
-        results["keuangan"] = list(
-            filter(lambda s: "keuangan" in s and s["keuangan"]["score"] > 0.5, stats))
-        results["pemetaan"] = list(
-            filter(lambda s: "pemetaan" in s and s["pemetaan"]["score"] > 0.3, stats))
-
-        return jsonify(results)
-    finally:
-        cur.close()
 
 
 if __name__ == '__main__':

@@ -7,10 +7,11 @@ from region import RegionCompleteModelSchema
 class ProgressRecapitulation(BaseModel):
     __tablename__ = 'progress_recapitulations'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    year = db.Column(db.String, nullable=False)
     budgeted_revenue = db.Column(db.DECIMAL)
     transferred_revenue = db.Column(db.DECIMAL)
+    budgeted_spending = db.Column(db.DECIMAL)
     realized_spending = db.Column(db.DECIMAL)
-    year = db.Column(db.String, nullable=False)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')

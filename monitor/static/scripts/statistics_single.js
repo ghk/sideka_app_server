@@ -13,13 +13,13 @@ var configDataQualityGraph= {
             data:[],
             fill: false,
         }, {
-            label: "Penduduk",       
+            label: "Kependudukan",       
             backgroundColor: fill[2],
             borderColor: fill[2],
             data:[],
             fill: false,
         },{
-            label: "Anggaran",
+            label: "Keuangan",
             backgroundColor: fill[3],
             borderColor: fill[3],
             data:[],
@@ -103,7 +103,7 @@ function applyGraph(){
     dataQualityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
     dataQualityGraph.update();
 
-    var custom = {property:"label",content:["Berita Harian","Kependudukan","Keuangan", "Pemetaan"]}
+    var custom = {property:"label",content:["Berita","Kependudukan","Keuangan", "Pemetaan"]}
     datasets = [contentDataActivity.post,contentDataActivity.penduduk,contentDataActivity.keuangan, contentDataActivity.pemetaan]
     applyDatasets(dataActivityGraph,datasets,custom)
     dataActivityGraph.data.labels = contentDataActivity.label.map(function(timestamp, idx){return (idx%7 ==0 ||idx == contentDataActivity.label.length-1)?moment.unix(timestamp).format("DD MMM YYYY"):"";})    
@@ -141,15 +141,19 @@ function sliceDataGraph(graph,startSlice, sliceLength, data){
 }
 
 function onWidthChange(widthCurrent){	
-    if($.isEmptyObject(cachedDataQualityGraph))cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
+    if($.isEmptyObject(cachedDataQualityGraph))
+	cachedDataQualityGraph = $.extend(true,{},dataQualityGraph.data ) 
+
+    if($.isEmptyObject(cachedDataActivityGraph))
+	cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
+
     var sliceConfig = getStartSlice(widthCurrent,cachedDataQualityGraph.labels.length)
     var startSlice = sliceConfig[0], sliceLength = sliceConfig[1];
-    sliceDataGraph(dataQualityGraph,startSlice, sliceLength,cachedDataQualityGraph)    
+
+    sliceDataGraph(dataQualityGraph, startSlice, sliceLength,cachedDataQualityGraph)    
     dataQualityGraph.update()  
     
-    if($.isEmptyObject(cachedDataActivityGraph))cachedDataActivityGraph = $.extend(true,{},dataActivityGraph.data ) 
-    startSlice = cachedDataActivityGraph.labels.length - sliceLength;
-    sliceDataGraph(dataActivityGraph,startSlice, sliceLength,cachedDataActivityGraph)
+    sliceDataGraph(dataActivityGraph, startSlice, sliceLength,cachedDataActivityGraph)
     dataActivityGraph.update()  
 }
 
@@ -206,7 +210,7 @@ function applyTableHeader(header,thead){
 }
 
 function applyTableContent(){    
-    var headerTableDaily = ["Tanggal","Berita","Penduduk","Anggaran", "Pemetaan", "B.Qlt","B.Freq","P.Pen","P.Sur","P.Mut","K.Ren","K.Ang", 
+    var headerTableDaily = ["Tanggal","Berita","Penduduk","Keuangan", "Pemetaan", "B.Qlt","B.Freq","P.Pen","P.Sur","P.Mut","K.Ren","K.Ang", 
                         "K.SPP", "K.TBP","Pt. Tra","Pt. Bou","Pt. Wat", "Pt. Fac","Pt. Lan"]
     var headerTablePost = ["Score","Tanggal","Judul","#KBBI", "#Kalimat", "#Paragraph","%Gambar Utama","%Judul", "%KBBI","%Foto & Caption","%Kalimat","%Paragraph"]
     var tbody = $('#table-daily tbody');
@@ -226,7 +230,7 @@ function applyTableContent(){
         $('<td>').html(score(content, "penduduk.log_surat.score")).appendTo(tr);
         $('<td>').html(score(content, "penduduk.mutasi.score")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.perencanaan.score", "keuangan.perencanaan.content_id")).appendTo(tr);
-        $('<td>').html(score(content, "keuangan.pengaggaran.score", "keuangan.penganggaran.content_id")).appendTo(tr);
+        $('<td>').html(score(content, "keuangan.penganggaran.score", "keuangan.penganggaran.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.spp.score", "keuangan.spp.content_id")).appendTo(tr);
         $('<td>').html(score(content, "keuangan.penerimaan.score", "keuangan.penerimaan.content_id")).appendTo(tr);
         $('<td>').html(score(content, "pemetaan.network_transportation.score")).appendTo(tr);

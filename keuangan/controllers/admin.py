@@ -1,9 +1,12 @@
 from flask import Blueprint, jsonify, current_app
 from time import time
 from keuangan import db
-from keuangan.helpers import SiskeudesFetcher, Generator
+from keuangan.helpers import SiskeudesFetcher, Generator, SiskeudesPenganggaranTransformer
+from keuangan.repository import SiskeudesPenganggaranRepository
+from keuangan.models import SiskeudesPenganggaranModelSchema
 
 app = Blueprint('admin', __name__)
+spr = SiskeudesPenganggaranRepository(db)
 
 
 @app.route('/admin/fetch/desas', methods=['GET'])
@@ -42,7 +45,7 @@ def generate_all():
     t0 = time()
     prs = Generator.generate_progress_recapitulations()
     pts = Generator.generate_progress_timelines()
-    srs = Generator.generate_spending_recapitulations()
+    srs = Generator.generate_budget_recapitulations()
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(prs)

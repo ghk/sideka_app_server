@@ -346,7 +346,7 @@ def get_keuangan_statistics(cur, desa_id):
 def get_pemetaan_statistics(cur, desa_id):
 	result = {
 			"score": 0.0, 
-			"change_id": None, 
+			"content_id": None, 
 			"network_transportation": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, 
 			"waters": {"score": 0.0, "quality": {"count": 0, "score": 0}, "quantity": {"count": 0, "score": 0.0}}, 
 			"facilities_infrastructures": {"score": 0.0, "quality": {"count": 0, "score": 0.0}, "quantity": {"count": 0, "score": 0.0}}, 
@@ -362,7 +362,7 @@ def get_pemetaan_statistics(cur, desa_id):
 	last_modified = result["last_modified"]
 	last_modified["score"] = 0
 	if sql_row_pemetaan is not None:
-		result["change_id"] = sql_row_pemetaan["id"]
+		result["content_id"] = sql_row_pemetaan["id"]
 		last_modified["date"] = str(sql_row_pemetaan["date_created"])
 		last_modified["count"] = str(datetime.now() - sql_row_pemetaan["date_created"])
 		last_modified["score"] = get_scale(7 -(datetime.now() - sql_row_pemetaan["date_created"]).days , 7)
@@ -411,6 +411,8 @@ def get_kemiskinan_statistics(cur, desa_id):
 	return result
 def get_statistics(cur, desa_id):
 	result = {}
+	result["scoring_formula_version"] = 2
+	result["scoring_date"] = str(datetime.now())
 	functions = {}
 	functions["blog"] = get_blog_statistics
 	functions["penduduk"] = get_penduduk_statistics

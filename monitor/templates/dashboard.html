@@ -131,10 +131,10 @@
 
 <div class="uk-grid">
 	<div class="uk-width-1-1">
-		<div class="md-card">
+		<div id="map-card" class="md-card">
 			<div class="md-card-toolbar">
 				<div class="md-card-toolbar-actions">                    
-					<i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed" id="fullscreen-maps">&#xE5D0;</i>
+					<i class="md-icon material-icons md-card-fullscreen-activate toolbar_fixed" id="fullscreen-maps">list</i>
 				</div>
 				<div class="md-card-toolbar-actions-left switch-score">
 					<h3 class="md-card-toolbar-heading-text">
@@ -147,26 +147,23 @@
 						</div>
 					</h3>
 				</div>
-				<div class="md-card-toolbar-actions-left switch-score">
-					<input type="range" id="min-score" min="0" max="100" step="5" value="5" list="steplist" style="display: inline-block; width: 200px; margin-top: 18px; margin-left: 15px;">
-					<datalist id="steplist">
-					    <option>0</option>
-					    <option>25</option>
-					    <option>50</option>
-					    <option>75</option>
-					    <option>100</option>
-					</datalist>
-					<span style="vertical-align: top; margin-top: 20px; line-height: 25px; display: inline-block;">
-					Min: <span id="min-score-value">5</span>
-					</span>
-				</div>
 				<form class="uk-form switch-score">
-					<select class="uk-form-width-medium" style="margin:10px; padding: 5px; background-color: #fff;">
+					<select class="uk-form-width-medium" style="margin:10px; margin-left: 0px; padding: 5px; background-color: #fff;">
 						<option value="blog">Berita</option>
 						<option value="penduduk">Kependudukan</option>
 						<option value="keuangan">Keuangan</option>
+						<option value="pemetaan">Pemetaan</option>
 					</select>  
 				</form>
+				<div id="range-score" class="md-card-toolbar-actions-right">
+					<input type="range" id="min-score" min="0" max="100" step="5" value="5">
+					<span class="uk-badge"> 
+					Min: <span id="min-score-value">5</span>
+					</span>
+					<span class="uk-badge"> 
+					<span id="desa-count-value">-</span> Desa
+					</span>
+				</div>
 			</div>
 			<div class="md-card-content" style="padding: 0px;">
 				<div class="mGraph-wrapper">

@@ -90,62 +90,80 @@ function getContext (canvas){
 }
 
 function onSupradesaChanged(supradesaId){
-	$.getJSON("/api/dashboard?supradesa_id="+supradesaId, function(data){
-		dataDashboard = data;	
-		if(chartsPeity.length === 0){
-			for(var i=0; i<weekly.length; i++){
-				var current = weekly[i];
-				chartsPeity.push($("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]})); 
-			}
-		}	
-		for (var i = 0; i < weekly.length; i++){
-			var current = weekly[i];
-			var chart =  chartsPeity[i];
-			
-			$("#weekly-"+current+" .count").html(data["weekly"][current][0]);
-			$("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));			
-			chart.change();		
-		}
-		dailyGraph.data.labels =[];
-		dailyGraph.data.datasets = [];
-		dailyGraph.update();
+    $.getJSON("/api/dashboard?supradesa_id="+supradesaId, function(data){
+        var center = {lat:-2.604236, lng: 116.499023};
+        var zoom = 5
+        var errorValue = [0,null]
+        if(!$.isEmptyObject(data["zoom"])){
+            if(!errorValue.includes(data.zoom.latitude)&&!errorValue.includes(data.zoom.longitude)){	
+                center = {lat:data.zoom.latitude, lng:data.zoom.longitude};
+                zoom = data.zoom.zoom;
+            }
+        }
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: zoom,
+            center: center,
+            mapTypeControl: false,
+            streetViewControl: false,
+            styles: mapStyles,
+        });	
+        dataDashboard = data;	
+        if(chartsPeity.length === 0){
+            for(var i=0; i<weekly.length; i++){
+                var current = weekly[i];
+                chartsPeity.push($("#weekly-"+current+" .peity").peity("bar", {"fill": [fill[i]]})); 
+            }
+        }	
+        for (var i = 0; i < weekly.length; i++){
+            var current = weekly[i];
+            var chart =  chartsPeity[i];
+            
+            $("#weekly-"+current+" .count").html(data["weekly"][current][0]);
+            $("#weekly-"+current+" .peity").html(data["weekly"][current].reverse().join(","));			
+            chart.change();		
+        }
+        dailyGraph.data.labels =[];
+        dailyGraph.data.datasets = [];
+        dailyGraph.update();
 
-		dailyGraph.data.labels = convertDailyGraphDate(data.daily.label);
-		dailyGraph.data.datasets.push({
-				label: "Berita Harian",
-				backgroundColor: fill[1],
-				borderColor: fill[1],
-				data: data.daily.post,
-				fill: false,
-			}, {
-				label: "Kependudukan",
-				fill: false,
-				backgroundColor: fill[2],
-				borderColor: fill[2],
-				data: data.daily.penduduk,
-			},{
-				label: "Keuangan",
-				fill: false,
-				backgroundColor: fill[3],
-				borderColor: fill[3],
-				data: data.daily.keuangan,
-			},{
-				label: "Pemetaan",
-				fill: false,
-				backgroundColor: fill[4],
-				borderColor: fill[4],
-				data: data.daily.pemetaan,
-			})
-		dailyGraph.update();
-			
-		cachedPanelData = {};	
-		onWidthChange(width);
-	});
-	
-	markers= [];
-	cachedDailyGraphData = {};
-	getStatistics(supradesaId);
-	
+        dailyGraph.data.labels = convertDailyGraphDate(data.daily.label);
+        dailyGraph.data.datasets.push({
+                label: "Berita Harian",
+                backgroundColor: fill[1],
+                borderColor: fill[1],
+                data: data.daily.post,
+                fill: false,
+            }, {
+                label: "Kependudukan",
+                fill: false,
+                backgroundColor: fill[2],
+                borderColor: fill[2],
+                data: data.daily.penduduk,
+            },{
+                label: "Keuangan",
+                fill: false,
+                backgroundColor: fill[3],
+                borderColor: fill[3],
+                data: data.daily.keuangan,
+            },{
+                label: "Pemetaan",
+                fill: false,
+                backgroundColor: fill[4],
+                borderColor: fill[4],
+                data: data.daily.pemetaan,
+            })
+        dailyGraph.update();
+            
+        cachedPanelData = {};	
+        onWidthChange(width);
+        dataStatistics = data["map_statistics"];
+
+        markers= [];
+        cachedDailyGraphData = {};
+
+        var icon = "blog";
+        onButtonScoreClicked(icon);
+    });
 }
 
 function onPanelClicked(panelName,data){
@@ -278,52 +296,14 @@ function onPanelClicked(panelName,data){
 	}
 }
 
-// Maps Configuration
-function getStatistics(supradesaId){
-	initMaps(supradesaId);
-	var minScore = parseInt($("#min-score").val()) / 100.0;
-	$("#min-score-value").html(minScore * 100.0);
-	$.getJSON('/api/statistics?supradesa_id='+supradesaId, function(data){
-		var icon = "blog";
-		dataStatistics = data;
-		$.each(data,function(idx,content){
-			if(content.latitude && content.longitude){
-				addMarker(content,icon, minScore);
-			} else {
-				console.log("cannot show data", content);
-			}
-		})	
-	})
-}
-
-function initMaps(supradesaId){
-	var center = {lat:-2.604236, lng: 116.499023};
-	var zoom = 5
-	var errorValue = [0,null]
-	$.getJSON( "/api/get_zoom?supradesa_id="+supradesaId, function(data){		
-		if(!$.isEmptyObject(data)){
-			if(!errorValue.includes(data.latitude)&&!errorValue.includes(data.longitude)){	
-				center = {lat:data.latitude, lng:data.longitude};
-				zoom = data.zoom;
-			}
-		}
-		map = new google.maps.Map(document.getElementById('map'), {
-			zoom: zoom,
-			center: center,
-			mapTypeControl: false,
-			streetViewControl: false,
-			styles: mapStyles,
-		});	
-	})	  
-}
 
 function addMarker(content,icon,minScore) {
 	if(!content.penduduk || !content.keuangan || !content.blog){
 		console.log("data not complete cannot show data", content);
-		return;
+		return false;
 	}
 	if(content[icon].score < minScore){
-		return;
+		return false;
 	}
 	var host = window.location.origin;
 	var pathImage = "/static/content/icons/number/number_"+(content[icon].score*100).toFixed()+".png"
@@ -334,11 +314,12 @@ function addMarker(content,icon,minScore) {
 		icon: host+pathImage
 	});
 
-	var content = 'Website: <a href="http://'+content.domain+'">'+content.domain+'</a><br />'+
+	var content = 'Website: <a target="_blank" href="http://'+content.domain+'">'+content.domain+'</a><br />'+
 				  'Desa: <a href="/statistic/'+content.blog_id+'">'+content.desa+'</a><br />'+
 				  'Berita: '+(content.blog.score*100).toFixed(2)+'<br />'+
 				  'Kependudukan: '+(content.penduduk.score*100).toFixed(2)+'<br />'+
-				  'Keuangan: '+(content.keuangan.score*100).toFixed(2);
+				  'Keuangan: '+(content.keuangan.score*100).toFixed(2)+'<br />'+
+				  'Pemetaan: '+(content.pemetaan.score*100).toFixed(2);
 	var infowindow = new google.maps.InfoWindow();
 	google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
 		return function() {
@@ -347,19 +328,28 @@ function addMarker(content,icon,minScore) {
 		};
 	})(marker,content,infowindow));
 	markers.push(marker);
+	return true;
 }
 
 var currentScoreType = "blog";
+var desaCount = 0;
 
 function onButtonScoreClicked(buttonName){
 	currentScoreType = buttonName;
 	var minScore = parseInt($("#min-score").val()) / 100.0;
 	$("#min-score-value").html(minScore * 100.0);
 	clearMarkers();
+	desaCount = 0;
 	$.each(dataStatistics,function(idx, content){
-		if(content.latitude != null && content.longitude != null)
-			addMarker(content,buttonName, minScore);
+		if(content.latitude != null && content.longitude != null) {
+			if(addMarker(content,buttonName, minScore)){
+				desaCount += 1;
+			}
+		} else {
+			console.log("cannot show data", content);
+		}
 	})	
+	$("#desa-count-value").html(desaCount);
 	applyTableInMaps(buttonName);
 }
 

@@ -6,6 +6,10 @@
           <span class="number text-success">Rp. {{ total.budgetedRevenue | formatCurrency }}</span>
         </li>
         <li>
+          <span class="number text-success">{{ entities.length }}</span>
+          <span class="text text-success">Total Desa</span>
+        </li>
+        <li>
           <span class="number text-success">{{ total.transferredRevenue / total.budgetedRevenue | percent:'2.0-0' }}</span>
           <span class="text text-success">Tersalurkan Kabupaten</span>
         </li>
@@ -23,43 +27,71 @@
         <table class="table table-condensed table-responsive table-bordered table-striped">
           <thead [hidden]="progress?.percentage !== 100">
             <tr>
-              <th>Desa</th>
-              <th>Kabupaten</th>
-              <th class="money">Anggaran Desa</th>
-              <th class="money">Tersalurkan Kabupaten</th>
-              <th class="money">Terrealisasi Desa</th>
+              <th (click)="sort('region.name')" style="cursor: pointer;">Desa
+                <ng-container *ngIf="order.includes('region.name')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
+                </ng-container>
+              </th>
+              <th (click)="sort('region.id')" style="cursor: pointer;">Kabupaten
+                <ng-container *ngIf="order.includes('region.id')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
+                </ng-container>
+              </th>
+              <th (click)="sort('budgeted_revenue')" class="money" style="cursor: pointer;">Anggaran Desa
+                <ng-container *ngIf="order.includes('budgeted_revenue')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
+                </ng-container>
+              </th>
+              <th (click)="sort('transferred_revenue')" class="money" style="cursor: pointer;">Tersalurkan Kabupaten
+                <ng-container *ngIf="order.includes('transferred_revenue')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
+                </ng-container>
+              </th>
+              <th (click)="sort('realized_spending')" class="money" style="cursor: pointer;">Terrealisasi Desa
+                <ng-container *ngIf="order.includes('realized_spending')">
+                  <span [hidden]="order.startsWith('-')">▲</span>
+                  <span [hidden]="!order.startsWith('-')">▼</span>
+                </ng-container>
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let entity of entities">
+            <tr *ngFor="let entity of entities | orderBy: order">
               <td>
                 <a [routerLink]="['/progress/region', entity.region.id]">
-                                    <span>{{ entity.region.name }}</span> 
-                                </a>
+                  <span>{{ entity.region.name }}</span>
+                </a>
               </td>
-              <td><span>{{ entity.region | regionType:2 }}</span></td>
-              <td class="money">
-                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.budgeted_revenue, total.budgetedRevenue)"> </div>
+              <td>
+                <span>{{ entity.region | regionType:2 }}</span>
               </td>
               <td class="money">
-                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.transferred_revenue, entity.budgeted_revenue)"> </div>
+                <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.budgetedRevenue"></div>
               </td>
               <td class="money">
-                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }} </div>
-                <div class="bar-percent" [ngStyle]="getBarPercent(entity.realized_spending, entity.budgeted_revenue)"> </div>
+                <div style="float:right;">{{ entity.transferred_revenue | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.transferredRevenue"></div>
+              </td>
+              <td class="money">
+                <div style="float:right;">{{ entity.realized_spending | number:'3.0-0' }}</div>
+                <div class="bar-percent" [ngStyle]="entity.barPercent.realizedSpending"></div>
               </td>
             </tr>
           </tbody>
-
           <tfoot [hidden]="progress?.percentage !== 100 && entities.length <= 0">
             <tr class="success">
-              <td><a href>Total</a></td>
+              <td>
+                <a href>Total</a>
+              </td>
               <td></td>
-              <td class="money"> {{ total.budgetedRevenue | number:'3.0-0'}} </td>
-              <td class="money"> {{ total.transferredRevenue | number:'3.0-0'}} </td>
-              <td class="money"> {{ total.realizedSpending | number:'3.0-0'}} </td>
+              <td class="money">{{ total.budgetedRevenue | number:'3.0-0' }}</td>
+              <td class="money">{{ total.transferredRevenue | number:'3.0-0' }}</td>
+              <td class="money">{{ total.realizedSpending | number:'3.0-0' }}</td>
             </tr>
           </tfoot>
           <tfoot [hidden]="progress?.percentage === 100">

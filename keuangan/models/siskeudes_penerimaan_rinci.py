@@ -1,4 +1,3 @@
-from marshmallow import post_load
 from keuangan import db
 from keuangan import ma
 from base import BaseModel

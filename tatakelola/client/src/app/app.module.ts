@@ -1,18 +1,19 @@
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-
+import { NgPipesModule } from 'ngx-pipes';
 
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
 import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
-
+import { SummaryComponent } from './components/summary';
 import { DataService } from './services/data';
 import { SharedService } from './services/shared';
 
@@ -22,18 +23,22 @@ import { SharedService } from './services/shared';
     MapComponent,
     DesaComponent,
     SearchComponent,
-    SidebarComponent
+    SidebarComponent,
+    SummaryComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     HttpModule,
     ProgressHttpModule,
+    NgPipesModule,
+    FormsModule,
     LeafletModule.forRoot(),
     RouterModule.forRoot([
-      { path: '', redirectTo: 'map', pathMatch: 'full' },
+      { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },
+      { path: 'summary/region/:regionId', component: SummaryComponent },
       { path: 'map', component: MapComponent },
-      { path: 'desa', component: DesaComponent }
+      { path: 'desa/region/:regionId', component: DesaComponent }
     ])
   ],
   providers: [

@@ -1,116 +1,221 @@
-<div id="map" #map leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)"></div>
-<st-search></st-search>
+<div id="map" class="map-responsive" #map leaflet [leafletOptions]="mapOptions" (leafletMapReady)="onMapReady($event)"></div>
 
-<div class="prevnext" style="float:right;">
-  <button class="prev">⇦ Desa Sebelum</button>
-  <button class="next">Desa Berikut ⇨</button>
+<div class="desktop">
+    <div id="cari" style="display: inline-flex">
+        <a>
+          <img src="/assets/res/logobp3ti.png">
+        </a>
+        <h5 *ngIf="activeDesa"> {{activeDesa}} </h5>
+    </div>
+      
+    <div class="center-div" [hidden]="progress?.percentage === 100">
+      <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+      <br>
+    </div>
+    
+    <div class="prevnext" style="float:right; margin-top: 2px;">
+      <button class="prev" (click)="prev()">⇦ Desa Sebelum</button>
+      <button class="next" (click)="next()">Desa Berikut ⇨</button>
+    </div>
+    
+    <div class="show-hide-side">
+      <button class="shide" (click)="sidebarCollapsed = !sidebarCollapsed" id="shide">Rincian ▾</button>
+    </div>
+    
+    <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
+      <a href="#" (click)="setActiveMenu('pembangunan')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'pembangunan' }">
+          <div class="icon">
+            <i class="fa fa-money"></i>
+          </div>
+          <div class="desc">
+            <h4>Rp {{summaries.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{summaries.penganggaran_year}}) </h4>
+          </div>
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('batas')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'batas' }">
+          <div class="icon">
+            <i class="fa fa-map"></i>
+          </div>
+          <div class="desc">
+              <h4> {{summaries.pemetaan_desa_boundary / 1000 | number:'1.0-0' }} km <sup>2</sup> </h4>
+          </div>
+    
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('gender')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'gender' }">
+          <div class="icon">
+            <i class="fa fa-male"></i>
+          </div>
+          <div class="desc">
+            <h4>
+              <i class="fa fa-mars"></i> {{summaries.penduduk_sex_male}}&nbsp;&nbsp;
+              <i class="fa fa-venus"></i> {{summaries.penduduk_sex_female}}</h4>
+          </div>
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('education')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'education' }">
+          <div class="icon">
+            <i class="fa fa-building"></i>
+          </div>
+          <div class="desc">
+            <h4> {{summaries.penduduk_edu_sd}} <strong>SD</strong>  {{summaries.penduduk_edu_smp}} <strong>SMP</strong>  {{summaries.penduduk_edu_sma}} <strong>SMA</strong>  {{summaries.penduduk_edu_pt}} <strong>PT</strong> </h4>
+          </div>
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('electricity')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
+          <div class="icon">
+            <i class="fa fa-plug"></i>
+          </div>
+          <div class="desc">
+            <h4>{{summaries.pemetaan_electricity_available_kk}} Dari {{summaries.penduduk_total_kk}} KK</h4>
+          </div>
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('misc')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
+          <div class="icon">
+            <i class="fa fa-tint"></i>
+          </div>
+          <div class="desc">
+            <h4>{{summaries.pemetaan_water_spring}} Mata Air, {{summaries.pemetaan_water_ditch}} Sistem Pipa</h4>
+          </div>
+        </div>
+      </a>
+      <a href="#" (click)="setActiveMenu('potensi')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'potensi' }">
+          <div class="icon">
+            <i class="fa fa-leaf"></i>
+          </div>
+          <div class="desc">
+            <div> 
+                <h4> Pertanian: <br> {{summaries.pemetaan_potential_farmland_trees}}</h4>     
+            </div>
+            <div> 
+                <h4> Perkebunan: <br>  {{summaries.pemetaan_potential_orchard_orchards}}</h4>
+            </div>
+            <div> 
+                <h4> Pohon: <br> {{summaries.pemetaan_potential_forest_trees}} </h4>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    
+    <div class="dropdown" style="float: right;">
+      <button class="dropbtn">☰</button>
+      <div class="dropdown-content">
+        <a href="#">
+          <img src="../../assets/res/graph1.svg">Dashboard Keuangan</a>
+        <a href="#">
+          <img src="../../assets/res/graph2.svg">Dashboard Monitoring</a>
+        <a href="#">
+          <img src="../../assets/res/news.svg">Kabar Desa</a>
+      </div>
+    </div>      
 </div>
 
-<div class="show-hide-side">
-  <button class="shide" (click)="isSidebarShown = !isSidebarShown" id="shide">Rincian ▾</button>
-</div>
-
-<div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
-  <a href="#" (click)="setActiveMenu('pembangunan')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'pembangunan' }">
-      <div class="icon">
-        <i class="fa fa-money"></i>
-      </div>
-      <div class="desc">
-        <h4>Rp {{captions.pembangunan.total}} (APBDes {{captions.pembangunan.year}})</h4>
-      </div>
+<div class="mobile">
+   <div id="cari" style="display: inline-flex; width: 360px;">
+      <a>
+        <img src="/assets/res/logobp3ti.png">
+      </a>
+      <h5 *ngIf="activeDesa"> {{activeDesa}} </h5>
     </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('batas')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'batas' }">
-      <div class="icon">
-        <i class="fa fa-map"></i>
-      </div>
-      <div class="desc">
-        <h4>{{captions.batas}} km2</h4>
-      </div>
-
+    <div class="center-div" [hidden]="progress?.percentage === 100">
+        <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+        <br>
     </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('gender')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'gender' }">
-      <div class="icon">
-        <i class="fa fa-male"></i>
-      </div>
-      <div class="desc">
-        <h4>
-          <i class="fa fa-mars"></i> {{captions.genders.male}} &nbsp;&nbsp;
-          <i class="fa fa-venus"></i> {{captions.genders.female}}</h4>
-      </div>
-
+    <div class="prevnext">
+        <button class="prev" (click)="prev()">⇦ Desa Sebelum</button>
+        <button class="next" (click)="next()">Desa Berikut ⇨</button>
     </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('education')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'education' }">
-      <div class="icon">
-        <i class="fa fa-building"></i>
-      </div>
-      <div class="desc">
-        <h4>{{captions.education.tk}} TK &nbsp;&nbsp; {{captions.education.sd}} SD &nbsp;&nbsp; {{captions.education.smp}} SMP
-          &nbsp;&nbsp; {{captions.education.sma}} SMA </h4>
-      </div>
+    <div style="margin-top: 10px; width: 600px; height: 300px; overflow-y: scroll;">
+        <a href="#" (click)="setActiveMenu('pembangunan')">
+            <div class="side" [ngClass]="{'active': activeMenu === 'pembangunan' }">
+              <div class="icon">
+                <i class="fa fa-money"></i>
+              </div>
+              <div class="desc">
+                <h4>Rp {{summaries.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{summaries.penganggaran_year}}) </h4>
+              </div>
+            </div>
+        </a>
+        
+        <a href="#" (click)="setActiveMenu('batas')">
+            <div class="side" [ngClass]="{'active': activeMenu === 'batas' }">
+              <div class="icon">
+                <i class="fa fa-map"></i>
+              </div>
+              <div class="desc">
+                  <h4> {{summaries.pemetaan_desa_boundary / 1000 | number:'1.0-0' }} km <sup>2</sup> </h4>
+              </div>
+        
+            </div>
+          </a>
+          <a href="#" (click)="setActiveMenu('gender')">
+              <div class="side" [ngClass]="{'active': activeMenu === 'gender' }">
+                <div class="icon">
+                  <i class="fa fa-male"></i>
+                </div>
+                <div class="desc">
+                  <h4>
+                    <i class="fa fa-mars"></i> {{summaries.penduduk_sex_male}}&nbsp;&nbsp;
+                    <i class="fa fa-venus"></i> {{summaries.penduduk_sex_female}}</h4>
+                </div>
+              </div>
+            </a>
+            <a href="#" (click)="setActiveMenu('education')">
+              <div class="side" [ngClass]="{'active': activeMenu === 'education' }">
+                <div class="icon">
+                  <i class="fa fa-building"></i>
+                </div>
+                <div class="desc">
+                  <h4> {{summaries.penduduk_edu_sd}} <strong>SD</strong>  {{summaries.penduduk_edu_smp}} <strong>SMP</strong>  {{summaries.penduduk_edu_sma}} <strong>SMA</strong>  {{summaries.penduduk_edu_pt}} <strong>PT</strong> </h4>
+                </div>
+              </div>
+            </a>
+            <a href="#" (click)="setActiveMenu('electricity')">
+              <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
+                <div class="icon">
+                  <i class="fa fa-plug"></i>
+                </div>
+                <div class="desc">
+                  <h4>{{summaries.pemetaan_electricity_available_kk}} Dari {{summaries.penduduk_total_kk}} KK</h4>
+                </div>
+              </div>
+            </a>
+            <a href="#" (click)="setActiveMenu('misc')">
+              <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
+                <div class="icon">
+                  <i class="fa fa-tint"></i>
+                </div>
+                <div class="desc">
+                  <h4>{{summaries.pemetaan_water_spring}} Mata Air, {{summaries.pemetaan_water_ditch}} Sistem Pipa</h4>
+                </div>
+              </div>
+            </a>
+            <a href="#" (click)="setActiveMenu('potensi')">
+              <div class="side" [ngClass]="{'active': activeMenu === 'potensi' }">
+                <div class="icon">
+                  <i class="fa fa-leaf"></i>
+                </div>
+                <div class="desc">
+                  <div> 
+                      <h4> Pertanian: <br> {{summaries.pemetaan_potential_farmland_trees}}</h4>     
+                  </div>
+                  <div> 
+                      <h4> Perkebunan: <br>  {{summaries.pemetaan_potential_orchard_orchards}}</h4>
+                  </div>
+                  <div> 
+                      <h4> Pohon: <br> {{summaries.pemetaan_potential_forest_trees}} </h4>
+                  </div>
+                </div>
+              </div>
+            </a>
     </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('electricity')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
-      <div class="icon">
-        <i class="fa fa-plug"></i>
-      </div>
-      <div class="desc">
-        <h4>{{captions.electricity.detected}} dari {{captions.electricity.total}} KK</h4>
-      </div>
-
-    </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('misc')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
-      <div class="icon">
-        <i class="fa fa-tint"></i>
-      </div>
-      <div class="desc">
-        <h4>{{captions.misc}}</h4>
-      </div>
-    </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('network')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'network' }">
-      <div class="icon">
-        <i class="fa fa-phone"></i>
-      </div>
-      <div class="desc">
-        <h4>{{captions.networks}}</h4>
-      </div>
-    </div>
-  </a>
-  <a href="#" (click)="setActiveMenu('potensi')">
-    <div class="side" [ngClass]="{'active': activeMenu === 'potensi' }">
-      <div class="icon">
-        <i class="fa fa-leaf"></i>
-      </div>
-      <div class="desc">
-        <h4>Pertanian :
-          <br> {{captions.potention.farmland}}
-          <br>
-          <br> Perkebunan :
-          <br> {{captions.potention.orchard}}</h4>
-      </div>
-    </div>
-  </a>
-</div>
-
-<div class="dropdown" style="float: right;">
-  <button class="dropbtn">☰</button>
-  <div class="dropdown-content">
-    <a href="#">
-      <img src="../../assets/res/graph1.svg">Dashboard Keuangan</a>
-    <a href="#">
-      <img src="../../assets/res/graph2.svg">Dashboard Monitoring</a>
-    <a href="#">
-      <img src="../../assets/res/news.svg">Kabar Desa</a>
-  </div>
 </div>
