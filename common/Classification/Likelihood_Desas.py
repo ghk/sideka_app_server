@@ -75,7 +75,6 @@ result = []
 for desa in all_splited:
     desa = [x for x in desa if x[2] !=0]
     result.append(desa[0:5])
-result
 from itertools import chain
 zipped=np.concatenate(result)
 result=pd.DataFrame(zipped)
@@ -85,7 +84,7 @@ result.columns=["fk_region_id", "likelihood_id", "euclidean_score"]
 rank = [1, 2, 3 , 4 , 5]
 #Joining column rank into dataframe
 result = result.join(pd.DataFrame(rank * (len(result)/len(rank)+1),columns=['rank']))
-result
+
 
 
 # In[ ]:
