@@ -204,35 +204,39 @@ class ParsePemetaanData:
 
                         if math.isnan(properties['width']) == False:
                             summary.pemetaan_water_pipe += int(properties['width'])
+           #elif type == 'electricity':
+                #if properties.has_key('electricity_watt'):
+                    #if math.isnan(properties['electricity_watt']) == False:
+                        #if int(properties['electricity_watt']) > 0:
+                            #summary.pemetaan_electricity_house += 1
+            elif type == 'facilities_infrastructures':
+                if properties.has_key('building'):
+                    if properties.has_key('house'):
+                        if properties.has_key('electricity_watt'):
+                            if math.isnan(properties['electricity_watt']) == False:
+                                if int(properties['electricity_watt']) > 0:
+                                    summary.pemetaan_electricity_house += 1
 
-            elif type == 'electricity':
-                if properties.has_key('electricity_watt'):
-                    if math.isnan(properties['electricity_watt']) == False:
-                        if int(properties['electricity_watt']) > 0:
-                            summary.pemetaan_electricity_house += 1
-            elif type == 'school':
-                if properties.has_key('amenity') == False:
-                    continue
-                if properties['amenity'] != 'school':
-                    continue
-                if properties.has_key('isced') == False:
-                    continue
+                elif properties.has_key('amenity') == False: 
+                    if properties['amenity'] == 'school':  
+                        if properties.has_key('isced') == False:
+                            continue
 
-                isced = -1
+                        isced = -1
 
-                if math.isnan(properties['isced']):
-                    isced = int(property['isced'])
+                        if math.isnan(properties['isced']):
+                            isced = int(property['isced'])
 
-                if isced == 0:
-                    summary.pemetaan_school_tk += 1
-                elif isced == 1:
-                    summary.pemetaan_school_sd += 1
-                elif isced == 2:
-                    summary.pemetaan_school_smp += 1
-                elif isced == 3:
-                    summary.pemetaan_school_sma += 1
-                elif isced == 4:
-                    summary.pemetaan_school_pt += 1
+                        if isced == 0:
+                            summary.pemetaan_school_tk += 1
+                        elif isced == 1:
+                            summary.pemetaan_school_sd += 1
+                        elif isced == 2:
+                            summary.pemetaan_school_smp += 1
+                        elif isced == 3:
+                            summary.pemetaan_school_sma += 1
+                        elif isced == 4:
+                            summary.pemetaan_school_pt += 1
 
         if pipe_count > 0:
             summary.pemetaan_water_pipe_width_avg = summary.pemetaan_water_pipe_width_avg / pipe_count
