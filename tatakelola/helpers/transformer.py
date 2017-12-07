@@ -204,6 +204,7 @@ class ParsePemetaanData:
 
                         if math.isnan(properties['width']) == False:
                             summary.pemetaan_water_pipe += int(properties['width'])
+
             elif type == 'electricity':
                 if properties.has_key('electricity_watt'):
                     if math.isnan(properties['electricity_watt']) == False:
@@ -217,15 +218,20 @@ class ParsePemetaanData:
                 if properties.has_key('isced') == False:
                     continue
 
-                if properties['isced'] == 0:
+                isced = -1
+
+                if math.isnan(properties['isced']):
+                    isced = int(property['isced'])
+
+                if isced == 0:
                     summary.pemetaan_school_tk += 1
-                elif properties['isced'] == 1:
+                elif isced == 1:
                     summary.pemetaan_school_sd += 1
-                elif properties['isced'] == 2:
+                elif isced == 2:
                     summary.pemetaan_school_smp += 1
-                elif properties['isced'] == 3:
+                elif isced == 3:
                     summary.pemetaan_school_sma += 1
-                elif properties['isced'] == 4:
+                elif isced == 4:
                     summary.pemetaan_school_pt += 1
 
         if pipe_count > 0:
