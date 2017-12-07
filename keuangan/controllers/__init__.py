@@ -6,3 +6,4 @@ from progress import app as ProgressController
 from region import app as RegionController
 from budget import app as BudgetController
 from spp import app as SppController
+from likelihood import app as LikelihoodController

@@ -90,7 +90,7 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
     }
 
-    ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
+    ngOnChanges(changes: {[propKey: string]: SimpleChange}): void {
         if (changes['budgetTypes'])
             this.budgetTypes = changes['budgetTypes'].currentValue;
         if (changes['budgetRecapitulations'])
@@ -99,9 +99,5 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
             this.getData();
         if (changes['progress'])
             this.progress = changes['progress'].currentValue;
-    }
-
-    progressListener(progress: Progress): void {
-        this.progress = progress;
     }
 }

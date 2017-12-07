@@ -3,19 +3,22 @@
     <div class="col-sm-8" style="border-right: 1px solid #ddd;">
       <ul class="nav nav-tabs front-numbers">
         <li>
-          <span class="number">DESA {{ region?.name }} <span style="font-size:24px;"> - KABUPATEN {{ region | regionType:2 }}</span> 
+          <span class="number">DESA {{ region?.name }}
+            <span style="font-size:24px;"> - KABUPATEN {{ region | regionType:2 }}</span>
             <a href="region?.domain" style="font-size:14px;">Web Desa</a>
           </span>
         </li>
       </ul>
       <div class="content-header">
         <span>ANGGARAN&nbsp;&nbsp;</span>
-        <select [(ngModel)]="budgetType">            
-            <option value="5">BELANJA</option>
-            <option value="4">PENDAPATAN</option>
+        <select [(ngModel)]="budgetType">
+          <option value="5">BELANJA</option>
+          <option value="4">PENDAPATAN</option>
         </select>
         <span>DESA</span>
-        <button class="btn btn-xs btn-primary" style="margin-left: 20px;" (click)="hideBudgetDetail = !hideBudgetDetail">{{ hideBudgetDetail ? "Tampilkan" : "Sembunyikan"}} rincian</button>
+        <button class="btn btn-xs btn-primary" style="margin-left: 20px;" (click)="hideBudgetDetail = !hideBudgetDetail">
+          {{ hideBudgetDetail ? "Tampilkan" : "Sembunyikan"}} rincian
+        </button>
       </div>
       <div class="table-responsive">
         <table class="table table-condensed table-responsive table-bordered table-striped">
@@ -43,7 +46,7 @@
               <!-- <th style="text-align: center">Perubahan</th> -->
             </tr>
           </thead>
-          <tbody>
+          <tbody [hidden]="progress?.percentage !== 100">
             <tr *ngFor="let entity of entities | budgetType:budgetType | hideBudgetDetail:hideBudgetDetail">
               <td>
                 <div [innerHTML]="entity.append.concat(entity.kode_rekening)"></div>
@@ -112,7 +115,8 @@
       </div>
     </div>
     <div class="col-sm-4">
-        <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
+      <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
+      <sk-budget-likelihood [progress]="progress"></sk-budget-likelihood>
     </div>
   </div>
 </div>

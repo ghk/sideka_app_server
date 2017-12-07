@@ -6,6 +6,10 @@
 
 <div *ngIf="progress?.percentage === 100">
   <div class="content-header">
+    <select [(ngModel)]="isPercentage">
+      <option [ngValue]="false">TOTAL</option>
+      <option [ngValue]="true">PERSENTASE</option>
+    </select>
     Penyaluran {{ region?.name }}
   </div>
   <br />
@@ -15,6 +19,10 @@
   </div>
   <br />
   <div class="content-header">
+    <select [(ngModel)]="isPercentage">
+      <option [ngValue]="false">TOTAL</option>
+      <option [ngValue]="true">PERSENTASE</option>
+    </select>
     Realisasi {{ region?.name }}
   </div>
   <br />

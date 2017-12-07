@@ -54,6 +54,11 @@ class BaseRegionRepository:
             .filter(self.model.fk_region_id == region_id) \
             .delete()
 
+    def delete_by_year(self, year):
+        self.db.session.query(self.model) \
+            .filter(self.model.year == year) \
+            .delete()
+
     def delete_by_region_and_year(self, region_id, year):
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \

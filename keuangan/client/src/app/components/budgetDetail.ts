@@ -61,6 +61,7 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
         let year = new Date().getFullYear().toString();
 
         this._subscriptions[0] = this._sharedService.getRegion().subscribe(region => {
+            this.progress = null;
             this.region = region;
             this.getData();
         });

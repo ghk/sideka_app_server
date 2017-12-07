@@ -26,6 +26,7 @@ def create_app():
     app.register_blueprint(RegionController)
     app.register_blueprint(BudgetController)
     app.register_blueprint(SppController)
+    app.register_blueprint(LikelihoodController)
     app.register_blueprint(AdminController)
 
     db.init_app(app)
