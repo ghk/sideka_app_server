@@ -217,15 +217,12 @@ class ParsePemetaanData:
                                 if int(properties['electricity_watt']) > 0:
                                     summary.pemetaan_electricity_house += 1
 
-                elif properties.has_key('amenity') == False: 
+                elif properties.has_key('amenity'): 
                     if properties['amenity'] == 'school':  
                         if properties.has_key('isced') == False:
                             continue
-
-                        isced = -1
-
-                        if math.isnan(properties['isced']):
-                            isced = int(property['isced'])
+                        
+                        isced = int(properties['isced'])
 
                         if isced == 0:
                             summary.pemetaan_school_tk += 1
