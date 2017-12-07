@@ -55,7 +55,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('penduduk_total')" rowspan="2" class="sortable-header">Pendidikan
+                    <th (click)="sort('desa_edu_total')" rowspan="2" class="sortable-header">Pendidikan
                             <ng-container *ngIf="order.includes('desa_edu_total')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
