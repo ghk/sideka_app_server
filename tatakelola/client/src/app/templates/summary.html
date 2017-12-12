@@ -37,7 +37,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                         </th>
-                    <th (click)="sort('penganggaran_budgeted_revenue')" rowspan="2" class="sortable-header">APBDes
+                    <th (click)="sort('penganggaran_budgeted_revenue')" rowspan="2" class="sortable-header">Anggaran
                         <ng-container *ngIf="order.includes('penganggaran_budgeted_revenue')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
@@ -55,7 +55,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('desa_edu_total')" rowspan="2" class="sortable-header">Pendidikan
+                    <th (click)="sort('desa_edu_total')" rowspan="2" class="sortable-header">Gedung Sekolah
                             <ng-container *ngIf="order.includes('desa_edu_total')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
@@ -74,7 +74,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>-->
-                    <th (click)="sort('desa_total_potential')" rowspan="2" class="sortable-header">Potensi
+                    <th (click)="sort('desa_total_potential')" rowspan="2" class="sortable-header">Lahan
                             <ng-container *ngIf="order.includes('desa_total_potential')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
@@ -91,7 +91,7 @@
                      <td class="money data-column-number hoverable" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
                      <td class="money data-column-number hoverable" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
                     
-                     <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000  | number:'1.0-0'}} </td>
+                     <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000000 | number:'1.0-0'}} </td>
                      <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
                      
                      <td class="money data-column-number hoverable" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total}} </td>
@@ -194,7 +194,7 @@
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary > 0"> {{summary.pemetaan_desa_boundary / 1000 | number:'1.0-0'}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary > 0"> {{summary.pemetaan_desa_boundary / 1000000 | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary === 0"> -</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_circumference > 0"> {{summary.pemetaan_desa_circumference / 1000 | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_circumference === 0"> -</td>

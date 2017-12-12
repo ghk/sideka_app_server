@@ -102,24 +102,25 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     setup(): void {
         this.activeDesa = null;
-        this.loadGeojsonByRegion();
+        this.loadMapLayout();
         this.loadSummariesByRegion();
 
         if(this.availableDesas.length === 0)
             this.loadAvailableMaps();
     }
 
-    private loadGeojsonByRegion(): void {
+    private loadMapLayout(): void {
         this.clearMap();
         this.progress.percentage = 0;
 
-        this._dataService.getGeojsonsByRegion(this.activeRegionId, {}, this.progressListener.bind(this)).subscribe(
-            geojson => {
-                if(geojson.length === 0)
+        this._dataService.getGeojsonByTypeAndRegion('boundary', this.activeRegionId, {}, 
+            this.progressListener.bind(this)).subscribe(
+                geojson => {
+                    if(geojson.length === 0)
                     return;
 
-                this.setMapLayout(geojson);
-            }
+                    this.setMapLayout(geojson);
+                }
         )
     }
 
@@ -179,6 +180,10 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     setMapLayout(geoJson): void {
+        console.log(geoJson);
+        this.geoJsonLayer = L.geoJSON(geoJson.data, this.geoJSONOptions).addTo(this.activeMap);
+        this.activeMap.setView(this.geoJsonLayer.getBounds().getCenter(), 15);
+        /*
         let landuse = geoJson.filter(e => e.type === 'landuse')[0];
         let transport = geoJson.filter(e => e.type === 'network_transportation')[0];
         let facilities = geoJson.filter(e => e.type === 'facilities_infrastructures')[0];
@@ -196,7 +201,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     
         this.geoJsonLayer = L.geoJSON(geoJsonData, this.geoJSONOptions).addTo(this.activeMap);
 
-        this.activeMap.setView(this.geoJsonLayer.getBounds().getCenter(), 15);
+        this.activeMap.setView(this.geoJsonLayer.getBounds().getCenter(), 15);*/
     }
 
     clearMap(): void {
