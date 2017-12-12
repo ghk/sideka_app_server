@@ -284,7 +284,7 @@ class SiskeudesLikelihoodTransformer:
         likelihood_table = []
 
         for desa in rank_desas_splitted:
-            desa = [x for x in desa if x[2] != 0]
+            desa = [x for x in desa if x[0] != x[1]]
             likelihood_table.append(desa[0:5])
 
         zipped = numpy.concatenate(likelihood_table)
