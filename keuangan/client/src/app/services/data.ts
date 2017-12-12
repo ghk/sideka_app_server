@@ -142,6 +142,20 @@ export class DataService {
             .catch(this.handleError)
     }
 
+    getBudgetLikelihoodByRegionAndYear(regionId: string, year: string, query: Query, progressListener: any): Observable<any> {
+        let request = RequestHelper.generateHttpRequest(
+            this._http,
+            'GET',
+            urljoin(this._serverUrl, 'budget/likelihoods/region', regionId, 'year', year),
+            query,
+            progressListener
+        );
+
+        return request
+            .map(res => res.json())
+            .catch(this.handleError);
+    }
+
     getSiskeudesPenerimaanByRegionAndYear(regionId: string, year: string, query: Query, progressListener: any): Observable<any> {
         let request = RequestHelper.generateHttpRequest(
             this._http,

@@ -18,6 +18,7 @@ import { BudgetComponent } from './components/budget';
 import { BudgetRecapitulationComponent } from './components/budgetRecapitulation';
 import { BudgetDetailComponent } from './components/budgetDetail';
 import { BudgetChartComponent } from './components/budgetChart';
+import { BudgetLikelihoodComponent } from './components/budgetLikelihood';
 
 import { FormatCurrencyPipe } from './pipes/formatCurrency';
 import { HideBudgetDetailPipe } from './pipes/hideBudgetDetail';
@@ -39,6 +40,7 @@ import { SharedService } from './services/shared';
     BudgetRecapitulationComponent,
     BudgetDetailComponent,
     BudgetChartComponent,
+    BudgetLikelihoodComponent,
     HideBudgetDetailPipe,
     BudgetTypePipe,
     FormatCurrencyPipe,

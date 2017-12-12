@@ -108,7 +108,7 @@ class TatakelolaFetcher():
             try:
                 TatakelolaFetcher.fetch_geojsons_by_region(region)
             except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
@@ -121,7 +121,7 @@ class TatakelolaFetcher():
             try:
                 TatakelolaFetcher.fetch_data_by_region(region)
             except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
@@ -132,6 +132,6 @@ class TatakelolaFetcher():
             try:
                 TatakelolaFetcher.fetch_apbdes_by_region(region)
             except Exception as e:
-                logging.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logging.error(e.message)
                 traceback.print_exc()

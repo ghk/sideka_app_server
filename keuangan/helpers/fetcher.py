@@ -31,7 +31,8 @@ class SiskeudesFetcher:
             region = region_repository.get(str(sd_desa.kode).rstrip())
 
             if (region is None):
-                logger.warning('Desa: {0}<{1}><{2}> does not have region'.format(sd_desa.desa, sd_desa.blog_id, sd_desa.kode))
+                logger.warning(
+                    'Desa: {0}<{1}><{2}> does not have region'.format(sd_desa.desa, sd_desa.blog_id, sd_desa.kode))
                 continue
 
             region.domain = sd_desa.domain
@@ -40,9 +41,7 @@ class SiskeudesFetcher:
             db.session.add(region)
 
     @staticmethod
-    def fetch_siskeudes_codes():
-        year = str(datetime.now().year)
-
+    def fetch_siskeudes_codes_by_year(year):
         # Why? Because penerimaan has kode desa
         sd_contents = sideka_content_repository.get_latest_content('penerimaan', year)
         for sd_content in sd_contents:
@@ -72,15 +71,14 @@ class SiskeudesFetcher:
             db.session.add(region)
 
     @staticmethod
-    def fetch_penganggaran_by_region(region):
-        year = str(datetime.now().year)
-
+    def fetch_penganggaran_by_region_and_year(region, year):
         siskeudes_penganggaran_repository.delete_by_region_and_year(region.id, year)
         siskeudes_kegiatan_repository.delete_by_region_and_year(region.id, year)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
         if (sd_content is None):
-            logger.warning('Region: {0}<{1}><{2}> does not have anggaran'.format(region.name, region.id, region.desa_id))
+            logger.warning(
+                'Region: {0}<{1}><{2}> does not have anggaran'.format(region.name, region.id, region.desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -109,9 +107,7 @@ class SiskeudesFetcher:
         siskeudes_kegiatan_repository.bulk_add_all(sks.data, region, year)
 
     @staticmethod
-    def fetch_penerimaan_by_region(region):
-        year = str(datetime.now().year)
-
+    def fetch_penerimaan_by_region_and_year(region, year):
         siskeudes_penerimaan_repository.delete_by_region_and_year(region.id, year)
         siskeudes_penerimaan_rinci_repository.delete_by_region_and_year(region.id, year)
 
@@ -129,9 +125,7 @@ class SiskeudesFetcher:
         siskeudes_penerimaan_rinci_repository.bulk_add_all(sprs.data, region, year)
 
     @staticmethod
-    def fetch_spp_by_region(region):
-        year = str(datetime.now().year)
-
+    def fetch_spps_by_region_and_year(region, year):
         siskeudes_spp_repository.delete_by_region_and_year(region.id, year)
         siskeudes_spp_bukti_repository.delete_by_region_and_year(region.id, year)
         siskeudes_spp_rinci_repository.delete_by_region_and_year(region.id, year)
@@ -152,34 +146,34 @@ class SiskeudesFetcher:
         siskeudes_spp_rinci_repository.bulk_add_all(spprs.data, region, year)
 
     @staticmethod
-    def fetch_penganggarans():
-        regions = region_repository.all()
+    def fetch_penganggarans_by_year(year):
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             try:
-                SiskeudesFetcher.fetch_penganggaran_by_region(region)
+                SiskeudesFetcher.fetch_penganggaran_by_region_and_year(region, year)
             except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
     @staticmethod
-    def fetch_penerimaans():
-        regions = region_repository.all()
+    def fetch_penerimaans_by_year(year):
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             try:
-                SiskeudesFetcher.fetch_penerimaan_by_region(region)
+                SiskeudesFetcher.fetch_penerimaan_by_region_and_year(region, year)
             except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
 
     @staticmethod
-    def fetch_spps():
-        regions = region_repository.all()
+    def fetch_spps_by_year(year):
+        regions = region_repository.all(is_siskeudes_code=True)
         for region in regions:
             try:
-                SiskeudesFetcher.fetch_spp_by_region(region)
+                SiskeudesFetcher.fetch_spps_by_region_and_year(region, year)
             except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.id, region.name, region.desa_id))
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()

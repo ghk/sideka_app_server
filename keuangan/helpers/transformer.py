@@ -1,6 +1,8 @@
 import simplejson as json
-import numbers
-from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressRecapitulation
+import pandas
+import numpy
+from scipy.spatial.distance import pdist, squareform
+from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressRecapitulation, BudgetLikelihood
 
 
 class ContentTransformer:
@@ -42,7 +44,8 @@ class BudgetRecapitulationTransformer:
                         continue
                     if not anggaran.kode_rekening.startswith('4.'):
                         continue
-                elif not budget_type.is_revenue and not (anggaran.kode_kegiatan.startswith(region.siskeudes_code + '.' + budget_type.code)):
+                elif not budget_type.is_revenue and not (
+                        anggaran.kode_kegiatan.startswith(region.siskeudes_code + '.' + budget_type.code)):
                     continue
 
                 if anggaran.jumlah_satuan is not None and anggaran.harga_satuan is not None:
@@ -62,7 +65,7 @@ class BudgetRecapitulationTransformer:
 
 class ProgressTimelineTransformer:
     @staticmethod
-    def transform(anggarans, penerimaan_rincis, spp_rincis, year, region):
+    def transform(penerimaan_rincis, spp_rincis, year, region):
         result = []
         max_month = 1
         months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -164,7 +167,6 @@ class SiskeudesPenganggaranTransformer:
             if (anggaran.satuan is None and anggaran.anggaran is None):
                 filtered_anggarans.append(anggaran)
 
-
         for anggaran in anggarans:
             if anggaran.satuan:
                 # Using filtered_anggarans improves speed by 40%
@@ -199,8 +201,6 @@ class SiskeudesPenganggaranTransformer:
                     entity.anggaran_pak = 0
                 entity.anggaran_pak += value_pak
 
-            print(entity.kode_rekening)
-
         if (kegiatan_entity is not None):
             if (value is not None):
                 if (kegiatan_entity.anggaran is None or not kegiatan_entity.anggaran):
@@ -211,8 +211,6 @@ class SiskeudesPenganggaranTransformer:
                 if (kegiatan_entity.anggaran_pak is None or not kegiatan_entity.anggaran_pak):
                     kegiatan_entity.anggaran_pak = 0
                 kegiatan_entity.anggaran_pak += value_pak
-
-            #print(str(kegiatan_entity.row_number) + '-' + kegiatan_entity.kode_kegiatan)
 
         SiskeudesPenganggaranTransformer.recursive_sum(anggarans, new_kode_rekening, new_kode_kegiatan, row_number,
                                                        value, value_pak)
@@ -232,3 +230,82 @@ class SiskeudesPenganggaranTransformer:
             if (not is_kegiatan and anggaran.row_number < row_number and anggaran.row_number > current.row_number):
                 current = anggaran
         return current
+
+
+class SiskeudesLikelihoodTransformer:
+    @staticmethod
+    def transform(view_learn_kegiatan_query, year):
+        d = pandas.read_sql(view_learn_kegiatan_query.statement, view_learn_kegiatan_query.session.bind)
+
+        # Fill missing data
+        d['anggaran'].fillna(0, inplace=True)
+
+        # Filter Data
+        df = d[d.percentage >= 0.1]
+        df = df.reset_index(drop=True)
+        data = pandas.pivot_table(df, index=["fk_region_id"], values=["percentage"], columns=["normalized_uraian"])
+
+        # Fill missing data
+        data = data.fillna(0)
+
+        # Build matrix pdist
+        distances = pdist(data.values, metric='euclidean')
+        distances_matrix = squareform(distances)
+
+        table = pandas.DataFrame(distances_matrix)
+        table['fk_regions'] = data.index.tolist()
+        table = table[['fk_regions'] + table.columns[:-1].tolist()]
+
+        # Prepare for result matrix
+        fk_regions = numpy.array(table['fk_regions'])
+        distances = numpy.array(table)
+
+        # Transform Matrix
+        rank_desas = []
+        for idx_1, dis_1 in enumerate(distances):
+            for idx_2, dis_2 in enumerate(dis_1):
+                region_distances = [dis_1[0]]
+                if idx_1 == idx_2:
+                    continue
+                ref_fk_region = fk_regions[idx_2 - 1]
+                region_distances.append(ref_fk_region)
+                region_distances.append(dis_2)
+                # print region_distances
+                rank_desas.append(region_distances)
+
+        rank_table = pandas.DataFrame(rank_desas)
+        rank_table.columns = ["id_desa", "id_likelihood", "euclidean_distances"]
+
+        # Sort result
+        rank_desas = sorted(rank_desas, key=lambda x: (x[0], x[2]))
+        split = lambda rank_desas, n=len(data): [rank_desas[i:i + n] for i in range(0, len(rank_desas), n)]
+        rank_desas_splitted = split(rank_desas)
+
+        likelihood_table = []
+
+        for desa in rank_desas_splitted:
+            desa = [x for x in desa if x[2] != 0]
+            likelihood_table.append(desa[0:5])
+
+        zipped = numpy.concatenate(likelihood_table)
+        likelihood_table = pandas.DataFrame(zipped)
+        likelihood_table.columns = ["fk_region_id", "fk_region_likelihood_id", "euclidean_score"]
+
+        # Add column rank
+        rank = [1, 2, 3, 4, 5]
+
+        # Join column rank into dataframe
+        likelihood_table = likelihood_table.join(
+            pandas.DataFrame(rank * (len(likelihood_table) / len(rank) + 1), columns=['rank']))
+
+        result = []
+        for likelihood in likelihood_table.iterrows():
+            sl = BudgetLikelihood()
+            sl.year = year
+            sl.euclidean_score = likelihood[1]['euclidean_score']
+            sl.rank = likelihood[1]['rank']
+            sl.fk_region_id = likelihood[1]['fk_region_id']
+            sl.fk_region_likelihood_id = likelihood[1]['fk_region_likelihood_id']
+            result.append(sl)
+
+        return result

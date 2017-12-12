@@ -71,6 +71,9 @@ def run_migrations_online():
         if object.info.has_key('bind_key'):
             if object.info['bind_key'] == 'sideka':
                 return False
+        if object.info.has_key('is_view'):
+            if object.info['is_view'] == True:
+                return False
         return True
 
     engine = engine_from_config(config.get_section(config.config_ini_section),
