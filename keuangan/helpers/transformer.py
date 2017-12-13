@@ -130,7 +130,8 @@ class ProgressRecapitulationTransformer:
                 pr.transferred_revenue += rinci.nilai
 
         for rinci in spp_rincis:
-            pr.realized_spending += rinci.nilai
+            if rinci.nilai is not None:
+                pr.realized_spending += rinci.nilai
 
         for anggaran in anggarans:
             if (anggaran.kode_rekening.startswith('4.')):
