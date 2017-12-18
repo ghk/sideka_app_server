@@ -1,3 +1,5 @@
+import * as L from 'leaflet';
+
 export class MapUtils {
     static createGeoJson(): any {
         return {
@@ -50,4 +52,16 @@ export class MapUtils {
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
+    static createMarker(url, center): L.Marker {
+        let bigIcon = L.icon({
+            iconUrl: 'assets/markers/' + url,
+            iconSize:     [15, 15],
+            shadowSize:   [50, 64],
+            iconAnchor:   [22, 24],
+            shadowAnchor: [4, 62],
+            popupAnchor:  [-3, -76]
+        });
+
+        return L.marker(center, {icon: bigIcon});
+    }
 }

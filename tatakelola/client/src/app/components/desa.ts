@@ -5,11 +5,12 @@ import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
 import { Progress } from 'angular-progress-http';
 
-import BIG from '../helpers/bigConfig';
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
 
 import 'rxjs/add/operator/map';
+
+import BIG from '../helpers/bigConfig';
 
 @Component({
     selector: 'st-desa',
@@ -17,21 +18,17 @@ import 'rxjs/add/operator/map';
 })
 export class DesaComponent implements OnInit, OnDestroy {
     activeMenu: string;
-    activeMap: L.Map;
-    mapOptions: L.MapOptions;
-    geoJSONOptions: L.GeoJSONOptions;
-    data: any[];
+    map: L.Map;
+    options: L.MapOptions;
     sidebarCollapsed: boolean;
-    summaries: any;
     progress: Progress;
-    farmlands: string;
-    orchards: string;
-    trees: string;
-    geoJsonLayer: L.GeoJSON;
-    availableDesas: any[];
-    currentIndex: number;
-    activeRegionId: string;
-    activeDesa: string;
+    regionId: string;
+    summaries: any;
+    geoJsonBoundary: L.GeoJSON;
+    geoJsonSchools: L.GeoJSON;
+    geoJsonLanduse: L.GeoJSON;
+    availableDesaSummaries: any[];
+    currentDesaIndex: number;
 
     constructor(
         private _http: Http,
@@ -42,8 +39,6 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
-        this.summaries = {};
-        this.availableDesas = [];
         this.progress = {
             percentage: 0,
             event: null,
@@ -52,168 +47,201 @@ export class DesaComponent implements OnInit, OnDestroy {
             total: 0,
         }
 
-        this.mapOptions = {
+        this.options = {
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
             zoom: 14,
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
-        
+
         this._activeRouter.params.subscribe(
-           params => {
-               let regionId = params['regionId'];
-               this.activeRegionId = regionId;
-               this.setup();
-           }
-        )
-
-        this.geoJSONOptions = {
-            style: (feature) => {
-                return { color: '#000', weight: 0.5 }
-            },
-            onEachFeature: (feature, layer) => {
-                 for (let i = 0; i < BIG.length; i++) {
-                    let indicator = BIG[i];
-                    let element = null;
-
-                    for (let j = 0; j < indicator.elements.length; j++) {
-                        let current = indicator.elements[j];
-
-                        if (current.values) {
-                            let valueKeys = Object.keys(current.values);
-
-                            if (valueKeys.every(valueKey => feature["properties"][valueKey] === current.values[valueKey])) {
-                                element = current;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!element)
-                        continue;
-
-                    if (element['style']) {
-                        let style = MapUtils.setupStyle(element['style']);
-                        layer['setStyle'](style);
-                    }
-                }
+            params => {
+                this.regionId = params['regionId'];
+                this.setupSummaries(params['regionId']);
+                this.setupBoundary(params['regionId']);
+                this.getAvailableDesaSummaries(params['regionId']);
             }
+         )
+    }
+
+    async setupSummaries(regionId: string) {
+        this.progress.percentage = 0;
+
+        try{
+           
+            let summaries = await this._dataService.getSummariesByRegion(regionId, {}, 
+                this.progressListener.bind(this)).toPromise();
+            
+            if(summaries.length > 0)
+              this.summaries = summaries[0];
+        }
+        catch(error) {
+            console.log(error);
         }
     }
 
-    setup(): void {
-        this.activeDesa = null;
-        this.loadMapLayout();
-        this.loadSummariesByRegion();
-
-        if(this.availableDesas.length === 0)
-            this.loadAvailableMaps();
+    async setupBoundary(regionId: string) {
+        try {
+            let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
+                this.progressListener.bind(this)).toPromise();
+        
+            this.setMapBoundary(geoJsonBoundaryRaw);
+            
+        }
+        catch(error) {
+            console.log(error);
+        }
     }
 
-    private loadMapLayout(): void {
-        this.clearMap();
+    async getAvailableDesaSummaries(regionId: string) {
+        this.availableDesaSummaries = await this._dataService.getSummariesExceptId(regionId, null).toPromise();
+        this.availableDesaSummaries = this.availableDesaSummaries.concat(this.summaries);
+        this.currentDesaIndex = this.availableDesaSummaries.indexOf(this.summaries);
+    }
+
+    async nextDesa() {
+        this.cleanLayers();   
+        this.cleanLayout();
+             
+        this.activeMenu = null;
+
+        if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
+           return;
+
+        this.currentDesaIndex += 1;
+        this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
+        this.setupBoundary(this.summaries.fk_region_id);
+    }
+    
+    async prevDesa() {
+        this.cleanLayers();  
+        this.cleanLayout();
+
+        this.activeMenu = null;
+        
+        if(this.currentDesaIndex === 0)
+          return;
+        
+        this.currentDesaIndex -= 1;
+        this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
+        this.setupBoundary(this.summaries.fk_region_id);
+    }
+    
+    async setMapSchools() {
+        this.cleanLayers(); 
+
+        let regionId = this.summaries.fk_region_id;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
+                regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+        let features = featureCollection.features.filter(e => e.properties.amenity 
+            && e.properties.amenity === 'school' && e.properties.isced);
+       
+        this.geoJsonSchools = L.geoJSON(features);
+        this.geoJsonSchools.addTo(this.map);
+    }
+    
+    async setMapLanduse() {
+        this.cleanLayers(); 
+
+        let regionId = this.summaries.fk_region_id;
+        
         this.progress.percentage = 0;
 
-        this._dataService.getGeojsonByTypeAndRegion('boundary', this.activeRegionId, {}, 
-            this.progressListener.bind(this)).subscribe(
-                geojson => {
-                    if(geojson.length === 0)
-                    return;
+        let map = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
+                regionId, {}, this.progressListener.bind(this)).toPromise();
 
-                    this.setMapLayout(geojson);
-                }
-        )
+        let featureCollection = map.data;
+        let features = featureCollection.features.filter(e => e.properties.landuse);
+      
+        this.geoJsonLanduse = L.geoJSON(features, {
+            onEachFeature: this.onEachFeature.bind(this)
+        });
+
+        this.geoJsonLanduse.addTo(this.map);
     }
 
-    private loadSummariesByRegion(): void {
-        this._dataService.getSummariesByRegion(this.activeRegionId, {}, null).subscribe(
-            summaries => {
-                if(summaries.length > 0) {
-                    this.summaries = summaries[0];
-                    this.activeDesa = this.summaries.region.name;
-                }
-            }
-        )
+    setMapBoundary(geoJsonBoundaryRaw: any): void {
+        this.geoJsonBoundary = L.geoJSON(geoJsonBoundaryRaw.data, {
+            style: this.getMapBoundaryStyle.bind(this),
+            onEachFeature: this.onEachFeature.bind(this)
+        });
+
+        this.geoJsonBoundary.addTo(this.map);
+        this.map.setView(this.geoJsonBoundary.getBounds().getCenter(), 15);
     }
 
-    private loadAvailableMaps(): void {
-        this._dataService.getRegionAvailableMaps({}, null).subscribe(
-            summaries => {
-                this.availableDesas = summaries;
-                
-                let thisRegion = this.availableDesas.filter(e => e.region.id === this.activeRegionId)[0];
-                this.currentIndex = this.availableDesas.indexOf(thisRegion);
-            }
-        )
-    }
-
-    next(): void {
-        this.currentIndex += 1;
-
-        if(this.availableDesas.length - 1 < this.currentIndex)
-            return;
-        
-        this.activeRegionId = this.availableDesas[this.currentIndex].region.id;
-        this.setup();
-    }
-
-    prev(): void {
-        if(this.currentIndex === 0)
-            return;
-       
-        this.currentIndex -= 1;
-    
-        this.activeRegionId = this.availableDesas[this.currentIndex].region.id;
-        this.setup();
-    }
-
-    ngOnDestroy(): void { }
-
-    setActiveMenu(menu: string): boolean {
+    setActiveMenu(menu: string) {
         this.activeMenu = menu;
-        switch(menu){
-            case 'pembangunan':
+
+        switch(menu) {
+            case 'schools':
+                this.setMapSchools();
             break;
-            case 'batas':
+            case 'landuse':
+                this.setMapLanduse();
             break;
         }
         return false;
     }
 
-    setMapLayout(geoJson): void {
-        console.log(geoJson);
-        this.geoJsonLayer = L.geoJSON(geoJson.data, this.geoJSONOptions).addTo(this.activeMap);
-        this.activeMap.setView(this.geoJsonLayer.getBounds().getCenter(), 15);
-        /*
-        let landuse = geoJson.filter(e => e.type === 'landuse')[0];
-        let transport = geoJson.filter(e => e.type === 'network_transportation')[0];
-        let facilities = geoJson.filter(e => e.type === 'facilities_infrastructures')[0];
-        let waters = geoJson.filter(e => e.type === 'waters')[0];
-        let boundary = geoJson.filter(e => e.type === 'boundary')[0];
-       
-        let geoJsonData: any = MapUtils.createGeoJson();
-
-        if(waters)
-            geoJsonData.features = geoJsonData.features.concat(waters.data.features);
-        if(transport)
-            geoJsonData.features = geoJsonData.features.concat(transport.data.features); 
-        if(landuse)
-            geoJsonData.features = geoJsonData.features.concat(landuse.data.features);
-    
-        this.geoJsonLayer = L.geoJSON(geoJsonData, this.geoJSONOptions).addTo(this.activeMap);
-
-        this.activeMap.setView(this.geoJsonLayer.getBounds().getCenter(), 15);*/
+    getMapBoundaryStyle(feature) {
+        return { color: '#aaa', weight: 0.5 };
     }
 
-    clearMap(): void {
-        if (this.geoJsonLayer)
-            this.activeMap.removeLayer(this.geoJsonLayer);
+    onEachFeature(feature, layer) {
+        for (let index in BIG) {
+            let indicator = BIG[index];
+            let elements = indicator.elements;
+            let matchedElement = null;
+
+            for (let index in elements) {
+                let indicatorElement = elements[index];
+
+                if (!indicatorElement.values)
+                   continue;
+                
+                let valueKeys = Object.keys(indicatorElement.values);
+
+                if (valueKeys.every(valueKey => feature["properties"][valueKey] 
+                    === indicatorElement.values[valueKey])) {
+                    matchedElement = indicatorElement;
+                    break;
+                }
+            }
+
+            if (!matchedElement)
+                continue;
+
+            if (matchedElement['style']) {
+                let style = MapUtils.setupStyle(matchedElement['style']);
+                layer['setStyle'](style);
+            }
+        }
     }
 
     onMapReady(map: L.Map): void {
-        this.activeMap = map;
+        this.map = map;
+    }
+
+    cleanLayers(): void {
+        if (this.geoJsonSchools)
+            this.map.removeLayer(this.geoJsonSchools);
+        if (this.geoJsonLanduse)
+            this.map.removeLayer(this.geoJsonLanduse);
+    }
+
+    cleanLayout(): void {
+        if (this.geoJsonBoundary)
+            this.map.removeLayer(this.geoJsonBoundary);
     }
 
     progressListener(progress: Progress): void {
         this.progress = progress;
+    }
+
+    ngOnDestroy(): void {
+        this.map.remove();
     }
 }
