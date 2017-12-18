@@ -88,6 +88,8 @@ class ProgressTimelineTransformer:
                 max_month = month
 
             for mon in range(month, 13, 1):
+                if rinci.nilai is None:
+                    rinci.nilai = 0;
                 sumber_dana = str(rinci.sumber_dana).strip()
                 if sumber_dana == 'DDS':
                     data[mon].transferred_dds += rinci.nilai
@@ -102,6 +104,8 @@ class ProgressTimelineTransformer:
                 max_month = month
 
             for mon in range(month, 13, 1):
+                if rinci.nilai is None:
+                    rinci.nilai = 0;
                 data[mon].realized_spending += rinci.nilai
 
         for key, datum in data.iteritems():
@@ -127,10 +131,12 @@ class ProgressRecapitulationTransformer:
         for rinci in penerimaan_rincis:
             sumber_dana = str(rinci.sumber_dana).strip()
             if sumber_dana == 'DDS' or sumber_dana == 'ADD' or sumber_dana == 'PBH':
-                pr.transferred_revenue += rinci.nilai
+                if rinci.nilai is not None:
+                    pr.transferred_revenue += rinci.nilai
 
         for rinci in spp_rincis:
-            pr.realized_spending += rinci.nilai
+            if rinci.nilai is not None:
+                pr.realized_spending += rinci.nilai
 
         for anggaran in anggarans:
             if (anggaran.kode_rekening.startswith('4.')):

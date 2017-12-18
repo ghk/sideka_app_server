@@ -7,16 +7,16 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Ranking</th>
           <th>Desa</th>
+          <th>Kabupaten</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let bl of budgetLikelihoods">
-          <td>{{ bl.rank }}</td>
           <td>
             <a routerLink="/budget/region/{{bl.region_likelihood .id}}">{{ bl.region_likelihood.name }}</a>
           </td>
+          <td>{{ bl.region_likelihood | regionType:2 }}</td>          
         </tr>
       </tbody>
     </table>
