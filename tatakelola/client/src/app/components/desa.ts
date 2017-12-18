@@ -131,6 +131,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         let regionId = this.summaries.fk_region_id;
 
+        this.progress.percentage = 0;
+        
         let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
