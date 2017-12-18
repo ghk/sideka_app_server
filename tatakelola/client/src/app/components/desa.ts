@@ -99,28 +99,28 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async nextDesa() {
-        this.cleanLayers();   
-        this.cleanLayout();
-             
         this.activeMenu = null;
 
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
            return;
 
+        this.cleanLayers();   
+        this.cleanLayout();
+   
         this.currentDesaIndex += 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
         this.setupBoundary(this.summaries.fk_region_id);
     }
     
     async prevDesa() {
-        this.cleanLayers();  
-        this.cleanLayout();
-
         this.activeMenu = null;
         
         if(this.currentDesaIndex === 0)
           return;
-        
+
+        this.cleanLayers();  
+        this.cleanLayout();
+
         this.currentDesaIndex -= 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
         this.setupBoundary(this.summaries.fk_region_id);
@@ -132,7 +132,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         let regionId = this.summaries.fk_region_id;
 
         this.progress.percentage = 0;
-        
+
         let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
