@@ -155,7 +155,7 @@ class ParsePemetaanData:
         farmland_trees = []
         orchard_orchards = []
         forest_trees = []
-
+        
         for feature in features:
             if feature.has_key('properties') == False:
                 continue
@@ -167,9 +167,11 @@ class ParsePemetaanData:
                     continue
                 if feature['properties'].has_key('admin_level') == False:
                     continue
-                if feature['properties']['admin_level'] != 7:
-                    continue
-                summary.pemetaan_desa_boundary += area(feature['geometry'])
+                if feature['properties']['admin_level'] == 7:
+                    summary.pemetaan_desa_boundary += area(feature['geometry'])
+                    summary.pemetaan_desa_circumference += 0
+                elif feature['properties']['admin_level'] == 8:
+                    summary.pemetaan_dusun_total += 1
             elif type == 'landuse':
                 if properties.has_key('landuse') == False:
                     continue
@@ -191,19 +193,19 @@ class ParsePemetaanData:
                         forest_trees.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
                         summary.pemetaan_potential_forest_area += area(feature['geometry'])
-            elif type == 'waters':
-                if properties.has_key('natural'):
-                    if properties['natural'] == 'spring':
-                        summary.pemetaan_water_natural += 1
-                        if feature['geometry']['type'] == 'Polygon':
-                            summary.pemetaan_water_natural_area += area(feature['geometry'])
-                elif properties.has_key('waterway'):
-                    if properties['waterway'] == 'pipe_system':
-                        summary.pemetaan_water_pipe += 1
-                        pipe_count += 1
+            #elif type == 'waters':
+                #if properties.has_key('natural'):
+                    #if properties['natural'] == 'spring':
+                        #summary.pemetaan_water_natural += 1
+                        #if feature['geometry']['type'] == 'Polygon':
+                            #summary.pemetaan_water_natural_area += area(feature['geometry'])
+                #elif properties.has_key('waterway'):
+                    #if properties['waterway'] == 'pipe_system':
+                        #summary.pemetaan_water_pipe += 1
+                        #pipe_count += 1
 
-                        if math.isnan(properties['width']) == False:
-                            summary.pemetaan_water_pipe += int(properties['width'])
+                        #if math.isnan(properties['width']) == False:
+                            #summary.pemetaan_water_pipe += int(properties['width'])
            #elif type == 'electricity':
                 #if properties.has_key('electricity_watt'):
                     #if math.isnan(properties['electricity_watt']) == False:
