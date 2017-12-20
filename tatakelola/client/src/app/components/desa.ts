@@ -84,7 +84,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
         
-            this.setMapBoundary(geoJsonBoundaryRaw);
+            this.setMapLayout(geoJsonBoundaryRaw);
             
         }
         catch(error) {
@@ -137,10 +137,11 @@ export class DesaComponent implements OnInit, OnDestroy {
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
         let featureCollection = map.data;
-        let features = featureCollection.features.filter(e => e.properties.amenity 
+
+        featureCollection.features = featureCollection.features.filter(e => e.properties.amenity 
             && e.properties.amenity === 'school' && e.properties.isced);
        
-        this.geoJsonSchools = L.geoJSON(features);
+        this.geoJsonSchools = L.geoJSON(featureCollection);
         this.geoJsonSchools.addTo(this.map);
     }
     
@@ -155,16 +156,58 @@ export class DesaComponent implements OnInit, OnDestroy {
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
         let featureCollection = map.data;
-        let features = featureCollection.features.filter(e => e.properties.landuse);
+
+        featureCollection.features = featureCollection.features.filter(e => e.properties.landuse);
       
-        this.geoJsonLanduse = L.geoJSON(features, {
+        this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachFeature.bind(this)
         });
 
         this.geoJsonLanduse.addTo(this.map);
     }
 
-    setMapBoundary(geoJsonBoundaryRaw: any): void {
+    async setMapLogPembangunan() {
+        this.cleanLayers(); 
+        
+        this.progress.percentage = 0;
+
+        let regionId = this.summaries.fk_region_id;
+
+        let landuse = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let infrastructures = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let logPembangunan = await this._dataService.getGeojsonByTypeAndRegion('log_pembangunan', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = landuse.data;
+
+        featureCollection.features  = featureCollection.features.filter(e => e.properties.landuse);
+        featureCollection.features = featureCollection.features.concat(infrastructures.data.features);
+
+        this.geoJsonLanduse = L.geoJSON(featureCollection, {
+            onEachFeature: this.onEachFeature.bind(this)
+        });
+
+        console.log(logPembangunan);
+    }
+
+    async setMapBoundary() {
+        this.cleanLayers(); 
+
+        let regionId = this.summaries.fk_region_id;
+        
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
+                regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+    }
+
+    setMapLayout(geoJsonBoundaryRaw: any): void {
         this.geoJsonBoundary = L.geoJSON(geoJsonBoundaryRaw.data, {
             style: this.getMapBoundaryStyle.bind(this),
             onEachFeature: this.onEachFeature.bind(this)
@@ -183,6 +226,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'landuse':
                 this.setMapLanduse();
+            break;
+            case 'apbdes':
+                this.setMapLogPembangunan();
             break;
         }
         return false;
@@ -218,7 +264,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
-                layer['setStyle'](style);
+                layer['setStyle'] ? layer['setStyle'](style) : null;
             }
         }
     }
