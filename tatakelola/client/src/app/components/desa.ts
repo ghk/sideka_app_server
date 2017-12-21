@@ -29,6 +29,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJsonLanduse: L.GeoJSON;
     availableDesaSummaries: any[];
     currentDesaIndex: number;
+    markers: L.Marker[];
 
     constructor(
         private _http: Http,
@@ -39,6 +40,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
+        this.markers = [];
+
         this.progress = {
             percentage: 0,
             event: null,
@@ -73,6 +76,8 @@ export class DesaComponent implements OnInit, OnDestroy {
             
             if(summaries.length > 0)
               this.summaries = summaries[0];
+
+            console.log(this.summaries);
         }
         catch(error) {
             console.log(error);
@@ -106,7 +111,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.cleanLayers();   
         this.cleanLayout();
-   
+        this.cleanMarkers();
+
         this.currentDesaIndex += 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
         this.setupBoundary(this.summaries.fk_region_id);
@@ -120,6 +126,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.cleanLayers();  
         this.cleanLayout();
+        this.cleanMarkers();
 
         this.currentDesaIndex -= 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
@@ -158,12 +165,44 @@ export class DesaComponent implements OnInit, OnDestroy {
         let featureCollection = map.data;
 
         featureCollection.features = featureCollection.features.filter(e => e.properties.landuse);
-      
+
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachFeature.bind(this)
         });
 
         this.geoJsonLanduse.addTo(this.map);
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            let marker = null;
+            let url = null;
+
+            if (feature.properties.landuse && feature.properties.landuse === 'farmland') 
+                url =  '/assets/images/pertanian.png';
+
+            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') 
+                url =  '/assets/images/perkebunan.png';
+
+            else if (feature.properties.landuse && feature.properties.landuse === 'forest')
+                url =  '/assets/images/hutan.png';
+            
+            if (!url)
+                continue;
+
+            marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [20, 20],
+                    shadowSize: [50, 64],
+                    iconAnchor: [22, 24],
+                    shadowAnchor: [4, 62],
+                    popupAnchor: [-3, -76]
+                })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
     }
 
     async setMapLogPembangunan() {
@@ -288,6 +327,13 @@ export class DesaComponent implements OnInit, OnDestroy {
     cleanLayout(): void {
         if (this.geoJsonBoundary)
             this.map.removeLayer(this.geoJsonBoundary);
+    }
+
+    cleanMarkers(): void {
+        for (let i=0; i<this.markers.length; i++)
+            this.map.removeLayer(this.markers[i]);
+
+        this.markers = [];
     }
 
     progressListener(progress: Progress): void {
