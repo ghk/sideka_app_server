@@ -18,7 +18,6 @@
       </div>
    </div>
    <div class="content-header">
-      <a href="#" *ngIf="viewType == 'detail'" (click)="backToSummary()"> <i class="fa fa-arrow-left"></i> </a>
       RANGKUMAN DATA DESA
    </div>
    <div class="table-responsive desktop-table">
@@ -43,8 +42,14 @@
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" class="sortable-header">Luas (Km<sup>2</sup>)
+                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" class="sortable-header">Luas (Ha)
                             <ng-container *ngIf="order.includes('pemetaan_desa_boundary')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                    </th>
+                    <th (click)="sort('desa_total_potential')" style="width: 15%;" rowspan="2" class="sortable-header">Lahan (Ha)
+                            <ng-container *ngIf="order.includes('desa_total_potential')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
@@ -74,12 +79,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>-->
-                    <th (click)="sort('desa_total_potential')" rowspan="2" class="sortable-header">Lahan
-                            <ng-container *ngIf="order.includes('desa_total_potential')">
-                                <span [hidden]="order.startsWith('-')">▲</span>
-                                <span [hidden]="!order.startsWith('-')">▼</span>
-                            </ng-container>
-                    </th>
+                   
                 </tr>
             </thead>
             <tbody>
@@ -88,27 +88,47 @@
                      <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                      <td class="data-column">{{summary.region.parent.name}}</td>
                      
-                     <td class="money data-column-number hoverable" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
-                     <td class="money data-column-number hoverable" (click)="loadDetail('apbdes')" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
+                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'apbdes']" *ngIf="summary.penganggaran_budgeted_revenue > 0"> {{summary.penganggaran_budgeted_revenue | number:'3.0-0'}} </td>
+                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'apbdes']" *ngIf="summary.penganggaran_budgeted_revenue === 0 || !summary.penganggaran_budgeted_revenue"> - </td>
                     
-                     <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 1000000 | number:'1.0-0'}} </td>
-                     <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
-                     
-                     <td class="money data-column-number hoverable" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total}} </td>
-                     <td class="money data-column-number hoverable" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total === 0">  - </td>
+                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'area']" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 10000 | number:'1.0-0'}} </td>
+                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'area']" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
+                    
+                     <td class="data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" [routerLink]="['/summary', 'potential']"> 
+                        <span style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_potential_farmland_area / 10000 | number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/>
+                        </span>
+                        <span  style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_potential_orchard_area / 10000 | number:'1.0-0'}} 
+                            </span>
+                            <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/>
+                        </span>
+                        <span>
+                            <span>
+                                {{summary.pemetaan_potential_forest_area / 10000 | number:'1.0-0'}} 
+                            </span>
+                            <img src="/assets/images/hutan.png" style="width: 20px; height: 20px;" title="Hutan"/>
+                        </span>
+                    </td>   
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" [routerLink]="['/summary', 'potential']"> - </td>
+                            
+                    <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total | number:'1.0-0'}} </td>
+                    <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total === 0">  - </td>
 
-                     <td class="money data-column-number hoverable" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total}} </td>
-                     <td class="money data-column-number hoverable" (click)="loadDetail('education')" *ngIf="summary.desa_edu_total === 0">  - </td>
-                     <!--
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
-                     
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
-                     -->
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
-                  </tr>
+                    <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total | number:'1.0-0'}} </td>
+                    <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total === 0">  - </td>
+                    <!--
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
+                    
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
+                    -->
+                </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
             <tr>
@@ -169,7 +189,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Batas Desa (km<sup>2</sup>)
+                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Batas Desa (Ha)
                             <ng-container *ngIf="order.includes('pemetaan_desa_boundary')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
@@ -190,11 +210,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary > 0"> {{summary.pemetaan_desa_boundary / 1000000 | number:'1.0-0'}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary > 0"> {{summary.pemetaan_desa_boundary / 10000 | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_boundary === 0"> -</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_circumference > 0"> {{summary.pemetaan_desa_circumference / 1000 | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_desa_circumference === 0"> -</td>
@@ -202,6 +222,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_dusun_total === 0"> -</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" style="overflow-x: hidden;" *ngIf="viewType === 'detail' && detailType === 'penduduk'">
@@ -288,44 +317,55 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
+                    
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_male > 0"> {{summary.penduduk_sex_male}}</td>
+                    
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_male > 0"> {{summary.penduduk_sex_male | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_male === 0"> -</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_female > 0"> {{summary.penduduk_sex_female}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_female > 0"> {{summary.penduduk_sex_female | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_female === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_unknown > 0"> {{summary.penduduk_sex_unknown}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_unknown > 0"> {{summary.penduduk_sex_unknown | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_sex_unknown === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sd > 0"> {{summary.penduduk_edu_sd}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sd > 0"> {{summary.penduduk_edu_sd | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sd === 0"> -</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_smp > 0"> {{summary.penduduk_edu_smp}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_smp > 0"> {{summary.penduduk_edu_smp | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_smp === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sma > 0"> {{summary.penduduk_edu_sma}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sma > 0"> {{summary.penduduk_edu_sma | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_sma === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_pt > 0"> {{summary.penduduk_edu_pt}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_pt > 0"> {{summary.penduduk_edu_pt | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_edu_pt === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_petani > 0"> {{summary.penduduk_job_petani}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_petani > 0"> {{summary.penduduk_job_petani | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_petani === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_pedagang > 0"> {{summary.penduduk_job_pedagang}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_pedagang > 0"> {{summary.penduduk_job_pedagang | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_pedagang === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_karyawan > 0"> {{summary.penduduk_job_karyawan}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_karyawan > 0"> {{summary.penduduk_job_karyawan | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_karyawan === 0"> -</td>
 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_lain > 0"> {{summary.penduduk_job_lain}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_lain > 0"> {{summary.penduduk_job_lain | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_lain === 0"> -</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'education'">
@@ -376,26 +416,35 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_tk > 0"> {{summary.pemetaan_school_tk}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_tk > 0"> {{summary.pemetaan_school_tk | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_tk === 0">-</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sd > 0"> {{summary.pemetaan_school_sd}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sd > 0"> {{summary.pemetaan_school_sd | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sd === 0">-</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_smp > 0"> {{summary.pemetaan_school_smp}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_smp > 0"> {{summary.pemetaan_school_smp | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_smp === 0">-</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sma > 0"> {{summary.pemetaan_school_sma}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sma > 0"> {{summary.pemetaan_school_sma | number:'3.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_sma === 0">-</td>
                     
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_pt > 0"> {{summary.pemetaan_school_pt}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_pt > 0"> {{summary.pemetaan_school_pt | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_pt === 0">-</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'electricity'">
@@ -428,7 +477,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
@@ -439,6 +488,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.kk_not_using_electricity === 0"> - </td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'waters'">
@@ -471,7 +529,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
@@ -482,6 +540,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_water_pipe_width_avg === 0"> - </td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'potential'">
@@ -499,19 +566,19 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_farmland')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Pertanian (km <sup>2</sup>)
+                    <th (click)="sort('pemetaan_potential_farmland')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Pertanian (Ha)
                         <ng-container *ngIf="order.includes('pemetaan_potential_farmland')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_orchard')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Perkebunan (km <sup>2</sup>)
+                    <th (click)="sort('pemetaan_potential_orchard')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Perkebunan (Ha)
                         <ng-container *ngIf="order.includes('pemetaan_potential_orchard')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_forest')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Hutan (km <sup>2</sup>)
+                    <th (click)="sort('pemetaan_potential_forest')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Hutan (Ha)
                         <ng-container *ngIf="order.includes('pemetaan_potential_forest')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
@@ -520,18 +587,27 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let summary of summaries | orderBy: order">
+                <tr *ngFor="let summary of summaries | orderBy: order" [hidden]="progress.percentage < 100">
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland_area > 0"> {{summary.pemetaan_potential_farmland_area / 1000 }}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland_area > 0"> {{summary.pemetaan_potential_farmland_area / 10000 | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland_area === 0"> - </td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_orchard_area > 0"> {{summary.pemetaan_potential_orchard_area  / 1000 }}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_orchard_area > 0"> {{summary.pemetaan_potential_orchard_area  / 10000 | number:'1.0-0'}}</td> 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_orchard_area === 0"> -</td> 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_forest_area > 0"> {{summary.pemetaan_potential_forest_area  / 1000 }}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_forest_area > 0"> {{summary.pemetaan_potential_forest_area  / 10000 | number:'1.0-0'}}</td> 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_forest_area === 0"> -</td> 
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
    </div>
 </div>

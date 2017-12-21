@@ -51,7 +51,9 @@ class Generator:
         summary.pemetaan_school_pt = 0
         summary.pemetaan_desa_boundary = 0
         summary.pemetaan_electricity_house = 0
-
+        summary.pemetaan_dusun_total = 0
+        summary.pemetaan_desa_circumference = 0
+        
         if boundaries is not None:
             summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary')
         if landuse is not None:
