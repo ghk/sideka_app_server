@@ -18,7 +18,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
     order: string;
     query: string;
    
-    constructor(dataService: DataService, private _router: Router) {
+    constructor(dataService: DataService, private _router: Router, private _activeRouter: ActivatedRoute) {
         this._dataService = dataService;
     }
 
@@ -39,7 +39,21 @@ export class SummaryComponent implements OnInit, OnDestroy {
        this.viewType = 'summary';
        this.order = 'region.parent.id';
        this.query = '';
-       this.loadSummaries();
+
+       this._activeRouter.params.subscribe(
+           params => {
+               if (params['detailType'] === 'master') {
+                   this.viewType = 'summary';
+                   this.detailType = null;
+               }
+               else {
+                   this.viewType = 'detail';
+                   this.detailType = params['detailType'];
+               }
+
+               this.loadSummaries();
+           }
+       )
     }
 
     isNumber(data): boolean {
