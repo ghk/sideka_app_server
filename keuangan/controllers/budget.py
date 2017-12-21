@@ -15,13 +15,7 @@ budget_recapitulation_repository = BudgetRecapitulationRepository(db)
 @app.route('/budget/types', methods=['GET'])
 def get_budget_types():
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-
-    is_revenue = request.args.get('is_revenue')
-    if (is_revenue and is_revenue == 'true'):
-        is_revenue = True
-    else:
-        is_revenue = False
-
+    is_revenue = request.args.get('is_revenue', default=False, type=bool)
     entities = budget_type_repository.all_by_condition(is_revenue=is_revenue, page_sort_params=page_sort_params)
     result = BudgetTypeModelSchema(many=True).dump(entities)
     return jsonify(result.data)

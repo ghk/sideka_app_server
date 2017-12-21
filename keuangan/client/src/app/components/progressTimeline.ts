@@ -106,16 +106,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
     }
 
     async getData(): Promise<void> {
-        let year = new Date().getFullYear().toString();
-
-        let budgetTypeQuery: Query = {
-            data: {
-                is_revenue: true
-            }
-        };
-
-        let query: Query = {
-        };
+        let year = new Date().getFullYear().toString();      
 
         this._transferredDdsDataset = {
             label: 'Penyaluran DDS',
@@ -133,13 +124,27 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
             label: 'Realisasi Desa',
             data: [null, null, null, null, null, null, null, null, null, null, null, null]
         };
-
         this.tDatasets = [this._transferredDdsDataset, this._transferredAddDataset, this._transferredPbhDataset];
         this.rDatasets = [this._realizedSpendingDataset];
 
+        let budgetTypeQuery: Query = {
+            data: {
+                is_revenue: true
+            }
+        };
+
+        let budgetRecapitulationsQuery: Query = {
+            data: {
+                is_full_region: ''
+            }
+        }
+
+        let progressTimelinesQuery: Query = {
+        };
+
         let budgetTypes = await this._dataService.getBudgetTypes(budgetTypeQuery, null).toPromise();
         let budgetRecapitulations = await this._dataService
-            .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, null, null)
+            .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, budgetRecapitulationsQuery, null)
             .toPromise();
         this._totalBudgetedSpending = await this._dataService
             .getSiskeudesPenganggaranTotalSpendingByRegionAndYear(this.region.id, year, null, null)
@@ -158,7 +163,7 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
             });
         });
 
-        this._dataService.getProgressTimelinesByRegionAndYear(this.region.id, year, query, this.progressListener.bind(this)).subscribe(
+        this._dataService.getProgressTimelinesByRegionAndYear(this.region.id, year, progressTimelinesQuery, this.progressListener.bind(this)).subscribe(
             results => {
                 this._progressTimelines = results;                
                 this._isPercentage.subscribe(isPercentage => {
