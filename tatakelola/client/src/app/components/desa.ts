@@ -122,8 +122,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.activeMenu = null;
 
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
-           return;
-
+           this.currentDesaIndex = -1;
+           
         this.cleanLayers();   
         this.cleanLayout();
         this.cleanMarkers();
@@ -139,7 +139,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.activeMenu = null;
         
         if(this.currentDesaIndex === 0)
-          return;
+           this.currentDesaIndex = this.availableDesaSummaries.length;
 
         this.cleanLayers();  
         this.cleanLayout();
@@ -403,14 +403,13 @@ export class DesaComponent implements OnInit, OnDestroy {
     onMapReady(map: L.Map): void {
         this.map = map;
     }
-
-    
+   
     setNextPrevLabel() {
         this.nextDesa = this.availableDesaSummaries[this.currentDesaIndex + 1] 
-            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name : 'TIDAK ADA';
+            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name : this.availableDesaSummaries[0].region.name;
     
         this.prevDesa = this.availableDesaSummaries[this.currentDesaIndex - 1] 
-            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name : 'TIDAK ADA';
+            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name : this.availableDesaSummaries[this.availableDesaSummaries.length - 1].region.name;
     }
 
     cleanLayers(): void {
