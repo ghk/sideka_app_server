@@ -268,6 +268,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async setMapBoundary() {
         this.cleanLayers(); 
+        this.cleanMarkers();
+        
         this.setDusunBoundary();
         this.setDesaBoundary();
     }
