@@ -407,6 +407,19 @@ button.side:hover .text span {
     font-size: 10pt;
 }
 
+input {
+    display: none;
+}
+
+input:checked+label i {
+    opacity: 1;
+}
+
+input:checked+label div {
+    background: #16a085;
+    border: 1px solid #16a085;
+}
+
 /* -- LEGEND -- */
 .legend {
     position: fixed;
@@ -415,10 +428,6 @@ button.side:hover .text span {
     padding: 10px 15px;
     background-color: #fff;
     box-shadow: 1px 1px 1px #888;
-}
-
-input[type="checkbox"] {
-    display: none;
 }
 
 label {

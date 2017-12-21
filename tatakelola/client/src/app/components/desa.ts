@@ -11,6 +11,7 @@ import * as L from 'leaflet';
 import 'rxjs/add/operator/map';
 
 import BIG from '../helpers/bigConfig';
+import geoJSONArea from '@mapbox/geojson-area';
 
 @Component({
     selector: 'st-desa',
@@ -24,12 +25,19 @@ export class DesaComponent implements OnInit, OnDestroy {
     progress: Progress;
     regionId: string;
     summaries: any;
-    geoJsonBoundary: L.GeoJSON;
+    geoJsonLayout: L.GeoJSON;
     geoJsonSchools: L.GeoJSON;
     geoJsonLanduse: L.GeoJSON;
+    geoJsonBoudary: L.GeoJSON;
+    geoJsonDesaBoundary: L.GeoJSON;
+    geoJsonDusunBoundary: L.GeoJSON;
     availableDesaSummaries: any[];
     currentDesaIndex: number;
     markers: L.Marker[];
+    showDesaBoundary: boolean;
+    showDusunBoundary: boolean;
+    nextDesa: string;
+    prevDesa: string;
 
     constructor(
         private _http: Http,
@@ -41,6 +49,10 @@ export class DesaComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.sidebarCollapsed = false;
         this.markers = [];
+        this.showDesaBoundary = true;
+        this.showDusunBoundary = true;
+        this.prevDesa = 'TIDAK ADA';
+        this.nextDesa = 'TIDAK ADA';
 
         this.progress = {
             percentage: 0,
@@ -86,10 +98,12 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async setupBoundary(regionId: string) {
         try {
-            let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
+            this.cleanMarkers();
+
+            let geoJsonLayoutRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
         
-            this.setMapLayout(geoJsonBoundaryRaw);
+            this.setMapLayout(geoJsonLayoutRaw);
             
         }
         catch(error) {
@@ -101,9 +115,10 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.availableDesaSummaries = await this._dataService.getSummariesExceptId(regionId, null).toPromise();
         this.availableDesaSummaries = this.availableDesaSummaries.concat(this.summaries);
         this.currentDesaIndex = this.availableDesaSummaries.indexOf(this.summaries);
+        this.setNextPrevLabel();
     }
 
-    async nextDesa() {
+    async next() {
         this.activeMenu = null;
 
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
@@ -113,12 +128,14 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.cleanLayout();
         this.cleanMarkers();
 
-        this.currentDesaIndex += 1;
+        this.currentDesaIndex += 1; 
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
+
+        this.setNextPrevLabel();
         this.setupBoundary(this.summaries.fk_region_id);
     }
     
-    async prevDesa() {
+    async prev() {
         this.activeMenu = null;
         
         if(this.currentDesaIndex === 0)
@@ -130,11 +147,14 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.currentDesaIndex -= 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
+
+        this.setNextPrevLabel();
         this.setupBoundary(this.summaries.fk_region_id);
     }
     
     async setMapSchools() {
         this.cleanLayers(); 
+        this.cleanMarkers();
 
         let regionId = this.summaries.fk_region_id;
 
@@ -154,6 +174,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     
     async setMapLanduse() {
         this.cleanLayers(); 
+        this.cleanMarkers();
 
         let regionId = this.summaries.fk_region_id;
         
@@ -189,7 +210,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                 if (feature.properties.crop && feature.properties.crop === 'bawang')
                     url = '/assets/images/garlic.png';
             }*/
-            
+
             if (feature.properties.landuse && feature.properties.landuse === 'farmland') 
                 url =  '/assets/images/pertanian.png';
 
@@ -247,25 +268,76 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async setMapBoundary() {
         this.cleanLayers(); 
+        this.setDusunBoundary();
+        this.setDesaBoundary();
+    }
 
+    async setDusunBoundary() {
         let regionId = this.summaries.fk_region_id;
         
         this.progress.percentage = 0;
 
         let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
-                regionId, {}, this.progressListener.bind(this)).toPromise();
+        regionId, {}, this.progressListener.bind(this)).toPromise();
 
-        let featureCollection = map.data;
+        let features = map.data.features.filter(e => e.properties.admin_level && e.properties.admin_level == 8);
+
+        this.markers = [];
+
+        for (let i=0; i<features.length; i++) {
+            let area = geoJSONArea.geometry(features[i].geometry);
+            
+            let marker = L.marker(L.geoJSON(features[i]).getBounds().getCenter(), {
+                icon: L.divIcon({
+                    className: 'label', 
+                    html: '<h4 style="color: blue;"><strong>' + Math.round(area / 10000) + ' Ha </strong></h4>',
+                    iconSize: [30, 30]
+                  })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
+
+        this.geoJsonDusunBoundary = L.geoJSON(features, {
+            style: (feature) => {
+                return { fillColor: '#000', color: '#fff', weight: 1 };
+            },
+            onEachFeature: (feature, layer) => {
+
+            }
+        }).addTo(this.map);
     }
 
-    setMapLayout(geoJsonBoundaryRaw: any): void {
-        this.geoJsonBoundary = L.geoJSON(geoJsonBoundaryRaw.data, {
+    async setDesaBoundary() {
+        let regionId = this.summaries.fk_region_id;
+        
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
+        regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let features = map.data.features.filter(e => e.properties.admin_level && e.properties.admin_level == 7); 
+
+        this.geoJsonDesaBoundary = L.geoJSON(features, {
+            style: (feature) => {
+                return { color: '#000', weight: 1 };
+            },
+            onEachFeature: (feature, layer) => {
+                if (feature.properties['boundary_sign']) {
+                    layer['setStyle'](MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign']}));
+                }
+            }
+        }).addTo(this.map);
+    }
+
+    setMapLayout(geoJsonLayoutRaw: any): void {
+        this.geoJsonLayout = L.geoJSON(geoJsonLayoutRaw.data, {
             style: this.getMapBoundaryStyle.bind(this),
             onEachFeature: this.onEachFeature.bind(this)
         });
 
-        this.geoJsonBoundary.addTo(this.map);
-        this.map.setView(this.geoJsonBoundary.getBounds().getCenter(), 15);
+        this.geoJsonLayout.addTo(this.map);
+        this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15);
     }
 
     setActiveMenu(menu: string) {
@@ -280,6 +352,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'apbdes':
                 this.setMapLogPembangunan();
+            break;
+            case 'boundary':
+                this.setMapBoundary();
             break;
         }
         return false;
@@ -329,16 +404,29 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.map = map;
     }
 
+    
+    setNextPrevLabel() {
+        this.nextDesa = this.availableDesaSummaries[this.currentDesaIndex + 1] 
+            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name : 'TIDAK ADA';
+    
+        this.prevDesa = this.availableDesaSummaries[this.currentDesaIndex - 1] 
+            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name : 'TIDAK ADA';
+    }
+
     cleanLayers(): void {
         if (this.geoJsonSchools)
             this.map.removeLayer(this.geoJsonSchools);
         if (this.geoJsonLanduse)
             this.map.removeLayer(this.geoJsonLanduse);
+        if (this.geoJsonDusunBoundary)
+            this.map.removeLayer(this.geoJsonDusunBoundary);
+        if (this.geoJsonDesaBoundary)
+            this.map.removeLayer(this.geoJsonDesaBoundary);
     }
 
     cleanLayout(): void {
-        if (this.geoJsonBoundary)
-            this.map.removeLayer(this.geoJsonBoundary);
+        if (this.geoJsonLayout)
+            this.map.removeLayer(this.geoJsonLayout);
     }
 
     cleanMarkers(): void {
@@ -352,7 +440,5 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.progress = progress;
     }
 
-    ngOnDestroy(): void {
-        this.map.remove();
-    }
+    ngOnDestroy(): void {}
 }
