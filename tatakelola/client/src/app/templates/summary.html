@@ -129,7 +129,6 @@
                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
                     -->
-                    
                 </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
