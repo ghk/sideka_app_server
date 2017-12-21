@@ -114,7 +114,7 @@
                             <img src="/assets/images/hutan.png" style="width: 20px; height: 20px;" title="Hutan"/>
                         </span>
                     </td>   
-                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" [routerLink]="['/summary', 'potential']"> - </td>
                             
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total | number:'1.0-0'}} </td>
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total === 0">  - </td>
