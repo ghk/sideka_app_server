@@ -267,7 +267,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                 layer['setStyle'] ? layer['setStyle'](style) : null;
             }
 
-            if (feature.properties['boundary_sign']) {
+            if (feature.properties['boundary_sign']) { 
                 let style = MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign'] });
                 layer.setStyle(style);
             }

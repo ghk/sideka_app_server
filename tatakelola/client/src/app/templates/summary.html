@@ -49,6 +49,12 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
+                    <th (click)="sort('desa_total_potential')" style="width: 15%;" rowspan="2" class="sortable-header">Lahan (Ha)
+                            <ng-container *ngIf="order.includes('desa_total_potential')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                    </th>
                     <th (click)="sort('penduduk_total')" rowspan="2" class="sortable-header">Penduduk
                             <ng-container *ngIf="order.includes('penduduk_total')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
@@ -74,12 +80,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>-->
-                    <th (click)="sort('desa_total_potential')" rowspan="2" class="sortable-header">Lahan
-                            <ng-container *ngIf="order.includes('desa_total_potential')">
-                                <span [hidden]="order.startsWith('-')">▲</span>
-                                <span [hidden]="!order.startsWith('-')">▼</span>
-                            </ng-container>
-                    </th>
+                   
                 </tr>
             </thead>
             <tbody>
@@ -93,7 +94,29 @@
                     
                      <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 10000 | number:'1.0-0'}} </td>
                      <td class="money data-column-number hoverable" (click)="loadDetail('area')" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
-                     
+                    
+                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> 
+                        <span style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_potential_farmland_area / 10000 | number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/>
+                        </span>
+                        <span  style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_potential_orchard_area / 10000 | number:'1.0-0'}} 
+                            </span>
+                            <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/>
+                        </span>
+                        <span>
+                            <span>
+                                {{summary.pemetaan_potential_forest_area / 10000 | number:'1.0-0'}} 
+                            </span>
+                            <img src="/assets/images/hutan.png" style="width: 20px; height: 20px;" title="Hutan"/>
+                        </span>
+                    </td>   
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
+                            
                      <td class="money data-column-number hoverable" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total | number:'1.0-0'}} </td>
                      <td class="money data-column-number hoverable" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total === 0">  - </td>
 
@@ -106,8 +129,7 @@
                      <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural > 0 || summary.pemetaan_water_pipe > 0" (click)="loadDetail('waters')"> {{summary.pemetaan_water_natural}} Mata Air, {{summary.pemetaan_water_pipe}} Sistem Pipa </td>
                      <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_water_natural === 0 && summary.pemetaan_water_pipe === 0" (click)="loadDetail('waters')"> - </td>
                      -->
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" (click)="loadDetail('potential')"> {{summary.pemetaan_potential_farmland}} Pertanian, {{summary.pemetaan_potential_orchard}} Perkebunan, {{summary.pemetaan_potential_forest}} Hutan </td>
-                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" (click)="loadDetail('potential')"> - </td>
+                     
                   </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
