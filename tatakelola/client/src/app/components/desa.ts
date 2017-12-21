@@ -178,6 +178,18 @@ export class DesaComponent implements OnInit, OnDestroy {
             let marker = null;
             let url = null;
 
+            /*
+            if (feature.properties.landuse && feature.properties.landuse === 'farmland') {
+                if (feature.properties.crop && feature.properties.crop === 'padi')
+                    url = '/assets/images/pertanian.png';
+                else if (feature.properties.crop && feature.properties.crop === 'jagung')
+                    url = '/assets/images/corn.png';
+            }
+            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') {
+                if (feature.properties.crop && feature.properties.crop === 'bawang')
+                    url = '/assets/images/garlic.png';
+            }*/
+            
             if (feature.properties.landuse && feature.properties.landuse === 'farmland') 
                 url =  '/assets/images/pertanian.png';
 
