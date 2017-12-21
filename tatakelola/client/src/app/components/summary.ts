@@ -39,7 +39,14 @@ export class SummaryComponent implements OnInit, OnDestroy {
        this.viewType = 'summary';
        this.order = 'region.parent.id';
        this.query = '';
-
+       this.progress = {
+           event: null,
+           percentage: 0,
+           loaded: 0,
+           lengthComputable: true,
+           total: 0
+       };
+       
        this._activeRouter.params.subscribe(
            params => {
                if (params['detailType'] === 'master') {
@@ -64,6 +71,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
     }
 
     loadSummaries(): void {
+        this.progress.percentage = 0;
+
         this._dataService.getSummaries({}, this.progressListener.bind(this)).subscribe(
             result => {
                 this.summaries = result;
