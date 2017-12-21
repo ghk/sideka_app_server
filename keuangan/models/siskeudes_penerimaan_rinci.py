@@ -18,7 +18,7 @@ class SiskeudesPenerimaanRinci(BaseModel):
     nilai = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    region = db.relationship('Region', lazy='joined')
+    region = db.relationship('Region', lazy='select')
 
     penerimaan = db.relationship('SiskeudesPenerimaan', primaryjoin='SiskeudesPenerimaan.no == SiskeudesPenerimaanRinci.no_tbp', foreign_keys=[no_tbp], lazy='joined')
 

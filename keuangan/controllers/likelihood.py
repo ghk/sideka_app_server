@@ -11,14 +11,16 @@ budget_likelihood_repository = BudgetLikelihoodRepository(db)
 @app.route('/budget/likelihoods/year/<string:year>', methods=['GET'])
 def get_budget_likelihoods_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = budget_likelihood_repository.all_by_year(year, page_sort_params)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = budget_likelihood_repository.all_by_year(year, is_lokpri, page_sort_params)
     result = BudgetLikelihoodModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
 @app.route('/budget/likelihoods/year/<string:year>/count', methods=['GET'])
 def get_budget_likelihoods_count_by_year(year):
-    result = budget_likelihood_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = budget_likelihood_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 

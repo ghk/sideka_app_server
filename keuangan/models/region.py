@@ -16,7 +16,7 @@ class Region(BaseModel):
     is_lokpri = db.Column(db.Boolean, nullable=False, default=False)
 
     fk_parent_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    parent = db.relationship('Region', remote_side=[id], lazy='joined')
+    parent = db.relationship('Region', remote_side=[id], lazy='select')
 
     __table_args__ = (
         db.Index('regions_ix_fk_parent_id', 'fk_parent_id'),

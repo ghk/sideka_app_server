@@ -14,7 +14,10 @@ class RegionRepository(BaseRepository):
             .first()
 
     def all(self, is_lokpri=True, is_siskeudes_code=False, page_sort_params=None):
-        query = self.db.session.query(self.model).filter(self.model.is_lokpri == is_lokpri)
+        query = self.db.session.query(self.model)
+
+        if (is_lokpri):
+            query = query.filter(self.model.is_lokpri == True)
 
         if (is_siskeudes_code):
             query = query.filter(self.model.siskeudes_code.isnot(None))

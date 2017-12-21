@@ -1,5 +1,6 @@
+from sqlalchemy.orm import aliased
 from base import BaseRepository, BaseRegionRepository, BaseSiskeudesRepository
-from keuangan.models import SiskeudesPenganggaran
+from keuangan.models import SiskeudesPenganggaran, Region
 
 
 class SiskeudesPenganggaranRepository(BaseRepository, BaseRegionRepository, BaseSiskeudesRepository):
@@ -8,12 +9,17 @@ class SiskeudesPenganggaranRepository(BaseRepository, BaseRegionRepository, Base
         self.model = SiskeudesPenganggaran
 
 
-    def get_total_spending_by_region_and_year(self, region_id, year):
-        query = self.db.session.query(self.model) \
-            .filter(self.model.kode_rekening == '5') \
-            .filter(self.model.year == year)
+    def get_total_spending_by_region_and_year(self, region_id, year, is_lokpri=True):
+        query = self.db.session.query(self.model)
 
-        if (region_id != '0'):
+        if is_lokpri:
+            region = aliased(Region)
+            query = query.join(region, self.model.region)
+            query = query.filter(region.is_lokpri == True)
+
+        query = query.filter(self.model.kode_rekening == '5').filter(self.model.year == year)
+
+        if region_id != '0':
             query = query.filter(self.model.fk_region_id == region_id)
 
         total = 0
