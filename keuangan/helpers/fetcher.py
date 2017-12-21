@@ -147,7 +147,7 @@ class SiskeudesFetcher:
 
     @staticmethod
     def fetch_penganggarans_by_year(year):
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             try:
                 SiskeudesFetcher.fetch_penganggaran_by_region_and_year(region, year)
@@ -158,7 +158,7 @@ class SiskeudesFetcher:
 
     @staticmethod
     def fetch_penerimaans_by_year(year):
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             try:
                 SiskeudesFetcher.fetch_penerimaan_by_region_and_year(region, year)
@@ -169,7 +169,7 @@ class SiskeudesFetcher:
 
     @staticmethod
     def fetch_spps_by_year(year):
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             try:
                 SiskeudesFetcher.fetch_spps_by_region_and_year(region, year)

@@ -26,7 +26,7 @@ class QueryHelper:
             else:
                 sub_model = attr.property.mapper.class_
                 sub_attr = getattr(sub_model, attrs[1])
-                query = query.join(sub_model)
+                query = query.outerjoin(sub_model)
                 query = query.order_by(func(sub_attr))
         return query
 

@@ -38,10 +38,12 @@ def generate_budget_types():
 @app.route('/budget/recapitulations/year/<string:year>', methods=['GET'])
 def get_budget_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = budget_recapitulation_repository.all_by_year(year, page_sort_params)
 
-    is_full_region = request.args.get('is_full_region')
-    if (is_full_region and is_full_region == 'true'):
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = budget_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+
+    is_full_region = request.args.get('is_full_region', default=True, type=bool)
+    if is_full_region:
         result = BudgetRecapitulationCompleteModelSchema(many=True).dump(entities)
     else:
         result = BudgetRecapitulationModelSchema(many=True).dump(entities)
@@ -50,7 +52,8 @@ def get_budget_recapitulations_by_year(year):
 
 @app.route('/budget/recapitulations/year/<string:year>/count', methods=['GET'])
 def get_budget_recapitulations_count_by_year(year):
-    result = budget_recapitulation_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = budget_recapitulation_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 
@@ -77,4 +80,3 @@ def generate_budget_recapitulations_by_region(region_id):
     db.session.add_all(entities)
     db.session.commit()
     return jsonify({'success': True})
-

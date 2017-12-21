@@ -23,7 +23,7 @@ class SiskeudesKegiatan(BaseModel):
     pagu_pak = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    region = db.relationship('Region', lazy='joined')
+    region = db.relationship('Region', lazy='select')
 
     __table_args__ = (
         db.Index('sk_ix_fk_region_id', 'fk_region_id'),

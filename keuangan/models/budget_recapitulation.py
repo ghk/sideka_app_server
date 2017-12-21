@@ -13,10 +13,10 @@ class BudgetRecapitulation(BaseModel):
     realized = db.Column(db.DECIMAL)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    region = db.relationship('Region', lazy='joined')
+    region = db.relationship('Region', lazy='select')
 
     fk_type_id = db.Column(db.Integer, db.ForeignKey('budget_types.id'))
-    type = db.relationship('BudgetType', lazy='joined')
+    type = db.relationship('BudgetType', lazy='select')
 
     __table_args__ = (
         db.Index('sr_ix_fk_type_id', 'fk_type_id'),
