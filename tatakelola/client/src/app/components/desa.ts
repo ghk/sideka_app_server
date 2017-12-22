@@ -185,7 +185,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         let featureCollection = map.data;
 
-        featureCollection.features = featureCollection.features.filter(e => e.properties.landuse);
+        featureCollection.features = featureCollection.features.filter(e => e.properties.landuse 
+            && (e.properties.landuse === 'farmland' || e.properties.landuse === 'orchard' || e.properties.landuse === 'forest'));
 
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachFeature.bind(this)
