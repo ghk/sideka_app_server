@@ -63,7 +63,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            layers: [L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png')],
             zoom: 14,
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
