@@ -18,7 +18,8 @@
       </div>
    </div>
    <div class="content-header">
-      RANGKUMAN DATA DESA
+    <i class="fa fa-arrow-left" *ngIf="viewType !== 'summary'" style="cursor: pointer;" [routerLink]="['/summary/','master']"></i>  
+    {{subTitle}}
    </div>
    <div class="table-responsive desktop-table">
         <table class="table table-condensed table-column-hoverable table-responsive table-bordered" style="overflow-x: hidden;" *ngIf="viewType === 'summary'">

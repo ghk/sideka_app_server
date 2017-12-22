@@ -17,28 +17,17 @@ export class SummaryComponent implements OnInit, OnDestroy {
     progress: Progress;
     order: string;
     query: string;
+    subTitle: string;
    
     constructor(dataService: DataService, private _router: Router, private _activeRouter: ActivatedRoute) {
         this._dataService = dataService;
-    }
-
-    sort(order: string): boolean {
-        if (this.order.includes(order)) {
-            if (this.order.startsWith('-'))
-                this.order = this.order.substr(1);
-            else
-                this.order = '-' + this.order;
-        } else {
-            this.order = order;
-        }
-
-        return false;
     }
 
     ngOnInit(): void {
        this.viewType = 'summary';
        this.order = 'region.parent.id';
        this.query = '';
+       this.subTitle = 'Rangkuman Data Desa';
        this.progress = {
            event: null,
            percentage: 0,
@@ -52,15 +41,30 @@ export class SummaryComponent implements OnInit, OnDestroy {
                if (params['detailType'] === 'master') {
                    this.viewType = 'summary';
                    this.detailType = null;
+                   this.subTitle = 'Rangkuman Data Desa';
                }
                else {
                    this.viewType = 'detail';
                    this.detailType = params['detailType'];
+                   this.setSubTitle();
                }
 
                this.loadSummaries();
            }
        )
+    }
+    
+    sort(order: string): boolean {
+        if (this.order.includes(order)) {
+            if (this.order.startsWith('-'))
+                this.order = this.order.substr(1);
+            else
+                this.order = '-' + this.order;
+        } else {
+            this.order = order;
+        }
+
+        return false;
     }
 
     isNumber(data): boolean {
@@ -91,21 +95,24 @@ export class SummaryComponent implements OnInit, OnDestroy {
         )
     }
     
-    loadDetail(type): void {
-        this.viewType = 'detail';
-        this.detailType = type;
-    }
-
-    backToSummary(): boolean {
-        this.viewType = 'summary';
-        this.detailType = null;
-        this.order = 'region.parent.id';
-
-        return false;
-    }
-
-    goToDesa(regionId): void {
-        this._router.navigateByUrl('/desa/' + regionId);
+    setSubTitle() {
+        switch(this.detailType) {
+            case 'area':
+                this.subTitle = 'Data Desa Per Area';
+            break;
+            case 'apbdes':
+                this.subTitle = 'Data Desa Per Anggaran';
+            break;
+            case 'potential':
+                this.subTitle = 'Data Desa Per Lahan';
+            break;
+            case 'penduduk':
+                this.subTitle = 'Data Desa Per Penduduk';
+            break;
+            case 'education':
+                this.subTitle = 'Data Desa Per Gedung Sekolah';
+            break;
+        }
     }
 
     ngOnDestroy(): void {}

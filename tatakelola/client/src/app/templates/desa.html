@@ -6,7 +6,7 @@
 
 <div class="desktop" *ngIf="summaries">
     <div id="cari" style="display: inline-flex">
-        <a>
+        <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
           <img src="/assets/res/logobp3ti.png">
         </a>
         <h5> {{summaries.region.name}} </h5>
