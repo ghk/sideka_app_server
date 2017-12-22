@@ -196,13 +196,13 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>            
-                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Keliling Desa (km)
-                        <ng-container *ngIf="order.includes('pemetaan_desa_boundary')">
+                    <th (click)="sort('pemetaan_desa_circumference')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Keliling Desa (km)
+                        <ng-container *ngIf="order.includes('pemetaan_desa_circumference')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>          
-                    <th (click)="sort('pemetaan_desa_boundary')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jumlah Dusun
+                    <th (click)="sort('pemetaan_dusun_total')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jumlah Dusun
                         <ng-container *ngIf="order.includes('pemetaan_desa_boundary')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
