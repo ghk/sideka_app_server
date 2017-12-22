@@ -369,7 +369,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.progress.percentage = 0;
 
         let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
-        regionId, {}, this.progressListener.bind(this)).toPromise();
+            regionId, {}, this.progressListener.bind(this)).toPromise();
 
         let features = map.data.features.filter(e => e.properties.admin_level && e.properties.admin_level == 7); 
 
@@ -383,6 +383,43 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
         }).addTo(this.map);
+    }
+    
+    async setMapPenduduk() {
+        this.cleanLayers(); 
+        this.cleanMarkers();
+
+        let regionId = this.summaries.fk_region_id;
+        
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+            
+        featureCollection.features = featureCollection.features.filter(e => e.properties.building 
+            && (e.properties.building === 'house'));
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            console.log(feature.properties);
+            let url = '/assets/images/house.png';
+
+            let marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [15, 15],
+                    shadowSize: [50, 64],
+                    iconAnchor: [22, 24],
+                    shadowAnchor: [4, 62],
+                    popupAnchor: [-3, -76]
+                })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
     }
 
     setActiveMenu(menu: string) {
@@ -400,6 +437,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'boundary':
                 this.setMapBoundary();
+            break;
+            case 'penduduk':
+                this.setMapPenduduk();
             break;
         }
         return false;
