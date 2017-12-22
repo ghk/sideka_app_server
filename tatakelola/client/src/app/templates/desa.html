@@ -14,10 +14,10 @@
 
     <div class="prevnext" style="float:right; margin-top: 2px;">
       <button class="prev" (click)="prev()">
-        <span style="width: 80px; text-overflow: ellipsis;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
+        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
       </button>
       <button class="next"  (click)="next()">
-        <span style="width: 80px; text-overflow: ellipsis;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
+        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
       </button>
     </div>
     
@@ -65,7 +65,27 @@
             <i class="fa fa-building"></i>
           </div>
           <div class="desc">
-            <h4> {{summaries.pemetaan_school_tk}} <strong>TK</strong> {{summaries.pemetaan_school_sd}} <strong>SD</strong>  {{summaries.pemetaan_school_smp}} <strong>SMP</strong>  {{summaries.pemetaan_school_sma}} <strong>SMA</strong>  {{summaries.pemetaan_school_pt}} <strong>PT</strong> </h4>
+            <span>
+                <img src="/assets/images/tk.png" style="width: 20px; height: 20px; padding-left: 2px;" title="TK"/> 
+                {{summaries.pemetaan_school_tk}}
+            </span>
+            <span>
+                <img src="/assets/images/sd.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SD"/> 
+                {{summaries.pemetaan_school_sd}}
+            </span>
+            <span>
+                <img src="/assets/images/smp.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMP"/> 
+                {{summaries.pemetaan_school_smp}}
+            </span>
+            <span>
+                <img src="/assets/images/sma.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMA"/> 
+                {{summaries.pemetaan_school_sma}}
+            </span>
+            <span>
+                <img src="/assets/images/pt.png" style="width: 20px; height: 20px; padding-left: 2px;" title="PT"/> 
+                {{summaries.pemetaan_school_pt}}
+            </span>
+           
           </div>
         </div>
       </a>
@@ -113,7 +133,26 @@
         </div>
       </a>
     </div>
-  </div>
+
+    <!--
+    <div class="legend">
+       <div>
+           <img src="/assets/images/tk.png" style="width: 30px; height: 30px;"> TK
+       </div>
+       <div>
+          <img src="/assets/images/sd.png" style="width: 30px; height: 30px;"> SD
+       </div>
+       <div>
+          <img src="/assets/images/smp.png" style="width: 30px; height: 30px;"> SMP
+       </div>
+       <div>
+          <img src="/assets/images/sma.png" style="width: 30px; height: 30px;"> SMA
+       </div>
+       <div>
+          <img src="/assets/images/pt.png" style="width: 30px; height: 30px;"> PT
+       </div>
+    </div> -->
+</div>
 
 <div class="mobile" *ngIf="summaries">
    <div id="cari" style="display: inline-flex; width: 360px;">
@@ -125,10 +164,10 @@
 
     <div class="prevnext">
       <button class="prev" (click)="prev()">
-        <span style="width: 80px; text-overflow: ellipsis;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
+        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
       </button>
       <button class="next"  (click)="next()">
-        <span style="width: 80px; text-overflow: ellipsis;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
+        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
       </button>
     </div>
     <div style="margin-top: 10px; width: 600px; height: 300px; overflow-y: scroll;">

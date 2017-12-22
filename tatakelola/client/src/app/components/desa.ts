@@ -72,7 +72,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             params => {
                 this.regionId = params['regionId'];
                 this.setupSummaries(params['regionId']);
-                this.setupBoundary(params['regionId']);
+                this.setupLayout(params['regionId']);
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
@@ -96,16 +96,29 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
     }
 
-    async setupBoundary(regionId: string) {
+    async setupLayout(regionId: string) {
         try {
             this.cleanMarkers();
 
-            let geoJsonLayoutRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
+            let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
-        
-            this.setMapLayout(geoJsonLayoutRaw);
+
+            let geoJsonTransportsRaw = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, 
+                this.progressListener.bind(this)).toPromise();
             
+  
+            let features = geoJsonBoundaryRaw.data.features;
+            features = features.concat(geoJsonTransportsRaw.data.features);
+      
+            this.geoJsonLayout = L.geoJSON(features, {
+                style: this.getMapBoundaryStyle.bind(this),
+                onEachFeature: this.onEachFeature.bind(this)
+            });
+    
+            this.geoJsonLayout.addTo(this.map);
+            this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15);
         }
+
         catch(error) {
             console.log(error);
         }
@@ -132,7 +145,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
-        this.setupBoundary(this.summaries.fk_region_id);
+        this.setupLayout(this.summaries.fk_region_id);
     }
     
     async prev() {
@@ -149,12 +162,14 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
-        this.setupBoundary(this.summaries.fk_region_id);
+        this.setupLayout(this.summaries.fk_region_id);
     }
     
     async setMapSchools() {
         this.cleanLayers(); 
         this.cleanMarkers();
+
+        this.markers = [];
 
         let regionId = this.summaries.fk_region_id;
 
@@ -167,9 +182,46 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         featureCollection.features = featureCollection.features.filter(e => e.properties.amenity 
             && e.properties.amenity === 'school' && e.properties.isced);
-       
-        this.geoJsonSchools = L.geoJSON(featureCollection);
-        this.geoJsonSchools.addTo(this.map);
+        
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            let marker = null;
+            let url = null;
+            
+            if (feature.properties['amenity'] && feature.properties['amenity'] === 'school') {
+                if (feature.properties['isced']) {
+                    if (feature.properties['isced'] == 0) {
+                        url = '/assets/images/tk.png';
+                    }
+                    else if (feature.properties['isced'] == 1) {
+                        url = '/assets/images/sd.png';
+                    }
+                    else if (feature.properties['isced'] == 2) {
+                        url = '/assets/images/smp.png';
+                    }
+                    else if (feature.properties['isced'] == 3) {
+                        url = '/assets/images/sma.png';
+                    }
+                    else if (feature.properties['isced'] == 4) {
+                        url = '/assets/images/pt.png';
+                    }
+
+                    marker = L.marker(center, {
+                        icon: L.icon({ 
+                            iconUrl: url,
+                            iconSize: [25, 25],
+                            shadowSize: [50, 64],
+                            iconAnchor: [22, 24],
+                            shadowAnchor: [4, 62],
+                            popupAnchor: [-3, -76]
+                        })
+                    }).addTo(this.map);
+        
+                    this.markers.push(marker);
+                }
+            }
+        }
     }
     
     async setMapLanduse() {
@@ -331,16 +383,6 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
         }).addTo(this.map);
-    }
-
-    setMapLayout(geoJsonLayoutRaw: any): void {
-        this.geoJsonLayout = L.geoJSON(geoJsonLayoutRaw.data, {
-            style: this.getMapBoundaryStyle.bind(this),
-            onEachFeature: this.onEachFeature.bind(this)
-        });
-
-        this.geoJsonLayout.addTo(this.map);
-        this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15);
     }
 
     setActiveMenu(menu: string) {
