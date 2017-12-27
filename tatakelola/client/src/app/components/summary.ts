@@ -84,9 +84,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
                 this.summaries.forEach(summary => {
                     summary['penduduk_total'] = summary.penduduk_sex_unknown + summary.penduduk_sex_male + summary.penduduk_sex_female;
                     summary['desa_edu_total'] = summary.pemetaan_school_tk + summary.pemetaan_school_sd + summary.pemetaan_school_smp + summary.pemetaan_school_sma + summary.pemetaan_school_pt;
-                    summary['desa_total_waters'] = summary.pemetaaan_water_spring + summary.pemetaan_water_ditch;
-                    summary['desa_total_potential'] = summary.pemetaan_potential_farmland + summary.pemetaan_potential_forest + summary.pemetaan_potential_orchard;
-                    summary['kk_not_using_electricity'] = summary.penduduk_total_kk - summary.pemetaan_electricity_house;
+                    summary['desa_total_landuse'] = summary.pemetaan_landuse_farmland + summary.pemetaan_landuse_forest + summary.pemetaan_landuse_orchard;
+                   
                 });  
             },
             error => {
@@ -103,7 +102,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
             case 'apbdes':
                 this.subTitle = 'Data Desa Per Anggaran';
             break;
-            case 'potential':
+            case 'landuse':
                 this.subTitle = 'Data Desa Per Lahan';
             break;
             case 'penduduk':

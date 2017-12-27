@@ -49,8 +49,8 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('desa_total_potential')" style="width: 15%;" rowspan="2" class="sortable-header">Lahan (Ha)
-                            <ng-container *ngIf="order.includes('desa_total_potential')">
+                    <th (click)="sort('desa_total_landuse')" style="width: 15%;" rowspan="2" class="sortable-header">Lahan (Ha)
+                            <ng-container *ngIf="order.includes('desa_total_landuse')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
@@ -95,27 +95,27 @@
                      <td class="money data-column-number hoverable" [routerLink]="['/summary', 'area']" *ngIf="summary.pemetaan_desa_boundary > 0"> {{ summary.pemetaan_desa_boundary / 10000 | number:'1.0-0'}} </td>
                      <td class="money data-column-number hoverable" [routerLink]="['/summary', 'area']" *ngIf="summary.pemetaan_desa_boundary === 0 || !summary.pemetaan_desa_boundary"> - </td>
                     
-                     <td class="data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_potential_farmland > 0 || summary.pemetaan_potential_orchard > 0 || summary.pemetaan_potential_forest > 0" [routerLink]="['/summary', 'potential']"> 
+                     <td class="data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_landuse_farmland > 0 || summary.pemetaan_landuse_orchard > 0 || summary.pemetaan_landuse_forest > 0" [routerLink]="['/summary', 'landuse']"> 
                         <span style="margin-right: 5px;">
                             <span>
-                                {{summary.pemetaan_potential_farmland_area / 10000 | number:'1.0-0'}}
+                                {{summary.pemetaan_landuse_farmland_area / 10000 | number:'1.0-0'}}
                             </span>
                             <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/>
                         </span>
                         <span  style="margin-right: 5px;">
                             <span>
-                                {{summary.pemetaan_potential_orchard_area / 10000 | number:'1.0-0'}} 
+                                {{summary.pemetaan_landuse_orchard_area / 10000 | number:'1.0-0'}} 
                             </span>
                             <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/>
                         </span>
                         <span>
                             <span>
-                                {{summary.pemetaan_potential_forest_area / 10000 | number:'1.0-0'}} 
+                                {{summary.pemetaan_landuse_forest_area / 10000 | number:'1.0-0'}} 
                             </span>
                             <img src="/assets/images/hutan.png" style="width: 20px; height: 20px;" title="Hutan"/>
                         </span>
                     </td>   
-                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_potential_farmland === 0 && summary.pemetaan_potential_orchard === 0 && summary.pemetaan_potential_forest === 0" [routerLink]="['/summary', 'potential']"> - </td>
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_landuse_farmland === 0 && summary.pemetaan_landuse_orchard === 0 && summary.pemetaan_landuse_forest === 0" [routerLink]="['/summary', 'landuse']"> - </td>
                             
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" (click)="loadDetail('penduduk')" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total | number:'1.0-0'}} </td>
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total === 0">  - </td>
@@ -297,6 +297,12 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
+                    <th (click)="sort('penduduk_job_nelayan')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Nelayan
+                        <ng-container *ngIf="order.includes('penduduk_job_nelayan')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
+                     </th>
                     <th (click)="sort('penduduk_job_pedagang')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Pedagang
                             <ng-container *ngIf="order.includes('penduduk_job_pedagang')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
@@ -309,6 +315,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
+                   
                     <th (click)="sort('penduduk_job_lain')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Lainnya
                             <ng-container *ngIf="order.includes('penduduk_job_lain')">
                                 <span [hidden]="order.startsWith('-')">▲</span>
@@ -347,6 +354,9 @@
 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_petani > 0"> {{summary.penduduk_job_petani | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_petani === 0"> -</td>
+
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_nelayan > 0"> {{summary.penduduk_job_nelayan | number:'1.0-0'}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_nelayan === 0"> -</td>
 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_pedagang > 0"> {{summary.penduduk_job_pedagang | number:'1.0-0'}}</td>
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_pedagang === 0"> -</td>
@@ -552,7 +562,7 @@
             </tfoot>
         </table>
 
-        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'potential'">
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'landuse'">
             <thead>
                 <tr>
                     <th (click)="sort('region.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Desa
@@ -567,20 +577,20 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_farmland')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Pertanian (Ha)
-                        <ng-container *ngIf="order.includes('pemetaan_potential_farmland')">
+                    <th (click)="sort('pemetaan_landuse_farmland')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Pertanian (Ha)
+                        <ng-container *ngIf="order.includes('pemetaan_landuse_farmland')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_orchard')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Perkebunan (Ha)
-                        <ng-container *ngIf="order.includes('pemetaan_potential_orchard')">
+                    <th (click)="sort('pemetaan_landuse_orchard')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Perkebunan (Ha)
+                        <ng-container *ngIf="order.includes('pemetaan_landuse_orchard')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
                     </th>
-                    <th (click)="sort('pemetaan_potential_forest')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Hutan (Ha)
-                        <ng-container *ngIf="order.includes('pemetaan_potential_forest')">
+                    <th (click)="sort('pemetaan_landuse_forest')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Luas Hutan (Ha)
+                        <ng-container *ngIf="order.includes('pemetaan_landuse_forest')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
                         </ng-container>
@@ -592,12 +602,12 @@
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
                     <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
                     <td style="font-size: 12px;"> {{summary.region.parent.parent.name}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland_area > 0"> {{summary.pemetaan_potential_farmland_area / 10000 | number:'1.0-0'}}</td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_farmland_area === 0"> - </td>
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_orchard_area > 0"> {{summary.pemetaan_potential_orchard_area  / 10000 | number:'1.0-0'}}</td> 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_orchard_area === 0"> -</td> 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_forest_area > 0"> {{summary.pemetaan_potential_forest_area  / 10000 | number:'1.0-0'}}</td> 
-                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_potential_forest_area === 0"> -</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_farmland_area > 0"> {{summary.pemetaan_landuse_farmland_area / 10000 | number:'1.0-0'}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_farmland_area === 0"> - </td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_orchard_area > 0"> {{summary.pemetaan_landuse_orchard_area  / 10000 | number:'1.0-0'}}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_orchard_area === 0"> -</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_forest_area > 0"> {{summary.pemetaan_landuse_forest_area  / 10000 | number:'1.0-0'}}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_forest_area === 0"> -</td> 
                 </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">
