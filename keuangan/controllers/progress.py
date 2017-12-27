@@ -12,14 +12,16 @@ progress_timeline_repository = ProgressTimelineRepository(db)
 @app.route('/progress/recapitulations/year/<string:year>', methods=['GET'])
 def get_progress_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = progress_recapitulation_repository.all_by_year(year, page_sort_params)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = progress_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
     result = ProgressRecapitulationModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
 @app.route('/progress/recapitulations/year/<string:year>/count', methods=['GET'])
 def get_progress_recapitulations_count_by_year(year):
-    result = progress_recapitulation_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = progress_recapitulation_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 
@@ -34,14 +36,16 @@ def generate_progress_recapitulations():
 @app.route('/progress/timelines/year/<string:year>', methods=['GET'])
 def get_progress_timelines_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = progress_timeline_repository.all_by_year(year, page_sort_params)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = progress_timeline_repository.all_by_year(year, is_lokpri, page_sort_params)
     result = ProgressTimelineModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
 @app.route('/progress/timelines/year/<string:year>/count', methods=['GET'])
 def get_progress_timelines_count_by_year(year):
-    result = progress_timeline_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = progress_timeline_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 

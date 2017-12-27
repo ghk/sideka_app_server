@@ -26,8 +26,17 @@ class QueryHelper:
             else:
                 sub_model = attr.property.mapper.class_
                 sub_attr = getattr(sub_model, attrs[1])
-                query = query.join(sub_model)
+
+                found_join_entity = None
+                for join_entity in query._join_entities:
+                    if join_entity.mapper.class_ == sub_model:
+                        found_join_entity = join_entity
+                if found_join_entity is None:
+                    query = query.outerjoin(sub_model)
+                else:
+                    sub_attr = getattr(found_join_entity.entity, attrs[1])
                 query = query.order_by(func(sub_attr))
+
         return query
 
     @staticmethod

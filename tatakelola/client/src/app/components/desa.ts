@@ -11,6 +11,7 @@ import * as L from 'leaflet';
 import 'rxjs/add/operator/map';
 
 import BIG from '../helpers/bigConfig';
+import geoJSONArea from '@mapbox/geojson-area';
 
 @Component({
     selector: 'st-desa',
@@ -24,11 +25,19 @@ export class DesaComponent implements OnInit, OnDestroy {
     progress: Progress;
     regionId: string;
     summaries: any;
-    geoJsonBoundary: L.GeoJSON;
+    geoJsonLayout: L.GeoJSON;
     geoJsonSchools: L.GeoJSON;
     geoJsonLanduse: L.GeoJSON;
+    geoJsonBoudary: L.GeoJSON;
+    geoJsonDesaBoundary: L.GeoJSON;
+    geoJsonDusunBoundary: L.GeoJSON;
     availableDesaSummaries: any[];
     currentDesaIndex: number;
+    markers: L.Marker[];
+    showDesaBoundary: boolean;
+    showDusunBoundary: boolean;
+    nextDesa: string;
+    prevDesa: string;
 
     constructor(
         private _http: Http,
@@ -39,6 +48,12 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
+        this.markers = [];
+        this.showDesaBoundary = true;
+        this.showDusunBoundary = true;
+        this.prevDesa = 'TIDAK ADA';
+        this.nextDesa = 'TIDAK ADA';
+
         this.progress = {
             percentage: 0,
             event: null,
@@ -48,7 +63,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            layers: [L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png')],
             zoom: 14,
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
@@ -57,7 +72,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             params => {
                 this.regionId = params['regionId'];
                 this.setupSummaries(params['regionId']);
-                this.setupBoundary(params['regionId']);
+                this.setupLayout(params['regionId']);
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
@@ -73,20 +88,37 @@ export class DesaComponent implements OnInit, OnDestroy {
             
             if(summaries.length > 0)
               this.summaries = summaries[0];
+
+            console.log(this.summaries);
         }
         catch(error) {
             console.log(error);
         }
     }
 
-    async setupBoundary(regionId: string) {
+    async setupLayout(regionId: string) {
         try {
+            this.cleanMarkers();
+
             let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
-        
-            this.setMapLayout(geoJsonBoundaryRaw);
+
+            let geoJsonTransportsRaw = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, 
+                this.progressListener.bind(this)).toPromise();
             
+  
+            let features = geoJsonBoundaryRaw.data.features;
+            features = features.concat(geoJsonTransportsRaw.data.features);
+      
+            this.geoJsonLayout = L.geoJSON(features, {
+                style: this.getMapBoundaryStyle.bind(this),
+                onEachFeature: this.onEachFeature.bind(this)
+            });
+    
+            this.geoJsonLayout.addTo(this.map);
+            this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15);
         }
+
         catch(error) {
             console.log(error);
         }
@@ -96,38 +128,48 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.availableDesaSummaries = await this._dataService.getSummariesExceptId(regionId, null).toPromise();
         this.availableDesaSummaries = this.availableDesaSummaries.concat(this.summaries);
         this.currentDesaIndex = this.availableDesaSummaries.indexOf(this.summaries);
+        this.setNextPrevLabel();
     }
 
-    async nextDesa() {
+    async next() {
         this.activeMenu = null;
 
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
-           return;
-
+           this.currentDesaIndex = -1;
+           
         this.cleanLayers();   
         this.cleanLayout();
-   
-        this.currentDesaIndex += 1;
+        this.cleanMarkers();
+
+        this.currentDesaIndex += 1; 
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
-        this.setupBoundary(this.summaries.fk_region_id);
+
+        this.setNextPrevLabel();
+        this.setupLayout(this.summaries.fk_region_id);
     }
     
-    async prevDesa() {
+    async prev() {
         this.activeMenu = null;
         
         if(this.currentDesaIndex === 0)
-          return;
+           this.currentDesaIndex = this.availableDesaSummaries.length;
 
         this.cleanLayers();  
         this.cleanLayout();
+        this.cleanMarkers();
 
         this.currentDesaIndex -= 1;
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
-        this.setupBoundary(this.summaries.fk_region_id);
+
+        this.setNextPrevLabel();
+        this.setupLayout(this.summaries.fk_region_id);
     }
     
     async setMapSchools() {
         this.cleanLayers(); 
+        this.cleanMarkers();
+
+        this.markers = [];
 
         let regionId = this.summaries.fk_region_id;
 
@@ -140,13 +182,51 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         featureCollection.features = featureCollection.features.filter(e => e.properties.amenity 
             && e.properties.amenity === 'school' && e.properties.isced);
-       
-        this.geoJsonSchools = L.geoJSON(featureCollection);
-        this.geoJsonSchools.addTo(this.map);
+        
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            let marker = null;
+            let url = null;
+            
+            if (feature.properties['amenity'] && feature.properties['amenity'] === 'school') {
+                if (feature.properties['isced']) {
+                    if (feature.properties['isced'] == 0) {
+                        url = '/assets/images/tk.png';
+                    }
+                    else if (feature.properties['isced'] == 1) {
+                        url = '/assets/images/sd.png';
+                    }
+                    else if (feature.properties['isced'] == 2) {
+                        url = '/assets/images/smp.png';
+                    }
+                    else if (feature.properties['isced'] == 3) {
+                        url = '/assets/images/sma.png';
+                    }
+                    else if (feature.properties['isced'] == 4) {
+                        url = '/assets/images/pt.png';
+                    }
+
+                    marker = L.marker(center, {
+                        icon: L.icon({ 
+                            iconUrl: url,
+                            iconSize: [25, 25],
+                            shadowSize: [50, 64],
+                            iconAnchor: [22, 24],
+                            shadowAnchor: [4, 62],
+                            popupAnchor: [-3, -76]
+                        })
+                    }).addTo(this.map);
+        
+                    this.markers.push(marker);
+                }
+            }
+        }
     }
     
     async setMapLanduse() {
         this.cleanLayers(); 
+        this.cleanMarkers();
 
         let regionId = this.summaries.fk_region_id;
         
@@ -157,13 +237,58 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         let featureCollection = map.data;
 
-        featureCollection.features = featureCollection.features.filter(e => e.properties.landuse);
-      
+        featureCollection.features = featureCollection.features.filter(e => e.properties.landuse 
+            && (e.properties.landuse === 'farmland' || e.properties.landuse === 'orchard' || e.properties.landuse === 'forest'));
+
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachFeature.bind(this)
         });
 
         this.geoJsonLanduse.addTo(this.map);
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            let marker = null;
+            let url = null;
+
+            /*
+            if (feature.properties.landuse && feature.properties.landuse === 'farmland') {
+                if (feature.properties.crop && feature.properties.crop === 'padi')
+                    url = '/assets/images/pertanian.png';
+                else if (feature.properties.crop && feature.properties.crop === 'jagung')
+                    url = '/assets/images/corn.png';
+            }
+            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') {
+                if (feature.properties.crop && feature.properties.crop === 'bawang')
+                    url = '/assets/images/garlic.png';
+            }*/
+
+            if (feature.properties.landuse && feature.properties.landuse === 'farmland') 
+                url =  '/assets/images/pertanian.png';
+
+            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') 
+                url =  '/assets/images/perkebunan.png';
+
+            else if (feature.properties.landuse && feature.properties.landuse === 'forest')
+                url =  '/assets/images/hutan.png';
+            
+            if (!url)
+                continue;
+
+            marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [20, 20],
+                    shadowSize: [50, 64],
+                    iconAnchor: [22, 24],
+                    shadowAnchor: [4, 62],
+                    popupAnchor: [-3, -76]
+                })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
     }
 
     async setMapLogPembangunan() {
@@ -196,25 +321,105 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async setMapBoundary() {
         this.cleanLayers(); 
+        this.cleanMarkers();
+        
+        this.setDusunBoundary();
+        this.setDesaBoundary();
+    }
 
+    async setDusunBoundary() {
         let regionId = this.summaries.fk_region_id;
         
         this.progress.percentage = 0;
 
         let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
-                regionId, {}, this.progressListener.bind(this)).toPromise();
+        regionId, {}, this.progressListener.bind(this)).toPromise();
 
-        let featureCollection = map.data;
+        let features = map.data.features.filter(e => e.properties.admin_level && e.properties.admin_level == 8);
+
+        this.markers = [];
+
+        for (let i=0; i<features.length; i++) {
+            let area = geoJSONArea.geometry(features[i].geometry);
+            
+            let marker = L.marker(L.geoJSON(features[i]).getBounds().getCenter(), {
+                icon: L.divIcon({
+                    className: 'label', 
+                    html: '<h4 style="color: blue;"><strong>' + Math.round(area / 10000) + ' Ha </strong></h4>',
+                    iconSize: [30, 30]
+                  })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
+
+        this.geoJsonDusunBoundary = L.geoJSON(features, {
+            style: (feature) => {
+                return { fillColor: '#000', color: '#fff', weight: 1 };
+            },
+            onEachFeature: (feature, layer) => {
+
+            }
+        }).addTo(this.map);
     }
 
-    setMapLayout(geoJsonBoundaryRaw: any): void {
-        this.geoJsonBoundary = L.geoJSON(geoJsonBoundaryRaw.data, {
-            style: this.getMapBoundaryStyle.bind(this),
-            onEachFeature: this.onEachFeature.bind(this)
-        });
+    async setDesaBoundary() {
+        let regionId = this.summaries.fk_region_id;
+        
+        this.progress.percentage = 0;
 
-        this.geoJsonBoundary.addTo(this.map);
-        this.map.setView(this.geoJsonBoundary.getBounds().getCenter(), 15);
+        let map = await this._dataService.getGeojsonByTypeAndRegion('boundary', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let features = map.data.features.filter(e => e.properties.admin_level && e.properties.admin_level == 7); 
+
+        this.geoJsonDesaBoundary = L.geoJSON(features, {
+            style: (feature) => {
+                return { color: '#000', weight: 1 };
+            },
+            onEachFeature: (feature, layer) => {
+                if (feature.properties['boundary_sign']) {
+                    layer['setStyle'](MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign']}));
+                }
+            }
+        }).addTo(this.map);
+    }
+    
+    async setMapPenduduk() {
+        this.cleanLayers(); 
+        this.cleanMarkers();
+
+        let regionId = this.summaries.fk_region_id;
+        
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
+            regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+            
+        featureCollection.features = featureCollection.features.filter(e => e.properties.building 
+            && (e.properties.building === 'house'));
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            console.log(feature.properties);
+            let url = '/assets/images/house.png';
+
+            let marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [15, 15],
+                    shadowSize: [50, 64],
+                    iconAnchor: [22, 24],
+                    shadowAnchor: [4, 62],
+                    popupAnchor: [-3, -76]
+                })
+            }).addTo(this.map);
+
+            this.markers.push(marker);
+        }
     }
 
     setActiveMenu(menu: string) {
@@ -229,6 +434,12 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'apbdes':
                 this.setMapLogPembangunan();
+            break;
+            case 'boundary':
+                this.setMapBoundary();
+            break;
+            case 'penduduk':
+                this.setMapPenduduk();
             break;
         }
         return false;
@@ -277,24 +488,41 @@ export class DesaComponent implements OnInit, OnDestroy {
     onMapReady(map: L.Map): void {
         this.map = map;
     }
+   
+    setNextPrevLabel() {
+        this.nextDesa = this.availableDesaSummaries[this.currentDesaIndex + 1] 
+            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name : this.availableDesaSummaries[0].region.name;
+    
+        this.prevDesa = this.availableDesaSummaries[this.currentDesaIndex - 1] 
+            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name : this.availableDesaSummaries[this.availableDesaSummaries.length - 1].region.name;
+    }
 
     cleanLayers(): void {
         if (this.geoJsonSchools)
             this.map.removeLayer(this.geoJsonSchools);
         if (this.geoJsonLanduse)
             this.map.removeLayer(this.geoJsonLanduse);
+        if (this.geoJsonDusunBoundary)
+            this.map.removeLayer(this.geoJsonDusunBoundary);
+        if (this.geoJsonDesaBoundary)
+            this.map.removeLayer(this.geoJsonDesaBoundary);
     }
 
     cleanLayout(): void {
-        if (this.geoJsonBoundary)
-            this.map.removeLayer(this.geoJsonBoundary);
+        if (this.geoJsonLayout)
+            this.map.removeLayer(this.geoJsonLayout);
+    }
+
+    cleanMarkers(): void {
+        for (let i=0; i<this.markers.length; i++)
+            this.map.removeLayer(this.markers[i]);
+
+        this.markers = [];
     }
 
     progressListener(progress: Progress): void {
         this.progress = progress;
     }
 
-    ngOnDestroy(): void {
-        this.map.remove();
-    }
+    ngOnDestroy(): void {}
 }

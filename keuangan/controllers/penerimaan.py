@@ -13,14 +13,16 @@ siskeudes_penerimaan_rinci_repository = SiskeudesPenerimaanRinciRepository(db)
 @app.route('/siskeudes/penerimaans/year/<string:year>', methods=['GET'])
 def get_siskeudes_penerimaans_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_penerimaan_repository.all_by_year(year, page_sort_params)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = siskeudes_penerimaan_repository.all_by_year(year, is_lokpri, page_sort_params)
     result = SiskeudesPenerimaanModelSchemaIso(many=True).dump(entities)
     return jsonify(result.data)
 
 
 @app.route('/siskeudes/penerimaans/year/<string:year>/count', methods=['GET'])
 def get_siskeudes_penerimaans_count_by_year(year):
-    result = siskeudes_penerimaan_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = siskeudes_penerimaan_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 
@@ -35,14 +37,16 @@ def get_siskeudes_penerimaans_by_region_and_year(region_id, year):
 @app.route('/siskeudes/penerimaans/rincis/year/<string:year>', methods=['GET'])
 def get_siskeudes_penerimaan_rincis_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
-    entities = siskeudes_penerimaan_rinci_repository.all_by_year(year, page_sort_params)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    entities = siskeudes_penerimaan_rinci_repository.all_by_year(year, is_lokpri, page_sort_params)
     result = SiskeudesPenerimaanRinciModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
 
 @app.route('/siskeudes/penerimaans/rincis/year/<string:year>/count', methods=['GET'])
 def get_siskeudes_penerimaan_rincis_count_by_year(year):
-    result = siskeudes_penerimaan_rinci_repository.count_by_year(year)
+    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    result = siskeudes_penerimaan_rinci_repository.count_by_year(year, is_lokpri)
     return jsonify(result)
 
 

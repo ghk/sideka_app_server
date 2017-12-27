@@ -1,3 +1,5 @@
+from sqlalchemy.orm import aliased
+from keuangan.models import Region
 from keuangan.helpers import QueryHelper
 
 
@@ -28,13 +30,30 @@ class BaseRepository:
 
 
 class BaseRegionRepository:
-    def all_by_year(self, year, page_sort_params=None):
+    def all_by_year(self, year, is_lokpri=True, page_sort_params=None):
         query = self.db.session.query(self.model)
-        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
-        return query.filter(self.model.year == year).all()
 
-    def count_by_year(self, year):
-        return self.db.session.query(self.model).filter(self.model.year == year).count()
+        if is_lokpri:
+            region = aliased(Region)
+            query = query.outerjoin(region, self.model.region)
+            query = query.filter(region.is_lokpri == True)
+
+        query = query.filter(self.model.year == year)
+        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
+
+        return query.all()
+
+    def count_by_year(self, year, is_lokpri=True):
+        query = self.db.session.query(self.model)
+
+        if is_lokpri:
+            region = aliased(Region)
+            query = query.outerjoin(region, self.model.region)
+            query = query.filter(region.is_lokpri == True)
+
+        query = query.filter(self.model.year == year)
+
+        return query.count()
 
     def get_by_region(self, region_id, page_sort_params=None):
         query = self.db.session.query(self.model)

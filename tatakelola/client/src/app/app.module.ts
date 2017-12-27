@@ -35,8 +35,8 @@ import { SharedService } from './services/shared';
     FormsModule,
     LeafletModule.forRoot(),
     RouterModule.forRoot([
-      { path: '', redirectTo: 'summary/region/0', pathMatch: 'full' },
-      { path: 'summary/region/:regionId', component: SummaryComponent },
+      { path: '', redirectTo: 'summary/master', pathMatch: 'full' },
+      { path: 'summary/:detailType', component: SummaryComponent },
       { path: 'map', component: MapComponent },
       { path: 'desa/region/:regionId', component: DesaComponent }
     ])

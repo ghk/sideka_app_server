@@ -1,5 +1,6 @@
 from keuangan import db
 from keuangan import ma
+from keuangan.helpers import CustomDateTime
 from base import BaseModel
 from region import RegionModelSchema
 
@@ -27,7 +28,7 @@ class SiskeudesPenerimaan(BaseModel):
     ref_bayar = db.Column(db.String)
 
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
-    region = db.relationship('Region', lazy='joined')
+    region = db.relationship('Region', lazy='select')
 
     __table_args__ = (
         db.Index('sp_ix_fk_region_id', 'fk_region_id'),
@@ -39,7 +40,7 @@ class SiskeudesPenerimaanModelSchema(ma.ModelSchema):
         model = SiskeudesPenerimaan
         include_fk = True
 
-    tanggal = ma.DateTime(format='%d/%m/%Y')
+    tanggal = CustomDateTime(format='keuangan', allow_none=True, missing=True)
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
 
 

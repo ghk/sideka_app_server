@@ -34,23 +34,18 @@ class Generator:
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
         facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
 
-        summary.pemetaan_potential_forest = 0
-        summary.pemetaan_potential_farmland = 0
-        summary.pemetaan_potential_orchard = 0
-        summary.pemetaan_potential_forest_area = 0
-        summary.pemetaan_potential_farmland_area = 0
-        summary.pemetaan_potential_orchard_area = 0
-        summary.pemetaan_water_natural_area = 0
-        summary.pemetaan_water_pipe = 0
-        summary.pemetaan_water_natural = 0
-        summary.pemetaan_water_pipe_width_avg = 0
+        summary.pemetaan_landuse_forest = 0
+        summary.pemetaan_landuse_farmland = 0
+        summary.pemetaan_landuse_orchard = 0
+        summary.pemetaan_landuse_forest_area = 0
+        summary.pemetaan_landuse_farmland_area = 0
+        summary.pemetaan_landuse_orchard_area = 0
         summary.pemetaan_school_tk = 0
         summary.pemetaan_school_sd = 0
         summary.pemetaan_school_smp = 0
         summary.pemetaan_school_sma = 0
         summary.pemetaan_school_pt = 0
         summary.pemetaan_desa_boundary = 0
-        summary.pemetaan_electricity_house = 0
         summary.pemetaan_dusun_total = 0
         summary.pemetaan_desa_circumference = 0
         
