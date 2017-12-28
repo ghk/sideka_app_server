@@ -1,0 +1,20 @@
+<div *ngIf="!isFinished" style="margin: auto; width: 50%; height:300px; text-align:center; padding-top:125px;">
+  <img src="/assets/images/loading.gif">
+  <br>
+  <br> Memuat data...
+</div>
+
+<div *ngIf="isFinished">
+  <div class="content-header">
+    <select [(ngModel)]="isPercentage">
+      <option [ngValue]="false">TOTAL</option>
+      <option [ngValue]="true">PERSENTASE</option>
+    </select>
+    Realisasi {{ region?.name }}
+  </div>
+  <br />
+  <div>
+    <canvas baseChart [datasets]="datasets" [labels]="labels" [options]="options" [chartType]="chartType">
+    </canvas>
+  </div>
+</div>

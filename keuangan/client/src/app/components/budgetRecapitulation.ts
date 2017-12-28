@@ -99,7 +99,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
     getBudgetTypes(): void {
         let budgetTypeQuery: Query = {           
             data: {
-                is_revenue: this.budgetType === '5' ? false : true
+                is_revenue: this.budgetType === '5' ? '' : 'true'
             }
         };
 
