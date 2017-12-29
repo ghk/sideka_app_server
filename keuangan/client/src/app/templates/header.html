@@ -20,7 +20,7 @@
           <a routerLink="/budget/region/{{region?.id}}">Anggaran</a>
         </li>
       </ul>
-      <ul class="nav navbar-nav nav-region">
+      <!-- <ul class="nav navbar-nav nav-region">
         <li [ngClass]="{'active': region?.id === '0' ? true : false}">
           <a routerLink="/{{state}}/region/0">DESA PRIORITAS</a>
         </li>
@@ -30,14 +30,7 @@
         <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}" [ngClass]="{'active': region?.id !== '0' ? true : false}">
           <a routerLink="/{{state}}/region/{{region?.id}}">{{region?.name}}</a>
         </li>
-      </ul> 
-      <!--     
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-          <a href="/login">Login</a>
-        </li>        
-      </ul>
-      -->
+      </ul>  -->     
     </nav>
   </div>
 </header>

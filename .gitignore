@@ -14,3 +14,6 @@ keuangan/logs/*
 
 tatakelola/logs/*
 !tatakelola/logs/.gitkeep
+
+posyandu/logs/*
+!posyandu/logs/.gitkeep
