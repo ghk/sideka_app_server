@@ -102,13 +102,16 @@ class ProgressTimelineTransformer:
                     data[mon].transferred_pbh += rinci.nilai
 
         for rinci in spp_rincis:
+            if rinci.spp.tanggal is None:
+                continue
+
             month = rinci.spp.tanggal.month
             if (max_month < month):
                 max_month = month
 
             for mon in range(month, 13, 1):
                 if rinci.nilai is None:
-                    rinci.nilai = 0;
+                    rinci.nilai = 0
                 data[mon].realized_spending += rinci.nilai
 
         for key, datum in data.iteritems():
