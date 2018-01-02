@@ -16,6 +16,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     private _subscription: Subscription;
 
     region: any;
+    year: string;
     totalRevenue: number = 0;
     totalSpending: number = 0;
     revenues: any[] = [];
@@ -30,6 +31,8 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.year = '2017';
+
         this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();
@@ -37,10 +40,8 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
     }
 
     getData() {
-        let year = new Date().getFullYear().toString();
-
         this._dataService
-            .getSiskeudesPenerimaanByRegionAndYear(this.region.id, year, null, this.progressListener.bind(this))
+            .getSiskeudesPenerimaanByRegionAndYear(this.region.id, this.year, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.revenues = results;
@@ -52,7 +53,7 @@ export class ProgressDetailComponent implements OnInit, OnDestroy {
         );
 
         this._dataService
-            .getSiskeudesSppByRegionAndYear(this.region.id, year, null, this.progressListener.bind(this))
+            .getSiskeudesSppByRegionAndYear(this.region.id, this.year, null, this.progressListener.bind(this))
             .subscribe(
             results => {
                 this.spendings = results

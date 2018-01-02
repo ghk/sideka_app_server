@@ -19,11 +19,8 @@ export class ProgressRealizationChartComponent implements OnInit, OnDestroy {
     private _datasets = new BehaviorSubject<any[]>([]);    
     private _isPercentage = new BehaviorSubject<boolean>(true);
 
-    @Input()
-    year: any;
-
-    @Input() 
-    progressTimelines: any;
+    @Input() year: any;
+    @Input() progressTimelines: any;
 
     @Input()
     set datasets(value) {
@@ -131,7 +128,7 @@ export class ProgressRealizationChartComponent implements OnInit, OnDestroy {
     }  
 
     ngOnChanges(changes: {[propKey: string]: SimpleChange}): void {
-        if (!this.progressTimelines && changes['progressTimelines']) {
+        if (this.progressTimelines) {
             this._subscriptions[0] = this._sharedService.getRegion().subscribe(region => {
                 this.region = region;            
                 this.getData().then(() => {

@@ -20,6 +20,7 @@ import { ProgressRealizationChartComponent } from './components/progressRealizat
 import { BudgetComponent } from './components/budget';
 import { BudgetRecapitulationComponent } from './components/budgetRecapitulation';
 import { BudgetDetailComponent } from './components/budgetDetail';
+import { BudgetTableComponent } from './components/budgetTable';
 import { BudgetChartComponent } from './components/budgetChart';
 import { BudgetLikelihoodComponent } from './components/budgetLikelihood';
 import { SummaryComponent } from './components/summary';
@@ -45,6 +46,7 @@ import { SharedService } from './services/shared';
     BudgetComponent,
     BudgetRecapitulationComponent,
     BudgetDetailComponent,
+    BudgetTableComponent,
     BudgetChartComponent,
     BudgetLikelihoodComponent,
     SummaryComponent,

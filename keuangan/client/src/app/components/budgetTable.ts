@@ -7,15 +7,14 @@ import { SharedService } from '../services/shared';
 import { Query } from '../models/query';
 
 @Component({
-    selector: 'sk-budget-detail',
-    templateUrl: '../templates/budgetDetail.html',
+    selector: 'sk-budget-table',
+    templateUrl: '../templates/budgetTable.html',
 })
-export class BudgetDetailComponent implements OnInit, OnDestroy {
+export class BudgetTableComponent implements OnInit, OnDestroy {
 
     private _subscriptions: Subscription[] = [];
     private _budgetType = new BehaviorSubject<string>('5');
     private _budgetTypes = new BehaviorSubject<any[]>([]);
-    private _budgetRecapitulations = new BehaviorSubject<any[]>([]);
 
     @Input()
     set budgetType(value) {
@@ -33,27 +32,15 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
         return this._budgetTypes.getValue();
     }
 
-    @Input()
-    set budgetRecapitulations(value) {
-        this._budgetRecapitulations.next(value);
-    }
-    get budgetRecapitulations() {
-        return this._budgetRecapitulations.getValue();
-    }
-
     region: any;
     year: string;
     isPak: boolean = false;
     progress: Progress;
     entities: any[] = [];
     hideBudgetDetail: boolean = true;
-    budgetTypeNames: any = {
+    budgetTypeNames = {
         '4': 'PENDAPATAN',
-        '5': 'BELANJA',
-        '6': 'PEMBIAYAAN',
-    };
-    extraOptions: any = {
-        aspectRatio: 1
+        '5': 'BELANJA'
     };
 
     constructor(
@@ -81,19 +68,10 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
         })
     }
 
-    getData() {      
+    getData() {
         let penganggaranQuery: Query = {
             sort: 'row_number'
-        };
-
-        this._dataService
-            .getBudgetRecapitulationsByRegionAndYear(this.region.id, this.year, null, null)
-            .subscribe(
-            result => {
-                this.budgetRecapitulations = result;
-            },
-            error => {}
-        );
+        };       
 
         this._dataService
             .getSiskeudesPenganggaranByRegionAndYear(this.region.id, this.year, penganggaranQuery, this.progressListener.bind(this))
