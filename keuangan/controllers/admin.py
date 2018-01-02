@@ -27,11 +27,10 @@ def fetch_siskeudes_codes():
     return jsonify({'success': True})
 
 
-@app.route('/admin/fetch/all', methods=['GET'])
-def fetch_all():
+@app.route('/admin/fetch/all/year/<string:year>', methods=['GET'])
+def fetch_all(year):
     t0 = time()
 
-    year = str(datetime.now().year)
     SiskeudesFetcher.fetch_desas()
     SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
     SiskeudesFetcher.fetch_penerimaans_by_year(year)
@@ -45,11 +44,10 @@ def fetch_all():
     return jsonify({'success': True})
 
 
-@app.route('/admin/generate/all', methods=['GET'])
-def generate_all():
+@app.route('/admin/generate/all/year/<string:year>', methods=['GET'])
+def generate_all(year):
     t0 = time()
 
-    year = str(datetime.now().year)
     prs = Generator.generate_progress_recapitulations_by_year(year)
     pts = Generator.generate_progress_timelines_by_year(year)
     srs = Generator.generate_budget_recapitulations_by_year(year)
@@ -74,8 +72,9 @@ def clear_cache():
 
 @app.route('/admin/run/all', methods=['GET'])
 def run_all():
-    fetch_result = fetch_all()
-    generate_result = generate_all()
+    year = '2017'
+    fetch_result = fetch_all(year)
+    generate_result = generate_all(year)
     return generate_result
 
 
