@@ -23,8 +23,8 @@ export class BudgetLikelihoodComponent implements OnInit, OnDestroy {
         return this._budgetLikelihoods.getValue();
     }
 
-    @Input() progress: any;
     region: any;
+    year: string;
 
     constructor(
         private _dataService: DataService,
@@ -32,7 +32,7 @@ export class BudgetLikelihoodComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        let year = new Date().getFullYear().toString();
+        this.year = '2017';
 
         this._subscriptions[0] = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
@@ -47,8 +47,6 @@ export class BudgetLikelihoodComponent implements OnInit, OnDestroy {
     }
 
     getData() {
-        let year = new Date().getFullYear().toString();
-
         let likelihoodQuery: Query = {
             sort: 'rank'
         };
@@ -57,7 +55,7 @@ export class BudgetLikelihoodComponent implements OnInit, OnDestroy {
             return;
 
         this._dataService
-            .getBudgetLikelihoodByRegionAndYear(this.region.id, year, null, null)
+            .getBudgetLikelihoodByRegionAndYear(this.region.id, this.year, null, null)
             .subscribe(
             result => {
                 this.budgetLikelihoods = result;

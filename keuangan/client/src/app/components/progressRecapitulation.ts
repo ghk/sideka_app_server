@@ -36,7 +36,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        let year = new Date().getFullYear().toString();
+        let year = '2017'
 
         let query: Query = {
             sort: 'region.id'

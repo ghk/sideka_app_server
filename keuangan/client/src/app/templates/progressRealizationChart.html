@@ -10,11 +10,14 @@
       <option [ngValue]="false">TOTAL</option>
       <option [ngValue]="true">PERSENTASE</option>
     </select>
-    Realisasi {{ region?.name }}
+    <a routerLink="/budget/region/{{region?.id}}">Realisasi {{ region?.name }}</a>
   </div>
   <br />
   <div>
     <canvas baseChart [datasets]="datasets" [labels]="labels" [options]="options" [chartType]="chartType">
     </canvas>
   </div>
+  <br />
 </div>
+
+

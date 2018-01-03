@@ -1,28 +1,49 @@
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-sm-12">
-      <tabset>
-        <tab heading="Pencapaian">
-          <div class="row">
-            <div class="col-sm-6">
-              <sk-progress-revenue-chart [year]="year" [progressTimelines]="progressTimelines"></sk-progress-revenue-chart>
-            </div>
-            <div class="col-sm-6">
-              <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
-            </div>
-          </div>
-        </tab>
-        <tab heading="Anggaran">
-          <div class="row">
-            <div class="col-sm-6">
-              <sk-progress-realization-chart [year]="year" [progressTimelines]="progressTimelines"></sk-progress-realization-chart>
-            </div>
-            <div class="col-sm-6">
-              <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
-            </div>
-          </div>
-        </tab>
-      </tabset>
+    <div class="row">
+        <div class="col-sm-12">
+            <ul class="nav front-numbers">
+                <li>
+                    <span class="number">{{ region?.name }}
+                        <span style="font-size:24px;"> - {{ region | regionType:2 }}</span>
+                        <a href="region?.domain" style="font-size:14px;">Web Desa</a>
+                    </span>
+                </li>
+            </ul>
+            <tabset>
+                <tab heading="Belanja" (select)="onTabSelected($event)" style="padding-top: 10px;">
+                    <div class="row" *ngIf="isBelanjaActive">
+                        <div class="col-sm-4">
+                            <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [extraOptions]="extraOptions"></sk-budget-chart>
+                        </div>
+                        <div class="col-sm-4">
+                            <sk-progress-realization-chart [year]="year" [progressTimelines]="progressTimelines"></sk-progress-realization-chart>
+                        </div>
+                        <div class="col-sm-4">
+                            <sk-budget-likelihood></sk-budget-likelihood>
+                        </div>
+                    </div>
+                    <div class="row" *ngIf="isBelanjaActive">
+                        <div class="col-sm-12">
+                            <sk-budget-table></sk-budget-table>
+                        </div>
+                    </div>
+                </tab>
+                <tab heading="Pendapatan" (select)="onTabSelected($event)" style="padding-top: 10px;">
+                    <div class="row" *ngIf="isPendapatanActive">
+                        <div class="col-sm-6">
+                            <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [extraOptions]="extraOptions"></sk-budget-chart>
+                        </div>
+                        <div class="col-sm-6">
+                            <sk-progress-revenue-chart [year]="year" [progressTimelines]="progressTimelines"></sk-progress-revenue-chart>
+                        </div>
+                    </div>
+                    <div class="row" *ngIf="isPendapatanActive">
+                        <div class="col-sm-12">
+                            <sk-budget-table [budgetType]="4"></sk-budget-table>
+                        </div>
+                    </div>
+                </tab>
+            </tabset>
+        </div>
     </div>
-  </div>
 </div>

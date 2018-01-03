@@ -17,8 +17,8 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
 
     progressTimelines: any; 
     region: any;
+    year: string;
     progress: Progress;
-    year: any = new Date().getFullYear();
 
     constructor(
         private _dataService: DataService,
@@ -26,6 +26,8 @@ export class ProgressTimelineComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {       
+        this.year = '2017';
+        
         this._subscription = this._sharedService.getRegion().subscribe(region => {
             this.region = region;
             this.getData();

@@ -6,6 +6,7 @@ from flask import Flask
 from flask_cors import CORS
 from common.database import db
 from common.marshmallow import ma
+from common.cache import cache
 from controllers import *
 
 
@@ -31,6 +32,7 @@ def create_app():
 
     db.init_app(app)
     ma.init_app(app)
+    cache.init_app(app)
     CORS(app)
 
     with app.app_context():
