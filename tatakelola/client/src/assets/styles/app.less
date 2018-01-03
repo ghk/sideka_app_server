@@ -519,7 +519,7 @@ td.money {
     position: fixed;
     width: 300px;
     height: 100px;   
-    left: 50%;
+    left: 45%;
     top: 50%; 
     margin-left: 0px;
     margin-top: -50px;
@@ -606,12 +606,65 @@ td.money {
     display: none;
 }
 
+.table-column-hoverable {
+    overflow: hidden;
+}
+
+.table-column-hoverable td, th {
+    padding: 10px;
+    position: relative;
+    outline: 0;
+}
+
+body:not(.nohover) .table-column-hoverable tbody tr:hover {
+    background-color: transparent;
+}
+
+.table-column-hoverable td:hover::after,
+.table-column-hoverable thead th:not(:empty):hover::after,
+.table-column-hoverable td:focus::after,
+.table-column-hoverable thead th:not(:empty):focus::after { 
+    content: '';  
+    height: 10000px;
+    left: 0;
+    position: absolute;  
+    top: -5000px;
+    width: 100%;
+    z-index: -1;
+}
+
+.table-column-hoverable .hoverable:hover::after,
+.table-column-hoverable .hoverable-header:hover::after {
+    background-color: #bbdfff;
+}
+
+.table-column-hoverable .hoverable:focus::after,
+.table-column-hoverable .hoverable-header:focus::after {
+    background-color: lightblue;
+}
+
+/* Focus stuff for mobile */
+.table-column-hoverable td:focus::before,
+.table-column-hoverable tbody th:focus::before {
+    background-color: lightblue;
+    content: '';  
+    height: 100%;
+    top: 0;
+    left: -5000px;
+    position: absolute;  
+    width: 10000px;
+    z-index: -1;
+}
+
+.zui-table {
+    display: none;
+}
+
 @media only screen and (max-width: 675px) {
     body,
     html {
         width: 100%;
         height: 650px;
-        overflow-y: hidden;
     }
 
     .summary-header {
@@ -692,56 +745,62 @@ td.money {
         margin-top: -50px;
         z-index: 100000;
     }
-}
 
-.table-column-hoverable {
-    overflow: hidden;
-}
+    .desktop-table {
+        display: none;
+    }
 
-.table-column-hoverable td, th {
-    padding: 10px;
-    position: relative;
-    outline: 0;
-}
+    .center-div {    
+        position: fixed;
+        width: 300px;
+        height: 100px;   
+        left: 40%;
+        top: 50%; 
+        margin-left: 0px;
+        margin-top: -50px;
+        z-index: 100000;
+    }
 
-body:not(.nohover) .table-column-hoverable tbody tr:hover {
-    background-color: transparent;
-}
-
-.table-column-hoverable td:hover::after,
-.table-column-hoverable thead th:not(:empty):hover::after,
-.table-column-hoverable td:focus::after,
-.table-column-hoverable thead th:not(:empty):focus::after { 
-    content: '';  
-    height: 10000px;
-    left: 0;
-    position: absolute;  
-    top: -5000px;
-    width: 100%;
-    z-index: -1;
-}
-
-.table-column-hoverable .hoverable:hover::after,
-.table-column-hoverable .hoverable-header:hover::after {
-    background-color: #bbdfff;
-}
-
-.table-column-hoverable .hoverable:focus::after,
-.table-column-hoverable .hoverable-header:focus::after {
-    background-color: lightblue;
-}
-
-/* Focus stuff for mobile */
-.table-column-hoverable td:focus::before,
-.table-column-hoverable tbody th:focus::before {
-    background-color: lightblue;
-    content: '';  
-    height: 100%;
-    top: 0;
-    left: -5000px;
-    position: absolute;  
-    width: 10000px;
-    z-index: -1;
+    .zui-table {
+        display: block;
+        border: none;
+        border-right: solid 1px #DDEFEF;
+        border-collapse: separate;
+        border-spacing: 0;
+        font: normal 13px Arial, sans-serif;
+    }
+    .zui-table thead th {
+        background-color: #DDEFEF;
+        border: none;
+        color: #336B6B;
+        padding: 10px;
+        text-align: left;
+        text-shadow: 1px 1px 1px #fff;
+        white-space: nowrap;
+    }
+    .zui-table tbody td {
+        border-bottom: solid 1px #DDEFEF;
+        color: #333;
+        padding: 10px;
+        text-shadow: 1px 1px 1px #fff;
+        white-space: nowrap;
+    }
+    .zui-wrapper {
+        position: relative;
+        overflow-x: hidden;
+    }
+    .zui-scroller {
+        margin-left: 180px;
+        overflow-x: scroll;
+    }
+    .zui-table .zui-sticky-col {
+        border-left: solid 1px #DDEFEF;
+        border-right: solid 1px #DDEFEF;
+        left: 0;
+        position: absolute;
+        top: auto;
+        width: 180px;
+    }
 }
 
 @media only screen and (max-width: 350px) {
@@ -751,5 +810,52 @@ body:not(.nohover) .table-column-hoverable tbody tr:hover {
     
     .summary-header-mobile .search-input {
         width: 202px;
+    }
+
+    .desktop-table {
+        display: none;
+    }
+
+    .zui-table {
+        border: none;
+        border-right: solid 1px #DDEFEF;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        height: 100%;
+        font: normal 13px Arial, sans-serif;
+    }
+    .zui-table thead th {
+        background-color: #DDEFEF;
+        border: none;
+        color: #336B6B;
+        padding: 10px;
+        text-align: left;
+        text-shadow: 1px 1px 1px #fff;
+        white-space: nowrap;
+    }
+    .zui-table tbody td {
+        border-bottom: solid 1px #DDEFEF;
+        color: #333;
+        padding: 10px;
+        text-shadow: 1px 1px 1px #fff;
+        white-space: nowrap;
+    }
+    .zui-wrapper {
+        position: relative;
+    }
+    .zui-scroller {
+        margin-left: 150px;
+        overflow-x: scroll;
+        padding-bottom: 5px;
+        width: 95%;
+    }
+    .zui-table .zui-sticky-col {
+        border-left: solid 1px #DDEFEF;
+        border-right: solid 1px #DDEFEF;
+        left: 0;
+        position: absolute;
+        top: auto;
+        width: 120px;
     }
 }

@@ -548,9 +548,9 @@ export default [
            ],
            "style":{
               "rgbColor":[
-                 177,
-                 211,
-                 137,
+                 0,
+                 94,
+                 0,
                  0
               ],
               "weight":2

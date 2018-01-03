@@ -235,11 +235,15 @@ export class DesaComponent implements OnInit, OnDestroy {
         let map = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
-        let featureCollection = map.data;
+        let roads = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, null).toPromise();
 
+        let featureCollection = map.data;
+       
         featureCollection.features = featureCollection.features.filter(e => e.properties.landuse 
             && (e.properties.landuse === 'farmland' || e.properties.landuse === 'orchard' || e.properties.landuse === 'forest'));
-
+        
+        featureCollection.features = featureCollection.features.concat(roads.data.features);
+            
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachFeature.bind(this)
         });

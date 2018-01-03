@@ -154,9 +154,9 @@
     </div> -->
 </div>
 
-<div class="mobile" *ngIf="summaries">
-   <div id="cari" style="display: inline-flex; width: 360px;">
-      <a>
+<div class="mobile" *ngIf="summaries" style="overflow: hidden;">
+   <div id="cari" style="display: inline-flex; width: 380px;">
+      <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
         <img src="/assets/images/bpppti.png">
       </a>
       <h5> {{summaries.region.name}} </h5>
