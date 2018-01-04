@@ -25,4 +25,6 @@ class ParentModelSchema(ma.ModelSchema):
         model = Parent
         include_fk = True
 
-        # parent = ma.Nested('self', many=False, exclude=('parent', ))
+
+    birth_date = ma.DateTime(format='%d-%m-%Y')
+    family_planning_range = ma.DateTime(format='%d-%m-%Y')

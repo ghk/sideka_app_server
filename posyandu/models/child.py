@@ -9,7 +9,7 @@ class Child(BaseModel):
     name = db.Column(db.String, nullable=False)
     birth_date = db.Column(db.Date)
     gender = db.Column(db.String)
-    is_bpjs = db.Column(db.Boolean)
+    bpjs = db.Column(db.String)
     bpjs_id = db.Column(db.String)
     flag = db.Column(db.Boolean)
     village = db.Column(db.String)
@@ -24,4 +24,4 @@ class ChildModelSchema(ma.ModelSchema):
         include_fk = True
 
 
-    birth_date = ma.DateTime(format='%d/%m/%Y')
+    birth_date = ma.DateTime(format='%d-%m-%Y')
