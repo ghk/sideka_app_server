@@ -115,7 +115,9 @@
     <ul class="list-group legend" *ngIf="isLegendShown" style="width: 200px;">
       <li class="list-group-item" *ngFor="let legend of legends" style="margin-bottom: 10px;" [style.background-color]="legend.color">
         <img src="{{legend.url}}" style="width: 30px; height: 30px;"/> 
-        <span style="float: right; padding-top: 10px;" [style.color]="legend.textColor ? legend.textColor : 'black'">{{legend.label}}</span>
+        <span style="float: right; padding-top: 10px;" [style.color]="legend.textColor ? legend.textColor : 'black'">
+            {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
+        </span>
       </li>
     </ul>
 </div>
@@ -202,4 +204,12 @@
             </div>
           </a>
     </div>
+    <ul class="list-group" *ngIf="isLegendShown" style="position: fixed; width: 100%; display: inline-flex; left: 0; top: 0; background-color: #fff; box-shadow: 1px 1px 1px #888;">
+      <li class="list-group-item" *ngFor="let legend of legends" style="width: auto; height: 35px;" [style.background-color]="legend.color">
+        <img src="{{legend.url}}" style="width: 20px; height: 20px;"/> 
+        <span [style.color]="legend.textColor ? legend.textColor : 'black'">
+            {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
+        </span>
+      </li>
+    </ul>
 </div>

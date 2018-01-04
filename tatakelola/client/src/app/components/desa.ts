@@ -132,6 +132,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     
             this.geoJsonLayout.addTo(this.map);
             this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15);
+            this.setActiveMenu(this.activeMenu);
         }
 
         catch(error) {
@@ -147,7 +148,6 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async next() {
-        this.activeMenu = null;
         this.isLegendShown = false;
         
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
@@ -165,7 +165,6 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
     
     async prev() {
-        this.activeMenu = null;
         this.isLegendShown = false;
 
         if(this.currentDesaIndex === 0)
@@ -234,8 +233,23 @@ export class DesaComponent implements OnInit, OnDestroy {
 
                     let existingLegend = this.legends.filter(e => e.url === url)[0];
 
-                    if(!existingLegend)
-                        this.legends.push({ label: label, url: url, color: null });
+                    if(!existingLegend) {
+                        if (label === 'TK')
+                            this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_tk });
+                        
+                        else if (label === 'SD')
+                            this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_sd });
+                        
+                        else if (label === 'SMP')
+                            this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_smp });
+
+                        else if (label === 'SMA')
+                            this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_sma });
+
+                        else if (label === 'PT')
+                            this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_pt });
+                    }
+                        
 
                     marker = L.marker(center, {
                         icon: L.icon({ 
