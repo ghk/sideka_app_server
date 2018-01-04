@@ -526,9 +526,9 @@ export default [
            ],
            "style":{
               "rgbColor":[
-                 195,
-                 240,
-                 137,
+                 141,
+                 198,
+                 102,
                  0
               ],
               "weight":2
@@ -549,8 +549,8 @@ export default [
            "style":{
               "rgbColor":[
                  0,
-                 94,
-                 0,
+                 104,
+                 56,
                  0
               ],
               "weight":2
@@ -570,9 +570,9 @@ export default [
            ],
            "style":{
               "rgbColor":[
-                 185,
-                 220,
-                 156,
+                 247,
+                 230,
+                 102,
                  0
               ],
               "weight":2

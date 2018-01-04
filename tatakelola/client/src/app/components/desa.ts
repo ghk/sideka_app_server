@@ -38,6 +38,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     showDusunBoundary: boolean;
     nextDesa: string;
     prevDesa: string;
+    isLegendShown: boolean;
+    legends: any[];
 
     constructor(
         private _http: Http,
@@ -48,11 +50,15 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.sidebarCollapsed = false;
-        this.markers = [];
         this.showDesaBoundary = true;
         this.showDusunBoundary = true;
+        this.isLegendShown = false;
+
         this.prevDesa = 'TIDAK ADA';
         this.nextDesa = 'TIDAK ADA';
+
+        this.markers = [];
+        this.legends = [];
 
         this.progress = {
             percentage: 0,
@@ -106,10 +112,19 @@ export class DesaComponent implements OnInit, OnDestroy {
             let geoJsonTransportsRaw = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
             
+            let geoJsonBuildings = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', regionId, {}, 
+                this.progressListener.bind(this)).toPromise();
   
             let features = geoJsonBoundaryRaw.data.features;
             features = features.concat(geoJsonTransportsRaw.data.features);
-      
+
+            geoJsonBuildings.data.features.map(feature => {
+                feature['indicator'] = 'facilities_infrastructures';
+                return feature;
+            });
+
+            features = features.concat(geoJsonBuildings.data.features.filter(e => e.geometry.type === 'Polygon'));
+
             this.geoJsonLayout = L.geoJSON(features, {
                 style: this.getMapBoundaryStyle.bind(this),
                 onEachFeature: this.onEachFeature.bind(this)
@@ -133,7 +148,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async next() {
         this.activeMenu = null;
-
+        this.isLegendShown = false;
+        
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
            this.currentDesaIndex = -1;
            
@@ -150,7 +166,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     
     async prev() {
         this.activeMenu = null;
-        
+        this.isLegendShown = false;
+
         if(this.currentDesaIndex === 0)
            this.currentDesaIndex = this.availableDesaSummaries.length;
 
@@ -168,9 +185,11 @@ export class DesaComponent implements OnInit, OnDestroy {
     async setMapSchools() {
         this.cleanLayers(); 
         this.cleanMarkers();
+        this.cleanLegends();
 
         this.markers = [];
-
+        this.legends = [];
+        
         let regionId = this.summaries.fk_region_id;
 
         this.progress.percentage = 0;
@@ -188,30 +207,41 @@ export class DesaComponent implements OnInit, OnDestroy {
             let center = L.geoJSON(feature).getBounds().getCenter();
             let marker = null;
             let url = null;
-            
+            let label = null;
+
             if (feature.properties['amenity'] && feature.properties['amenity'] === 'school') {
                 if (feature.properties['isced']) {
                     if (feature.properties['isced'] == 0) {
                         url = '/assets/images/tk.png';
+                        label = 'TK';
                     }
                     else if (feature.properties['isced'] == 1) {
                         url = '/assets/images/sd.png';
+                        label = 'SD';
                     }
                     else if (feature.properties['isced'] == 2) {
                         url = '/assets/images/smp.png';
+                        label = 'SMP';
                     }
                     else if (feature.properties['isced'] == 3) {
                         url = '/assets/images/sma.png';
+                        label = 'SMA';
                     }
                     else if (feature.properties['isced'] == 4) {
                         url = '/assets/images/pt.png';
+                        label = 'PT';
                     }
+
+                    let existingLegend = this.legends.filter(e => e.url === url)[0];
+
+                    if(!existingLegend)
+                        this.legends.push({ label: label, url: url, color: null });
 
                     marker = L.marker(center, {
                         icon: L.icon({ 
                             iconUrl: url,
-                            iconSize: [25, 25],
-                            shadowSize: [50, 64],
+                            iconSize: [20, 20],
+                            shadowSize: [64, 64],
                             iconAnchor: [22, 24],
                             shadowAnchor: [4, 62],
                             popupAnchor: [-3, -76]
@@ -222,11 +252,17 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
         }
+
+        this.isLegendShown = true;
     }
     
     async setMapLanduse() {
         this.cleanLayers(); 
         this.cleanMarkers();
+        this.cleanLegends();
+
+        this.markers = [];
+        this.legends = [];
 
         let regionId = this.summaries.fk_region_id;
         
@@ -245,10 +281,14 @@ export class DesaComponent implements OnInit, OnDestroy {
         featureCollection.features = featureCollection.features.concat(roads.data.features);
             
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
-            onEachFeature: this.onEachFeature.bind(this)
+            onEachFeature: this.onEachLanduseFeature.bind(this)
         });
 
         this.geoJsonLanduse.addTo(this.map);
+
+        let label = null;
+        let color = null;
+        let textColor = null;
 
         for (let i=0; i<featureCollection.features.length; i++) {
             let feature = featureCollection.features[i];
@@ -268,35 +308,41 @@ export class DesaComponent implements OnInit, OnDestroy {
                     url = '/assets/images/garlic.png';
             }*/
 
-            if (feature.properties.landuse && feature.properties.landuse === 'farmland') 
+            if (feature.properties.landuse && feature.properties.landuse === 'farmland')  {
                 url =  '/assets/images/pertanian.png';
+                label = 'Pertanian';
+                color = 'rgb(247,230,102)';
+            }
 
-            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') 
+            else if (feature.properties.landuse && feature.properties.landuse === 'orchard') {
                 url =  '/assets/images/perkebunan.png';
+                label = 'Perkebunan';
+                color = 'rgb(141,198,102)';
+            }
 
-            else if (feature.properties.landuse && feature.properties.landuse === 'forest')
-                url =  '/assets/images/hutan.png';
-            
+            else if (feature.properties.landuse && feature.properties.landuse === 'forest') {
+                url =  '/assets/images/hutan.png';    
+                label = 'Hutan';
+                color = 'rgb(0,104,56)';
+                textColor = 'white';
+            }
+               
             if (!url)
                 continue;
 
-            marker = L.marker(center, {
-                icon: L.icon({ 
-                    iconUrl: url,
-                    iconSize: [20, 20],
-                    shadowSize: [50, 64],
-                    iconAnchor: [22, 24],
-                    shadowAnchor: [4, 62],
-                    popupAnchor: [-3, -76]
-                })
-            }).addTo(this.map);
-
-            this.markers.push(marker);
+            let existingLegend = this.legends.filter(e => e.url === url)[0];
+            
+            if(!existingLegend)
+                this.legends.push({ label: label, url: url, color: color, textColor: textColor });
         }
+
+        this.isLegendShown = true;
     }
 
     async setMapLogPembangunan() {
         this.cleanLayers(); 
+        this.cleanMarkers();
+        this.cleanLegends();
         
         this.progress.percentage = 0;
 
@@ -326,6 +372,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     async setMapBoundary() {
         this.cleanLayers(); 
         this.cleanMarkers();
+        this.cleanLegends();
         
         this.setDusunBoundary();
         this.setDesaBoundary();
@@ -392,6 +439,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     async setMapPenduduk() {
         this.cleanLayers(); 
         this.cleanMarkers();
+        this.cleanLegends();
 
         let regionId = this.summaries.fk_region_id;
         
@@ -450,10 +498,57 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     getMapBoundaryStyle(feature) {
-        return { color: '#aaa', weight: 0.5 };
+        return { color: '#aaa', weight: 1 };
     }
 
     onEachFeature(feature, layer) {
+        for (let index in BIG) {
+            let indicator = BIG[index];
+            let elements = indicator.elements;
+            let matchedElement = null;
+
+            for (let index in elements) {
+                let indicatorElement = elements[index];
+
+                if (!indicatorElement.values)
+                   continue;
+                
+                let valueKeys = Object.keys(indicatorElement.values);
+
+                if (valueKeys.every(valueKey => feature["properties"][valueKey] 
+                    === indicatorElement.values[valueKey])) {
+                    matchedElement = indicatorElement;
+                    break;
+                }
+            }
+
+            if (!matchedElement) { 
+                if (feature['indicator']) {
+                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                    layer.setStyle(style);
+                }
+                continue;
+            }
+
+            if (matchedElement['style']) {
+                let style = MapUtils.setupStyle(matchedElement['style']);
+                style['weight'] = 1;
+                layer['setStyle'] ? layer['setStyle'](style) : null;
+            }
+
+            if (feature.properties['boundary_sign']) { 
+                let style = MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign'] });
+                layer.setStyle(style);
+            }
+
+            if (feature['indicator']) {
+                let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                layer.setStyle(style);
+            }
+        }
+    }
+
+    onEachLanduseFeature(feature, layer) {
         for (let index in BIG) {
             let indicator = BIG[index];
             let elements = indicator.elements;
@@ -479,12 +574,16 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
-                layer['setStyle'] ? layer['setStyle'](style) : null;
-            }
 
-            if (feature.properties['boundary_sign']) { 
-                let style = MapUtils.setupStyle({ dashArray: feature.properties['boundary_sign'] });
-                layer.setStyle(style);
+                style['weight'] = 0;
+
+                if (feature.geometry.type === 'Polygon') {
+                    style['fill'] = style['color'];
+                    style['fillOpacity'] = 1;
+                }
+                    
+                layer['setStyle'] ? layer['setStyle'](style) : null;
+                console.log(style);
             }
         }
     }
@@ -522,6 +621,11 @@ export class DesaComponent implements OnInit, OnDestroy {
             this.map.removeLayer(this.markers[i]);
 
         this.markers = [];
+    }
+    
+    cleanLegends(): void {
+        this.isLegendShown = false;
+        this.legends = [];
     }
 
     progressListener(progress: Progress): void {
