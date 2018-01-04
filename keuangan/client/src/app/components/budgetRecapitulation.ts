@@ -52,26 +52,27 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
         
     total: number[] = [];
     order: string = 'region.parent.id';
+    year: string;
     progress: Progress;
+    extraOptions: any = {
+        responsive: true,
+        aspectRatio: 1
+    }
 
     constructor(
         private _dataService: DataService
     ) { }
 
     ngOnInit(): void {
-        let year = new Date().getFullYear().toString();
+        this.year = '2017';
 
-        this._subscriptions[0] = this._budgetType.subscribe(x => {
-            this.getBudgetTypes();
-        })
+        let budgetTypeSubscription = this._budgetType.subscribe(x => { this.getBudgetTypes(); })
+        let budgetTypesSubscription = this._budgetTypes.subscribe(x => { this.transformData(); });
+        let budgetRecapitulationsSubscription = this._budgetRecapitulations.subscribe(x => { this.transformData(); });
 
-        this._subscriptions[1] = this._budgetTypes.subscribe(x => {
-            this.transformData();
-        });
-
-        this._subscriptions[2] = this._budgetRecapitulations.subscribe(x => {
-            this.transformData();
-        });
+        this._subscriptions.push(budgetTypeSubscription);
+        this._subscriptions.push(budgetTypesSubscription);
+        this._subscriptions.push(budgetRecapitulationsSubscription);
 
         let budgetRecapitulationsQuery: Query = {
             sort: 'region.id',
@@ -81,7 +82,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
         };
 
         this._dataService
-            .getBudgetRecapitulationsByYear(year, budgetRecapitulationsQuery, this.progressListener.bind(this))
+            .getBudgetRecapitulationsByYear(this.year, budgetRecapitulationsQuery, this.progressListener.bind(this))
             .subscribe(
             result => {
                 this.budgetRecapitulations = result;
@@ -99,7 +100,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
     getBudgetTypes(): void {
         let budgetTypeQuery: Query = {           
             data: {
-                is_revenue: this.budgetType === '5' ? false : true
+                is_revenue: this.budgetType === '5' ? '' : 'true'
             }
         };
 

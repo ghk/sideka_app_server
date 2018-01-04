@@ -1,12 +1,12 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, current_app
 from time import time
-from keuangan import db
+from keuangan import db, cache
 from keuangan.helpers import SiskeudesFetcher, Generator
-from keuangan.repository import SiskeudesPenganggaranRepository
+from keuangan.repository import RegionRepository, SiskeudesPenganggaranRepository
 
 app = Blueprint('admin', __name__)
-spr = SiskeudesPenganggaranRepository(db)
+region_repository = RegionRepository(db)
 
 
 @app.route('/admin/fetch/desas', methods=['GET'])
@@ -27,11 +27,10 @@ def fetch_siskeudes_codes():
     return jsonify({'success': True})
 
 
-@app.route('/admin/fetch/all', methods=['GET'])
-def fetch_all():
+@app.route('/admin/fetch/all/year/<string:year>', methods=['GET'])
+def fetch_all(year):
     t0 = time()
 
-    year = str(datetime.now().year)
     SiskeudesFetcher.fetch_desas()
     SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
     SiskeudesFetcher.fetch_penerimaans_by_year(year)
@@ -40,15 +39,15 @@ def fetch_all():
 
     db.session.commit()
 
+    clear_cache()
     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
 
-@app.route('/admin/generate/all', methods=['GET'])
-def generate_all():
+@app.route('/admin/generate/all/year/<string:year>', methods=['GET'])
+def generate_all(year):
     t0 = time()
 
-    year = str(datetime.now().year)
     prs = Generator.generate_progress_recapitulations_by_year(year)
     pts = Generator.generate_progress_timelines_by_year(year)
     srs = Generator.generate_budget_recapitulations_by_year(year)
@@ -61,12 +60,82 @@ def generate_all():
     db.session.add_all(sls)
     db.session.commit()
 
+    clear_cache()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
 
+@app.route('/admin/cache/clear', methods=['GET'])
+def clear_cache():
+    cache.clear()
+
+
 @app.route('/admin/run/all', methods=['GET'])
 def run_all():
-    fetch_result = fetch_all()
-    generate_result = generate_all()
+    year = '2017'
+    fetch_result = fetch_all(year)
+    generate_result = generate_all(year)
     return generate_result
+
+
+@app.route('/budget/types/generate', methods=['GET'])
+def generate_budget_types():
+    budget_types = Generator.generate_budget_types()
+    db.session.add_all(budget_types)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/budget/recapitulations/generate', methods=['GET'])
+def generate_budget_recapitulations():
+    entities = Generator.generate_budget_recapitulations()
+    db.session.add_all(entities)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/budget/recapitulations/region/<string:region_id>/generate', methods=['GET'])
+def generate_budget_recapitulations_by_region(region_id):
+    region = region_repository.get(region_id)
+    entities = Generator.generate_budget_recapitulation_by_region(region)
+    db.session.add_all(entities)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/siskeudes/penganggarans/fetch', methods=['GET'])
+def fetch_siskeudes_penganggarans():
+    SiskeudesFetcher.fetch_penganggarans()
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>', methods=['GET'])
+def fetch_siskeudes_penganggarans_by_region(region_id):
+    region = region_repository.get(region_id)
+    SiskeudesFetcher.fetch_penganggaran_by_region(region)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/progress/recapitulations/generate', methods=['GET'])
+def generate_progress_recapitulations():
+    progress_recapitulations = Generator.generate_progress_recapitulation()
+    db.session.add_all(progress_recapitulations)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/progress/timelines/generate', methods=['GET'])
+def generate_progress_timelines():
+    progress_timelines = Generator.generate_progress_timeline()
+    db.session.add_all(progress_timelines)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/siskeudes/spps/fetch', methods=['GET'])
+def fetch_siskeudes_spps():
+    SiskeudesFetcher.fetch_spps()
+    db.session.commit()
+    return jsonify({'success': True})

@@ -25,8 +25,10 @@ export class MapUtils {
     static setupStyle(configStyle) {
         let resultStyle = Object.assign({}, configStyle);
         let color = this.getStyleColor(configStyle);
+        
         if (color)
             resultStyle['color'] = color;
+
         return resultStyle;
     }
 

@@ -14,30 +14,12 @@
     <nav class="collapse navbar-collapse" id="navbar">
       <ul class="nav navbar-nav nav-menu">        
         <li [ngClass]="{'active': state === 'progress' ? true : false}">
-          <a routerLink="/progress/region/{{region?.id}}">Pencapaian</a>
+          <a routerLink="/progress/region/0">Pencapaian</a>
         </li>
         <li [ngClass]="{'active': state === 'budget' ? true : false}">
-          <a routerLink="/budget/region/{{region?.id}}">Anggaran</a>
+          <a routerLink="/budget/region/0">Anggaran</a>
         </li>
-      </ul>
-      <ul class="nav navbar-nav nav-region">
-        <li [ngClass]="{'active': region?.id === '0' ? true : false}">
-          <a routerLink="/{{state}}/region/0">DESA PRIORITAS</a>
-        </li>
-        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}">
-          <div class="gt hidden-xs">→</div>
-        </li>
-        <li [ngStyle]="{'display': region?.id === '0' ? 'none': 'block'}" [ngClass]="{'active': region?.id !== '0' ? true : false}">
-          <a routerLink="/{{state}}/region/{{region?.id}}">{{region?.name}}</a>
-        </li>
-      </ul> 
-      <!--     
-      <ul class="nav navbar-nav navbar-right">
-        <li>
-          <a href="/login">Login</a>
-        </li>        
-      </ul>
-      -->
+      </ul>       
     </nav>
   </div>
 </header>

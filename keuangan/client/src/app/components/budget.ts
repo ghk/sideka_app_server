@@ -11,7 +11,7 @@ import { SharedService } from '../services/shared';
 
 export class BudgetComponent implements OnInit, OnDestroy {
 
-    private _routeSubscription: Subscription;
+    private _subscriptions: Subscription[] = [];
 
     regionId: string;
 
@@ -25,17 +25,21 @@ export class BudgetComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {        
         this._sharedService.setState('budget');
-        this._routeSubscription = this._route.params.subscribe(params => {
+        let routeSubscription = this._route.params.subscribe(params => {
             this.regionId = params['regionId'];     
             if (!this._sharedService.region || this._sharedService.region.id !== this.regionId)       
                 this._dataService.getRegion(this.regionId, null, null).subscribe(region => {
                     this._sharedService.setRegion(region);
                 })            
         });
+
+        this._subscriptions.push(routeSubscription);
     }
 
     ngOnDestroy(): void {
-        this._routeSubscription.unsubscribe()
+        this._subscriptions.forEach(sub => {
+            sub.unsubscribe();
+        });
     }
 
 }

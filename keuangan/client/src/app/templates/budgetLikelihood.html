@@ -1,25 +1,23 @@
-<div *ngIf="progress?.percentage === 100">
-  <div class="content-header">
-    Desa yang memiliki kemiripan anggaran dengan {{ region?.name }}
-  </div>
-  <br />
-  <div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Desa</th>
-          <th>Kabupaten</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let bl of budgetLikelihoods">
-          <td>
-            <a routerLink="/budget/region/{{bl.region_likelihood .id}}">{{ bl.region_likelihood.name }}</a>
-          </td>
-          <td>{{ bl.region_likelihood | regionType:2 }}</td>          
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <br />
+<div class="content-header">
+  Desa yang memiliki kemiripan anggaran
 </div>
+<br />
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Desa</th>
+        <th>Kabupaten</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bl of budgetLikelihoods">
+        <td>
+          <a routerLink="/summary/region/{{bl.region_likelihood .id}}">{{ bl.region_likelihood.name }}</a>
+        </td>
+        <td>{{ bl.region_likelihood | regionType:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<br />

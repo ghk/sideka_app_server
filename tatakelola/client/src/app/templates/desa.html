@@ -89,28 +89,6 @@
           </div>
         </div>
       </a>
-      <!--
-      <a href="#" (click)="setActiveMenu('electricity')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
-          <div class="icon">
-            <i class="fa fa-plug"></i>
-          </div>
-          <div class="desc">
-            <h4>{{summaries.pemetaan_electricity_available_kk}} Dari {{summaries.penduduk_total_kk}} KK</h4>
-          </div>
-        </div>
-      </a>
-    
-      <a href="#" (click)="setActiveMenu('misc')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
-          <div class="icon">
-            <i class="fa fa-tint"></i>
-          </div>
-          <div class="desc">
-            <h4>{{summaries.pemetaan_water_spring}} Mata Air, {{summaries.pemetaan_water_ditch}} Sistem Pipa</h4>
-          </div>
-        </div>
-      </a> -->
       <a href="#" (click)="setActiveMenu('landuse')">
         <div class="side" [ngClass]="{'active': activeMenu === 'landuse' }">
           <div class="icon">
@@ -134,29 +112,19 @@
       </a>
     </div>
 
-    <!--
-    <div class="legend">
-       <div>
-           <img src="/assets/images/tk.png" style="width: 30px; height: 30px;"> TK
-       </div>
-       <div>
-          <img src="/assets/images/sd.png" style="width: 30px; height: 30px;"> SD
-       </div>
-       <div>
-          <img src="/assets/images/smp.png" style="width: 30px; height: 30px;"> SMP
-       </div>
-       <div>
-          <img src="/assets/images/sma.png" style="width: 30px; height: 30px;"> SMA
-       </div>
-       <div>
-          <img src="/assets/images/pt.png" style="width: 30px; height: 30px;"> PT
-       </div>
-    </div> -->
+    <ul class="list-group legend" *ngIf="isLegendShown" style="width: 200px;">
+      <li class="list-group-item" *ngFor="let legend of legends" style="margin-bottom: 10px;" [style.background-color]="legend.color">
+        <img src="{{legend.url}}" style="width: 30px; height: 30px;"/> 
+        <span style="float: right; padding-top: 10px;" [style.color]="legend.textColor ? legend.textColor : 'black'">
+            {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
+        </span>
+      </li>
+    </ul>
 </div>
 
-<div class="mobile" *ngIf="summaries">
-   <div id="cari" style="display: inline-flex; width: 360px;">
-      <a>
+<div class="mobile" *ngIf="summaries" style="overflow: hidden;">
+   <div id="cari" style="display: inline-flex; width: 380px;">
+      <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
         <img src="/assets/images/bpppti.png">
       </a>
       <h5> {{summaries.region.name}} </h5>
@@ -214,28 +182,6 @@
               </div>
             </div>
           </a>
-          <!--
-          <a href="#" (click)="setActiveMenu('electricity')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'electricity' }">
-              <div class="icon">
-                <i class="fa fa-plug"></i>
-              </div>
-              <div class="desc">
-                <h4>{{summaries.pemetaan_electricity_available_kk}} Dari {{summaries.penduduk_total_kk}} KK</h4>
-              </div>
-            </div>
-          </a>
-        
-          <a href="#" (click)="setActiveMenu('misc')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'misc' }">
-              <div class="icon">
-                <i class="fa fa-tint"></i>
-              </div>
-              <div class="desc">
-                <h4>{{summaries.pemetaan_water_spring}} Mata Air, {{summaries.pemetaan_water_ditch}} Sistem Pipa</h4>
-              </div>
-            </div>
-          </a> -->
           <a href="#" (click)="setActiveMenu('landuse')">
             <div class="side" [ngClass]="{'active': activeMenu === 'landuse' }">
               <div class="icon">
@@ -258,4 +204,12 @@
             </div>
           </a>
     </div>
+    <ul class="list-group" *ngIf="isLegendShown" style="position: fixed; width: 100%; display: inline-flex; left: 0; top: 0; background-color: #fff; box-shadow: 1px 1px 1px #888;">
+      <li class="list-group-item" *ngFor="let legend of legends" style="width: auto; height: 35px;" [style.background-color]="legend.color">
+        <img src="{{legend.url}}" style="width: 20px; height: 20px;"/> 
+        <span [style.color]="legend.textColor ? legend.textColor : 'black'">
+            {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
+        </span>
+      </li>
+    </ul>
 </div>
