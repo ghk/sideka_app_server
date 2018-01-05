@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
 import { Progress } from 'angular-progress-http';
+import { ChartHelper } from '../helpers/chartHelper';
 
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
@@ -40,6 +41,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     prevDesa: string;
     isLegendShown: boolean;
     legends: any[];
+    chartHelper: ChartHelper;
+    penduduks: any[];
 
     constructor(
         private _http: Http,
@@ -60,6 +63,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.markers = [];
         this.legends = [];
 
+        this.chartHelper = new ChartHelper();
+
         this.progress = {
             percentage: 0,
             event: null,
@@ -79,6 +84,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                 this.regionId = params['regionId'];
                 this.setupSummaries(params['regionId']);
                 this.setupLayout(params['regionId']);
+                this.setupPenduduks(params['regionId']);
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
@@ -95,11 +101,14 @@ export class DesaComponent implements OnInit, OnDestroy {
             if(summaries.length > 0)
               this.summaries = summaries[0];
 
-            console.log(this.summaries);
         }
         catch(error) {
             console.log(error);
         }
+    }
+
+    async setupPenduduks(regionId) {
+        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise()
     }
 
     async setupLayout(regionId: string) {
@@ -161,6 +170,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
+        this.setupPenduduks(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
     }
     
@@ -178,6 +188,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
+        this.setupPenduduks(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
     }
     
@@ -185,12 +196,13 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.cleanLayers(); 
         this.cleanMarkers();
         this.cleanLegends();
-
+        
         this.markers = [];
         this.legends = [];
         
         let regionId = this.summaries.fk_region_id;
 
+        this.setPendidikStatistic(regionId);
         this.progress.percentage = 0;
 
         let map = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
@@ -280,6 +292,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         let regionId = this.summaries.fk_region_id;
         
+        this.setPekerjaanStatistic(regionId);
         this.progress.percentage = 0;
 
         let map = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
@@ -470,7 +483,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         for (let i=0; i<featureCollection.features.length; i++) {
             let feature = featureCollection.features[i];
             let center = L.geoJSON(feature).getBounds().getCenter();
-            console.log(feature.properties);
+    
             let url = '/assets/images/house.png';
 
             let marker = L.marker(center, {
@@ -486,6 +499,22 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             this.markers.push(marker);
         }
+    }
+
+    async setPekerjaanStatistic(regionId) {
+        let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
+        let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let pekerjaanChart = this.chartHelper.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
+
+        console.log(pekerjaanData);
+    }
+
+    async setPendidikStatistic(regionId) {
+        let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
+        let pendidikanData = this.chartHelper.transformDataStacked(pendidikanRaw, 'pendidikan');
+        let pendidikanChart = this.chartHelper.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
+
+        console.log(pendidikanData);
     }
 
     setActiveMenu(menu: string) {
@@ -597,7 +626,6 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
                     
                 layer['setStyle'] ? layer['setStyle'](style) : null;
-                console.log(style);
             }
         }
     }

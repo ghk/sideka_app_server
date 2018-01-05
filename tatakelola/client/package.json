@@ -28,11 +28,13 @@
     "angular-progress-http": "^0.5.1",
     "bootstrap": "^3.3.5",
     "core-js": "^2.5.0",
+    "d3": "^3.5.17",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
     "leaflet": "^1.2.0",
     "lodash": "^4.17.4",
     "ngx-pipes": "^2.0.5",
+    "nvd3": "^1.8.6",
     "rxjs": "^5.4.3",
     "url-join": "^2.0.2",
     "zone.js": "^0.8.17"
