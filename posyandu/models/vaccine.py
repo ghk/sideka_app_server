@@ -9,12 +9,10 @@ class Vaccine(BaseModel):
     name = db.Column(db.String)
     flag = db.Column(db.Boolean)
     village = db.Column(db.String)
-
+    fk_growth_id = db.Column(db.Integer)
     fk_child_id = db.Column(db.Integer, db.ForeignKey('childs.id'))
     child = db.relationship('Child', lazy='joined')
 
-    fk_growth_id = db.Column(db.Integer, db.ForeignKey('growths.id'))
-    growth = db.relationship('Growth', lazy='joined')
 
 
 class VaccineModelSchema(ma.ModelSchema):
