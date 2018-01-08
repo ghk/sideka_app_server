@@ -40,6 +40,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     nextDesa: string;
     prevDesa: string;
     isLegendShown: boolean;
+    isPekerjaanStatisticShown: boolean;
+    isPendidikanStatisticShown: boolean;
     legends: any[];
     chartHelper: ChartHelper;
     penduduks: any[];
@@ -56,6 +58,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.showDesaBoundary = true;
         this.showDusunBoundary = true;
         this.isLegendShown = false;
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
 
         this.prevDesa = 'TIDAK ADA';
         this.nextDesa = 'TIDAK ADA';
@@ -197,6 +201,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.cleanMarkers();
         this.cleanLegends();
         
+        this.isPekerjaanStatisticShown = false;
+
         this.markers = [];
         this.legends = [];
         
@@ -280,12 +286,15 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.isLegendShown = true;
+        this.isPendidikanStatisticShown = true;
     }
     
     async setMapLanduse() {
         this.cleanLayers(); 
         this.cleanMarkers();
         this.cleanLegends();
+
+        this.isPendidikanStatisticShown = false;
 
         this.markers = [];
         this.legends = [];
@@ -502,19 +511,27 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPekerjaanStatistic(regionId) {
+        this.isPekerjaanStatisticShown = true;
+
         let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
         let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
         let pekerjaanChart = this.chartHelper.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
 
-        console.log(pekerjaanData);
+        setTimeout(() => {
+            pekerjaanChart.update();
+        }, 1000);
     }
 
     async setPendidikStatistic(regionId) {
+        this.isPendidikanStatisticShown = true;
+
         let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
         let pendidikanData = this.chartHelper.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = this.chartHelper.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
-        console.log(pendidikanData);
+        setTimeout(() => {
+            pendidikanChart.update();
+        }, 1000)
     }
 
     setActiveMenu(menu: string) {
