@@ -22,7 +22,7 @@
     {{subTitle}}
    </div>
 
-   <div class="center-div" [hidden]="progress?.percentage === 100">
+   <div class="center-div mobile" [hidden]="progress?.percentage === 100">
      <img style="margin: 0 auto; margin-left: -40px;" src="/assets/images/loading.gif">
      <br>
      <br> Memuat data...
@@ -114,7 +114,6 @@
                                 
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total > 0"> {{summary.penduduk_total | number:'1.0-0'}} </td>
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total === 0">  - </td>
-
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total | number:'1.0-0'}} </td>
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total === 0">  - </td>
                     </tr>
@@ -630,7 +629,15 @@
                     -->
                 </tr>
             </tbody>
-           
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'apbdes'">
@@ -665,6 +672,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="!summary.penganggaran_budgeted_revenue"> -</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" style="overflow-x: hidden;" *ngIf="viewType === 'detail' && detailType === 'area'">
@@ -715,6 +731,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_dusun_total === 0"> -</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" style="overflow-x: hidden;" *ngIf="viewType === 'detail' && detailType === 'penduduk'">
@@ -850,6 +875,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.penduduk_job_lain === 0"> -</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'education'">
@@ -920,6 +954,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_school_pt === 0">-</td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'electricity'">
@@ -963,6 +1006,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.kk_not_using_electricity === 0"> - </td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'waters'">
@@ -1006,6 +1058,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_water_pipe_width_avg === 0"> - </td>
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
 
         <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'landuse'">
@@ -1056,6 +1117,15 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_forest_area === 0"> -</td> 
                 </tr>
             </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
         </table>
    </div>
 </div>
