@@ -17,11 +17,43 @@ export class SummaryComponent implements OnInit, OnDestroy {
     progress: Progress;
     order: string;
     query: string;
+    subTitle: string;
    
-    constructor(dataService: DataService, private _router: Router) {
+    constructor(dataService: DataService, private _router: Router, private _activeRouter: ActivatedRoute) {
         this._dataService = dataService;
     }
 
+    ngOnInit(): void {
+       this.viewType = 'summary';
+       this.order = 'region.parent.id';
+       this.query = '';
+       this.subTitle = 'Rangkuman Data Desa';
+       this.progress = {
+           event: null,
+           percentage: 0,
+           loaded: 0,
+           lengthComputable: true,
+           total: 0
+       };
+       
+       this._activeRouter.params.subscribe(
+           params => {
+               if (params['detailType'] === 'master') {
+                   this.viewType = 'summary';
+                   this.detailType = null;
+                   this.subTitle = 'Rangkuman Data Desa';
+               }
+               else {
+                   this.viewType = 'detail';
+                   this.detailType = params['detailType'];
+                   this.setSubTitle();
+               }
+
+               this.loadSummaries();
+           }
+       )
+    }
+    
     sort(order: string): boolean {
         if (this.order.includes(order)) {
             if (this.order.startsWith('-'))
@@ -35,13 +67,6 @@ export class SummaryComponent implements OnInit, OnDestroy {
         return false;
     }
 
-    ngOnInit(): void {
-       this.viewType = 'summary';
-       this.order = 'region.parent.id';
-       this.query = '';
-       this.loadSummaries();
-    }
-
     isNumber(data): boolean {
         if(isNaN(data))
             return false;
@@ -50,6 +75,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
     }
 
     loadSummaries(): void {
+        this.progress.percentage = 0;
+
         this._dataService.getSummaries({}, this.progressListener.bind(this)).subscribe(
             result => {
                 this.summaries = result;
@@ -57,9 +84,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
                 this.summaries.forEach(summary => {
                     summary['penduduk_total'] = summary.penduduk_sex_unknown + summary.penduduk_sex_male + summary.penduduk_sex_female;
                     summary['desa_edu_total'] = summary.pemetaan_school_tk + summary.pemetaan_school_sd + summary.pemetaan_school_smp + summary.pemetaan_school_sma + summary.pemetaan_school_pt;
-                    summary['desa_total_waters'] = summary.pemetaaan_water_spring + summary.pemetaan_water_ditch;
-                    summary['desa_total_potential'] = summary.pemetaan_potential_farmland + summary.pemetaan_potential_forest + summary.pemetaan_potential_orchard;
-                    summary['kk_not_using_electricity'] = summary.penduduk_total_kk - summary.pemetaan_electricity_house;
+                    summary['desa_total_landuse'] = summary.pemetaan_landuse_farmland + summary.pemetaan_landuse_forest + summary.pemetaan_landuse_orchard;
                 });  
             },
             error => {
@@ -68,21 +93,24 @@ export class SummaryComponent implements OnInit, OnDestroy {
         )
     }
     
-    loadDetail(type): void {
-        this.viewType = 'detail';
-        this.detailType = type;
-    }
-
-    backToSummary(): boolean {
-        this.viewType = 'summary';
-        this.detailType = null;
-        this.order = 'region.parent.id';
-
-        return false;
-    }
-
-    goToDesa(regionId): void {
-        this._router.navigateByUrl('/desa/' + regionId);
+    setSubTitle() {
+        switch(this.detailType) {
+            case 'area':
+                this.subTitle = 'Data Desa Per Area';
+            break;
+            case 'apbdes':
+                this.subTitle = 'Data Desa Per Anggaran';
+            break;
+            case 'landuse':
+                this.subTitle = 'Data Desa Per Lahan';
+            break;
+            case 'penduduk':
+                this.subTitle = 'Data Desa Per Penduduk';
+            break;
+            case 'education':
+                this.subTitle = 'Data Desa Per Gedung Sekolah';
+            break;
+        }
     }
 
     ngOnDestroy(): void {}

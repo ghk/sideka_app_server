@@ -42,14 +42,18 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
     }
 
     region: any;
+    year: string;
     isPak: boolean = false;
     progress: Progress;
     entities: any[] = [];
     hideBudgetDetail: boolean = true;
-    budgetTypeNames = {
+    budgetTypeNames: any = {
         '4': 'PENDAPATAN',
         '5': 'BELANJA',
         '6': 'PEMBIAYAAN',
+    };
+    extraOptions: any = {
+        aspectRatio: 1
     };
 
     constructor(
@@ -58,7 +62,7 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        let year = new Date().getFullYear().toString();
+        this.year = '2017';
 
         this._subscriptions[0] = this._sharedService.getRegion().subscribe(region => {
             this.progress = null;
@@ -77,15 +81,13 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
         })
     }
 
-    getData() {
-        let year = new Date().getFullYear().toString();
-
+    getData() {      
         let penganggaranQuery: Query = {
             sort: 'row_number'
         };
 
         this._dataService
-            .getBudgetRecapitulationsByRegionAndYear(this.region.id, year, null, null)
+            .getBudgetRecapitulationsByRegionAndYear(this.region.id, this.year, null, null)
             .subscribe(
             result => {
                 this.budgetRecapitulations = result;
@@ -94,7 +96,7 @@ export class BudgetDetailComponent implements OnInit, OnDestroy {
         );
 
         this._dataService
-            .getSiskeudesPenganggaranByRegionAndYear(this.region.id, year, penganggaranQuery, this.progressListener.bind(this))
+            .getSiskeudesPenganggaranByRegionAndYear(this.region.id, this.year, penganggaranQuery, this.progressListener.bind(this))
             .subscribe(
             result => {
                 this.entities = result

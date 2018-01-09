@@ -7,6 +7,7 @@ import { HttpModule } from '@angular/http';
 import { ProgressHttpModule } from 'angular-progress-http';
 import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { NgPipesModule } from 'ngx-pipes';
+import { TabsModule } from 'ngx-bootstrap';
 
 import { AppComponent } from './components/app';
 import { HeaderComponent } from './components/header';
@@ -14,11 +15,15 @@ import { ProgressComponent } from './components/progress';
 import { ProgressRecapitulationComponent } from './components/progressRecapitulation';
 import { ProgressTimelineComponent } from './components/progressTimeline';
 import { ProgressDetailComponent } from './components/progressDetail';
+import { ProgressRevenueChartComponent } from './components/progressRevenueChart';
+import { ProgressRealizationChartComponent } from './components/progressRealizationChart';
 import { BudgetComponent } from './components/budget';
 import { BudgetRecapitulationComponent } from './components/budgetRecapitulation';
 import { BudgetDetailComponent } from './components/budgetDetail';
+import { BudgetTableComponent } from './components/budgetTable';
 import { BudgetChartComponent } from './components/budgetChart';
 import { BudgetLikelihoodComponent } from './components/budgetLikelihood';
+import { SummaryComponent } from './components/summary';
 
 import { FormatCurrencyPipe } from './pipes/formatCurrency';
 import { HideBudgetDetailPipe } from './pipes/hideBudgetDetail';
@@ -36,11 +41,15 @@ import { SharedService } from './services/shared';
     ProgressRecapitulationComponent,
     ProgressTimelineComponent,
     ProgressDetailComponent,
+    ProgressRevenueChartComponent,
+    ProgressRealizationChartComponent,
     BudgetComponent,
     BudgetRecapitulationComponent,
     BudgetDetailComponent,
+    BudgetTableComponent,
     BudgetChartComponent,
     BudgetLikelihoodComponent,
+    SummaryComponent,
     HideBudgetDetailPipe,
     BudgetTypePipe,
     FormatCurrencyPipe,
@@ -54,10 +63,12 @@ import { SharedService } from './services/shared';
     ProgressHttpModule,
     ChartsModule,
     NgPipesModule,
+    TabsModule.forRoot(),
     RouterModule.forRoot([
       { path: '', redirectTo: 'progress/region/0', pathMatch: 'full' },
       { path: 'progress/region/:regionId', component: ProgressComponent }, 
       { path: 'budget/region/:regionId', component: BudgetComponent },
+      { path: 'summary/region/:regionId', component: SummaryComponent },
       { path: '**', redirectTo: 'progress/region/0' }
     ]),
   ],

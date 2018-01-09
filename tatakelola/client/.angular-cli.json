@@ -21,7 +21,8 @@
       "styles": [
         "../node_modules/bootstrap/dist/css/bootstrap.min.css",
         "assets/styles/main.less",
-         "../node_modules/leaflet/dist/leaflet.css"
+         "../node_modules/leaflet/dist/leaflet.css",
+         "../node_modules/nvd3/build/nv.d3.css"
       ],
       "scripts": [
         "../node_modules/jquery/dist/jquery.min.js",

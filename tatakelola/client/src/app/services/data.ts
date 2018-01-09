@@ -92,6 +92,17 @@ export class DataService {
 
       return request.map(res => res.json()).catch(this.handleError);
   }
+
+  getSummariesExceptId(regionId: string, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(this._http, 
+      'GET', 
+      urljoin(this._serverUrl, 'summaries/get_except_id', regionId),
+      {},
+      progressListener
+    );
+
+    return request.map(res => res.json()).catch(this.handleError);
+  }
   
   getRegionAvailableMaps( query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(this._http, 

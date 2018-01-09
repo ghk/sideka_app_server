@@ -44,7 +44,7 @@
           <tbody>
             <tr *ngFor="let entity of entities | orderBy: order">
               <td>
-                <a [routerLink]="['/budget/region', entity.region.id]">
+                <a [routerLink]="['/summary/region', entity.region.id]">
                   <span>{{ entity.region.name }}</span>
                 </a>
               </td>
@@ -81,7 +81,7 @@
       </div>
     </div>
     <div class="col-sm-4">
-      <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [progress]="progress"></sk-budget-chart>
+      <sk-budget-chart [budgetTypes]="budgetTypes" [budgetRecapitulations]="budgetRecapitulations" [extraOptions]="extraOptions"></sk-budget-chart>
     </div>
   </div>
 </div>

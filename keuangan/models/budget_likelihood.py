@@ -1,7 +1,7 @@
 from keuangan import db
 from keuangan import ma
 from base import BaseModel
-from region import RegionModelSchema
+from region import RegionModelSchema, RegionCompleteModelSchema
 
 
 class BudgetLikelihood(BaseModel):
@@ -29,4 +29,4 @@ class BudgetLikelihoodModelSchema(ma.ModelSchema):
         include_fk = True
 
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
-    region_likelihood = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
+    region_likelihood = ma.Nested(RegionCompleteModelSchema, many=False)

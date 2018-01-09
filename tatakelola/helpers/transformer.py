@@ -85,9 +85,9 @@ class SummaryPendudukTransformer:
         summary.penduduk_job_petani = 0
         summary.penduduk_job_pedagang = 0
         summary.penduduk_job_karyawan = 0
+        summary.penduduk_job_nelayan = 0
         summary.penduduk_job_lain = 0
-        summary.penduduk_total_kk = 0
-
+        
         ref = PendudukReference()
         for penduduk in penduduks:
 
@@ -116,12 +116,15 @@ class SummaryPendudukTransformer:
                 summary.penduduk_edu_pt += 1
 
             pekerjaan = str(penduduk.pekerjaan)
+
             if pekerjaan == 'Petani':
                 summary.penduduk_job_petani += 1
             elif pekerjaan.startswith('Pedagang'):
                 summary.penduduk_job_pedagang += 1
             elif pekerjaan.startswith('Karyawan'):
                 summary.penduduk_job_karyawan += 1
+            elif pekerjaan.startswith('Nelayan'):
+                summary.penduduk_job_nelayan += 1
             else:
                 summary.penduduk_job_lain += 1
 
@@ -144,18 +147,13 @@ class SummaryApbdesTransformer:
 class SummaryGeojsonTransformer:
     @staticmethod
     def transform(summary, data, type):
-        features = data['features'];
+        features = data['features']
 
         return ParsePemetaanData.parse(features, type, summary)
 
 class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
-        pipe_count = 0
-        farmland_trees = []
-        orchard_orchards = []
-        forest_trees = []
-
         for feature in features:
             if feature.has_key('properties') == False:
                 continue
@@ -167,48 +165,33 @@ class ParsePemetaanData:
                     continue
                 if feature['properties'].has_key('admin_level') == False:
                     continue
-                if feature['properties']['admin_level'] != 7:
-                    continue
-                summary.pemetaan_desa_boundary += area(feature['geometry'])
+                if feature['properties']['admin_level'] == 7:
+                    summary.pemetaan_desa_boundary += area(feature['geometry'])
+                    summary.pemetaan_desa_circumference += 0
+                elif feature['properties']['admin_level'] == 8:
+                    summary.pemetaan_dusun_total += 1
             elif type == 'landuse':
                 if properties.has_key('landuse') == False:
                     continue
                 if properties['landuse'] == 'farmland':
-                    summary.pemetaan_potential_farmland += 1
+                    summary.pemetaan_landuse_farmland += 1
                     if properties.has_key('farmland'):
                         farmland_trees.append(properties['farmland'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
-                        summary.pemetaan_potential_farmland_area += area(feature['geometry'])
+                        summary.pemetaan_landuse_farmland_area += area(feature['geometry'])
                 elif properties['landuse'] == 'orchard':
-                    summary.pemetaan_potential_orchard += 1
+                    summary.pemetaan_landuse_orchard += 1
                     if properties.has_key('forest'):
                         orchard_orchards.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
-                        summary.pemetaan_potential_orchard_area += area(feature['geometry'])
+                        summary.pemetaan_landuse_orchard_area += area(feature['geometry'])
                 elif properties['landuse'] == 'forest':
-                    summary.pemetaan_potential_forest += 1
+                    summary.pemetaan_landuse_forest += 1
                     if properties.has_key('forest'):
                         forest_trees.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
-                        summary.pemetaan_potential_forest_area += area(feature['geometry'])
-            elif type == 'waters':
-                if properties.has_key('natural'):
-                    if properties['natural'] == 'spring':
-                        summary.pemetaan_water_natural += 1
-                        if feature['geometry']['type'] == 'Polygon':
-                            summary.pemetaan_water_natural_area += area(feature['geometry'])
-                elif properties.has_key('waterway'):
-                    if properties['waterway'] == 'pipe_system':
-                        summary.pemetaan_water_pipe += 1
-                        pipe_count += 1
+                        summary.pemetaan_landuse_forest_area += area(feature['geometry'])
 
-                        if math.isnan(properties['width']) == False:
-                            summary.pemetaan_water_pipe += int(properties['width'])
-           #elif type == 'electricity':
-                #if properties.has_key('electricity_watt'):
-                    #if math.isnan(properties['electricity_watt']) == False:
-                        #if int(properties['electricity_watt']) > 0:
-                            #summary.pemetaan_electricity_house += 1
             elif type == 'facilities_infrastructures':
                 if properties.has_key('building'):
                     if properties.has_key('house'):
@@ -234,12 +217,4 @@ class ParsePemetaanData:
                             summary.pemetaan_school_sma += 1
                         elif isced == 4:
                             summary.pemetaan_school_pt += 1
-
-        if pipe_count > 0:
-            summary.pemetaan_water_pipe_width_avg = summary.pemetaan_water_pipe_width_avg / pipe_count
-
-        summary.pemetaan_potential_farmland_trees = ','.join(map(str, farmland_trees))
-        summary.pemetaan_potential_orchard_orchards = ','.join(map(str, orchard_orchards))
-        summary.pemetaan_potential_forest_trees = ','.join(map(str, forest_trees))
-
         return summary

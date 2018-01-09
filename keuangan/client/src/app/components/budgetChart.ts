@@ -26,9 +26,9 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
         return this._sData.getValue();
     }
 
+    @Input() extraOptions: any;
     @Input() budgetTypes: any[];
     @Input() budgetRecapitulations: any[];
-    @Input() progress: any;
 
     labels: any[] = [];
     colors: any = [{
@@ -61,14 +61,13 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
             arc: true,
             position: 'outside',
             precision: 2
-        },
-        aspectRatio: 1
+        },       
     };
     chartType: string = 'pie';
 
     constructor() { }
 
-    ngOnInit(): void {
+    ngOnInit(): void {      
     }
 
     getData(): void {
@@ -95,9 +94,11 @@ export class BudgetChartComponent implements OnInit, OnDestroy {
             this.budgetTypes = changes['budgetTypes'].currentValue;
         if (changes['budgetRecapitulations'])
             this.budgetRecapitulations = changes['budgetRecapitulations'].currentValue;            
-        if (this.budgetTypes.length > 0 && this.budgetRecapitulations.length > 0)
+        if (this.budgetTypes && this.budgetRecapitulations && 
+            this.budgetTypes.length > 0 && this.budgetRecapitulations.length > 0)
             this.getData();
-        if (changes['progress'])
-            this.progress = changes['progress'].currentValue;
+        if (changes['extraOptions']) {
+            this.options = Object.assign(this.options, changes['extraOptions'].currentValue);
+        }
     }
 }
