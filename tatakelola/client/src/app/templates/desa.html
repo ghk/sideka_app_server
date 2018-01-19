@@ -1,6 +1,6 @@
 <div id="map" class="map-responsive" #map leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)"></div>
 
-<div class="center-div" [hidden]="progress?.percentage === 100">
+<div class="center-div" *ngIf="progress?.percentage < 100">
   <img style="margin: 0 auto; margin-left: -70px;" src="/assets/images/loading.gif">
 </div>
 
@@ -129,6 +129,18 @@
       <div id="pendidikan">
         <svg style="height: 250px; width: 100%; margin-left: -60px;"></svg>
       </div>
+    </div>
+    <div class="dropdown" style="float:right;">
+        <button type="button" class="dropbtn">
+        </button>
+    
+        <div class="dropdown-content">
+            <a href="https://keuangan.sideka.id" target="_blank" class="op keuangan">Keuangan Desa</a>
+            <span class="separator"></span>
+            <a href="https://monitor.sideka.id" target="_blank" class="op monitoring">Kualitas Data</a>
+            <span class="separator"></span>
+            <a href="http://kabar.sideka.id" target="_blank" class="op kabardesa">Kabar Desa</a>
+        </div>
     </div>
 </div>
 

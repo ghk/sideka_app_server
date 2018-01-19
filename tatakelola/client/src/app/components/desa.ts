@@ -104,7 +104,6 @@ export class DesaComponent implements OnInit, OnDestroy {
             
             if(summaries.length > 0)
               this.summaries = summaries[0];
-
         }
         catch(error) {
             console.log(error);
@@ -119,12 +118,18 @@ export class DesaComponent implements OnInit, OnDestroy {
         try {
             this.cleanMarkers();
 
+            this.progress.percentage = 0;
+
             let geoJsonBoundaryRaw = await this._dataService.getGeojsonByTypeAndRegion('boundary', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
+            
+            this.progress.percentage = 0;
 
             let geoJsonTransportsRaw = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
             
+            this.progress.percentage = 0;
+
             let geoJsonBuildings = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
   
@@ -409,6 +414,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.cleanLayers(); 
         this.cleanMarkers();
         this.cleanLegends();
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
         
         this.setDusunBoundary();
         this.setDesaBoundary();
