@@ -78,7 +78,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png')],
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
             zoom: 14,
             center: L.latLng([-7.547389769590928, 108.21044272398679])
         }
@@ -111,7 +111,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setupPenduduks(regionId) {
-        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise()
+        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise();
     }
 
     async setupLayout(regionId: string) {
@@ -518,6 +518,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPekerjaanStatistic(regionId) {
+        if (this.penduduks.length === 0)
+            return;
+
         this.isPekerjaanStatisticShown = true;
 
         let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
@@ -530,6 +533,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPendidikStatistic(regionId) {
+        if (this.penduduks.length === 0)
+            return;
+            
         this.isPendidikanStatisticShown = true;
 
         let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
