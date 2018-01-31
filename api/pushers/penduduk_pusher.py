@@ -43,9 +43,12 @@ class PendudukPusher(BasePusher):
 			born_str =  r["tanggal_lahir"]
 			if not born_str:
 				return 0
-			born = datetime.datetime.strptime(born_str , "%d/%m/%Y")
-			today = date.today()
-			return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+			try:
+				born = datetime.datetime.strptime(born_str , "%d/%m/%Y")
+				today = date.today()
+				return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+			except Exception as e:
+				return 0
 		for r in self.penduduk:
 			r["umur"] = calculate_age(r)
 			if r["umur"] < 0 or r["umur"] > 200:

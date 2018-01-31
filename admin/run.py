@@ -1,6 +1,10 @@
 import sys
-sys.path.append("../common");
+import os, logging
 
+moddir = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0]
+sys.path.append(moddir)
+
+from logging.handlers import RotatingFileHandler
 from admin import create_app, create_login_manager, db
 from flask import request, jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import login_user, login_required, logout_user, UserMixin
@@ -17,10 +21,10 @@ import json
 import urllib
 import datetime
 
+app = create_app()
 phasher = PasswordHash(8, True)
 app = create_app()
 login_manager = create_login_manager(app)
-
 
 class User(UserMixin):
     pass
@@ -377,7 +381,7 @@ def get_contents_v2():
         query = query.filter(SdContent.type == type_filter_value)
 
     query = query.order_by(desc(SdContent.date_created))
-    query = query.limit(100)
+    query = query.limit(2)
 
     contents = query.all()
     result = []
@@ -615,6 +619,5 @@ def remove_supradesa():
     db.session.commit()
     return jsonify({'success': True})
 
-
-if __name__ == '__main__':
-    app.run(debug=True, host=app.config["HOST"], port=app.config["ADMIN_PORT"])
+if __name__ == "__main__":
+   app.run(debug=True, host=app.config["HOST"], port=app.config["ADMIN_PORT"])
