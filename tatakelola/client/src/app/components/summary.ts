@@ -86,6 +86,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
                     summary['desa_edu_total'] = summary.pemetaan_school_tk + summary.pemetaan_school_sd + summary.pemetaan_school_smp + summary.pemetaan_school_sma + summary.pemetaan_school_pt;
                     summary['desa_total_landuse'] = summary.pemetaan_landuse_farmland + summary.pemetaan_landuse_forest + summary.pemetaan_landuse_orchard;
                 });  
+
+                this.progress.percentage = 100;
             },
             error => {
                 console.log(error);
