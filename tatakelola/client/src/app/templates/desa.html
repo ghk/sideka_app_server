@@ -121,19 +121,30 @@
       </li>
     </ul>
     <div class="legend" style="position: fixed; top: 350px; width: 500px; background: white; padding: 0" [hidden]="!isPekerjaanStatisticShown">
-      <div id="pekerjaan">
+      <button class="btn btn-sm btm-default" (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="isPekerjaanContextShown">
+        <i class="fa fa-window-minimize"></i>
+      </button>
+      <button class="btn btn-sm btm-default" (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="!isPekerjaanContextShown">
+        <i class="fa fa-window-maximize"></i>
+      </button>
+      <div id="pekerjaan" [hidden]="!isPekerjaanContextShown">
         <svg style="height: 250px; width: 100%; margin-left: -80px;"></svg>
       </div>
     </div>
     <div class="legend" style="position: fixed; top: 350px; width: 500px; background: white; padding: 0" [hidden]="!isPendidikanStatisticShown">
-      <div id="pendidikan">
+      <button class="btn btn-sm btm-default" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="isPendidikanContextShown">
+        <i class="fa fa-window-minimize"></i>
+      </button>
+      <button class="btn btn-sm btm-default" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="!isPendidikanContextShown">
+        <i class="fa fa-window-maximize"></i>
+      </button>
+      <div id="pendidikan"  [hidden]="!isPendidikanContextShown">
         <svg style="height: 250px; width: 100%; margin-left: -60px;"></svg>
       </div>
     </div>
     <div class="dropdown" style="float:right;">
         <button type="button" class="dropbtn">
         </button>
-    
         <div class="dropdown-content">
             <a href="https://keuangan.sideka.id" target="_blank" class="op keuangan">Keuangan Desa</a>
             <span class="separator"></span>
@@ -182,8 +193,8 @@
         
             </div>
           </a>
-          <a href="#" (click)="setActiveMenu('gender')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'gender' }">
+          <a href="#" (click)="setActiveMenu('penduduk')">
+            <div class="side" [ngClass]="{'active': activeMenu === 'penduduk' }">
               <div class="icon">
                 <i class="fa fa-male"></i>
               </div>

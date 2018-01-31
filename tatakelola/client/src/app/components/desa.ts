@@ -42,6 +42,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     isLegendShown: boolean;
     isPekerjaanStatisticShown: boolean;
     isPendidikanStatisticShown: boolean;
+    isPekerjaanContextShown: boolean;
+    isPendidikanContextShown: boolean;
     legends: any[];
     chartHelper: ChartHelper;
     penduduks: any[];
@@ -60,7 +62,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isLegendShown = false;
         this.isPekerjaanStatisticShown = false;
         this.isPendidikanStatisticShown = false;
-
+        this.isPekerjaanContextShown = true;
+        this.isPendidikanContextShown = true;
         this.prevDesa = 'TIDAK ADA';
         this.nextDesa = 'TIDAK ADA';
 
@@ -79,8 +82,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.options = {
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-            zoom: 20,
-            center: L.latLng([-22.221307, 92.578126])
+            zoom: 30,
+            center: L.latLng([-75.991294, 69.843757])
         }
 
         this._activeRouter.params.subscribe(
@@ -92,6 +95,10 @@ export class DesaComponent implements OnInit, OnDestroy {
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
+    }
+
+    toggleShowPendudikan() {
+        this.isPendidikanContextShown = !this.isPendidikanContextShown;
     }
 
     async setupSummaries(regionId: string) {
@@ -515,6 +522,10 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             this.markers.push(marker);
         }
+
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
+        this.isLegendShown = false;
     }
 
     async setPekerjaanStatistic(regionId) {
@@ -522,6 +533,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             return;
 
         this.isPekerjaanStatisticShown = true;
+        this.isPekerjaanContextShown = true;
 
         let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
         let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
@@ -537,7 +549,8 @@ export class DesaComponent implements OnInit, OnDestroy {
             return;
             
         this.isPendidikanStatisticShown = true;
-
+        this.isPendidikanContextShown = true;
+        
         let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
         let pendidikanData = this.chartHelper.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = this.chartHelper.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
