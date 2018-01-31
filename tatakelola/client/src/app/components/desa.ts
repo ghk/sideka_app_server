@@ -79,8 +79,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.options = {
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-            zoom: 14,
-            center: L.latLng([-7.547389769590928, 108.21044272398679])
+            zoom: 20,
+            center: L.latLng([-22.221307, 92.578126])
         }
 
         this._activeRouter.params.subscribe(
