@@ -186,13 +186,13 @@ class TatakelolaFetcher():
                 logging.error(e.message)
                 traceback.print_exc()
 
-    @staticmethod
-    def fetch_mandalamekar():
-        region = region_repository.get('32.06.19.2009')
-        try:
-            TatakelolaFetcher.fetch_data_by_region(region)
-        except Exception as e:
-            logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
-            logger.error(e.message)
-            traceback.print_exc()
+    # @staticmethod
+    # def fetch_mandalamekar():
+    #     region = region_repository.get('32.06.19.2009')
+    #     try:
+    #         TatakelolaFetcher.fetch_data_by_region(region)
+    #     except Exception as e:
+    #         logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
+    #         logger.error(e.message)
+    #         traceback.print_exc()
         
