@@ -56,7 +56,7 @@ export class MapUtils {
 
     static createMarker(url, center): L.Marker {
         let bigIcon = L.icon({
-            iconUrl: 'assets/markers/' + url,
+            iconUrl:  url,
             iconSize:     [15, 15],
             shadowSize:   [50, 64],
             iconAnchor:   [22, 24],
@@ -65,5 +65,17 @@ export class MapUtils {
         });
 
         return L.marker(center, {icon: bigIcon});
+    }
+
+    static calculateCenterOfLineStrings(coordinates: any[]): any {
+        let x = 0;
+        let y = 0;
+
+        for (let i=0; i<coordinates.length; i++) {
+            x += coordinates[i][0];
+            y += coordinates[i][1];
+        }
+
+        return [y/coordinates.length, x/coordinates.length];
     }
 }

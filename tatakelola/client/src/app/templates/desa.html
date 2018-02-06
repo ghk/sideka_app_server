@@ -110,6 +110,31 @@
           </div>
         </div>
       </a>
+      <a href="#" (click)="setActiveMenu('highway')">
+        <div class="side" [ngClass]="{'active': activeMenu === 'highway' }">
+          <div class="icon">
+            <i class="fa fa-road"></i>
+          </div>
+          <div class="desc">
+            <span>
+                <img src="/assets/images/asphalt.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Aspal"/> 
+                {{summaries.pemetaan_highway_asphalt_length | number:'1.0-0'}} m
+            </span>
+            <span>
+                <img src="/assets/images/concrete.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Beton"/> 
+                {{summaries.pemetaan_highway_concrete_length | number:'1.0-0'}} m
+            </span>
+            <span>
+                <img src="/assets/images/other.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Lainnya"/> 
+                {{summaries.pemetaan_highway_other_length | number:'1.0-0'}} m
+            </span>
+            <span>
+              <img src="/assets/images/bridge.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Jembatan"/> 
+              {{summaries.pemetaan_bridge_length | number:'1.0-0'}} m
+          </span>
+          </div>
+        </div>
+      </a>
     </div>
 
     <ul class="list-group legend" *ngIf="isLegendShown" style="width: 200px;">

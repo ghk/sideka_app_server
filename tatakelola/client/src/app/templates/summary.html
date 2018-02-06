@@ -125,25 +125,27 @@
                         <td class="data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_highway_asphalt_length > 0 || summary.pemetaan_highway_concrete_length > 0 || summary.pemetaan_highway_other_length > 0" [routerLink]="['/summary', 'highway']"> 
                             <span style="margin-right: 5px;">
                                 <span>
-                                    {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}} Aspal
+                                    {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}
                                 </span>
-                               
+                                <img src="/assets/images/asphalt.png" style="width: 20px; height: 20px;" title="Aspal"/>
                             </span>
                             <span  style="margin-right: 5px;">
                                 <span>
-                                    {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}} Beton
+                                    {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}
                                 </span>
-                               
+                                <img src="/assets/images/concrete.png" style="width: 20px; height: 20px;" title="Beton"/>
                             </span>
                             <span>
                                 <span>
                                     {{summary.pemetaan_highway_other_length| number:'1.0-0'}} Lainnya
                                 </span>
+                                <img src="/assets/images/other.png" style="width: 20px; height: 20px;" title="Lainnya"/>
                             </span>
                             <span>
                                 <span>
-                                    {{summary.pemetaan_bridge_length| number:'1.0-0'}} Jembatan
+                                    {{summary.pemetaan_bridge_length| number:'1.0-0'}}
                                 </span>
+                                <img src="/assets/images/bridge.png" style="width: 20px; height: 20px;" title="Jembatan"/>
                             </span>
                         </td>   
                         <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_highway_asphalt_length === 0 && summary.pemetaan_highway_concrete_length === 0 && summary.pemetaan_highway_other_length === 0 && summary.pemetaan_bridge_length" [routerLink]="['/summary', 'highway']"> - </td>
@@ -655,7 +657,7 @@
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
                     </th>
-                    <th (click)="sort('desa_total_highway')" rowspan="2" class="sortable-header">Jalan (m)
+                    <th (click)="sort('desa_total_highway')" style="width: 22%;" rowspan="2" class="sortable-header">Jalan (m)
                         <ng-container *ngIf="order.includes('desa_total_highway')">
                             <span [hidden]="order.startsWith('-')">▲</span>
                             <span [hidden]="!order.startsWith('-')">▼</span>
@@ -720,27 +722,27 @@
                     <td class="money data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_highway_asphalt_length > 0 || summary.pemetaan_highway_concrete_length > 0 || summary.pemetaan_highway_other_length > 0 || summary.pemetaan_bridge_length > 0" [routerLink]="['/summary', 'highway']"> 
                         <span style="margin-right: 5px;">
                             <span>
-                                {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}} Aspal
+                                {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}
                             </span>
-                           
+                            <img src="/assets/images/asphalt.png" style="width: 20px; height: 20px;" title="Aspal"/>
                         </span>
                         <span  style="margin-right: 5px;">
                             <span>
-                                {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}  Beton
+                                {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}
                             </span>
-                            
+                            <img src="/assets/images/concrete.png" style="width: 20px; height: 20px;" title="Beton"/>
                         </span>
                         <span>
                             <span>
-                                {{summary.pemetaan_highway_other_length| number:'1.0-0'}} Lainnya
+                                {{summary.pemetaan_highway_other_length| number:'1.0-0'}}
                             </span>
-                            
+                            <img src="/assets/images/other.png" style="width: 20px; height: 20px;" title="Lainnya"/>
                         </span>
                         <span>
                             <span>
-                                {{summary.pemetaan_bridge_length| number:'1.0-0'}} Jembatan
+                                {{summary.pemetaan_bridge_length| number:'1.0-0'}}
                             </span>
-                            
+                            <img src="/assets/images/bridge.png" style="width: 20px; height: 20px;" title="Jembatan"/>
                         </span>
                     </td>   
                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_highway_asphalt_length === 0 && summary.pemetaan_highway_concrete_length === 0 && summary.pemetaan_highway_other_length === 0" [routerLink]="['/summary', 'highway']"> - </td>

@@ -32,6 +32,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJsonBoudary: L.GeoJSON;
     geoJsonDesaBoundary: L.GeoJSON;
     geoJsonDusunBoundary: L.GeoJSON;
+    geoJsonHighway: L.GeoJSON;
     availableDesaSummaries: any[];
     currentDesaIndex: number;
     markers: L.Marker[];
@@ -528,6 +529,80 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isLegendShown = false;
     }
 
+    async setMapHighway() {
+        this.cleanLayers(); 
+        this.cleanMarkers();
+        this.cleanLegends();
+
+        this.isPendidikanStatisticShown = false;
+        this.isPekerjaanStatisticShown = false;
+        
+        this.markers = [];
+        this.legends = [];
+
+        let regionId = this.summaries.fk_region_id;
+
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', 
+                regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+       
+        featureCollection.features = featureCollection.features.filter(e => e.properties.highway || e.properties.bridge);
+        
+        this.geoJsonHighway = L.geoJSON(featureCollection, {
+            onEachFeature: this.onEachFeature.bind(this)
+        });
+
+        this.geoJsonHighway.addTo(this.map);
+
+        let label = null;
+        let color = null;
+        let textColor = null;
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = MapUtils.calculateCenterOfLineStrings(feature.geometry.coordinates);
+            let marker = null;
+            let url = null;
+
+            if (feature.properties.surface && feature.properties.surface === 'asphalt')  {
+                url =  '/assets/images/asphalt.png';
+                label = 'Aspal';
+            }
+
+            else if (feature.properties.surface && feature.properties.surface === 'concrete') {
+                url =  '/assets/images/concrete.png';
+                label = 'Beton';
+            }
+
+            else if (feature.properties.bridge) {
+                url =  '/assets/images/bridge.png';    
+                label = 'Jembatan';
+            }
+
+            else {
+                url =  '/assets/images/other.png';
+                label = 'Lainnya';
+            }
+               
+            if (!url)
+                continue;
+
+            marker = MapUtils.createMarker(url, center);
+
+            this.markers.push(marker.addTo(this.map));
+
+            let existingLegend = this.legends.filter(e => e.url === url)[0];
+            
+            if(!existingLegend)
+                this.legends.push({ label: label, url: url, color: color, textColor: textColor });
+        }
+
+        this.isLegendShown = true;
+    }
+
     async setPekerjaanStatistic(regionId) {
         if (this.penduduks.length === 0)
             return;
@@ -579,6 +654,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             case 'penduduk':
                 this.setMapPenduduk();
             break;
+            case 'highway':
+                this.setMapHighway();
+            break;
         }
         return false;
     }
@@ -618,7 +696,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
-                style['weight'] = 1;
+                style['weight'] = 2;
                 layer['setStyle'] ? layer['setStyle'](style) : null;
             }
 
