@@ -3,6 +3,7 @@ import simplejson as json
 import geojson
 import math
 
+from math import pi, cos, sqrt
 from tatakelola.models import Summary, PendudukReference
 from area import area
 
@@ -191,7 +192,6 @@ class ParsePemetaanData:
                         forest_trees.append(properties['forest'].lower().strip())
                     if feature['geometry']['type'] == 'Polygon':
                         summary.pemetaan_landuse_forest_area += area(feature['geometry'])
-
             elif type == 'facilities_infrastructures':
                 if properties.has_key('building'):
                     if properties.has_key('house'):
@@ -217,4 +217,58 @@ class ParsePemetaanData:
                             summary.pemetaan_school_sma += 1
                         elif isced == 4:
                             summary.pemetaan_school_pt += 1
+            elif type == 'network_transportation':
+                 if properties.has_key('highway') or properties.has_key('bridge'):
+                     if properties.has_key('surface') == False:
+                         continue
+                     elif properties.has_key('bridge'):
+                         if feature['geometry']['type'] == 'LineString':
+                            summary.pemetaan_bridge_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                         elif feature['geometry']['type'] == 'Polygon':
+                             summary.pemetaan_bridge_length = 0
+                     elif properties['surface'] == 'asphalt':
+                         if feature['geometry']['type'] == 'LineString':
+                            summary.pemetaan_highway_asphalt_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                         elif feature['geometry']['type'] == 'Polygon':
+                            summary.pemetaan_highway_asphalt_length = 0
+                     elif properties['surface'] == 'concrete':
+                         if feature['geometry']['type'] == 'LineString':
+                            summary.pemetaan_highway_concrete_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                         elif feature['geometry']['type'] == 'Polygon':
+                            summary.pemetaan_highway_concrete_length = 0
+                     else:
+                         if feature['geometry']['type'] == 'LineString':
+                            summary.pemetaan_highway_other_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                         elif feature['geometry']['type'] == 'Polygon':
+                            summary.pemetaan_highway_other_length = 0
+
         return summary
+    
+
+class GeoJsonUtils:
+    @staticmethod
+    def calculate_length(coordinates):
+        if len(coordinates) < 2:
+            return 0
+        
+        result = 0
+        index = 1
+
+        for coordinate in coordinates:
+            if index < len(coordinates):
+                result += GeoJsonUtils.distance(coordinates[index - 1][0], coordinates[index - 1][1], coordinates[index][0], coordinates[index][1])
+            
+            index += 1
+
+        return result
+
+    @staticmethod
+    def distance(x1, y1, x2, y2):
+        R = 6371000
+        dx = (x2 - x1) * pi / 180
+        y1 = y1 * pi / 180
+        y2 = y2 * pi / 180
+        x = dx * cos((y1+y2)/2)
+        y = (y2-y1)
+        d = sqrt(x*x + y*y)
+        return R * d

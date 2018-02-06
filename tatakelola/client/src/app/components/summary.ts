@@ -85,6 +85,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
                     summary['penduduk_total'] = summary.penduduk_sex_unknown + summary.penduduk_sex_male + summary.penduduk_sex_female;
                     summary['desa_edu_total'] = summary.pemetaan_school_tk + summary.pemetaan_school_sd + summary.pemetaan_school_smp + summary.pemetaan_school_sma + summary.pemetaan_school_pt;
                     summary['desa_total_landuse'] = summary.pemetaan_landuse_farmland + summary.pemetaan_landuse_forest + summary.pemetaan_landuse_orchard;
+                    summary['desa_total_highway'] = summary.pemetaan_highway_asphalt_length + summary.pemetaan_highway_concrete_length + summary.pemetaan_highway_other_length + summary.pemetaan_bridge_length;
                 });  
 
                 this.progress.percentage = 100;
@@ -111,6 +112,9 @@ export class SummaryComponent implements OnInit, OnDestroy {
             break;
             case 'education':
                 this.subTitle = 'Data Desa Per Gedung Sekolah';
+            break;
+            case 'highway':
+                this.subTitle = 'Data Desa Per Jalan';
             break;
         }
     }
