@@ -51,7 +51,7 @@ class Generator:
     @staticmethod
     def generate_progress_recapitulations_by_year(year):
         result = []
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             pr = Generator.generate_progress_recapitulation_by_region_and_year(region, year)
             result.append(pr)
@@ -60,7 +60,7 @@ class Generator:
     @staticmethod
     def generate_progress_timelines_by_year(year):
         result = []
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             pts = Generator.generate_progress_timeline_by_region_and_year(region, year)
             result += pts
@@ -69,7 +69,7 @@ class Generator:
     @staticmethod
     def generate_budget_recapitulations_by_year(year):
         result = []
-        regions = region_repository.all(is_siskeudes_code=True)
+        regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
             srs = Generator.generate_budget_recapitulation_by_region_and_year(region, year)
             result += srs

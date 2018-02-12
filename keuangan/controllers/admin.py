@@ -1,9 +1,8 @@
-from datetime import datetime
 from flask import Blueprint, jsonify, current_app
 from time import time
 from keuangan import db, cache
 from keuangan.helpers import SiskeudesFetcher, Generator
-from keuangan.repository import RegionRepository, SiskeudesPenganggaranRepository
+from keuangan.repository import RegionRepository
 
 app = Blueprint('admin', __name__)
 region_repository = RegionRepository(db)
@@ -86,56 +85,65 @@ def generate_budget_types():
     return jsonify({'success': True})
 
 
-@app.route('/budget/recapitulations/generate', methods=['GET'])
-def generate_budget_recapitulations():
-    entities = Generator.generate_budget_recapitulations()
+@app.route('/budget/recapitulations/year/<string:year>/generate', methods=['GET'])
+def generate_budget_recapitulations_by_year(year):
+    entities = Generator.generate_budget_recapitulations_by_year(year)
     db.session.add_all(entities)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/budget/recapitulations/region/<string:region_id>/generate', methods=['GET'])
-def generate_budget_recapitulations_by_region(region_id):
+@app.route('/budget/recapitulations/region/<string:region_id>/year/<string:year>/generate', methods=['GET'])
+def generate_budget_recapitulation_by_region_and_year(region_id, year):
     region = region_repository.get(region_id)
-    entities = Generator.generate_budget_recapitulation_by_region(region)
-    db.session.add_all(entities)
+    entity = Generator.generate_budget_recapitulation_by_region_and_year(region, year)
+    db.session.add(entity)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/siskeudes/penganggarans/fetch', methods=['GET'])
-def fetch_siskeudes_penganggarans():
-    SiskeudesFetcher.fetch_penganggarans()
+@app.route('/siskeudes/penganggarans/fetch/year/<string:year>', methods=['GET'])
+def fetch_siskeudes_penganggarans(year):
+    SiskeudesFetcher.fetch_penganggarans_by_year(year)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>', methods=['GET'])
-def fetch_siskeudes_penganggarans_by_region(region_id):
+@app.route('/siskeudes/penganggarans/fetch/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def fetch_siskeudes_penganggarans_by_region(region_id, year):
     region = region_repository.get(region_id)
-    SiskeudesFetcher.fetch_penganggaran_by_region(region)
+    SiskeudesFetcher.fetch_penganggarans_by_region_and_year(region, year)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/progress/recapitulations/generate', methods=['GET'])
-def generate_progress_recapitulations():
-    progress_recapitulations = Generator.generate_progress_recapitulation()
+@app.route('/progress/recapitulations/generate/year/<string:year>', methods=['GET'])
+def generate_progress_recapitulations_by_year(year):
+    progress_recapitulations = Generator.generate_progress_recapitulations_by_year(year)
     db.session.add_all(progress_recapitulations)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/progress/timelines/generate', methods=['GET'])
-def generate_progress_timelines():
-    progress_timelines = Generator.generate_progress_timeline()
+@app.route('/progress/recapitulations/generate/region/<string:region_id>/year/<string:year>', methods=['GET'])
+def generate_progress_recapitulation_by_region_and_year(region_id, year):
+    region = region_repository.get(region_id)
+    progress_recapitulation = Generator.generate_progress_recapitulation_by_region_and_year(region, year)
+    db.session.add(progress_recapitulation)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/progress/timelines/generate/year/<string:year>', methods=['GET'])
+def generate_progress_timelines_by_year(year):
+    progress_timelines = Generator.generate_progress_timelines_by_year(year)
     db.session.add_all(progress_timelines)
     db.session.commit()
     return jsonify({'success': True})
 
 
-@app.route('/siskeudes/spps/fetch', methods=['GET'])
-def fetch_siskeudes_spps():
-    SiskeudesFetcher.fetch_spps()
+@app.route('/siskeudes/spps/fetch/year/<string:year>', methods=['GET'])
+def fetch_siskeudes_spps(year):
+    SiskeudesFetcher.fetch_spps_by_year(year)
     db.session.commit()
     return jsonify({'success': True})
