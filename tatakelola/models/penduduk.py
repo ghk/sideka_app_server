@@ -2,7 +2,7 @@ from tatakelola import db
 from tatakelola import ma
 from base import BaseModel
 from region import RegionModelSchema
-
+from tatakelola.helpers import CustomDateTime
 
 class Penduduk(BaseModel):
     __tablename__ = 'penduduks'
@@ -55,7 +55,8 @@ class PendudukModelSchema(ma.ModelSchema):
         model = Penduduk
         include_fk = True
 
-    tanggal_lahir = ma.DateTime(format='%d/%m/%Y', allow_none=True)
+    fk_region_id = None
+    tanggal_lahir = CustomDateTime(format='penduduk', allow_none=True, missing=True)
     region = ma.Nested(RegionModelSchema, many=False, exclude=('parent',))
 
 

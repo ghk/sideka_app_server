@@ -32,6 +32,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     geoJsonBoudary: L.GeoJSON;
     geoJsonDesaBoundary: L.GeoJSON;
     geoJsonDusunBoundary: L.GeoJSON;
+    geoJsonHighway: L.GeoJSON;
     availableDesaSummaries: any[];
     currentDesaIndex: number;
     markers: L.Marker[];
@@ -42,6 +43,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     isLegendShown: boolean;
     isPekerjaanStatisticShown: boolean;
     isPendidikanStatisticShown: boolean;
+    isPekerjaanContextShown: boolean;
+    isPendidikanContextShown: boolean;
     legends: any[];
     chartHelper: ChartHelper;
     penduduks: any[];
@@ -60,7 +63,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isLegendShown = false;
         this.isPekerjaanStatisticShown = false;
         this.isPendidikanStatisticShown = false;
-
+        this.isPekerjaanContextShown = true;
+        this.isPendidikanContextShown = true;
         this.prevDesa = 'TIDAK ADA';
         this.nextDesa = 'TIDAK ADA';
 
@@ -78,9 +82,9 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png')],
-            zoom: 14,
-            center: L.latLng([-7.547389769590928, 108.21044272398679])
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            zoom: 30,
+            center: L.latLng([-75.991294, 69.843757])
         }
 
         this._activeRouter.params.subscribe(
@@ -92,6 +96,10 @@ export class DesaComponent implements OnInit, OnDestroy {
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
+    }
+
+    toggleShowPendudikan() {
+        this.isPendidikanContextShown = !this.isPendidikanContextShown;
     }
 
     async setupSummaries(regionId: string) {
@@ -111,7 +119,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setupPenduduks(regionId) {
-        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise()
+        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise();
     }
 
     async setupLayout(regionId: string) {
@@ -515,10 +523,92 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             this.markers.push(marker);
         }
+
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
+        this.isLegendShown = false;
+    }
+
+    async setMapHighway() {
+        this.cleanLayers(); 
+        this.cleanMarkers();
+        this.cleanLegends();
+
+        this.isPendidikanStatisticShown = false;
+        this.isPekerjaanStatisticShown = false;
+        
+        this.markers = [];
+        this.legends = [];
+
+        let regionId = this.summaries.fk_region_id;
+
+        this.progress.percentage = 0;
+
+        let map = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', 
+                regionId, {}, this.progressListener.bind(this)).toPromise();
+
+        let featureCollection = map.data;
+       
+        featureCollection.features = featureCollection.features.filter(e => e.properties.highway || e.properties.bridge);
+        
+        this.geoJsonHighway = L.geoJSON(featureCollection, {
+            onEachFeature: this.onEachFeature.bind(this)
+        });
+
+        this.geoJsonHighway.addTo(this.map);
+
+        let label = null;
+        let color = null;
+        let textColor = null;
+
+        for (let i=0; i<featureCollection.features.length; i++) {
+            let feature = featureCollection.features[i];
+            let center = MapUtils.calculateCenterOfLineStrings(feature.geometry.coordinates);
+            let marker = null;
+            let url = null;
+
+            if (feature.properties.surface && feature.properties.surface === 'asphalt')  {
+                url =  '/assets/images/asphalt.png';
+                label = 'Aspal';
+            }
+
+            else if (feature.properties.surface && feature.properties.surface === 'concrete') {
+                url =  '/assets/images/concrete.png';
+                label = 'Beton';
+            }
+
+            else if (feature.properties.bridge) {
+                url =  '/assets/images/bridge.png';    
+                label = 'Jembatan';
+            }
+
+            else {
+                url =  '/assets/images/other.png';
+                label = 'Lainnya';
+            }
+               
+            if (!url)
+                continue;
+
+            marker = MapUtils.createMarker(url, center);
+
+            this.markers.push(marker.addTo(this.map));
+
+            let existingLegend = this.legends.filter(e => e.url === url)[0];
+            
+            if(!existingLegend)
+                this.legends.push({ label: label, url: url, color: color, textColor: textColor });
+        }
+
+        this.isLegendShown = true;
     }
 
     async setPekerjaanStatistic(regionId) {
+        if (this.penduduks.length === 0)
+            return;
+
         this.isPekerjaanStatisticShown = true;
+        this.isPekerjaanContextShown = true;
 
         let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
         let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
@@ -530,8 +620,12 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPendidikStatistic(regionId) {
+        if (this.penduduks.length === 0)
+            return;
+            
         this.isPendidikanStatisticShown = true;
-
+        this.isPendidikanContextShown = true;
+        
         let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
         let pendidikanData = this.chartHelper.transformDataStacked(pendidikanRaw, 'pendidikan');
         let pendidikanChart = this.chartHelper.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
@@ -559,6 +653,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'penduduk':
                 this.setMapPenduduk();
+            break;
+            case 'highway':
+                this.setMapHighway();
             break;
         }
         return false;
@@ -599,7 +696,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
-                style['weight'] = 1;
+                style['weight'] = 2;
                 layer['setStyle'] ? layer['setStyle'](style) : null;
             }
 

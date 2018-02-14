@@ -33,6 +33,7 @@ class Generator:
         boundaries = geojson_repository.get_by_type_and_region('boundary', region.id)
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
         facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
+        transportations = geojson_repository.get_by_type_and_region('network_transportation', region.id)
 
         summary.pemetaan_landuse_forest = 0
         summary.pemetaan_landuse_farmland = 0
@@ -48,14 +49,20 @@ class Generator:
         summary.pemetaan_desa_boundary = 0
         summary.pemetaan_dusun_total = 0
         summary.pemetaan_desa_circumference = 0
-        
+
+        summary.pemetaan_highway_asphalt_length = 0
+        summary.pemetaan_highway_concrete_length = 0
+        summary.pemetaan_highway_other_length = 0
+        summary.pemetaan_bridge_length = 0
+
         if boundaries is not None:
             summary = SummaryGeojsonTransformer.transform(summary, boundaries.data, 'boundary')
         if landuse is not None:
             summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse')
         if facilities is not None:
             sumamry = SummaryGeojsonTransformer.transform(summary, facilities.data, 'facilities_infrastructures')
-
+        if transportations is not None:
+            summary = SummaryGeojsonTransformer.transform(summary, transportations.data, 'network_transportation')
         return summary
 
     @staticmethod

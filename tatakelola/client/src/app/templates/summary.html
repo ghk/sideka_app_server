@@ -76,6 +76,12 @@
                                     <span [hidden]="!order.startsWith('-')">▼</span>
                                 </ng-container>
                         </th>
+                        <th (click)="sort('desa_total_highway')" rowspan="2" class="sortable-header">Jalan (m)
+                            <ng-container *ngIf="order.includes('desa_total_highway')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,6 +122,33 @@
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'penduduk']" *ngIf="summary.penduduk_total === 0">  - </td>
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total | number:'1.0-0'}} </td>
                         <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total === 0">  - </td>
+                        <td class="data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_highway_asphalt_length > 0 || summary.pemetaan_highway_concrete_length > 0 || summary.pemetaan_highway_other_length > 0" [routerLink]="['/summary', 'highway']"> 
+                            <span style="margin-right: 5px;">
+                                <span>
+                                    {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}
+                                </span>
+                                <img src="/assets/images/asphalt.png" style="width: 20px; height: 20px;" title="Aspal"/>
+                            </span>
+                            <span  style="margin-right: 5px;">
+                                <span>
+                                    {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}
+                                </span>
+                                <img src="/assets/images/concrete.png" style="width: 20px; height: 20px;" title="Beton"/>
+                            </span>
+                            <span>
+                                <span>
+                                    {{summary.pemetaan_highway_other_length| number:'1.0-0'}} Lainnya
+                                </span>
+                                <img src="/assets/images/other.png" style="width: 20px; height: 20px;" title="Lainnya"/>
+                            </span>
+                            <span>
+                                <span>
+                                    {{summary.pemetaan_bridge_length| number:'1.0-0'}}
+                                </span>
+                                <img src="/assets/images/bridge.png" style="width: 20px; height: 20px;" title="Jembatan"/>
+                            </span>
+                        </td>   
+                        <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_highway_asphalt_length === 0 && summary.pemetaan_highway_concrete_length === 0 && summary.pemetaan_highway_other_length === 0 && summary.pemetaan_bridge_length" [routerLink]="['/summary', 'highway']"> - </td>
                     </tr>
                 </tbody>
             </table>
@@ -516,6 +549,65 @@
                     </tr>
                 </tbody>
             </table>
+        </div>   
+        <div class="zui-scroller" *ngIf="viewType === 'detail' && detailType === 'highway'">
+            <table class="zui-table">
+                <thead>
+                    <tr>
+                        <th (click)="sort('region.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;" class="zui-sticky-col">Desa
+                                <ng-container *ngIf="order.includes('region.name')">
+                                    <span [hidden]="order.startsWith('-')">▲</span>
+                                    <span [hidden]="!order.startsWith('-')">▼</span>
+                                </ng-container>
+                        </th>
+                        <th (click)="sort('region.parent.parent.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Kabupaten
+                                <ng-container *ngIf="order.includes('region.parent.parent.name')">
+                                    <span [hidden]="order.startsWith('-')">▲</span>
+                                    <span [hidden]="!order.startsWith('-')">▼</span>
+                                </ng-container>
+                        </th>
+                        <th (click)="sort('pemetaan_highway_asphalt_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jalan Aspal (m)
+                            <ng-container *ngIf="order.includes('pemetaan_highway_asphalt_length')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                        </th>
+                        <th (click)="sort('pemetaan_highway_concrete_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jalan Beton (m)
+                            <ng-container *ngIf="order.includes('pemetaan_highway_concrete_length')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                        </th>
+                        <th (click)="sort('pemetaan_highway_other_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jalan Lainnya (m)
+                            <ng-container *ngIf="order.includes('pemetaan_highway_other_length')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                        </th>
+                        <th (click)="sort('pemetaan_bridge_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jembatan (m)
+                            <ng-container *ngIf="order.includes('pemetaan_bridge_length')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let summary of summaries | orderBy: order">
+                        <td class="data-column zui-sticky-col" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
+                        <td class="data-column zui-sticky-col" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
+                        <td style="font-size: 12px;"> {{summary.region.parent.name}}</td>
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_asphalt_length > 0"> {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}</td>
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_asphalt_length === 0"> - </td>
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_concrete_length > 0"> {{summary.pemetaan_highway_concrete_length  | number:'1.0-0'}}</td> 
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_concrete_length === 0"> -</td> 
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_other_length > 0"> {{summary.pemetaan_highway_other_length | number:'1.0-0'}}</td> 
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_other_length === 0"> -</td> 
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_bridge_length > 0"> {{summary.pemetaan_bridge_length | number:'1.0-0'}}</td> 
+                        <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_bridge_length === 0"> -</td> 
+                    </tr>
+                </tbody>
+            </table>
         </div>    
    </div>
    
@@ -564,6 +656,12 @@
                                 <span [hidden]="order.startsWith('-')">▲</span>
                                 <span [hidden]="!order.startsWith('-')">▼</span>
                             </ng-container>
+                    </th>
+                    <th (click)="sort('desa_total_highway')" style="width: 22%;" rowspan="2" class="sortable-header">Jalan (m)
+                        <ng-container *ngIf="order.includes('desa_total_highway')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
                     </th>
                     <!--
                     <th (click)="sort('pemetaan_electricity_available_kk')" rowspan="2" class="sortable-header">Listrik
@@ -620,6 +718,34 @@
 
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total > 0"> {{summary.desa_edu_total | number:'1.0-0'}} </td>
                     <td class="money data-column-number hoverable" [routerLink]="['/summary', 'education']" *ngIf="summary.desa_edu_total === 0">  - </td>
+                    
+                    <td class="money data-column-pointer hoverable" style="text-align: right;" *ngIf="summary.pemetaan_highway_asphalt_length > 0 || summary.pemetaan_highway_concrete_length > 0 || summary.pemetaan_highway_other_length > 0 || summary.pemetaan_bridge_length > 0" [routerLink]="['/summary', 'highway']"> 
+                        <span style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/asphalt.png" style="width: 20px; height: 20px;" title="Aspal"/>
+                        </span>
+                        <span  style="margin-right: 5px;">
+                            <span>
+                                {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/concrete.png" style="width: 20px; height: 20px;" title="Beton"/>
+                        </span>
+                        <span>
+                            <span>
+                                {{summary.pemetaan_highway_other_length| number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/other.png" style="width: 20px; height: 20px;" title="Lainnya"/>
+                        </span>
+                        <span>
+                            <span>
+                                {{summary.pemetaan_bridge_length| number:'1.0-0'}}
+                            </span>
+                            <img src="/assets/images/bridge.png" style="width: 20px; height: 20px;" title="Jembatan"/>
+                        </span>
+                    </td>   
+                    <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_highway_asphalt_length === 0 && summary.pemetaan_highway_concrete_length === 0 && summary.pemetaan_highway_other_length === 0" [routerLink]="['/summary', 'highway']"> - </td>
                     <!--
                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house > 0" (click)="loadDetail('electricity')"> {{summary.pemetaan_electricity_house}} Dari {{summary.penduduk_total_kk}} KK</td>
                     <td class="data-column-pointer hoverable" *ngIf="summary.pemetaan_electricity_house === 0" (click)="loadDetail('electricity')"> - </td>
@@ -1115,6 +1241,73 @@
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_orchard_area === 0"> -</td> 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_forest_area > 0"> {{summary.pemetaan_landuse_forest_area  / 10000 | number:'1.0-0'}}</td> 
                     <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_landuse_forest_area === 0"> -</td> 
+                </tr>
+            </tbody>
+            <tfoot [hidden]="progress?.percentage === 100">
+                <tr>
+                    <td style="padding: 80px 5px; text-align: center;" colspan="100">
+                    <img style="margin: 0 auto;" src="/assets/images/loading.gif">
+                    <br>
+                    <br> Memuat data...
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <table class="table table-condensed table-responsive table-bordered table-striped" *ngIf="viewType === 'detail' && detailType === 'highway'">
+            <thead>
+                <tr>
+                    <th (click)="sort('region.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Desa
+                            <ng-container *ngIf="order.includes('region.name')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                    </th>
+                    <th (click)="sort('region.parent.parent.name')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Kabupaten
+                            <ng-container *ngIf="order.includes('region.parent.parent.name')">
+                                <span [hidden]="order.startsWith('-')">▲</span>
+                                <span [hidden]="!order.startsWith('-')">▼</span>
+                            </ng-container>
+                    </th>
+                    <th (click)="sort('pemetaan_highway_asphalt_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jalan Aspal (m)
+                        <ng-container *ngIf="order.includes('pemetaan_highway_asphalt_length')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
+                    </th>
+                    <th (click)="sort('pemetaan_highway_concrete_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jalan Beton (m)
+                        <ng-container *ngIf="order.includes('pemetaan_highway_concrete_length')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
+                    </th>
+                    <th (click)="sort('pemetaan_highway_other_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Lainnya (m)
+                        <ng-container *ngIf="order.includes('pemetaan_highway_other_length')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
+                    </th>
+                    <th (click)="sort('pemetaan_bridge_length')" rowspan="2" style="text-align: center; vertical-align: middle; cursor: pointer;">Jembatan (m)
+                        <ng-container *ngIf="order.includes('pemetaan_bridge_length')">
+                            <span [hidden]="order.startsWith('-')">▲</span>
+                            <span [hidden]="!order.startsWith('-')">▼</span>
+                        </ng-container>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let summary of summaries | orderBy: order | filterBy: ['region.name']: query" [hidden]="progress.percentage < 100">
+                    <td class="data-column" *ngIf="summary.pemetaan_desa_boundary > 0"><a [routerLink]="['/desa/region', summary.region.id]"> {{summary.region.name}}</a></td>
+                    <td class="data-column" *ngIf="summary.pemetaan_desa_boundary == 0">{{summary.region.name}}</td>
+                    <td style="font-size: 12px;"> {{summary.region.parent.parent.name}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_asphalt_length > 0"> {{summary.pemetaan_highway_asphalt_length | number:'1.0-0'}}</td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_asphalt_length === 0"> - </td>
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_concrete_length > 0"> {{summary.pemetaan_highway_concrete_length | number:'1.0-0'}}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_concrete_length === 0"> -</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_other_length > 0"> {{summary.pemetaan_highway_other_length | number:'1.0-0'}}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_highway_other_length === 0"> -</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_bridge_length > 0"> {{summary.pemetaan_bridge_length | number:'1.0-0'}}</td> 
+                    <td class="money" style="text-align: right; font-size: 12px;" *ngIf="summary.pemetaan_bridge_length === 0"> -</td> 
                 </tr>
             </tbody>
             <tfoot [hidden]="progress?.percentage === 100">

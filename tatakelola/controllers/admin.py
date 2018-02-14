@@ -5,6 +5,12 @@ from tatakelola.helpers import TatakelolaFetcher, Generator
 
 app = Blueprint('admin', __name__)
 
+# @app.route('/admin/fetch/mandalamekar', methods=['GET'])
+# def fetch_mandalameker():
+#     TatakelolaFetcher.fetch_mandalamekar()
+#     db.session.commit()
+#     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
+#     return jsonify({'success': True})
 
 @app.route('/admin/fetch/desas', methods=['GET'])
 def fetch_desa_ids():

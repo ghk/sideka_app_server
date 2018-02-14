@@ -55,11 +55,10 @@ for c in contents:
 		continue
 	desa_slug = domain.split(".")[0]
 	print "%d - %d %s %s: %s %s %d" % (c["id"], c["desa_id"], c["desa"], desa_slug, c["type"], c["subtype"], c["change_id"])
-
+   
 	if not c["type"] in pusher_classes:
 		print "no pusher for %s" % c["type"]
 		continue
-	
 	try:
 		pusher = pusher_classes[c["type"]](desa_slug, ckan, c)
 		pusher.setup()

@@ -1,9 +1,10 @@
 import logging, traceback
 from tatakelola import db
-from tatakelola.models import Geojson, Data, PendudukModelSchema, Apbdes
+from tatakelola.models import Geojson, Data, PendudukModelSchema, Apbdes, Penduduk
 from tatakelola.repository import RegionRepository, SidekaContentRepository, SidekaDesaRepository, \
     DataRepository, GeojsonRepository, ProgressRecapitulationRepository, ApbdesRepository, PendudukRepository
 from transformer import ContentTransformer, PemetaanContentTransformer, GeojsonTransformer
+from datetime import datetime
 
 region_repository = RegionRepository(db)
 sideka_content_repository = SidekaContentRepository(db)
@@ -60,24 +61,73 @@ class TatakelolaFetcher():
         penduduk_repository.delete_by_region(region.id)
 
         penduduk_sd_content = sideka_content_repository.get_latest_content_by_desa_id('penduduk', None, region.desa_id)
+        
         if (penduduk_sd_content is None):
             logger.warning('Region: {0}<{1}><{2}> does not have penduduk'.format(region.name, region.id, region.desa_id))
             return
 
         contents = ContentTransformer.transform(penduduk_sd_content.content)
+        
         if (contents is None):
             logger.warning('Region: {0}<{1}><{2}> does not have correct penduduk'.format(region.name, region.id, region.desa_id))
             return
 
         data = Data()
+        data.fk_region_id = None
         data.data = {'penduduk': contents['penduduk']}
         data.fk_region_id = region.id
         data_repository.add(data)
 
-        penduduks = PendudukModelSchema(many=True).load(contents['penduduk'])
-        for penduduk in penduduks.data:
+        penduduks = []
+
+        for d in contents['penduduk']:
+            penduduk = Penduduk()
+            penduduk.id = d['id']
+            penduduk.nik = d['nik']
+            penduduk.nama_penduduk = d['nama_penduduk']
+            penduduk.jenis_kelamin = d['jenis_kelamin']
+            penduduk.tempat_lahir = d['tempat_lahir']
+
+            if penduduk.tanggal_lahir != None:
+                penduduk.tanggal_lahir = datetime.strptime(d['tanggal_lahir'], '%d/%m/%Y') 
+
+            penduduk.status_kawin = d['status_kawin']
+            penduduk.agama = d['agama']
+            penduduk.golongan_darah = d['golongan_darah']
+            penduduk.kewarganegaraan = d['kewarganegaraan']
+            penduduk.no_kk = d['no_kk']
+            penduduk.nama_ayah = d['nama_ayah']
+            penduduk.nama_ibu = d['nama_ibu']
+            penduduk.hubungan_keluarga = d['hubungan_keluarga']
+            penduduk.nama_dusun = d['nama_dusun']
+            penduduk.rw = d['rw']
+            penduduk.rt = d['rt']
+            penduduk.alamat_jalan = d['alamat_jalan']
+            penduduk.no_telepon = d['no_telepon']
+            penduduk.email = d['email']
+            penduduk.no_akta = d['no_akta']
+            penduduk.no_kitas = d['no_kitas']
+            penduduk.no_paspor = d['no_paspor']
+            penduduk.pendidikan = d['pendidikan']
+            penduduk.pekerjaan = d['pekerjaan']
+            penduduk.etnis_suku = d['etnis_suku']
+            penduduk.status_tinggal = d['status_tinggal']
+            penduduk.akseptor_kb = d['akseptor_kb']
+            penduduk.cacat_fisik = d['cacat_fisik']
+            penduduk.cacat_mental = d['cacat_mental']
+            penduduk.wajib_pajak = d['wajib_pajak']
+            penduduk.lembaga_pemerintahan = d['lembaga_pemerintahan']
+            penduduk.lembaga_kemasyarakatan = d['lembaga_kemasyarakatan']
+            penduduk.lembaga_ekonomi = d['lembaga_ekonomi']
             penduduk.fk_region_id = region.id
-        penduduk_repository.bulk_add_all(penduduks.data)
+            penduduk.region = region
+            penduduks.append(penduduk)
+       
+        #penduduks = PendudukModelSchema(many=True).load(contents['penduduk'])
+        
+        #for penduduk in penduduks.data:
+            #penduduk.fk_region_id = region.id
+        penduduk_repository.bulk_add_all(penduduks)
 
     @staticmethod
     def fetch_apbdes_by_region(region):
@@ -135,3 +185,14 @@ class TatakelolaFetcher():
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logging.error(e.message)
                 traceback.print_exc()
+
+    # @staticmethod
+    # def fetch_mandalamekar():
+    #     region = region_repository.get('32.06.19.2009')
+    #     try:
+    #         TatakelolaFetcher.fetch_data_by_region(region)
+    #     except Exception as e:
+    #         logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
+    #         logger.error(e.message)
+    #         traceback.print_exc()
+        
