@@ -156,7 +156,7 @@ class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
         for feature in features:
-            if feature.has_key('properties') == False or features['geometry'] == None:
+            if feature.has_key('properties') == False or feature['geometry'] == None:
                 continue
 
             properties = feature['properties']
