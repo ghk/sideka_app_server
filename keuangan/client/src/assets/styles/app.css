@@ -356,8 +356,6 @@ table.table-bordered > thead > tr > th:first-child, table.table-bordered > thead
     border-radius: 0px;
 }
 
-.front-numbers {}
-
 .front-numbers li {
     margin-top: -10px;
     margin-right: 40px;
