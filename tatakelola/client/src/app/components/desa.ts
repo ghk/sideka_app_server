@@ -48,6 +48,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     legends: any[];
     chartHelper: ChartHelper;
     penduduks: any[];
+    isToggleContext: boolean;
 
     constructor(
         private _http: Http,
@@ -65,6 +66,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isPendidikanStatisticShown = false;
         this.isPekerjaanContextShown = true;
         this.isPendidikanContextShown = true;
+        this.isToggleContext = true;
+
         this.prevDesa = 'TIDAK ADA';
         this.nextDesa = 'TIDAK ADA';
 
@@ -83,8 +86,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.options = {
             layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-            zoom: 30,
-            center: L.latLng([-75.991294, 69.843757])
+            zoom: 10,
+            center: L.latLng([0, 0])
         }
 
         this._activeRouter.params.subscribe(
@@ -99,7 +102,8 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     toggleShowPendudikan() {
-        this.isPendidikanContextShown = !this.isPendidikanContextShown;
+        if (this.isToggleContext)
+            this.isPendidikanContextShown = !this.isPendidikanContextShown;
     }
 
     async setupSummaries(regionId: string) {
@@ -175,7 +179,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     async next() {
         this.isLegendShown = false;
-        
+        this.isToggleContext = false;
+
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
            this.currentDesaIndex = -1;
            
@@ -193,6 +198,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     
     async prev() {
         this.isLegendShown = false;
+        this.isToggleContext = false;
 
         if(this.currentDesaIndex === 0)
            this.currentDesaIndex = this.availableDesaSummaries.length;
@@ -607,9 +613,11 @@ export class DesaComponent implements OnInit, OnDestroy {
         if (this.penduduks.length === 0)
             return;
 
-        this.isPekerjaanStatisticShown = true;
-        this.isPekerjaanContextShown = true;
-
+        if(this.isToggleContext) {
+            this.isPekerjaanStatisticShown = true;
+            this.isPekerjaanContextShown = true;
+        }
+       
         let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
         let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
         let pekerjaanChart = this.chartHelper.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);

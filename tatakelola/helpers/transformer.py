@@ -156,11 +156,11 @@ class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
         for feature in features:
-            if feature.has_key('properties') == False:
+            if feature.has_key('properties') == False or feature['geometry'] == None:
                 continue
 
             properties = feature['properties']
-
+        
             if type == 'boundary':
                 if feature['geometry']['type'] != 'Polygon':
                     continue
