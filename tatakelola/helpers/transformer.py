@@ -220,7 +220,7 @@ class ParsePemetaanData:
             elif type == 'network_transportation':
                  if properties.has_key('highway') or properties.has_key('bridge'):
                      if properties.has_key('surface') == False:
-                         continue
+                         summary.pemetaan_highway_other_length = 0
                      elif properties.has_key('bridge'):
                          if feature['geometry']['type'] == 'LineString':
                             summary.pemetaan_bridge_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
