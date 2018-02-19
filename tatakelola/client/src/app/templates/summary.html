@@ -22,13 +22,13 @@
     {{subTitle}}
    </div>
 
-   <div class="center-div mobile" [hidden]="progress?.percentage === 100">
-     <img style="margin: 0 auto; margin-left: -40px;" src="/assets/images/loading.gif">
-     <br>
-     <br> Memuat data...
-   </div>
-
-   <div class="zui-wrapper">
+   <div class="zui-wrapper mobile">
+        <div class="center-div" [ngClass]="{'mobile': progress?.percentage !== 100, 'mobile-hide': progress?.percentage === 100}">
+            <img style="margin: 0 auto; margin-left: -40px;" src="/assets/images/loading.gif">
+            <br>
+            <br> Memuat data...
+        </div>
+           
         <div class="zui-scroller" *ngIf="viewType === 'summary'">
             <table class="zui-table">
                 <thead>
@@ -448,6 +448,7 @@
                 </tbody>
             </table>
         </div> 
+
         <div class="zui-scroller" *ngIf="viewType === 'detail' && detailType === 'education'">
             <table class="zui-table">
                 <thead>
@@ -499,6 +500,7 @@
                 </tbody>
             </table>
         </div>  
+
         <div class="zui-scroller" *ngIf="viewType === 'detail' && detailType === 'landuse'">
             <table class="zui-table">
                 <thead>
@@ -550,6 +552,7 @@
                 </tbody>
             </table>
         </div>   
+
         <div class="zui-scroller" *ngIf="viewType === 'detail' && detailType === 'highway'">
             <table class="zui-table">
                 <thead>
