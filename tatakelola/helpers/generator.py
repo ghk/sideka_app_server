@@ -35,6 +35,7 @@ class Generator:
         facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
         transportations = geojson_repository.get_by_type_and_region('network_transportation', region.id)
 
+
         summary.pemetaan_landuse_forest = 0
         summary.pemetaan_landuse_farmland = 0
         summary.pemetaan_landuse_orchard = 0
