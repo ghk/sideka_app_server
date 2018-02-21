@@ -156,12 +156,12 @@ class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
         for feature in features:
-            if feature.has_key('properties') == False or feature['geometry'] == None:
-                if type == 'network_transportation':
-                    if feature['geometry'] != None:
-                        summary.pemetaan_highway_other_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
-                else:
-                    continue
+            if type == 'network_transportation' and feature.has_key('properties') == False and feature['geometry'] != None:
+                summary.pemetaan_highway_other_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                continue
+                 
+            elif feature.has_key('properties') == False or feature['geometry'] == None:
+                continue
 
             properties = feature['properties']
         
