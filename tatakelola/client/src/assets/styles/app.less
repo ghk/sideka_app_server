@@ -376,17 +376,6 @@ button.side:hover .text span {
 }
 
 
-/* -- LEGEND -- */
-
-.legend {
-    position: fixed;
-    top: 60px;
-    right: 10px;
-    padding: 10px 15px;
-    background-color: #fff;
-    box-shadow: 1px 1px 1px #888;
-}
-
 .leaflet-control-zoom {
     margin-top: 520px!important;
     margin-left: 20px!important;
@@ -513,9 +502,17 @@ input:checked+label div {
     position: fixed;
     top: 60px;
     right: 10px;
-    padding: 10px 15px;
+    padding: 10px 10px;
     background-color: #fff;
     box-shadow: 1px 1px 1px #888;
+}
+
+.legend > li {
+    margin-bottom: 10px;
+}
+
+.legend > li:last-child{
+    margin-bottom: 0;
 }
 
 label {

@@ -68,8 +68,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isPendidikanContextShown = true;
         this.isToggleContext = true;
 
-        this.prevDesa = 'TIDAK ADA';
-        this.nextDesa = 'TIDAK ADA';
+        this.prevDesa = '-';
+        this.nextDesa = '-';
 
         this.markers = [];
         this.legends = [];
@@ -214,6 +214,12 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.setupPenduduks(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
     }
+
+    recenter() {
+        this.map.setView(this.geoJsonLayout.getBounds().getCenter(), 15);
+        return false;
+    }
+
     
     async setMapSchools() {
         this.cleanLayers(); 
@@ -366,19 +372,19 @@ export class DesaComponent implements OnInit, OnDestroy {
             if (feature.properties.landuse && feature.properties.landuse === 'farmland')  {
                 url =  '/assets/images/pertanian.png';
                 label = 'Pertanian';
-                color = 'rgb(247,230,102)';
+                color = 'rgba(247,230,102,0.5)';
             }
 
             else if (feature.properties.landuse && feature.properties.landuse === 'orchard') {
                 url =  '/assets/images/perkebunan.png';
                 label = 'Perkebunan';
-                color = 'rgb(141,198,102)';
+                color = 'rgba(141,198,102,0.5)';
             }
 
             else if (feature.properties.landuse && feature.properties.landuse === 'forest') {
                 url =  '/assets/images/hutan.png';    
                 label = 'Hutan';
-                color = 'rgb(0,104,56)';
+                color = 'rgba(0,104,56,0.5)';
                 textColor = 'white';
             }
                
@@ -751,7 +757,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
                 if (feature.geometry.type === 'Polygon') {
                     style['fill'] = style['color'];
-                    style['fillOpacity'] = 1;
+                    style['fillOpacity'] =0.5; 
                 }
                     
                 layer['setStyle'] ? layer['setStyle'](style) : null;
