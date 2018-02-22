@@ -85,7 +85,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'), ],
             zoom: 5,
             center: L.latLng([-2.604236, 116.499023])
         }
@@ -767,6 +767,15 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     onMapReady(map: L.Map): void {
         this.map = map;
+
+        let satellite = L.tileLayer( 'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A')
+
+        let basemapControl = {
+        //"OSM": streets,
+        "Satelit": satellite
+        }
+
+        L.control.layers( null, basemapControl, {'position': 'bottomleft'} ).addTo(this.map);
     }
    
     setNextPrevLabel() {

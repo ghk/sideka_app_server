@@ -145,7 +145,7 @@
         </span>
       </li>
     </ul>
-    <div class="legend" [hidden]="!isPekerjaanStatisticShown" style="position: fixed; top: 350px; background: white; padding: 0; text-align: right;" 
+    <div class="legend" [hidden]="!isPekerjaanStatisticShown" style="position: fixed; top: 350px; padding: 0; text-align: right;" 
         [style.width]="isPekerjaanContextShown ? '500px': '35px'">
       <button class="btn btn-sm btn-default" style="position: absolute; right: 0;"  (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="isPekerjaanContextShown">
         <i class="fa fa-window-minimize"></i>
@@ -157,7 +157,7 @@
         <svg style="height: 250px; width: 100%;"></svg>
       </div>
     </div>
-    <div class="legend" style="position: fixed; top: 350px; background: white; padding: 0; text-align: right;" [style.width]="isPendidikanContextShown ? '500px': '35px'" [hidden]="!isPendidikanStatisticShown">
+    <div class="legend" style="position: fixed; top: 350px; padding: 0; text-align: right;" [style.width]="isPendidikanContextShown ? '500px': '35px'" [hidden]="!isPendidikanStatisticShown">
       <button class="btn btn-sm btm-default" style="position: absolute; right: 0;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="isPendidikanContextShown">
         <i class="fa fa-window-minimize"></i>
       </button>
