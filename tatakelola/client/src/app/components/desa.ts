@@ -214,6 +214,61 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.setupPenduduks(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
     }
+
+    async setMapApbdes() {
+        let logPembangunan = await this._dataService.getGeojsonByTypeAndRegion('log_pembangunan', this.summaries.fk_region_id, {}, null).toPromise();
+       
+        for (let i=0; i<logPembangunan.data.features.length; i++) {
+            let data = logPembangunan.data.features[i];
+            let feature = data[6];
+            let center = L.geoJSON(feature).getBounds().getCenter();
+            let url = null;
+            let name = feature.properties['name'] ? feature.properties['name'] : '';
+            let label = '<strong>Pembangunan ' + name + '</strong><br> Anggaran: Rp ' + parseFloat(data[7]).toFixed(2);
+            let marker = null;
+
+            if (data[3] === 'highway') 
+                url = '/assets/images/asphalt.png';
+            
+            else if (data[3] === 'amenity') {
+                if (feature.properties[data[3]] === 'school') {
+                    if (!isNaN(feature.properties['isced'])) {
+                        let isced = parseInt(feature.properties['isced']);
+
+                        if (isced === 0) 
+                            url = '/assets/images/tx.png';
+                        else if (isced === 1)
+                            url = '/assets/images/sd.png';
+                        else if (isced === 2) 
+                            url = '/assets/images/smp.png';
+                        else if (isced === 3)
+                            url = '/assets/images/sma.png';
+                        else if (isced === 4)
+                            url = '/assets/images/pt.png';
+                    }
+                }
+            }
+            else if (data[3] === 'building') {
+                if (feature.properties[data[3]] === 'house') {
+                    label = '<strong>Pembangunan Rumah </strong><br> Anggaran: Rp ' + parseFloat(data[7]).toFixed(2); 
+                    url = '/assets/images/house.png';
+                }
+            }
+            
+            marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [20, 20],
+                    shadowSize: [64, 64],
+                    iconAnchor: [22, 24],
+                    shadowAnchor: [4, 62],
+                    popupAnchor: [-3, -76]
+                })
+            }).addTo(this.map).bindPopup(label);
+
+            this.markers.push(marker);
+        }
+    }
     
     async setMapSchools() {
         this.cleanLayers(); 
@@ -647,6 +702,9 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.activeMenu = menu;
 
         switch(menu) {
+            case 'apbdes':
+                this.setMapApbdes();
+            break;
             case 'schools':
                 this.setMapSchools();
             break;
