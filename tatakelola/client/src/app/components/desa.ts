@@ -246,8 +246,6 @@ export class DesaComponent implements OnInit, OnDestroy {
 
             label += '</span></div>';
 
-            let marker = null;
-
             if (data[3] === 'highway') {
                 url = '/assets/images/asphalt.png';
                 center = MapUtils.calculateCenterOfLineStrings(feature.geometry.coordinates);
@@ -278,12 +276,12 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
             
-            marker = L.marker(center, {
+            let marker = L.marker(center, {
                 icon: L.icon({ 
                     iconUrl: url,
                     iconSize: [20, 20],
                 })
-            }).addTo(this.map).bindPopup(label).openPopup();
+            }).addTo(this.map).bindPopup(label, { autoClose: false }).openPopup();
 
             this.markers.push(marker);
         }
