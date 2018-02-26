@@ -231,7 +231,21 @@ export class DesaComponent implements OnInit, OnDestroy {
             let center = L.geoJSON(feature).getBounds().getCenter();
             let url = null;
             let name = feature.properties['name'] ? feature.properties['name'] : '';
-            let label = '<strong>Pembangunan ' + name + '</strong><br> Anggaran: Rp ' + parseFloat(data[7]).toFixed(2);
+            let label = '<strong>Pembangunan ' + name + '</strong>' 
+                + '<br> Total: Rp ' + parseFloat(data[7]).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.")
+                + '<hr>';
+
+            let anggarans = data[4];
+
+            for (let i=0; i<anggarans.length; i++) {
+                let anggaran = anggarans[i];
+
+                label += '<div><span>Kode Kegiatan:' + anggaran[0] + '<br> Kode Anggaran: ' + anggaran[1] + '<br> Anggaran: Rp ' 
+                    + parseFloat(anggaran[2]).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+            }
+
+            label += '</span></div>';
+
             let marker = null;
 
             if (data[3] === 'highway') {
@@ -268,12 +282,8 @@ export class DesaComponent implements OnInit, OnDestroy {
                 icon: L.icon({ 
                     iconUrl: url,
                     iconSize: [20, 20],
-                    shadowSize: [64, 64],
-                    iconAnchor: [22, 24],
-                    shadowAnchor: [4, 62],
-                    popupAnchor: [-3, -76]
                 })
-            }).addTo(this.map).bindPopup(label);
+            }).addTo(this.map).bindPopup(label).openPopup();
 
             this.markers.push(marker);
         }
