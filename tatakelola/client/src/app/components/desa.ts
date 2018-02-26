@@ -68,8 +68,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isPendidikanContextShown = true;
         this.isToggleContext = true;
 
-        this.prevDesa = 'TIDAK ADA';
-        this.nextDesa = 'TIDAK ADA';
+        this.prevDesa = '-';
+        this.nextDesa = '-';
 
         this.markers = [];
         this.legends = [];
@@ -85,9 +85,9 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')],
-            zoom: 10,
-            center: L.latLng([0, 0])
+            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'), ],
+            zoom: 5,
+            center: L.latLng([-2.604236, 116.499023])
         }
 
         this._activeRouter.params.subscribe(
@@ -216,6 +216,13 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setMapApbdes() {
+        this.cleanLayers(); 
+        this.cleanMarkers();
+        this.cleanLegends();
+
+        this.isPendidikanStatisticShown = false;
+        this.isPekerjaanStatisticShown = false;
+
         let logPembangunan = await this._dataService.getGeojsonByTypeAndRegion('log_pembangunan', this.summaries.fk_region_id, {}, null).toPromise();
        
         for (let i=0; i<logPembangunan.data.features.length; i++) {
@@ -227,9 +234,11 @@ export class DesaComponent implements OnInit, OnDestroy {
             let label = '<strong>Pembangunan ' + name + '</strong><br> Anggaran: Rp ' + parseFloat(data[7]).toFixed(2);
             let marker = null;
 
-            if (data[3] === 'highway') 
+            if (data[3] === 'highway') {
                 url = '/assets/images/asphalt.png';
-            
+                center = MapUtils.calculateCenterOfLineStrings(feature.geometry.coordinates);
+            }
+                
             else if (data[3] === 'amenity') {
                 if (feature.properties[data[3]] === 'school') {
                     if (!isNaN(feature.properties['isced'])) {
@@ -421,19 +430,19 @@ export class DesaComponent implements OnInit, OnDestroy {
             if (feature.properties.landuse && feature.properties.landuse === 'farmland')  {
                 url =  '/assets/images/pertanian.png';
                 label = 'Pertanian';
-                color = 'rgb(247,230,102)';
+                color = 'rgba(247,230,102,0.5)';
             }
 
             else if (feature.properties.landuse && feature.properties.landuse === 'orchard') {
                 url =  '/assets/images/perkebunan.png';
                 label = 'Perkebunan';
-                color = 'rgb(141,198,102)';
+                color = 'rgba(141,198,102,0.5)';
             }
 
             else if (feature.properties.landuse && feature.properties.landuse === 'forest') {
                 url =  '/assets/images/hutan.png';    
                 label = 'Hutan';
-                color = 'rgb(0,104,56)';
+                color = 'rgba(0,104,56,0.5)';
                 textColor = 'white';
             }
                
@@ -809,7 +818,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
                 if (feature.geometry.type === 'Polygon') {
                     style['fill'] = style['color'];
-                    style['fillOpacity'] = 1;
+                    style['fillOpacity'] =0.5; 
                 }
                     
                 layer['setStyle'] ? layer['setStyle'](style) : null;
@@ -819,6 +828,15 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     onMapReady(map: L.Map): void {
         this.map = map;
+
+        let satellite = L.tileLayer( 'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A')
+
+        let basemapControl = {
+        //"OSM": streets,
+        "Satelit": satellite
+        }
+
+        L.control.layers( null, basemapControl, {'position': 'bottomleft'} ).addTo(this.map);
     }
    
     setNextPrevLabel() {
