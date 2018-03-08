@@ -13,6 +13,7 @@ import 'rxjs/add/operator/map';
 
 import BIG from '../helpers/bigConfig';
 import geoJSONArea from '@mapbox/geojson-area';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'st-desa',
@@ -54,7 +55,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         private _http: Http,
         private _dataService: DataService,
         private _activeRouter: ActivatedRoute,
-        private _router: Router
+        private _router: Router,
+        private _location: Location
     ) { }
 
     ngOnInit(): void {
@@ -104,6 +106,11 @@ export class DesaComponent implements OnInit, OnDestroy {
     toggleShowPendudikan() {
         if (this.isToggleContext)
             this.isPendidikanContextShown = !this.isPendidikanContextShown;
+    }
+
+    recenter(): boolean {
+        this.map.flyTo(this.geoJsonLayout.getBounds().getCenter(), 15); 
+        return false;
     }
 
     async setupSummaries(regionId: string) {
