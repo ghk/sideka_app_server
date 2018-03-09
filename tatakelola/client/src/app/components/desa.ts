@@ -405,19 +405,19 @@ export class DesaComponent implements OnInit, OnDestroy {
         let map = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
                 regionId, {}, this.progressListener.bind(this)).toPromise();
 
-        let roads = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, null).toPromise();
+        //let roads = await this._dataService.getGeojsonByTypeAndRegion('network_transportation', regionId, {}, null).toPromise();
 
         let featureCollection = map.data;
        
         featureCollection.features = featureCollection.features.filter(e => e.properties.landuse 
             && (e.properties.landuse === 'farmland' || e.properties.landuse === 'orchard' || e.properties.landuse === 'forest'));
         
-        featureCollection.features = featureCollection.features.concat(roads.data.features);
+        //featureCollection.features = featureCollection.features.concat(roads.data.features);
             
         this.geoJsonLanduse = L.geoJSON(featureCollection, {
             onEachFeature: this.onEachLanduseFeature.bind(this)
         });
-
+        
         this.geoJsonLanduse.addTo(this.map);
 
         let label = null;
@@ -823,8 +823,13 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
             }
 
-            if (!matchedElement)
+            if (!matchedElement) {
+                if (feature['indicator']) {
+                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                    layer.setStyle(style);
+                }
                 continue;
+            }
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
