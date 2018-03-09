@@ -5,15 +5,16 @@ import { DataService } from '../services/data';
 import { MapUtils } from '../helpers/mapUtils';
 import { Progress } from 'angular-progress-http';
 import { ChartHelper } from '../helpers/chartHelper';
+import { Location } from '@angular/common';
 
 import * as ngxLeaflet from '@asymmetrik/ngx-leaflet';
 import * as L from 'leaflet';
+import { length as GeoJsonLength } from '@turf/turf';
 
 import 'rxjs/add/operator/map';
 
 import BIG from '../helpers/bigConfig';
 import geoJSONArea from '@mapbox/geojson-area';
-import { Location } from '@angular/common';
 
 @Component({
     selector: 'st-desa',
@@ -201,6 +202,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.setNextPrevLabel();
         this.setupPenduduks(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
+
+        this._location.replaceState('/desa/region/' + this.summaries.fk_region_id);
     }
     
     async prev() {
@@ -239,9 +242,9 @@ export class DesaComponent implements OnInit, OnDestroy {
             let url = null;
             let name = feature.properties['name'] ? feature.properties['name'] : '';
             let label = '<strong>Pembangunan ' + name + '</strong>' 
-                + '<br> Total: Rp ' + parseFloat(data[7]).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.")
-                + '<hr>';
-
+                + '<br> Total: Rp ' + parseFloat(data[7]).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+                //+ '<hr>';
+            /*
             let anggarans = data[4];
 
             for (let i=0; i<anggarans.length; i++) {
@@ -251,7 +254,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                     + parseFloat(anggaran[2]).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
             }
 
-            label += '</span></div>';
+            label += '</span></div>';*/
 
             if (data[3] === 'highway') {
                 url = '/assets/images/asphalt.png';
@@ -365,19 +368,21 @@ export class DesaComponent implements OnInit, OnDestroy {
                         else if (label === 'PT')
                             this.legends.push({ label: label, url: url, color: null, total: this.summaries.pemetaan_school_pt });
                     }
-                        
 
+                    let popupContent = '<strong>' + label + '</strong><br>';
+                    let name = feature['name'] ? feature['name'] : 'Belum Terisi';
+                    let capacity = feature['capacity'] ? feature['capacity'] + ' Orang' : 'Belum Terisi';
+                    let address = feature['address'] ? feature['address'] : 'Belum Terisi';
+
+                    popupContent += '<span>Nama: ' + name + '<br> Kapasitas: ' + capacity + '<br>Alamat: ' + address +  '</span>';
+                  
                     marker = L.marker(center, {
                         icon: L.icon({ 
                             iconUrl: url,
-                            iconSize: [20, 20],
-                            shadowSize: [64, 64],
-                            iconAnchor: [22, 24],
-                            shadowAnchor: [4, 62],
-                            popupAnchor: [-3, -76]
+                            iconSize: [20, 20]
                         })
-                    }).addTo(this.map);
-        
+                    }).addTo(this.map).bindPopup(popupContent, {autoClose: true}).openPopup();
+                    
                     this.markers.push(marker);
                 }
             }
@@ -427,9 +432,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         for (let i=0; i<featureCollection.features.length; i++) {
             let feature = featureCollection.features[i];
             let center = L.geoJSON(feature).getBounds().getCenter();
-            let marker = null;
             let url = null;
-
+          
             /*
             if (feature.properties.landuse && feature.properties.landuse === 'farmland') {
                 if (feature.properties.crop && feature.properties.crop === 'padi')
@@ -473,36 +477,6 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isLegendShown = true;
     }
 
-    async setMapLogPembangunan() {
-        this.cleanLayers(); 
-        this.cleanMarkers();
-        this.cleanLegends();
-        
-        this.progress.percentage = 0;
-
-        let regionId = this.summaries.fk_region_id;
-
-        let landuse = await this._dataService.getGeojsonByTypeAndRegion('landuse', 
-            regionId, {}, this.progressListener.bind(this)).toPromise();
-
-        let infrastructures = await this._dataService.getGeojsonByTypeAndRegion('facilities_infrastructures', 
-            regionId, {}, this.progressListener.bind(this)).toPromise();
-
-        let logPembangunan = await this._dataService.getGeojsonByTypeAndRegion('log_pembangunan', 
-            regionId, {}, this.progressListener.bind(this)).toPromise();
-
-        let featureCollection = landuse.data;
-
-        featureCollection.features  = featureCollection.features.filter(e => e.properties.landuse);
-        featureCollection.features = featureCollection.features.concat(infrastructures.data.features);
-
-        this.geoJsonLanduse = L.geoJSON(featureCollection, {
-            onEachFeature: this.onEachFeature.bind(this)
-        });
-
-        console.log(logPembangunan);
-    }
-
     async setMapBoundary() {
         this.cleanLayers(); 
         this.cleanMarkers();
@@ -532,7 +506,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             let marker = L.marker(L.geoJSON(features[i]).getBounds().getCenter(), {
                 icon: L.divIcon({
                     className: 'label', 
-                    html: '<h4 style="color: blue;"><strong>' + Math.round(area / 10000) + ' Ha </strong></h4>',
+                    html: '<h4 style="color: blue;"><strong>' + (area / 10000).toFixed(2) + ' Ha </strong></h4>',
                     iconSize: [30, 30]
                   })
             }).addTo(this.map);
@@ -675,8 +649,17 @@ export class DesaComponent implements OnInit, OnDestroy {
             if (!url)
                 continue;
 
-            marker = MapUtils.createMarker(url, center);
+            let length = GeoJsonLength(feature.geometry, {units: 'kilometers'}).toFixed(2);
 
+            let popupContent = '<strong>' + label + '</strong>' + '<p>Panjang: ' + length + ' Km';
+
+            marker = L.marker(center, {
+                icon: L.icon({ 
+                    iconUrl: url,
+                    iconSize: [20, 20]
+                })
+            }).bindPopup(popupContent);
+            
             this.markers.push(marker.addTo(this.map));
 
             let existingLegend = this.legends.filter(e => e.url === url)[0];
@@ -734,9 +717,6 @@ export class DesaComponent implements OnInit, OnDestroy {
             break;
             case 'landuse':
                 this.setMapLanduse();
-            break;
-            case 'apbdes':
-                this.setMapLogPembangunan();
             break;
             case 'boundary':
                 this.setMapBoundary();
@@ -802,6 +782,63 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
     }
 
+    onEachHighwayFeature(feature, layer) {
+        for (let index in BIG) {
+            let indicator = BIG[index];
+            let elements = indicator.elements;
+            let matchedElement = null;
+
+            for (let index in elements) {
+                let indicatorElement = elements[index];
+
+                if (!indicatorElement.values)
+                   continue;
+                
+                let valueKeys = Object.keys(indicatorElement.values);
+
+                if (valueKeys.every(valueKey => feature["properties"][valueKey] 
+                    === indicatorElement.values[valueKey])) {
+                    matchedElement = indicatorElement;
+                    break;
+                }
+            }
+
+            if (!matchedElement) { 
+                if (feature['indicator']) {
+                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                    layer.setStyle(style);
+                }
+                continue;
+            }
+
+            if (matchedElement['style']) {
+                let style = MapUtils.setupStyle(matchedElement['style']);
+                style['weight'] = 2;
+                layer['setStyle'] ? layer['setStyle'](style) : null;
+            }
+        
+            if (feature['indicator']) {
+                let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                layer.setStyle(style);
+            }
+
+            let popupContent = '<strong>';
+
+            if (feature.properties.surface && feature.properties.surface === 'asphalt')
+                popupContent += 'Aspal';
+            else if (feature.properties.surface && feature.properties.surface === 'concrete')
+                popupContent += 'Beton';
+            else if (feature.properties.bridge)
+                popupContent += 'Jembatan';
+            else
+                popupContent += 'Lainnya';
+
+            let length = GeoJsonLength(feature.geometry, {units: 'kilometers'}).toFixed(2);
+
+            layer.bindPopup(popupContent);
+        }
+    }
+
     onEachLanduseFeature(feature, layer) {
         for (let index in BIG) {
             let indicator = BIG[index];
@@ -842,6 +879,20 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
                     
                 layer['setStyle'] ? layer['setStyle'](style) : null;
+
+                let popupContent = '<strong>';
+
+                if (layer.feature.properties['landuse'] === 'farmland')
+                    popupContent += layer.feature.properties['crop'] ? layer.feature.properties['crop'] : 'Belum Terisi' + '</strong>';
+
+                else if (layer.feature.properties['landuse'] === 'orchard')
+                    popupContent += layer.feature.properties['crop'] ? layer.feature.properties['crop'] : 'Belum Terisi' + '</strong>';
+
+                else if (layer.feature.properties['landuse'] === 'forest')
+                    popupContent += layer.feature.properties['trees'] ? layer.feature.properties['trees'] : 'Belum Terisi' + '</strong>';
+
+                popupContent += '<p>Luas: ' + (geoJSONArea.geometry(feature.geometry) /10000).toFixed(2) + ' Ha</p>';
+                layer.bindPopup(popupContent);
             }
         }
     }
@@ -861,10 +912,12 @@ export class DesaComponent implements OnInit, OnDestroy {
    
     setNextPrevLabel() {
         this.nextDesa = this.availableDesaSummaries[this.currentDesaIndex + 1] 
-            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name : this.availableDesaSummaries[0].region.name;
+            ? this.availableDesaSummaries[this.currentDesaIndex + 1].region.name 
+            : this.availableDesaSummaries[0].region.name;
     
         this.prevDesa = this.availableDesaSummaries[this.currentDesaIndex - 1] 
-            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name : this.availableDesaSummaries[this.availableDesaSummaries.length - 1].region.name;
+            ? this.availableDesaSummaries[this.currentDesaIndex - 1].region.name 
+            : this.availableDesaSummaries[this.availableDesaSummaries.length - 1].region.name;
     }
 
     cleanLayers(): void {
