@@ -929,6 +929,8 @@ export class DesaComponent implements OnInit, OnDestroy {
             this.map.removeLayer(this.geoJsonDusunBoundary);
         if (this.geoJsonDesaBoundary)
             this.map.removeLayer(this.geoJsonDesaBoundary);
+        if (this.geoJsonHighway)
+            this.map.removeLayer(this.geoJsonHighway);
     }
 
     cleanLayout(): void {
