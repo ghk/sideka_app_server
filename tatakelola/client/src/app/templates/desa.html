@@ -146,25 +146,25 @@
       </li>
     </ul>
     <div class="legend" [hidden]="!isPekerjaanStatisticShown" style="position: fixed; top: 350px; padding: 0; text-align: right;" 
-        [style.width]="isPekerjaanContextShown ? '500px': '35px'">
-      <button class="btn btn-sm btn-default" style="position: absolute; right: 0;"  (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="isPekerjaanContextShown">
+        [style.width]="isPekerjaanContextShown ? '500px': '30px'">
+      <button class="btn btn-sm btn-default" style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;"  (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="isPekerjaanContextShown">
         <i class="fa fa-window-minimize"></i>
       </button>
-      <button class="btn btn-sm btn-default" (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="!isPekerjaanContextShown">
+      <button class="btn btn-sm btn-default" style="border: 0; background: transparent;" (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="!isPekerjaanContextShown">
         <i class="fa fa-window-maximize"></i>
       </button>
-      <div id="pekerjaan">
+      <div id="pekerjaan" [hidden]="!isPekerjaanContextShown">
         <svg style="height: 250px; width: 100%;"></svg>
       </div>
     </div>
-    <div class="legend" style="position: fixed; top: 350px; padding: 0; text-align: right;" [style.width]="isPendidikanContextShown ? '500px': '35px'" [hidden]="!isPendidikanStatisticShown">
-      <button class="btn btn-sm btm-default" style="position: absolute; right: 0;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="isPendidikanContextShown">
+    <div class="legend" [hidden]="!isPendidikanStatisticShown" style="position: fixed; top: 350px; padding: 0; text-align: right;" [style.width]="isPendidikanContextShown ? '500px': '30px'">
+      <button class="btn btn-sm btm-default" style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="isPendidikanContextShown">
         <i class="fa fa-window-minimize"></i>
       </button>
-      <button class="btn btn-sm btm-default" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="!isPendidikanContextShown">
+      <button class="btn btn-sm btm-default" style="border: 0; background: transparent;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="!isPendidikanContextShown">
         <i class="fa fa-window-maximize"></i>
       </button>
-      <div id="pendidikan"  [hidden]="!isPendidikanContextShown">
+      <div id="pendidikan" [hidden]="!isPendidikanContextShown">
         <svg style="height: 250px; width: 100%;"></svg>
       </div>
     </div>

@@ -179,9 +179,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async getAvailableDesaSummaries(regionId: string) {
-        this.availableDesaSummaries = await this._dataService.getSummariesExceptId(regionId, null).toPromise();
-        this.availableDesaSummaries = this.availableDesaSummaries.concat(this.summaries);
-        this.currentDesaIndex = this.availableDesaSummaries.indexOf(this.summaries);
+        this.availableDesaSummaries = await this._dataService.getAllSummaries(null).toPromise();
+        let currentSummary = this.availableDesaSummaries.filter(e => e.fk_region_id === this.summaries.fk_region_id)[0];
+        this.currentDesaIndex = currentSummary ? this.availableDesaSummaries.indexOf(currentSummary) : - 1;
         this.setNextPrevLabel();
     }
 
@@ -381,7 +381,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                             iconUrl: url,
                             iconSize: [20, 20]
                         })
-                    }).addTo(this.map).bindPopup(popupContent, {autoClose: true}).openPopup();
+                    }).addTo(this.map).bindPopup(popupContent);
                     
                     this.markers.push(marker);
                 }
