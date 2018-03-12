@@ -627,12 +627,12 @@ export class DesaComponent implements OnInit, OnDestroy {
             let url = null;
 
             if (feature.properties.surface && feature.properties.surface === 'asphalt')  {
-                url =  '/assets/images/asphalt.png';
+                url =  '/assets/images/aspal.png';
                 label = 'Aspal';
             }
 
             else if (feature.properties.surface && feature.properties.surface === 'concrete') {
-                url =  '/assets/images/concrete.png';
+                url =  '/assets/images/beton.png';
                 label = 'Beton';
             }
 
@@ -642,7 +642,7 @@ export class DesaComponent implements OnInit, OnDestroy {
             }
 
             else {
-                url =  '/assets/images/other.png';
+                url =  '/assets/images/lainnya.png';
                 label = 'Lainnya';
             }
                
