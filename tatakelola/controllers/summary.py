@@ -28,8 +28,8 @@ def get_summaries_by_region(region_id):
     result = SummaryModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 
-@app.route('/summaries/get_except_id/<string:region_id>', methods=['GET'])
-def get_except_id(region_id):
-    entities = summary_repository.get_except_id(region_id)
+@app.route('/summaries/get_all', methods=['GET'])
+def get_all():
+    entities = summary_repository.get_all()
     result = SummaryModelSchema(many=True).dump(entities)
     return jsonify(result.data)

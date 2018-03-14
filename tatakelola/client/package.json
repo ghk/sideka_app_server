@@ -25,6 +25,7 @@
     "@angular/router": "^4.3.6",
     "@asymmetrik/ngx-leaflet": "^2.4.1",
     "@mapbox/geojson-area": "^0.2.2",
+    "@turf/turf": "^5.1.6",
     "angular-progress-http": "^0.5.1",
     "bootstrap": "^3.3.5",
     "core-js": "^2.5.0",
