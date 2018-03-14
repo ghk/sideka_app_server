@@ -2,6 +2,7 @@ import MySQLdb
 import traceback
 import json
 import math
+import sys
 from datetime import datetime, timedelta
 
 from utils import open_cfg, query_single 
@@ -437,9 +438,12 @@ if __name__ == "__main__":
 	query = "select blog_id, domain from sd_desa"
 	cur.execute(query)
 	desas = list(cur.fetchall())
+	blog_id = None
+	if len(sys.argv) > 1:
+		blog_id = int(sys.argv[1])
 	for desa in desas:
-		#if desa["blog_id"] != 14:
-		#	continue
+		if blog_id is not None and desa["blog_id"] != blog_id:
+			continue
 
 		stats = get_statistics(cur, desa["blog_id"])
 		stats["blog_id"] = desa["blog_id"]
@@ -452,29 +456,4 @@ if __name__ == "__main__":
 		#if "penduduk" in stats and stats["penduduk"]["score"] > 0.5:
 		#	break
 	db.close()
-
-
-if __name__ == "___main__":
-	conf = open_cfg('../app.cfg')
-	db = MySQLdb.connect(host=conf.MYSQL_HOST,
-			     user=conf.MYSQL_USER,
-			     passwd=conf.MYSQL_PASSWORD,
-			     db=conf.MYSQL_DB)
-	cur = db.cursor(MySQLdb.cursors.DictCursor)
-	cur.execute("select id, content, timestamp, date_created from sd_contents where desa_id = %s and type = 'spp' and api_version='2.0' order by timestamp desc", (50,))
-	sql_row_spp =  cur.fetchone()
-	spp_cur = json.loads(sql_row_spp["content"], encoding='ISO-8859-1')["data"]["spp"]
-	test=[r for r in spp_cur]
-	date_spp=[r[3] for r in spp_cur]
-	datestr=[datetime.strptime(r[3], '%d/%m/%Y') for r in spp_cur]
-	maxdate=max(datestr)
-	count_d=str(maxdate)
-	score_str=str(datetime.now() - maxdate)
-	score=get_scale(7 -(datetime.now() - maxdate).days , 7)
-
-
-	print datestr
-	print maxdate
-	print score_str
-	print score
 

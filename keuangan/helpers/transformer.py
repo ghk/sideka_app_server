@@ -4,7 +4,6 @@ import numpy
 from scipy.spatial.distance import pdist, squareform
 from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressRecapitulation, BudgetLikelihood
 
-
 class ContentTransformer:
     @staticmethod
     def transform(content):
@@ -20,7 +19,6 @@ class ContentTransformer:
                 for index, datum in enumerate(data):
                     obj[columns[column][index]] = datum
                 result[column].append(obj)
-
         return result
 
 
@@ -102,7 +100,7 @@ class ProgressTimelineTransformer:
                     data[mon].transferred_pbh += rinci.nilai
 
         for rinci in spp_rincis:
-            if rinci.spp.tanggal is None:
+            if rinci.spp.tanggal  is None:
                 continue
 
             month = rinci.spp.tanggal.month
@@ -245,15 +243,100 @@ class SiskeudesPenganggaranTransformer:
 
 
 class SiskeudesLikelihoodTransformer:
+    stop_words = ['/', '&', 'dan', 'atau', ',', '.', 'desa', 'desa/data', 'hanura', 'kegiatan', 'di', 'ke', '...', ';',
+                  'petaaset', 'dalam', 'pakraman']
+    mapping = ["bpd", "badan permusyawaratan", "kantor"]
+
+    @staticmethod
+    def create_documents():
+        docs = pandas.read_sql("select distinct(uraian) from view_learn_kegiatan order by uraian asc")
+        docs['uraian'].fillna(0, inplace=True)
+        return docs['uraian']
+
+    @staticmethod
+    def tokenize(doc):
+        tokens = []
+        words = doc.strip().lower().split()
+        for word in words:
+            if word in stop_words:
+                continue
+            tokens.append(word.strip())
+
+        return tokens
+    @staticmethod
+    def process(text, documents):
+        token = tokenize(text)
+        max = -1000
+        result = None
+
+        for d, doc in enumerate(documents):
+            if text.strip().lower() == doc.strip().lower():
+                continue
+
+            token_doc = tokenize(doc)
+            score = calculate_scores(token, token_doc)
+
+            if score > 25:
+                if score > max:
+                    if len(''.join(token)) > len(''.join(token_doc)):
+                        result = {'original': text, 'normalized': ' '.join(token_doc), 'score': score}
+                    else:
+                        result = {'original': text, 'normalized': ' '.join(token), 'score': score}
+                    max = score
+        if result is None:
+            return {'original': text, 'normalized': ' '.join(token), 'score': 0}
+        return result
+
+    @staticmethod
+    def calculate_scores(d1, d2):
+        lindex = 0
+        uindex = 0
+        if len(d1) > len(d2):
+            lindex = d2
+            uindex = d1
+        else:
+            lindex = d1
+            uindex = d2
+
+        score = 0
+        for i, t in enumerate(lindex):
+            if i == 0:
+                if lindex[i] == uindex[i]:
+                    score += 30
+                else:
+                    score -= 30
+            elif i == len(lindex) - 1:
+                if lindex[i] == uindex[i]:
+                    score += 30
+                else:
+                    score -= 30
+            else:
+                if lindex[i] == uindex[i]:
+                    score += 20
+            if d1[i] in mapping or d2[i] in mapping:
+                score += 30
+        if score == 0:
+            return score
+        return score / len(lindex)
+
+    @staticmethod
+    def normalize():
+        documents = create_documents()
+        docs = pandas.read_sql("select fk_region_id, uraian, percentage from view_learn_kegiatan order by fk_region_id")
+        docs['uraian'].fillna(0, inplace=True)
+        d = []
+        for idx, doc in enumerate(docs['uraian']):
+            result = process(doc, documents)
+            d.append(result['normalized'])
+        docs['normalized_uraian'] = d
+        docs = pandas.DataFrame(docs)
+        return docs
+
     @staticmethod
     def transform(view_learn_kegiatan_query, year):
-        d = pandas.read_sql(view_learn_kegiatan_query.statement, view_learn_kegiatan_query.session.bind)
-
-        # Fill missing data
-        d['anggaran'].fillna(0, inplace=True)
-
+        d = normalize()
         # Filter Data
-        df = d[d.percentage >= 0.1]
+        df = d[d.percentage >= 0.005]
         df = df.reset_index(drop=True)
         data = pandas.pivot_table(df, index=["fk_region_id"], values=["percentage"], columns=["normalized_uraian"])
 
@@ -296,7 +379,7 @@ class SiskeudesLikelihoodTransformer:
         likelihood_table = []
 
         for desa in rank_desas_splitted:
-            desa = [x for x in desa if x[0] != x[1]]
+            desa = [x for x in desa if x[2] != 0]
             likelihood_table.append(desa[0:5])
 
         zipped = numpy.concatenate(likelihood_table)

@@ -6,7 +6,7 @@ from flask_mysqldb import MySQL
 from flask_cors import CORS, cross_origin
 from flask_compress import Compress
 from flask_caching import Cache
-from common.phpass import PasswordHash
+from phpass import PasswordHash
 import MySQLdb
 import os
 import json
