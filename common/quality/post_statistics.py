@@ -271,7 +271,7 @@ if __name__ == "__main__":
 			for post in posts:
 				try:
 					scores = get_post_scores(cur, desa["blog_id"], desa["domain"], post["ID"])
-					s = json.dumps(scores)
+					s = json.dumps(scores, encoding='ISO-8859-1')
 					print s
 					cur.execute("REPLACE into sd_post_scores (blog_id, post_id, post_date, score_value, score) values(%s, %s, %s, %s, %s)", (desa["blog_id"], post["ID"], post["post_date_gmt"], scores["score"], s))
 				except Exception as e:
