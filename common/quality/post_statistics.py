@@ -257,7 +257,12 @@ if __name__ == "__main__":
 	query = "select blog_id, domain from sd_desa"
 	cur.execute(query)
 	desas = list(cur.fetchall())
+	blog_id = None
+	if len(sys.argv) > 1:
+		blog_id = int(sys.argv[1])
 	for desa in desas:
+		if blog_id is not None and desa["blog_id"] != blog_id:
+			continue
 		print desa["blog_id"]
 		try:
 			query = "select ID, post_date_gmt from wp_"+str(desa["blog_id"])+"_posts where post_status = 'publish' and post_type = 'post'"
@@ -274,17 +279,4 @@ if __name__ == "__main__":
 		except Exception as e:
 			traceback.print_exc()
 		db.commit()
-	db.close()
-
-if __name__ == "___main__":
-	conf = open_cfg('app.cfg')
-	db = MySQLdb.connect(host=conf.MYSQL_HOST,    
-			     user=conf.MYSQL_USER,      
-			     passwd=conf.MYSQL_PASSWORD,
-			     db=conf.MYSQL_DB)        
-	cur = db.cursor(MySQLdb.cursors.DictCursor)
-	#scores = get_post_scores(cur, 5, 55)
-	scores = get_post_scores(cur, 4, "leu", 351)
-	#print scores
-	db.commit()
 	db.close()
