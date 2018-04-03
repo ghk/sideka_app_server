@@ -48,19 +48,19 @@ export class BudgetLikelihoodComponent implements OnInit, OnDestroy {
 
     getData() {
         let likelihoodQuery: Query = {
-            sort: 'rank'
+            sort: 'euclidean_score'
         };
 
         if (this.region.id === '0')
             return;
 
         this._dataService
-            .getBudgetLikelihoodByRegionAndYear(this.region.id, this.year, null, null)
+            .getBudgetLikelihoodByRegionAndYear(this.region.id, this.year, likelihoodQuery, null)
             .subscribe(
             result => {
                 this.budgetLikelihoods = result;
             },
             error => { }
-            );   
+            );
     }
 }

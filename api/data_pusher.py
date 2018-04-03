@@ -31,7 +31,7 @@ cur = db.cursor(MySQLdb.cursors.DictCursor)
 cur.execute("""
 SELECT * FROM sd_contents c 
 	left join sd_desa d on d.blog_id = c.desa_id
-	WHERE c.api_version = '2.0' and c.opendata_date_pushed is null and c.opendata_push_error is null order by c.change_id asc
+	WHERE c.type in ('penduduk') and c.api_version = '2.0' and c.opendata_date_pushed is null and c.opendata_push_error is null order by c.change_id asc 
 """)
 
 contents = list(cur.fetchall())

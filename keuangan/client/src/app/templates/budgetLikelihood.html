@@ -8,6 +8,7 @@
       <tr>
         <th>Desa</th>
         <th>Kabupaten</th>
+        <th>Jarak</th>
       </tr>
     </thead>
     <tbody>
@@ -16,6 +17,7 @@
           <a routerLink="/summary/region/{{bl.region_likelihood .id}}">{{ bl.region_likelihood.name }}</a>
         </td>
         <td>{{ bl.region_likelihood | regionType:2 }}</td>
+        <td>{{ bl.euclidean_score | number }}</td>
       </tr>
     </tbody>
   </table>
