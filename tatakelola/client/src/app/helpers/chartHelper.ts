@@ -21,54 +21,6 @@ export class ChartHelper {
         this.sources.pendidikan = ['Tamat SD', 'Tamat SMP', 'Tamat SMA', 'Tamat PT'];
     }
 
-    getPekerjaanRaw(data: any[]): any[] {
-        let result: any[] = [];
-    
-        for (let index in this.sources['pekerjaan']) {
-            let source = this.sources['pekerjaan'][index];
-
-            let totalMale = data.filter(e => 
-               e.pekerjaan && e.pekerjaan.toLowerCase().indexOf(source.toLowerCase()) === 0 && e.jenis_kelamin === 'Laki-Laki').length;
-
-            let totalFemale = data.filter(e => 
-               e.pekerjaan && e.pekerjaan.toLowerCase().indexOf(source.toLowerCase()) === 0 && e.jenis_kelamin === 'Perempuan').length;
-
-            let resultMale = { jenis_kelamin: 'Laki-Laki', jumlah: totalMale, pekerjaan: source };
-            let resultFemale = { jenis_kelamin: 'Perempuan', jumlah: totalFemale, pekerjaan: source };
-
-            result.push(resultMale);
-            result.push(resultFemale);
-        }
-
-        return result;
-    }
-
-    getPendidikanRaw(data: any[]): any[] {
-        let result: any[] = [];
-        let keys = Object.keys(this.pendidikanGroups);
-
-        for (let index in keys) {
-            let key = keys[index];
-            let items = this.pendidikanGroups[key];
-
-            let totalMale = data.filter(e => e.pendidikan 
-                && items.filter(f => f.toLowerCase() === e.pendidikan.toLowerCase()).length > 0
-                && e.jenis_kelamin === 'Laki-Laki').length;
-
-            let totalFemale = data.filter(e => e.pendidikan 
-                && items.filter(f => f.toLowerCase() === e.pendidikan.toLowerCase()).length > 0
-                && e.jenis_kelamin === 'Perempuan').length;
-
-            let resultMale = { jenis_kelamin: 'Laki-Laki', jumlah: totalMale, pendidikan: key };
-            let resultFemale = { jenis_kelamin: 'Perempuan', jumlah: totalFemale, pendidikan: key };
-    
-            result.push(resultMale);
-            result.push(resultFemale);
-        }
-
-        return result;
-    }
-
     transformDataStacked(raw, label): any{
         var all = {};
         var allPerSex = {}

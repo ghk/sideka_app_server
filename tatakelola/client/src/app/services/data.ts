@@ -93,6 +93,17 @@ export class DataService {
       return request.map(res => res.json()).catch(this.handleError);
   }
 
+  getStatisticByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(this._http, 
+       'GET', 
+       urljoin(this._serverUrl, 'statistics/region', regionId),
+       query,
+       progressListener
+     );
+
+     return request.map(res => res.json()).catch(this.handleError);
+ }
+
   getAllSummaries(progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(this._http, 
       'GET', 

@@ -17,7 +17,6 @@ penduduk_repository = PendudukRepository(db)
 
 logger = logging.getLogger('tatakelola')
 
-
 class TatakelolaFetcher():
     @staticmethod
     def fetch_desas():

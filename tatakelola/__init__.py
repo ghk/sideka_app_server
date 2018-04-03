@@ -27,6 +27,7 @@ def create_app():
     app.register_blueprint(PendudukController)
     app.register_blueprint(RegionController)
     app.register_blueprint(SummaryController)
+    app.register_blueprint(StatisticController)
 
     db.init_app(app)
     ma.init_app(app)

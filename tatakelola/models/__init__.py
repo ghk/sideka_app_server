@@ -6,4 +6,5 @@ from penduduk import Penduduk, PendudukModelSchema, PendudukModelSchemaIso, Pend
 from progress_recapitulation import ProgressRecapitulation, ProgressRecapitulationModelSchema
 from region import Region, RegionModelSchema, RegionCompleteModelSchema
 from summary import Summary, SummaryModelSchema
+from statistic import Statistic, StatisticModelSchema
 from common.models import SdContent, SdContentSchema, SdDesa, SdDesaSchema

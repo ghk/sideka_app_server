@@ -9,6 +9,24 @@ from area import area
 
 logger = logging.getLogger('tatakelola')
 
+sources = {
+    "genders": [], 
+    "pekerjaan": ["Petani", "Pedagang", "Karyawan", "Nelayan", "Lainnya"], 
+    "pendidikan": ["Tamat SD", "Tamat SMP", "Tamat SMA", "Tamat PT"] 
+}
+
+pendidikan_groups = {
+    "Tidak Diketahui": ['Tidak Diketahui', 'Belum masuk TK/Kelompok Bermain', 'Tidak dapat membaca dan menulis huruf Latin/Arab','Tidak pernah sekolah',
+    'Tidak tamat SD/sederajat', 'Sedang SD/sederajat'],
+    "Tamat SD": ['Tamat SD/sederajat', 'Sedang SLTP/sederajat'],
+    "Tamat SLTP": ['Tamat SLTP/sederajat', 'Sedang SLTA/sederajat'],
+    "Tamat SLTA": ['Tamat SLTA/sederajat', 'Sedang D-1/sederajat', 'Sedang D-2/sederajat', 'Sedang D-3/sederajat',
+    'Sedang D-4/sederajat', 'Sedang S-1/sederajat'],
+    "Tamat PT": ['Tamat D-1/sederajat', 'Tamat D-2/sederajat', 'Tamat D-3/sederajat', 'Tamat D-4/sederajat',
+    'Tamat S-1/sederajat', 'Sedang S-2/sederajat', 'Tamat S-2/sederajat', 'Sedang S-3/sederajat',
+    'Tamat S-3/sederajat']
+}
+
 class ContentTransformer:
     @staticmethod
     def transform(content):
@@ -247,7 +265,6 @@ class ParsePemetaanData:
                             summary.pemetaan_highway_other_length = 0
 
         return summary
-    
 
 class GeoJsonUtils:
     @staticmethod
@@ -276,3 +293,50 @@ class GeoJsonUtils:
         y = (y2-y1)
         d = sqrt(x*x + y*y)
         return R * d
+
+class StatisticTransformer:
+    @staticmethod
+    def transform_pekerjaan_raw(penduduks):
+        result = []
+        for source in sources["pekerjaan"]:
+            total_male = 0
+            total_female = 0
+
+            for penduduk in penduduks:
+                if penduduk is None or penduduk.pekerjaan is None:
+                    continue
+
+                if source.lower() in penduduk.pekerjaan.lower() and penduduk.jenis_kelamin == "Laki-Laki":
+                    total_male += 1
+                elif source.lower() in penduduk.pekerjaan.lower() and penduduk.jenis_kelamin == "Perempuan":
+                    total_female += 1
+              
+            result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "pekerjaan": source })
+            result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "pekerjaan": source })
+            
+        return result
+
+    @staticmethod
+    def transform_pendidikan_raw(penduduks):
+        result = []
+        for key in pendidikan_groups.iterkeys():
+            total_male = 0
+            total_female = 0
+            group = pendidikan_groups[key]
+
+            for penduduk in penduduks:
+                if penduduk is None or penduduk.pendidikan is None:
+                    continue
+                
+                pendidikan = penduduk.pendidikan
+
+                if pendidikan in group and penduduk.jenis_kelamin == "Laki-Laki":
+                    total_male += 1
+                elif pendidikan in group and penduduk.jenis_kelamin == "Perempuan":
+                    total_female += 1
+                
+            result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "pendidikan": key })
+            result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "pendidikan": key })
+            
+        return result
+

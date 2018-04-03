@@ -1,13 +1,14 @@
 from tatakelola import db
-from tatakelola.models import Summary
-from tatakelola.helpers import SummaryPendudukTransformer, SummaryApbdesTransformer, SummaryGeojsonTransformer
-from tatakelola.repository import PendudukRepository, RegionRepository, ApbdesRepository, GeojsonRepository, SummaryRepository
+from tatakelola.models import Summary, Statistic
+from tatakelola.helpers import SummaryPendudukTransformer, SummaryApbdesTransformer, SummaryGeojsonTransformer, StatisticTransformer
+from tatakelola.repository import PendudukRepository, RegionRepository, ApbdesRepository, GeojsonRepository, SummaryRepository, StatisticRepository
 
 region_repository = RegionRepository(db)
 penduduk_repository = PendudukRepository(db)
 apbdes_repository = ApbdesRepository(db)
 summary_repository = SummaryRepository(db)
 geojson_repository = GeojsonRepository(db)
+statistic_repository = StatisticRepository(db)
 
 class Generator:
     @staticmethod
@@ -34,7 +35,6 @@ class Generator:
         landuse = geojson_repository.get_by_type_and_region('landuse', region.id)
         facilities = geojson_repository.get_by_type_and_region('facilities_infrastructures', region.id)
         transportations = geojson_repository.get_by_type_and_region('network_transportation', region.id)
-
 
         summary.pemetaan_landuse_forest = 0
         summary.pemetaan_landuse_farmland = 0
@@ -70,6 +70,8 @@ class Generator:
     def generate_summaries():
         result = []
         regions = region_repository.all()
+        #regions = region_repository.get_pancamandala()
+        
         for region in regions:
             summary_repository.delete_by_region(region.id)
             summary = Summary()
@@ -79,3 +81,39 @@ class Generator:
             summary.fk_region_id = region.id
             result.append(summary)
         return result
+
+    @staticmethod
+    def generate_pekerjaan_statistics():
+        result = []
+        regions = region_repository.all()
+        #regions = region_repository.get_pancamandala()
+
+        for region in regions:
+            statistic_repository.delete_by_region(region.id)
+            statistic = Statistic()
+            penduduks = penduduk_repository.get_by_region(region.id)
+
+            statistic.fk_region_id = region.id
+            statistic.type = "pekerjaan"
+            statistic.data = StatisticTransformer.transform_pekerjaan_raw(penduduks)
+
+            result.append(statistic)
+        return result 
+
+    @staticmethod
+    def generate_pendidikan_statistics():
+        result = []
+        regions = region_repository.all()
+        #regions = region_repository.get_pancamandala()
+        
+        for region in regions:
+            statistic_repository.delete_by_region(region.id)
+            statistic = Statistic()
+            penduduks = penduduk_repository.get_by_region(region.id)
+
+            statistic.fk_region_id = region.id
+            statistic.type = "pendidikan"
+            statistic.data = StatisticTransformer.transform_pendidikan_raw(penduduks)
+
+            result.append(statistic)
+        return result 

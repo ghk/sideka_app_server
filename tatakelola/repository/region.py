@@ -1,6 +1,7 @@
 from tatakelola.models import Region
 from tatakelola.helpers import QueryHelper
 
+
 class RegionRepository:
     def __init__(self, db):
         self.db = db
@@ -15,6 +16,10 @@ class RegionRepository:
         return self.db.session.query(self.model) \
             .filter(self.model.desa_id == desa_id) \
             .first()
+    
+    def get_pancamandala(self):
+        return self.db.session.query(self.model) \
+            .filter((self.model.id == '32.06.19.2009') | (self.model.id == '32.06.19.2010') | (self.model.id == '32.06.19.2011') | (self.model.id == '32.06.19.2007') | (self.model.id == '32.06.19.2006')).all()
 
     def all(self, is_lokpri=True, page_sort_params=None):
         query = self.db.session.query(self.model) \

@@ -49,7 +49,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     isPendidikanContextShown: boolean;
     legends: any[];
     chartHelper: ChartHelper;
-    penduduks: any[];
+    statistics: any[];
     isToggleContext: boolean;
 
     constructor(
@@ -98,7 +98,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                 this.regionId = params['regionId'];
                 this.setupSummaries(params['regionId']);
                 this.setupLayout(params['regionId']);
-                this.setupPenduduks(params['regionId']);
+                this.setupStatistics(params['regionId']);
                 this.getAvailableDesaSummaries(params['regionId']);
             }
          )
@@ -118,7 +118,6 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.progress.percentage = 0;
 
         try{
-           
             let summaries = await this._dataService.getSummariesByRegion(regionId, {}, 
                 this.progressListener.bind(this)).toPromise();
             
@@ -130,8 +129,10 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
     }
 
-    async setupPenduduks(regionId) {
-        this.penduduks = await this._dataService.getPenduduksByRegion(regionId, {}, null).toPromise();
+    async setupStatistics(regionId) {
+        this.statistics = await this._dataService.getStatisticByRegion(regionId, {}, null).toPromise();
+        
+        console.log(this.statistics);
     }
 
     async setupLayout(regionId: string) {
@@ -181,6 +182,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     async getAvailableDesaSummaries(regionId: string) {
         this.availableDesaSummaries = await this._dataService.getAllSummaries(null).toPromise();
         let currentSummary = this.availableDesaSummaries.filter(e => e.fk_region_id === this.summaries.fk_region_id)[0];
+      
         this.currentDesaIndex = currentSummary ? this.availableDesaSummaries.indexOf(currentSummary) : - 1;
         this.setNextPrevLabel();
     }
@@ -188,7 +190,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     async next() {
         this.isLegendShown = false;
         this.isToggleContext = false;
-
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
+  
         if(this.currentDesaIndex === this.availableDesaSummaries.length - 1)
            this.currentDesaIndex = -1;
            
@@ -200,7 +204,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
-        this.setupPenduduks(this.summaries.fk_region_id);
+        this.setupStatistics(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
 
         this._location.replaceState('/desa/region/' + this.summaries.fk_region_id);
@@ -210,6 +214,9 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.isLegendShown = false;
         this.isToggleContext = false;
 
+        this.isPekerjaanStatisticShown = false;
+        this.isPendidikanStatisticShown = false;
+        
         if(this.currentDesaIndex === 0)
            this.currentDesaIndex = this.availableDesaSummaries.length;
 
@@ -221,8 +228,10 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.summaries = this.availableDesaSummaries[this.currentDesaIndex];
 
         this.setNextPrevLabel();
-        this.setupPenduduks(this.summaries.fk_region_id);
+        this.setupStatistics(this.summaries.fk_region_id);
         this.setupLayout(this.summaries.fk_region_id);
+
+        this._location.replaceState('/desa/region/' + this.summaries.fk_region_id);
     }
 
     async setMapApbdes() {
@@ -672,16 +681,14 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPekerjaanStatistic(regionId) {
-        if (this.penduduks.length === 0)
+        if (this.statistics.length === 0)
             return;
 
-        if(this.isToggleContext) {
-            this.isPekerjaanStatisticShown = true;
-            this.isPekerjaanContextShown = true;
-        }
+        this.isPekerjaanStatisticShown = true;
+        this.isPekerjaanContextShown = true;
        
-        let pekerjaanRaw = this.chartHelper.getPekerjaanRaw(this.penduduks);
-        let pekerjaanData = this.chartHelper.transformDataStacked(pekerjaanRaw, 'pekerjaan');
+        let statisticData = this.statistics.filter(e => e.type === 'pekerjaan')[0];
+        let pekerjaanData = this.chartHelper.transformDataStacked(statisticData.data, 'pekerjaan');
         let pekerjaanChart = this.chartHelper.renderMultiBarHorizontalChart('pekerjaan', pekerjaanData);
 
         setTimeout(() => {
@@ -690,14 +697,14 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     async setPendidikStatistic(regionId) {
-        if (this.penduduks.length === 0)
+        if (this.statistics.length === 0)
             return;
-            
+          
         this.isPendidikanStatisticShown = true;
         this.isPendidikanContextShown = true;
-        
-        let pendidikanRaw = this.chartHelper.getPendidikanRaw(this.penduduks);
-        let pendidikanData = this.chartHelper.transformDataStacked(pendidikanRaw, 'pendidikan');
+
+        let statisticData = this.statistics.filter(e => e.type === 'pendidikan')[0];
+        let pendidikanData = this.chartHelper.transformDataStacked(statisticData.data, 'pendidikan');
         let pendidikanChart = this.chartHelper.renderMultiBarHorizontalChart('pendidikan', pendidikanData);
 
         setTimeout(() => {

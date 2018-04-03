@@ -32,14 +32,17 @@ def fetch_all():
     current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
-
 @app.route('/admin/generate/all', methods=['GET'])
 def generate_all():
     t0 = time()
     summaries = Generator.generate_summaries()
+    pekerjaan = Generator.generate_pekerjaan_statistics()
+    pendidikan = Generator.generate_pendidikan_statistics()
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(summaries)
+    db.session.add_all(pekerjaan)
+    db.session.add_all(pendidikan)
     db.session.commit()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
