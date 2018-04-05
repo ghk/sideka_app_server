@@ -21,7 +21,7 @@ export class MapComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.leafletOptions = {
             layers: [
-                L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+                L.tileLayer('http://a.basemaps.cartocdn.com/light_nolabels/{z}/{y}/{x}.png', {
                     maxZoom: 18,
                     attribution: '',
                     id: 'mapbox.streets'

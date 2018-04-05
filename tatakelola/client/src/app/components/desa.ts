@@ -88,11 +88,11 @@ export class DesaComponent implements OnInit, OnDestroy {
         }
 
         this.options = {
-            layers: [L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'), ],
-            zoom: 5,
+            //layers: [L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom: 13}), ],
+            layers: [L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'), ],
+            zoom: 6,
             center: L.latLng([-2.604236, 116.499023])
         }
-
         this._activeRouter.params.subscribe(
             params => {
                 this.regionId = params['regionId'];
