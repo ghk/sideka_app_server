@@ -1,274 +1,192 @@
-<div id="map" class="map-responsive" #map leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)"></div>
-
-<div class="center-div" *ngIf="progress?.percentage < 100">
-  <img style="margin: 0 auto; margin-left: -70px;" src="/assets/images/loading.gif">
+<div id="map" class="map-responsive" 
+     #map 
+     leaflet 
+     [leafletOptions]="options" 
+     (leafletMapReady)="onMapReady($event)">
 </div>
 
-<div class="desktop" *ngIf="summaries">
-    <div id="cari" style="display: inline-flex">
-        <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
-          <img src="/assets/images/bpppti.png">
-        </a>
-        <a href="#" (click)="recenter()"><h5> {{summaries.region.name}} </h5> </a>
-    </div>
+<div class="desktop" *ngIf="activeDesa">
+   <div id="cari" style="display: inline-flex">
+      <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
+        <img src="/assets/images/bpppti.png">
+      </a>
+      <a href="#" (click)="recenter()"><h5> {{activeDesa.regionName}} </h5> </a>
+   </div>
 
     <div class="prevnext" style="float:right; margin-top: 2px;">
-      <button class="prev" (click)="prev()">
-        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
-      </button>
-      <button class="next"  (click)="next()">
-        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
-      </button>
+        <button class="prev" (click)="setLocation(prevDesa)">
+          <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;">
+            <i class="fa fa-arrow-left"></i> {{prevDesa.regionName}}
+          </span>
+        </button>
+        <button class="next" (click)="setLocation(nextDesa)">
+          <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"> {{nextDesa.regionName}} 
+            <i class="fa fa-arrow-right"></i>
+          </span>
+        </button>
     </div>
-    
+
     <div class="show-hide-side">
       <button class="shide" (click)="sidebarCollapsed = !sidebarCollapsed" id="shide">Rincian ▾</button>
     </div>
-    
-    <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
-      <a href="#" (click)="setActiveMenu('apbdes')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'apbdes' }">
-          <div class="icon">
-            <i class="fa fa-money"></i>
-          </div>
-          <div class="desc">
-            <h4>Rp {{summaries.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{summaries.penganggaran_year}}) </h4>
-          </div>
-        </div>
-      </a>
-      <a href="#" (click)="setActiveMenu('boundary')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'boundary' }">
-          <div class="icon">
-            <i class="fa fa-map"></i>
-          </div>
-          <div class="desc">
-              <h4> {{summaries.pemetaan_desa_boundary / 10000 | number:'1.0-0' }} Ha </h4>
-          </div>
-    
-        </div>
-      </a>
-      <a href="#" (click)="setActiveMenu('penduduk')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'penduduk' }">
-          <div class="icon">
-            <i class="fa fa-male"></i>
-          </div>
-          <div class="desc">
-            <h4>
-              <i class="fa fa-mars"></i> {{summaries.penduduk_sex_male}}&nbsp;&nbsp;
-              <i class="fa fa-venus"></i> {{summaries.penduduk_sex_female}}</h4>
-          </div>
-        </div>
-      </a>
-      <a href="#" (click)="setActiveMenu('schools')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'schools' }">
-          <div class="icon">
-            <i class="fa fa-building"></i>
-          </div>
-          <div class="desc">
-            <span>
-                <img src="/assets/images/tk.png" style="width: 20px; height: 20px; padding-left: 2px;" title="TK"/> 
-                {{summaries.pemetaan_school_tk}}
-            </span>
-            <span>
-                <img src="/assets/images/sd.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SD"/> 
-                {{summaries.pemetaan_school_sd}}
-            </span>
-            <span>
-                <img src="/assets/images/smp.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMP"/> 
-                {{summaries.pemetaan_school_smp}}
-            </span>
-            <span>
-                <img src="/assets/images/sma.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMA"/> 
-                {{summaries.pemetaan_school_sma}}
-            </span>
-            <span>
-                <img src="/assets/images/pt.png" style="width: 20px; height: 20px; padding-left: 2px;" title="PT"/> 
-                {{summaries.pemetaan_school_pt}}
-            </span>
-           
-          </div>
-        </div>
-      </a>
-      <a href="#" (click)="setActiveMenu('landuse')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'landuse' }">
-          <div class="icon">
-            <i class="fa fa-leaf"></i>
-          </div>
-          <div class="desc">
-            <span>
-                <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/> 
-                {{summaries.pemetaan_landuse_farmland_area / 10000 | number:'1.0-0'}} Ha
-            </span>
-            <span>
-                <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/> 
-                {{summaries.pemetaan_landuse_orchard_area / 10000 | number:'1.0-0'}} Ha
-            </span>
-            <span>
-                <img src="/assets/images/hutan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Hutan"/> 
-                {{summaries.pemetaan_landuse_forest_area / 10000 | number:'1.0-0'}} Ha 
-            </span>
-          </div>
-        </div>
-      </a>
-      <a href="#" (click)="setActiveMenu('highway')">
-        <div class="side" [ngClass]="{'active': activeMenu === 'highway' }">
-          <div class="icon">
-            <i class="fa fa-road"></i>
-          </div>
-          <div class="desc">
-            <span>
-                <img src="/assets/images/aspal.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Aspal"/> 
-                {{summaries.pemetaan_highway_asphalt_length | number:'1.0-0'}} m
-            </span>
-            <span>
-                <img src="/assets/images/beton.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Beton"/> 
-                {{summaries.pemetaan_highway_concrete_length | number:'1.0-0'}} m
-            </span>
-            <span>
-                <img src="/assets/images/lainnya.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Lainnya"/> 
-                {{summaries.pemetaan_highway_other_length | number:'1.0-0'}} m
-            </span>
-            <span>
-              <img src="/assets/images/bridge.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Jembatan"/> 
-              {{summaries.pemetaan_bridge_length | number:'1.0-0'}} m
-          </span>
-          </div>
-        </div>
-      </a>
-    </div>
 
-    <ul class="list-group legend" *ngIf="isLegendShown" style="width: 200px;">
-      <li class="list-group-item" *ngFor="let legend of legends" [style.background-color]="legend.color">
+    <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
+        <a href="#" (click)="setActiveMenu('apbdes')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'apbdes' }">
+            <div class="icon">
+              <i class="fa fa-money"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+              <h4>Rp {{activeDesa.summary.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{activeDesa.summary.penganggaran_year}}) </h4>
+            </div>
+          </div>
+        </a>
+        <a href="#" (click)="setActiveMenu('boundary')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'boundary' }">
+            <div class="icon">
+              <i class="fa fa-map"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+                <h4> {{activeDesa.summary.pemetaan_desa_boundary / 10000 | number:'1.0-0' }} Ha </h4>
+            </div>
+          </div>
+        </a>
+        <a href="#" (click)="setActiveMenu('penduduk')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'penduduk' }">
+            <div class="icon">
+              <i class="fa fa-male"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+              <h4>
+                <i class="fa fa-mars"></i> {{activeDesa.summary.penduduk_sex_male}}&nbsp;&nbsp;
+                <i class="fa fa-venus"></i> {{activeDesa.summary.penduduk_sex_female}}</h4>
+            </div>
+          </div>
+        </a>
+        <a href="#" (click)="setActiveMenu('schools')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'schools' }">
+            <div class="icon">
+              <i class="fa fa-building"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+              <span>
+                  <img src="/assets/images/tk.png" style="width: 20px; height: 20px; padding-left: 2px;" title="TK"/> 
+                  {{activeDesa.summary.pemetaan_school_tk}}
+              </span>
+              <span>
+                  <img src="/assets/images/sd.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SD"/> 
+                  {{activeDesa.summary.pemetaan_school_sd}}
+              </span>
+              <span>
+                  <img src="/assets/images/smp.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMP"/> 
+                  {{activeDesa.summary.pemetaan_school_smp}}
+              </span>
+              <span>
+                  <img src="/assets/images/sma.png" style="width: 20px; height: 20px; padding-left: 2px;" title="SMA"/> 
+                  {{activeDesa.summary.pemetaan_school_sma}}
+              </span>
+              <span>
+                  <img src="/assets/images/pt.png" style="width: 20px; height: 20px; padding-left: 2px;" title="PT"/> 
+                  {{activeDesa.summary.pemetaan_school_pt}}
+              </span>
+            </div>
+          </div>
+        </a>
+        <a href="#" (click)="setActiveMenu('landuse')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'landuse' }">
+            <div class="icon">
+              <i class="fa fa-leaf"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+              <span>
+                  <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/> 
+                  {{activeDesa.summary.pemetaan_landuse_farmland_area / 10000 | number:'1.0-0'}} Ha
+              </span>
+              <span>
+                  <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/> 
+                  {{activeDesa.summary.pemetaan_landuse_orchard_area / 10000 | number:'1.0-0'}} Ha
+              </span>
+              <span>
+                  <img src="/assets/images/hutan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Hutan"/> 
+                  {{activeDesa.summary.pemetaan_landuse_forest_area / 10000 | number:'1.0-0'}} Ha 
+              </span>
+            </div>
+          </div>
+        </a>
+        <a href="#" (click)="setActiveMenu('highway')">
+          <div class="side" [ngClass]="{'active': activeMenu === 'highway' }">
+            <div class="icon">
+              <i class="fa fa-road"></i>
+            </div>
+            <div class="desc" *ngIf="activeDesa.summary">
+              <span>
+                  <img src="/assets/images/aspal.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Aspal"/> 
+                  {{activeDesa.summary.pemetaan_highway_asphalt_length | number:'1.0-0'}} m
+              </span>
+              <span>
+                  <img src="/assets/images/beton.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Beton"/> 
+                  {{activeDesa.summary.pemetaan_highway_concrete_length | number:'1.0-0'}} m
+              </span>
+              <span>
+                  <img src="/assets/images/lainnya.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Lainnya"/> 
+                  {{activeDesa.summary.pemetaan_highway_other_length | number:'1.0-0'}} m
+              </span>
+              <span>
+                  <img src="/assets/images/bridge.png" style="width: 15px; height: 15px; padding-left: 1px;" title="Jembatan"/> 
+                  {{activeDesa.summary.pemetaan_bridge_length | number:'1.0-0'}} m
+              </span>
+            </div>
+          </div>
+        </a>
+    </div>
+    <ul class="list-group legend" *ngIf="activeDesa.isLegendShown" style="width: 200px;">
+      <li class="list-group-item" *ngFor="let legend of activeDesa.legends" [style.background-color]="legend.color">
         <img src="{{legend.url}}" style="width: 30px; height: 30px;"/> 
         <span style="float: right; padding-top: 10px;" [style.color]="legend.textColor ? legend.textColor : 'black'">
             {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
         </span>
       </li>
     </ul>
-    <div class="legend" [hidden]="!isPekerjaanStatisticShown" style="position: fixed; top: 350px; padding: 0; text-align: right;" 
-        [style.width]="isPekerjaanContextShown ? '500px': '30px'">
-      <button class="btn btn-sm btn-default" style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;"  (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="isPekerjaanContextShown">
+
+    <div class="legend" [hidden]="!activeDesa.isPendidikanStatisticShown" 
+      style="position: fixed; top: 350px; padding: 0; text-align: right;" 
+      [style.width]="!activeDesa.isPendidikanStatisticHidden ? '500px': '30px'">
+
+      <button class="btn btn-sm btm-default" 
+        style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;" 
+        (click)="activeDesa.isPendidikanStatisticHidden = !activeDesa.isPendidikanStatisticHidden" 
+        *ngIf="!activeDesa.isPendidikanStatisticHidden">
         <i class="fa fa-window-minimize"></i>
       </button>
-      <button class="btn btn-sm btn-default" style="border: 0; background: transparent;" (click)="isPekerjaanContextShown = !isPekerjaanContextShown" *ngIf="!isPekerjaanContextShown">
+      <button class="btn btn-sm btm-default" style="border: 0; background: transparent;" 
+        (click)="activeDesa.isPendidikanStatisticHidden = !activeDesa.isPendidikanStatisticHidden"
+         *ngIf="activeDesa.isPendidikanStatisticHidden">
         <i class="fa fa-window-maximize"></i>
       </button>
-      <div id="pekerjaan" [hidden]="!isPekerjaanContextShown">
+      <div id="pendidikan" [hidden]="activeDesa.isPendidikanStatisticHidden">
         <svg style="height: 250px; width: 100%;"></svg>
       </div>
     </div>
-    <div class="legend" [hidden]="!isPendidikanStatisticShown" style="position: fixed; top: 350px; padding: 0; text-align: right;" [style.width]="isPendidikanContextShown ? '500px': '30px'">
-      <button class="btn btn-sm btm-default" style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="isPendidikanContextShown">
+
+    <div class="legend" [hidden]="!activeDesa.isPekerjaanStatisticShown" 
+      style="position: fixed; top: 350px; padding: 0; text-align: right;" 
+      [style.width]="!activeDesa.isPekerjaanStatisticHidden ? '500px': '30px'">
+
+      <button class="btn btn-sm btm-default" 
+        style="position: absolute; right: 0; border: 0; background: transparent; margin-top: -5px;" 
+        (click)="activeDesa.isPekerjaanStatisticHidden = !activeDesa.isPekerjaanStatisticHidden" 
+        *ngIf="!activeDesa.isPekerjaanStatisticHidden">
         <i class="fa fa-window-minimize"></i>
       </button>
-      <button class="btn btn-sm btm-default" style="border: 0; background: transparent;" (click)="isPendidikanContextShown = !isPendidikanContextShown" *ngIf="!isPendidikanContextShown">
+      <button class="btn btn-sm btm-default" style="border: 0; background: transparent;" 
+        (click)="activeDesa.isPekerjaanStatisticHidden = !activeDesa.isPekerjaanStatisticHidden"
+         *ngIf="activeDesa.isPekerjaanStatisticHidden">
         <i class="fa fa-window-maximize"></i>
       </button>
-      <div id="pendidikan" [hidden]="!isPendidikanContextShown">
+      <div id="pekerjaan" [hidden]="activeDesa.isPekerjaanStatisticHidden">
         <svg style="height: 250px; width: 100%;"></svg>
       </div>
     </div>
-    <div class="dropdown" style="float:right;">
-        <button type="button" class="dropbtn">
-        </button>
-        <div class="dropdown-content">
-            <a href="https://keuangan.sideka.id" target="_blank" class="op keuangan">Keuangan Desa</a>
-            <span class="separator"></span>
-            <a href="https://monitor.sideka.id" target="_blank" class="op monitoring">Kualitas Data</a>
-            <span class="separator"></span>
-            <a href="http://kabar.sideka.id" target="_blank" class="op kabardesa">Kabar Desa</a>
-        </div>
-    </div>
 </div>
 
-<div class="mobile" *ngIf="summaries" style="overflow: hidden;">
-   <div id="cari" style="display: inline-flex; width: 380px;">
-      <a [routerLink]="['/summary/','master']" title="Kembali Ke Beranda">
-        <img src="/assets/images/bpppti.png">
-      </a>
-      <h5> {{summaries.region.name}} </h5>
-    </div>
-
-    <div class="prevnext">
-      <button class="prev" (click)="prev()">
-        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"><i class="fa fa-arrow-left"></i> {{prevDesa}}</span>
-      </button>
-      <button class="next"  (click)="next()">
-        <span style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width: 3px;"> {{nextDesa}} <i class="fa fa-arrow-right"></i></span>
-      </button>
-    </div>
-    <div style="margin-top: 10px; width: 600px; height: 300px; overflow-y: scroll;">
-        <a href="#" (click)="setActiveMenu('apbdes')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'apbdes' }">
-              <div class="icon">
-                <i class="fa fa-money"></i>
-              </div>
-              <div class="desc">
-                <h4>Rp {{summaries.penganggaran_budgeted_revenue | number:'3.0-0'}} (APBDes {{summaries.penganggaran_year}}) </h4>
-              </div>
-            </div>
-          </a>
-          <a href="#" (click)="setActiveMenu('boundary')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'boundary' }">
-              <div class="icon">
-                <i class="fa fa-map"></i>
-              </div>
-              <div class="desc">
-                  <h4> {{summaries.pemetaan_desa_boundary / 10000 | number:'1.0-0' }} Ha </h4>
-              </div>
-        
-            </div>
-          </a>
-          <a href="#" (click)="setActiveMenu('penduduk')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'penduduk' }">
-              <div class="icon">
-                <i class="fa fa-male"></i>
-              </div>
-              <div class="desc">
-                <h4>
-                  <i class="fa fa-mars"></i> {{summaries.penduduk_sex_male}}&nbsp;&nbsp;
-                  <i class="fa fa-venus"></i> {{summaries.penduduk_sex_female}}</h4>
-              </div>
-            </div>
-          </a>
-          <a href="#" (click)="setActiveMenu('schools')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'schools' }">
-              <div class="icon">
-                <i class="fa fa-building"></i>
-              </div>
-              <div class="desc">
-                <h4> {{summaries.pemetaan_school_tk}} <strong>TK</strong> {{summaries.pemetaan_school_sd}} <strong>SD</strong>  {{summaries.pemetaan_school_smp}} <strong>SMP</strong>  {{summaries.pemetaan_school_sma}} <strong>SMA</strong>  {{summaries.pemetaan_school_pt}} <strong>PT</strong> </h4>
-              </div>
-            </div>
-          </a>
-          <a href="#" (click)="setActiveMenu('landuse')">
-            <div class="side" [ngClass]="{'active': activeMenu === 'landuse' }">
-              <div class="icon">
-                <i class="fa fa-leaf"></i>
-              </div>
-              <div class="desc">
-                <span>
-                    <img src="/assets/images/pertanian.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Pertanian"/> 
-                    {{summaries.pemetaan_landuse_farmland_area / 10000 | number:'1.0-0'}} Ha
-                </span>
-                <span>
-                    <img src="/assets/images/perkebunan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Perkebunan"/> 
-                    {{summaries.pemetaan_landuse_orchard_area / 10000 | number:'1.0-0'}} Ha
-                </span>
-                <span>
-                    <img src="/assets/images/hutan.png" style="width: 20px; height: 20px; padding-left: 2px;" title="Hutan"/> 
-                    {{summaries.pemetaan_landuse_forest_area / 10000 | number:'1.0-0'}} Ha 
-                </span>
-              </div>
-            </div>
-          </a>
-    </div>
-    <ul class="list-group" *ngIf="isLegendShown" style="position: fixed; width: 100%; display: inline-flex; left: 0; top: 0; background-color: #fff; box-shadow: 1px 1px 1px #888;">
-      <li class="list-group-item" *ngFor="let legend of legends" style="width: auto; height: 35px;" [style.background-color]="legend.color">
-        <img src="{{legend.url}}" style="width: 20px; height: 20px;"/> 
-        <span [style.color]="legend.textColor ? legend.textColor : 'black'">
-            {{legend.label}} {{legend.total ?  ' - '  +  legend.total : '' }} 
-        </span>
-      </li>
-    </ul>
-</div>
+<progress-bar [isLoadingData]="isLoadingData"></progress-bar>

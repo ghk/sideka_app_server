@@ -1,4 +1,5 @@
 import * as L from 'leaflet';
+import { CONFIG } from './bigConfig';
 
 export class MapUtils {
     static createGeoJson(): any {
@@ -77,5 +78,47 @@ export class MapUtils {
         }
 
         return [y/coordinates.length, x/coordinates.length];
+    }
+
+    static onEachFeature(feature, layer): void {
+        for (let index in CONFIG) {
+            let indicator = CONFIG[index];
+            let elements = indicator.elements;
+            let matchedElement = null;
+
+            for (let index in elements) {
+                let indicatorElement = elements[index];
+
+                if (!indicatorElement.values)
+                   continue;
+                
+                let valueKeys = Object.keys(indicatorElement.values);
+
+                if (valueKeys.every(valueKey => feature["properties"][valueKey] 
+                    === indicatorElement.values[valueKey])) {
+                    matchedElement = indicatorElement;
+                    break;
+                }
+            }
+
+            if (!matchedElement) { 
+                if (feature['indicator']) {
+                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                    layer.setStyle(style);
+                }
+                continue;
+            }
+
+            if (matchedElement['style']) {
+                let style = MapUtils.setupStyle(matchedElement['style']);
+                style['weight'] = 2;
+                layer['setStyle'] ? layer['setStyle'](style) : null;
+            }
+
+            if (feature['indicator']) {
+                let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                layer.setStyle(style);
+            }
+        }
     }
 }

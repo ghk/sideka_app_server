@@ -8,3 +8,5 @@ from sideka_content import SidekaContentRepository
 from sideka_desa import SidekaDesaRepository
 from summary import SummaryRepository
 from statistic import StatisticRepository
+from layout import LayoutRepository
+from boundary import BoundaryRepository

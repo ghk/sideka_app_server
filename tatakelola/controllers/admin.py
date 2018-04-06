@@ -47,6 +47,26 @@ def generate_all():
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
+@app.route('/admin/generate/layouts', methods=['GET'])
+def generate_layouts():
+    t0 = time()
+    layouts = Generator.generate_layouts()
+
+    db.session.add_all(layouts)
+    db.session.commit()
+    current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
+    return jsonify({'success': True})
+
+@app.route('/admin/generate/boundaries', methods=['GET'])
+def generate_boundaries():
+    t0 = time()
+    boundary = Generator.generate_boundaries()
+
+    db.session.add(boundary)
+    db.session.commit()
+    current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
+    return jsonify({'success': True})
+
 @app.route('/admin/test', methods=['GET'])
 def test():
     query1 = '\'{"id": "oQM8YJSEHLDpTKrkfkZO9k"}\''

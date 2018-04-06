@@ -10,6 +10,7 @@ import { NgPipesModule } from 'ngx-pipes';
 
 import { AppComponent } from './components/app';
 import { MapComponent } from './components/map';
+import { ProgressBarComponent } from './components/progressBar';
 import { DesaComponent } from './components/desa';
 import { SearchComponent } from './components/search';
 import { SidebarComponent } from './components/sidebar';
@@ -21,6 +22,7 @@ import { SharedService } from './services/shared';
   declarations: [
     AppComponent,
     MapComponent,
+    ProgressBarComponent,
     DesaComponent,
     SearchComponent,
     SidebarComponent,

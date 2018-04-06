@@ -17,6 +17,10 @@ class GeojsonRepository(BaseRepository):
         query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
         return query.filter(self.model.fk_region_id == region_id).all()
 
+    def get_by_type(self, type):
+        query = self.db.session.query(self.model)
+        return query.filter(self.model.type == type).all()
+
     def delete_by_region(self, region_id):
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \

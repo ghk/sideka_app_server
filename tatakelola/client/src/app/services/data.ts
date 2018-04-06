@@ -68,6 +68,34 @@ export class DataService {
         .catch(this.handleError)
   }
 
+  getBoundaries(progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+        this._http,
+        'GET',
+        urljoin(this._serverUrl, 'boundary/all'),
+        {},
+        progressListener
+      );
+  
+      return request
+        .map(res => res.json())
+        .catch(this.handleError)
+  }
+
+  getLayoutByRegion(regionId, progressListener: any): Observable<any> {
+    let request = RequestHelper.generateHttpRequest(
+      this._http,
+      'GET',
+      urljoin(this._serverUrl, 'layout/region', regionId),
+      {},
+      progressListener
+    );
+
+    return request
+      .map(res => res.json())
+      .catch(this.handleError)
+  }
+
   getGeojsonByTypeAndRegion(type: string, regionId: string, query: Query, progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
         this._http,

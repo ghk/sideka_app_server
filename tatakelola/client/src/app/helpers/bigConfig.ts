@@ -1,4 +1,4 @@
-export default [
+export const CONFIG = [
   {
      "id":"network_transportation",
      "label":"Jaringan Transportasi",

@@ -1,7 +1,7 @@
 from tatakelola import db
-from tatakelola.models import Summary, Statistic
-from tatakelola.helpers import SummaryPendudukTransformer, SummaryApbdesTransformer, SummaryGeojsonTransformer, StatisticTransformer
-from tatakelola.repository import PendudukRepository, RegionRepository, ApbdesRepository, GeojsonRepository, SummaryRepository, StatisticRepository
+from tatakelola.models import Summary, Statistic, Layout, Boundary
+from tatakelola.helpers import SummaryPendudukTransformer, SummaryApbdesTransformer, SummaryGeojsonTransformer, StatisticTransformer, LayoutTransformer
+from tatakelola.repository import PendudukRepository, RegionRepository, ApbdesRepository, GeojsonRepository, SummaryRepository, StatisticRepository, LayoutRepository, BoundaryRepository
 
 region_repository = RegionRepository(db)
 penduduk_repository = PendudukRepository(db)
@@ -9,6 +9,8 @@ apbdes_repository = ApbdesRepository(db)
 summary_repository = SummaryRepository(db)
 geojson_repository = GeojsonRepository(db)
 statistic_repository = StatisticRepository(db)
+layout_repository = LayoutRepository(db)
+boundary_repository = BoundaryRepository(db)
 
 class Generator:
     @staticmethod
@@ -117,3 +119,40 @@ class Generator:
 
             result.append(statistic)
         return result 
+
+    @staticmethod
+    def generate_layouts():
+        result = []
+        regions = region_repository.all()
+
+        for region in regions:
+            penduduks = penduduk_repository.get_by_region(region.id)
+            geojsons = geojson_repository.get_by_region(region.id)
+
+            layout_repository.delete_by_region(region.id)
+            layout = Layout()
+            layout = LayoutTransformer.transform(layout, geojsons, penduduks)
+            layout.fk_region_id = region.id
+            result.append(layout)
+
+        return result
+
+    @staticmethod
+    def generate_boundaries():
+        regions = region_repository.all()
+        boundary_repository.delete()
+        boundary = Boundary()
+        boundary.data = []
+
+        for region in regions:
+            geojsons = geojson_repository.get_by_region(region.id)
+            boundary_data = filter(lambda x:x.type == "boundary", geojsons)
+
+            if len(boundary_data) > 0:
+                for feature in boundary_data[0].data["features"]:
+                    if feature["geometry"]["type"] == "Polygon":
+                        feature["properties"]["regionId"] = region.id
+                        feature["properties"]["regionName"] = region.name
+                        boundary.data.append(feature)
+
+        return boundary

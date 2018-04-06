@@ -340,3 +340,56 @@ class StatisticTransformer:
             
         return result
 
+class LayoutTransformer:
+    @staticmethod
+    def transform(layout, geoJsons, penduduks):
+        pekerjaan_statistic_raw = StatisticTransformer.transform_pekerjaan_raw(penduduks)
+        pendidikan_statistic_raw = StatisticTransformer.transform_pendidikan_raw(penduduks)
+
+        apbdes_features = filter(lambda x: x.type == 'log_pembangunan', geoJsons)
+        landuse_features = filter(lambda x: x.type == 'landuse', geoJsons)
+        boundary_features = filter(lambda x: x.type == 'boundary', geoJsons)
+        highway_features = filter(lambda x: x.type == 'network_transportation', geoJsons)
+        building_features = filter(lambda x: x.type == 'facilities_infrastructures', geoJsons)
+
+        layout.data = {"base": [], "apbdes": [], "landuses": [], "boundaries": [], "highways": [], "schools": [], "houses": [], "properties": {}}
+
+        if len(apbdes_features) > 0:
+            layout.data["apbdes"] = apbdes_features[0].data["features"]
+
+        if len(landuse_features) > 0:
+            layout.data["landuses"] = landuse_features[0].data["features"]
+
+        if len(boundary_features) > 0:
+            layout.data["boundaries"] = boundary_features[0].data["features"]
+
+        for feature in layout.data["boundaries"]:
+            layout.data["base"].append(feature)
+
+        if len(highway_features) > 0:
+            layout.data["highways"] = highway_features[0].data["features"]
+
+        for feature in layout.data["highways"]:
+            layout.data["base"].append(feature)
+
+        if len(building_features) > 0:
+            for feature in building_features[0].data["features"]:
+
+                if feature["geometry"]["type"] == "Polygon":
+                    layout.data["base"].append(feature)
+
+                if feature.has_key("properties"):
+                    if feature["properties"].has_key("amenity"):
+                        if feature["properties"]["amenity"] == "school":
+                            layout.data["schools"].append(feature)
+                    if feature["properties"].has_key("building"):
+                        if feature["properties"]["building"] == "house":
+                            layout.data["houses"].append(feature)
+
+        
+        layout.data["properties"] = {"statistics": []}
+        layout.data["properties"]["statistics"] = {"pekerjaan": pekerjaan_statistic_raw, "pendidikan": pendidikan_statistic_raw}
+
+        return layout 
+
+
