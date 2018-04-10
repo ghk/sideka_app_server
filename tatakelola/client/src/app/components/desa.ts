@@ -32,12 +32,17 @@ export class DesaComponent implements OnInit, OnDestroy {
     isLoadingData: boolean;
     loadingMessage: string;
 
+    labelMarkers: any[];
+    pointMarkers: any[];
+
     constructor(private _router: ActivatedRoute, 
                 private _dataService: DataService, 
                 private _location: Location) {}
 
     ngOnInit(): void {
         this.options = { center: latLng([-2.604236, 116.499023]), zoom: 5, layers: [LIGHT] };
+        this.labelMarkers = [];
+        this.pointMarkers = [];
         this.chartHelper = new ChartHelper();
     }
 
@@ -59,16 +64,17 @@ export class DesaComponent implements OnInit, OnDestroy {
                 let instance = new DesaInstance();
                 instance.regionId = layer['feature']['properties']['regionId'];
                 instance.regionName = layer['feature']['properties']['regionName'];
-
-                marker(geoJSON(layer['feature']).getBounds().getCenter(), {
-                    icon: divIcon({
-                        className: 'label', 
-                        html: '<span style="color: blue;">' + instance.regionName + ' </span>',
-                        iconSize: [30, 30]
-                      })
-                }).addTo(this.map);
-
                 this.desaInstances.push(instance);
+
+                let center = geoJSON(layer['feature']).getBounds().getCenter();
+                let popupContent = '<strong>' + layer['feature']['properties']['regionName'] + '</strong>';
+    
+                let pointMarker = marker(center, {
+                    icon: icon({ 
+                        iconUrl: '/assets/images/titikdesa-01.png',
+                        iconSize: [20, 20],
+                    })
+                }).addTo(this.map).bindPopup(popupContent).openPopup();
             } 
         });
 
@@ -506,6 +512,54 @@ export class DesaComponent implements OnInit, OnDestroy {
         this.activeDesa.isLegendShown = true;
     }
 
+    setDesaLabels(): void {
+        for (let i=0; i<this.labelMarkers.length; i++) {
+            this.map.removeLayer(this.labelMarkers[i]);
+        }
+
+        for (let i=0; i<this.pointMarkers.length; i++) {
+            this.map.removeLayer(this.pointMarkers[i]);
+        }
+
+        this.labelMarkers = [];
+
+        this.geojsonBoundary.eachLayer(layer => {
+           let labelMarker = marker(geoJSON(layer['feature']).getBounds().getCenter(), {
+                icon: divIcon({
+                    className: 'label', 
+                    html: '<span style="color: blue;">' + layer['feature']['properties']['regionName'] + ' </span>',
+                    iconSize: [30, 30]
+                  })
+            }).addTo(this.map);
+
+            this.labelMarkers.push(labelMarker);
+        })
+    }
+
+    setDesaPoints(): void {
+        for (let i=0; i<this.pointMarkers.length; i++) {
+            this.map.removeLayer(this.pointMarkers[i]);
+        }
+
+        for (let i=0; i<this.labelMarkers.length; i++) {
+            this.map.removeLayer(this.labelMarkers[i]);
+        }
+
+        this.geojsonBoundary.eachLayer(layer => {
+            let center = geoJSON(layer['feature']).getBounds().getCenter();
+            let popupContent = '<strong>' + layer['feature']['properties']['regionName'] + '</strong>';
+
+            let pointMarker = marker(center, {
+                icon: icon({ 
+                    iconUrl: '/assets/images/titikdesa-01.png',
+                    iconSize: [20, 20],
+                })
+            }).addTo(this.map).bindPopup(popupContent).openPopup();
+
+           this.pointMarkers.push(pointMarker);
+        })
+    }
+
     setNextPrev(): void {
         let index = this.desaInstances.indexOf(this.activeDesa);
 
@@ -548,6 +602,16 @@ export class DesaComponent implements OnInit, OnDestroy {
                 this.load(params['regionId']);
             } 
         );
+
+        this.map.on('zoomend', e => {
+            let zoom = e.target["_zoom"];
+
+            /*
+            if (zoom <= 6)
+                this.setDesaLabels();
+            else if (zoom >= 10)
+                this.setDesaPoints();*/
+        });
     }
 
     ngOnDestroy(): void {}
