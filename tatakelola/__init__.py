@@ -7,6 +7,7 @@ from flask_compress import Compress
 from common.database import db
 from common.marshmallow import ma
 from controllers import *
+from helpers import *
 
 def create_app():
     app = Flask('tatakelola')
