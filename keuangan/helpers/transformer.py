@@ -1,6 +1,7 @@
 import simplejson as json
 import pandas
 import numpy
+from keuangan import db
 from scipy.spatial.distance import pdist, squareform
 from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressRecapitulation, BudgetLikelihood
 
@@ -242,14 +243,14 @@ class SiskeudesPenganggaranTransformer:
         return current
 
 
+stop_words = ['/', '&', 'dan', 'atau', ',', '.', 'desa', 'desa/data', 'hanura', 'kegiatan', 'di', 'ke', '...', ';',
+              'petaaset', 'dalam', 'pakraman']
+mapping = ["bpd", "badan permusyawaratan", "kantor"]
 class SiskeudesLikelihoodTransformer:
-    stop_words = ['/', '&', 'dan', 'atau', ',', '.', 'desa', 'desa/data', 'hanura', 'kegiatan', 'di', 'ke', '...', ';',
-                  'petaaset', 'dalam', 'pakraman']
-    mapping = ["bpd", "badan permusyawaratan", "kantor"]
 
     @staticmethod
     def create_documents():
-        docs = pandas.read_sql("select distinct(uraian) from view_learn_kegiatan order by uraian asc")
+        docs = pandas.read_sql("select distinct(uraian) from view_learn_kegiatan order by uraian asc", db.session.connection())
         docs['uraian'].fillna(0, inplace=True)
         return docs['uraian']
 
@@ -265,7 +266,7 @@ class SiskeudesLikelihoodTransformer:
         return tokens
     @staticmethod
     def process(text, documents):
-        token = tokenize(text)
+        token = SiskeudesLikelihoodTransformer.tokenize(text)
         max = -1000
         result = None
 
@@ -273,8 +274,8 @@ class SiskeudesLikelihoodTransformer:
             if text.strip().lower() == doc.strip().lower():
                 continue
 
-            token_doc = tokenize(doc)
-            score = calculate_scores(token, token_doc)
+            token_doc = SiskeudesLikelihoodTransformer.tokenize(doc)
+            score = SiskeudesLikelihoodTransformer.calculate_scores(token, token_doc)
 
             if score > 25:
                 if score > max:
@@ -321,12 +322,12 @@ class SiskeudesLikelihoodTransformer:
 
     @staticmethod
     def normalize():
-        documents = create_documents()
-        docs = pandas.read_sql("select fk_region_id, uraian, percentage from view_learn_kegiatan order by fk_region_id")
+        documents = SiskeudesLikelihoodTransformer.create_documents()
+        docs = pandas.read_sql("select fk_region_id, uraian, percentage from view_learn_kegiatan order by fk_region_id", db.session.connection())
         docs['uraian'].fillna(0, inplace=True)
         d = []
         for idx, doc in enumerate(docs['uraian']):
-            result = process(doc, documents)
+            result = SiskeudesLikelihoodTransformer.process(doc, documents)
             d.append(result['normalized'])
         docs['normalized_uraian'] = d
         docs = pandas.DataFrame(docs)
@@ -334,7 +335,7 @@ class SiskeudesLikelihoodTransformer:
 
     @staticmethod
     def transform(view_learn_kegiatan_query, year):
-        d = normalize()
+        d = SiskeudesLikelihoodTransformer.normalize()
         # Filter Data
         df = d[d.percentage >= 0.005]
         df = df.reset_index(drop=True)
