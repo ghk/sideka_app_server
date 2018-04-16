@@ -80,7 +80,7 @@ class Generator:
         siskeudes_likelihood_repository.delete_by_year(year)
 
         model = view_learn_kegiatan_repository.model
-        view_learn_kegiatan_query_ = db.session.query(model) \
+        view_learn_kegiatan_query = db.session.query(model) \
             .filter(model.year == year)
 
         result = SiskeudesLikelihoodTransformer.transform(view_learn_kegiatan_query, year)
