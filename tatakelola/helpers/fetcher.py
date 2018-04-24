@@ -57,7 +57,6 @@ class TatakelolaFetcher():
     @staticmethod
     def fetch_data_by_region(region):
         data_repository.delete_by_region(region.id)
-        penduduk_repository.delete_by_region(region.id)
 
         penduduk_sd_content = sideka_content_repository.get_latest_content_by_desa_id('penduduk', None, region.desa_id)
         
@@ -77,7 +76,20 @@ class TatakelolaFetcher():
         data.fk_region_id = region.id
         data_repository.add(data)
 
-        penduduks = []
+    @staticmethod
+    def fetch_penduduk_by_region(region):
+        penduduk_sd_content = sideka_content_repository.get_latest_content_by_desa_id('penduduk', None, region.desa_id)
+        
+        if (penduduk_sd_content is None):
+            logger.warning('Region: {0}<{1}><{2}> does not have penduduk'.format(region.name, region.id, region.desa_id))
+            return
+
+        contents = ContentTransformer.transform(penduduk_sd_content.content)
+        
+        if (contents is None):
+            logger.warning('Region: {0}<{1}><{2}> does not have correct penduduk'.format(region.name, region.id, region.desa_id))
+            return
+
 
         for d in contents['penduduk']:
             penduduk = Penduduk()
@@ -121,12 +133,8 @@ class TatakelolaFetcher():
             penduduk.fk_region_id = region.id
             penduduk.region = region
             penduduks.append(penduduk)
-       
-        #penduduks = PendudukModelSchema(many=True).load(contents['penduduk'])
-        
-        #for penduduk in penduduks.data:
-            #penduduk.fk_region_id = region.id
-        penduduk_repository.bulk_add_all(penduduks)
+
+            penduduk_repository.add(penduduk)
 
     @staticmethod
     def fetch_apbdes_by_region(region):
@@ -164,11 +172,23 @@ class TatakelolaFetcher():
     @staticmethod
     def fetch_data():
         regions = region_repository.all()
-        #regions = list()
-        #regions.append(region_repository.get_by_desa_id(3))
+
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_data_by_region(region)
+            except Exception as e:
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
+                logger.error(e.message)
+                traceback.print_exc()
+
+    @staticmethod
+    def fetch_penduduks():
+        regions = region_repository.all()
+
+        for region in regions:
+            try:
+                penduduk_repository.delete_by_region(region.id)
+                TatakelolaFetcher.fetch_penduduk_by_region(region)
             except Exception as e:
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)

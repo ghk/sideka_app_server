@@ -86,7 +86,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         });
 
         this.geojsonBoundary.on('mouseover', e => {
-            e['layer']['setStyle']({ color: 'blue', fill: 'transparent', weight: 1 });
+            e['layer']['setStyle']({ color: '#005366', fill: 'transparent', weight: 1 });
         });
 
         this.geojsonBoundary.on('mouseout', e => {
