@@ -204,7 +204,7 @@ def get_content_v2(id, type='data'):
 def get_json_content_v2(id, type='data'):
     sheet = request.args.get("sheet", "0")
     query = db.session.query(SdContent)
-    query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
+    #query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
     query = query.filter(SdContent.id == id).filter(SdContent.api_version == '2.0')
     content = query.first()
     schema = []

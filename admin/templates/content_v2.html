@@ -7,29 +7,44 @@
 			padding: 5px;
 		}
 	</style>
+
+    <div class="flex-item">
+    <a class="btn btn-default" href="/api/contents/v2/{{id}}">View JSON</a> 
+    <a class="btn btn-danger" href="contents/delete?id={{id}}">Delete Content</a> 
+    </div>
+    <div style="flex: 1; padding: 15px;">
+        <table class="table table-striped" style="background-color: rgba(255,255,255,0.8);">
+            <tbody>
+                <tr>
+                    <td>Desa ID</td>
+                    <td>{{content.desa_id}}</td>
+                </tr>
+                <tr>
+                    <td>Type</td>
+                    <td>{{content.type}}</td>
+                </tr>
+                <tr>
+                    <td>Sub Type</td>
+                    <td>{{content.subtype}}</td>
+                </tr>
+                <tr>
+                    <td>Sub Type</td>
+                    <td>{{content.subtype}}</td>
+                </tr>
+                <tr>
+                    <td>Date Created</td>
+                    <td>{{content.date_created}}</td>
+                </tr>
+                <tr>
+                    <td>Date Pushed</td>
+                    <td>{{content.opendata_date_pushed}}</td>
+                </tr>
+                <tr>
+                    <td>Push Error</td>
+                    <td>{{content.opendata_push_error}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 	
-	<div class="flex-item">
-		<span style="line-height: 40px; vertical-align: top;"><a href="/api/contents/v2/{{id}}">JSON</a> Desa ID: {{content.desa_id}}, Type: {{content.type}}, Sub Type: {{content.subtype}}</span>
-		<ul class="nav nav-pills flex-item" role="tablist" id="nav-data" style="display: inline-block;">
-			{% for x in keys %}
-				<li role="presentation" id="{{x}}">
-					<a href="/contents/v2/{{content.id}}/data?sheet={{x}}" id="penduduk-link-{{x}}" aria-controls="home" role="tab" data-toggle="tab">{{x}}</a>
-				</li>
-			{% endfor %}
-		</ul>
-	</div>
-	<div class="flex-item">
-		<span>
-			<input type="radio" name="mode" value="data" onclick="onModeChange(this)" checked> Data &nbsp;
-			<input type="radio" name="mode" value="added" onclick="onModeChange(this)"> Added &nbsp; 
-			<input type="radio" name="mode" value="modified" onclick="onModeChange(this)"> Modified &nbsp;
-			<input type="radio" name="mode" value="deleted" onclick="onModeChange(this)"> Deleted &nbsp;
-		</span>
-	</div>
-	<div id="sheet"></div>
-	<script>
-		var content = {{content.content | safe}};
-		var schema = {{schema | safe}};
-	</script>
-	<script src="/static/scripts/content_v2.js"></script>
 {% endblock %}
