@@ -27,6 +27,14 @@ var columns = [{
     header: 'SubType',
   },
   {
+    data: 'diff_size',
+    header: 'Diff',
+  },
+  {
+    data: 'content_size',
+    header: 'Content',
+  },
+  {
     data: 'd0',
     header: 'Data 0',
   },
@@ -41,6 +49,14 @@ var columns = [{
   {
     data: 'd3',
     header: 'Data 3',
+  },
+  {
+    data: 'd4',
+    header: 'Data 4',
+  },
+  {
+    data: 'd5',
+    header: 'Data 5',
   },
   {
     data: 'added',
@@ -83,9 +99,43 @@ columns.forEach(c => {
 
 var hot;
 
+function updateQueryString(key, value, url) {
+    if (!url) url = window.location.href;
+    var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
+        hash;
+
+    if (re.test(url)) {
+        if (typeof value !== 'undefined' && value !== null)
+            return url.replace(re, '$1' + key + "=" + value + '$2$3');
+        else {
+            hash = url.split('#');
+            url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
+            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+                url += '#' + hash[1];
+            return url;
+        }
+    }
+    else {
+        if (typeof value !== 'undefined' && value !== null) {
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            hash = url.split('#');
+            url = hash[0] + separator + key + '=' + value;
+            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+                url += '#' + hash[1];
+            return url;
+        }
+        else
+            return url;
+    }
+}
+
+function getQueryStringValue (key) {  
+  return decodeURIComponent(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURIComponent(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+}  
+
 var getUrl = function () {
   var params = {};
-  var filter = $("input[name='desa-filter']").val();
+  var filter = $("[name='desa-filter']").val();
   if (filter) {
     if (parseInt(filter))
       params["desa_id"] = filter;
@@ -96,25 +146,25 @@ var getUrl = function () {
   if (type_filter) {
     params["type"] = type_filter;
   }
+  var page = $("[name='page']").val();
+  params["page"] = page;
+
+  var url = window.location.href;
+  url = updateQueryString("q", filter, url);
+  url = updateQueryString("type", type_filter, url);
+  url = updateQueryString("page", page, url);
+  window.history.replaceState({path:url},'',url);
   return "/api/contents/v2?" + $.param(params);
 }
 
-$.getJSON(getUrl(), function (data) {
-  var container = document.getElementById('sheet');
-  hot = new Handsontable(container, {
-    data: data,
-    columns: columns,
-    rowHeaders: true,
-    renderAllRows: false,
-    colHeaders: columns.map(c => c.header),
-  });
-  setTimeout(() => hot.render(), 0);
-});
-
-
 var filter = function () {
-  $.getJSON(getUrl(), function (data) {
+  var url = getUrl();
+  $("#filter-form").attr("disabled", "disabled");
+  $("#sheet").hide();
+  $.getJSON(url, function (data) {
     hot.loadData(data);
+    $("#filter-form").removeAttr("disabled");
+    $("#sheet").show();
     setTimeout(() => hot.render(), 0);
   });
 };
@@ -126,4 +176,28 @@ $("#filter-form").submit(function () {
 
 $("#filter-form select").change(function () {
   filter();
+});
+
+$("#filter-form [name='page']").change(function (e) {
+  filter();
+});
+
+$(function(){
+    $("[name='desa-filter']").val(getQueryStringValue("q"));
+    $("[name='type']").val(getQueryStringValue("type"));
+    var page = getQueryStringValue("page");
+    if(page){
+        $("[name='page']").val(page);
+    }
+    $.getJSON(getUrl(), function (data) {
+      var container = document.getElementById('sheet');
+      hot = new Handsontable(container, {
+        data: data,
+        columns: columns,
+        rowHeaders: true,
+        renderAllRows: false,
+        colHeaders: columns.map(c => c.header),
+      });
+      setTimeout(() => hot.render(), 0);
+    });
 });

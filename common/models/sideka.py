@@ -2,6 +2,8 @@ from common.database import db
 from common.marshmallow import ma
 from datetime import datetime
 from sqlalchemy.dialects.mysql import BIT
+from sqlalchemy.sql.expression import FunctionElement
+from sqlalchemy.ext.compiler import compiles
 
 class SdContent(db.Model):
     __tablename__ = 'sd_contents'
@@ -10,7 +12,7 @@ class SdContent(db.Model):
     desa_id = db.Column(db.Integer)
     type = db.Column(db.String(length=50))
     subtype = db.Column(db.String(length=50))
-    content = db.Column(db.Text)
+    content = db.Column(db.JSON)
     timestamp = db.Column(db.Integer)
     date_created = db.Column(db.TIMESTAMP(timezone=False), default=datetime.utcnow)
     created_by = db.Column(db.Integer)
@@ -18,6 +20,8 @@ class SdContent(db.Model):
     opendata_push_error = db.Column(db.String(length=200))
     change_id = db.Column(db.Integer, default=0)
     api_version = db.Column(db.String(length=4), default='1.0')
+    content_size = db.Column(db.Integer, default=0)
+    diff_size = db.Column(db.Integer, default=0)
 
     __table_args__ = (
         db.Index('idx_type_desa_id', 'type', 'desa_id'),
@@ -103,3 +107,31 @@ class SdSupradesa(db.Model):
 class SdSupradesaSchema(ma.ModelSchema):
     class Meta:
         model = SdSupradesa
+
+class json_length(FunctionElement):
+    name = 'json_length'
+
+@compiles(json_length)
+def compile(element, compiler, **kw):
+    return "json_length(%s)" % compiler.process(element.clauses)
+
+class json_extract(FunctionElement):
+    name = 'json_extract'
+
+@compiles(json_extract)
+def compile(element, compiler, **kw):
+    return "json_extract(%s)" % compiler.process(element.clauses)
+
+class json_keys(FunctionElement):
+    name = 'json_keys'
+
+@compiles(json_keys)
+def compile(element, compiler, **kw):
+    return "json_keys(%s)" % compiler.process(element.clauses)
+
+class json_unquote(FunctionElement):
+    name = 'json_unquote'
+
+@compiles(json_unquote)
+def compile(element, compiler, **kw):
+    return "json_unquote(%s)" % compiler.process(element.clauses)
