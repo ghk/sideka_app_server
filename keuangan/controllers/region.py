@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 from keuangan import db, cache
 from keuangan.models import RegionModelSchema, RegionCompleteModelSchema
-from keuangan.repository import RegionRepository
+from keuangan.repository import RegionRepository, ProgressRecapitulationRepository
 from keuangan.helpers import QueryHelper
 
 app = Blueprint('region', __name__)
 region_repository = RegionRepository(db)
-
+progress_recapitulation_repository = ProgressRecapitulationRepository(db)
 
 @app.route('/regions', methods=['GET'])
 @cache.cached(timeout=1800, query_string=True)
@@ -30,3 +30,9 @@ def get_region(id):
     region = region_repository.get(id)
     result = RegionCompleteModelSchema(many=False).dump(region)
     return jsonify(result.data)
+
+@app.route('/regions/<string:id>/years', methods=['GET'])
+@cache.cached(timeout=1800, query_string=True)
+def get_region_years(id):
+    years = progress_recapitulation_repository.get_region_years(id)
+    return jsonify(years)

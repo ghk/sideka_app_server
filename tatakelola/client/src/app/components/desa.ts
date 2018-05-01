@@ -10,9 +10,9 @@ import { length as GeoJsonLength } from '@turf/turf';
 import geoJSONArea from '@mapbox/geojson-area';
 import { ChartHelper } from '../helpers/chartHelper';
 
-const OSM = tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 const SATELLITE = tileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A');
-const LIGHT = tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
+const LIGHT = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
 
 @Component({
     selector: 'st-desa',

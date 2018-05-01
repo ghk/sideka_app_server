@@ -30,7 +30,7 @@ pendidikan_groups = {
 class ContentTransformer:
     @staticmethod
     def transform(content):
-        serialized_content = json.loads(content)
+        serialized_content = content
         columns = {}
         result = {}
 
@@ -60,7 +60,7 @@ class ContentTransformer:
 class PemetaanContentTransformer:
     @staticmethod
     def transform(content):
-        serialized_content = json.loads(content)
+        serialized_content = content
         columns = {}
         result = {}
 

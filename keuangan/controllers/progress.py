@@ -14,7 +14,12 @@ progress_timeline_repository = ProgressTimelineRepository(db)
 def get_progress_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
     is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
-    entities = progress_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+    region_id = request.args.get('region_id', default=None, type=str)
+    entities = None
+    if region_id is None:
+        entities = progress_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+    else:
+        entities = progress_recapitulation_repository.get_by_region_and_year(region_id, year, page_sort_params)
     result = ProgressRecapitulationModelSchema(many=True).dump(entities)
     return jsonify(result.data)
 

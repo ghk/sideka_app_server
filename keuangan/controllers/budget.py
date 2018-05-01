@@ -27,7 +27,12 @@ def get_budget_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
 
     is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
-    entities = budget_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+    region_id = request.args.get('region_id', default=None, type=str)
+    entities = None
+    if region_id is None:
+        entities = budget_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+    else:
+        entities = budget_recapitulation_repository.get_by_region_and_year(region_id, year, page_sort_params)
 
     is_full_region = request.args.get('is_full_region', default=True, type=bool)
     if is_full_region:

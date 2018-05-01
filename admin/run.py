@@ -10,6 +10,7 @@ from flask import request, jsonify, render_template, send_from_directory, redire
 from flask_login import login_user, login_required, logout_user, UserMixin
 from sqlalchemy.orm import load_only, aliased
 from sqlalchemy import func, desc, update
+from sqlalchemy.sql.functions import concat
 
 from phpserialize import *
 from collections import OrderedDict
@@ -22,8 +23,9 @@ import urllib
 import datetime
 
 app = create_app()
+app.config['SQLALCHEMY_ECHO'] = True
+
 phasher = PasswordHash(8, True)
-app = create_app()
 login_manager = create_login_manager(app)
 
 class User(UserMixin):
@@ -180,7 +182,7 @@ def get_content_v2(id, type='data'):
     content = query.first()
     schema = []
     keys = []
-    json_content = json.loads(content.content);
+    json_content = content.content
 
     if sheet == "null":
         sheet = content.type
@@ -202,12 +204,12 @@ def get_content_v2(id, type='data'):
 def get_json_content_v2(id, type='data'):
     sheet = request.args.get("sheet", "0")
     query = db.session.query(SdContent)
-    query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
+    #query = query.options(load_only('desa_id', 'subtype', 'type', 'content', 'change_id'))
     query = query.filter(SdContent.id == id).filter(SdContent.api_version == '2.0')
     content = query.first()
     schema = []
     keys = []
-    json_content = json.loads(content.content);
+    json_content = content.content;
 
     return jsonify(json_content)
 
@@ -358,11 +360,7 @@ def get_contents():
 def get_contents_v2():
     sd_desa_alias = aliased(SdDesa)
     wp_user_alias = aliased(WpUser)
-    query = db.session.query(SdContent.id, SdContent.content, SdContent.desa_id,
-                             sd_desa_alias.desa, sd_desa_alias.domain, SdContent.type,
-                             SdContent.subtype, SdContent.timestamp, SdContent.date_created,
-                             SdContent.created_by, wp_user_alias.user_login, SdContent.opendata_date_pushed,
-                             SdContent.opendata_push_error, SdContent.change_id, SdContent.api_version) \
+    query = db.session.query(SdContent.id) \
         .join(sd_desa_alias, SdContent.desa_id == sd_desa_alias.blog_id) \
         .join(wp_user_alias, SdContent.created_by == wp_user_alias.ID) \
         .filter(SdContent.api_version == '2.0')
@@ -381,13 +379,39 @@ def get_contents_v2():
         query = query.filter(SdContent.type == type_filter_value)
 
     query = query.order_by(desc(SdContent.date_created))
-    query = query.limit(2)
+    query = query.limit(40)
+    query = query.offset(int(request.args.get("page", "0")) * 40)
 
+    id_results = query.all()
+    print id_results
+    ids = map(lambda c: c[0], id_results)
+    print ids
+
+    query = db.session.query(SdContent.id, SdContent.desa_id,
+                             sd_desa_alias.desa, sd_desa_alias.domain, SdContent.type,
+                             SdContent.subtype, SdContent.timestamp, SdContent.date_created,
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[0]")))).label("d0"),
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[1]")))).label("d1"),
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[2]")))).label("d2"),
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[3]")))).label("d3"),
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[4]")))).label("d4"),
+                             json_length(SdContent.content, concat("$.data.", json_unquote(json_extract(json_keys(SdContent.content, "$.data"), "$[5]")))).label("d5"),
+                             json_length(json_extract(SdContent.content, "$.diffs.*[*].added[*]")).label("added"),
+                             json_length(json_extract(SdContent.content, "$.diffs.*[*].modified[*]")).label("modified"),
+                             json_length(json_extract(SdContent.content, "$.diffs.*[*].deleted[*]")).label("deleted"),
+                             SdContent.created_by, wp_user_alias.user_login, SdContent.opendata_date_pushed,
+                             SdContent.diff_size, SdContent.content_size, 
+                             SdContent.opendata_push_error, SdContent.change_id, SdContent.api_version) \
+        .join(sd_desa_alias, SdContent.desa_id == sd_desa_alias.blog_id) \
+        .join(wp_user_alias, SdContent.created_by == wp_user_alias.ID) \
+        .filter(SdContent.id.in_(ids)) \
+        .order_by(desc(SdContent.date_created))
     contents = query.all()
     result = []
 
     for content in contents:
         c = content._asdict()
+        """
         j = json.loads(c["content"])
         if "data" in j and "keys" in dir(j["data"]):
             keys = j["data"].keys()
@@ -406,6 +430,7 @@ def get_contents_v2():
             c["modified"] = modified
             c["deleted"] = deleted
         del c["content"]
+        """
         result.append(c)
 
     return jsonify(result)

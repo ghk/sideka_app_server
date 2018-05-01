@@ -13,15 +13,27 @@ db.app=app
 db.init_app(app)
 
 def fetch_all():
+    print "Fetching desas..."
     TatakelolaFetcher.fetch_desas()
+
+    print "Fetching GeoJSONs..."
     TatakelolaFetcher.fetch_geojsons()
+
+    print "Fetching data..."
     TatakelolaFetcher.fetch_data()
+
+    print "Fetching APBDeses..."
     TatakelolaFetcher.fetch_apbdes()
     db.session.commit()
 
 def generate_all():
+    print "Generating summaries..."
     summaries = Generator.generate_summaries()
+
+    print "Generating layouts..."
     layouts = Generator.generate_layouts()
+
+    print "Generating boundaries..."
     boundary = Generator.generate_boundaries()
 
     db.session.add(boundary)
