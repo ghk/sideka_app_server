@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-import { tileLayer, Map, MapOptions, latLng, control, GeoJSON, geoJSON, divIcon, marker, icon, LatLng, Layer } from 'leaflet';
+import { tileLayer, Map, MapOptions, latLng, control, GeoJSON, geoJSON, divIcon, marker, icon, LatLng, Layer, LayerGroup, layerGroup } from 'leaflet';
 import { ActivatedRoute } from '@angular/router';
 import { DataService } from '../services/data';
 import { Location } from '@angular/common';
@@ -10,9 +10,9 @@ import { length as GeoJsonLength } from '@turf/turf';
 import geoJSONArea from '@mapbox/geojson-area';
 import { ChartHelper } from '../helpers/chartHelper';
 
-const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-const SATELLITE = tileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A');
 const LIGHT = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
+const SATELLITE = tileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A');
+//const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
 @Component({
     selector: 'st-desa',
@@ -32,8 +32,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     isLoadingData: boolean;
     loadingMessage: string;
 
-    labelMarkers: any[];
-    pointMarkers: any[];
+    showPoints = true;
+    labelMarkers: LayerGroup;
+    pointMarkers: LayerGroup;
 
     constructor(private _router: ActivatedRoute, 
                 private _dataService: DataService, 
@@ -41,8 +42,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.options = { center: latLng([-2.604236, 116.499023]), zoom: 5, layers: [LIGHT] };
-        this.labelMarkers = [];
-        this.pointMarkers = [];
+        this.labelMarkers = layerGroup();
+        this.pointMarkers = layerGroup();
         this.chartHelper = new ChartHelper();
     }
 
@@ -65,18 +66,11 @@ export class DesaComponent implements OnInit, OnDestroy {
                 instance.regionId = layer['feature']['properties']['regionId'];
                 instance.regionName = layer['feature']['properties']['regionName'];
                 this.desaInstances.push(instance);
-
-                let center = geoJSON(layer['feature']).getBounds().getCenter();
-                let popupContent = '<strong>' + layer['feature']['properties']['regionName'] + '</strong>';
-    
-                let pointMarker = marker(center, {
-                    icon: icon({ 
-                        iconUrl: '/assets/images/titikdesa-01.png',
-                        iconSize: [20, 20],
-                    })
-                }).addTo(this.map).bindPopup(popupContent).openPopup();
             } 
         });
+
+        this.setDesaLabels();
+        this.setDesaPoints();
 
         this.desaInstances.sort((a, b) => {
             if (a.regionId < b.regionId)
@@ -513,15 +507,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     setDesaLabels(): void {
-        for (let i=0; i<this.labelMarkers.length; i++) {
-            this.map.removeLayer(this.labelMarkers[i]);
-        }
-
-        for (let i=0; i<this.pointMarkers.length; i++) {
-            this.map.removeLayer(this.pointMarkers[i]);
-        }
-
-        this.labelMarkers = [];
+        this.labelMarkers.clearLayers();
 
         this.geojsonBoundary.eachLayer(layer => {
            let labelMarker = marker(geoJSON(layer['feature']).getBounds().getCenter(), {
@@ -530,20 +516,14 @@ export class DesaComponent implements OnInit, OnDestroy {
                     html: '<span style="color: blue;">' + layer['feature']['properties']['regionName'] + ' </span>',
                     iconSize: [30, 30]
                   })
-            }).addTo(this.map);
+            });
 
-            this.labelMarkers.push(labelMarker);
+            this.labelMarkers.addLayer(labelMarker);
         })
     }
 
     setDesaPoints(): void {
-        for (let i=0; i<this.pointMarkers.length; i++) {
-            this.map.removeLayer(this.pointMarkers[i]);
-        }
-
-        for (let i=0; i<this.labelMarkers.length; i++) {
-            this.map.removeLayer(this.labelMarkers[i]);
-        }
+        this.pointMarkers.clearLayers();
 
         this.geojsonBoundary.eachLayer(layer => {
             let center = geoJSON(layer['feature']).getBounds().getCenter();
@@ -554,9 +534,9 @@ export class DesaComponent implements OnInit, OnDestroy {
                     iconUrl: '/assets/images/titikdesa-01.png',
                     iconSize: [20, 20],
                 })
-            }).addTo(this.map).bindPopup(popupContent).openPopup();
+            }).bindPopup(popupContent).openPopup();
 
-           this.pointMarkers.push(pointMarker);
+           this.pointMarkers.addLayer(pointMarker);
         })
     }
 
@@ -595,7 +575,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     onMapReady(map: Map) {
         this.map = map;
 
-        control.layers(null, {"OSM": OSM, "Satelit": SATELLITE, "Light": LIGHT}, {'position': 'bottomleft'}).addTo(this.map);
+        control.layers(null, {"Satelit": SATELLITE, "Light": LIGHT}, {'position': 'bottomleft'}).addTo(this.map);
 
         this._router.params.subscribe(
             params => {
@@ -603,14 +583,28 @@ export class DesaComponent implements OnInit, OnDestroy {
             } 
         );
 
+        console.log("on map ready");
+        this.pointMarkers.addTo(this.map);
+        this.showPoints = true;
+
         this.map.on('zoomend', e => {
             let zoom = e.target["_zoom"];
-
-            /*
-            if (zoom <= 6)
-                this.setDesaLabels();
-            else if (zoom >= 10)
-                this.setDesaPoints();*/
+            console.log("zoom end", zoom);
+            if (zoom >= 10){
+                if(this.showPoints){
+                    console.log("show label");
+                    this.labelMarkers.addTo(this.map);
+                    this.map.removeLayer(this.pointMarkers);
+                    this.showPoints = false;
+                }
+            } else {
+                if(!this.showPoints){
+                    console.log("show points");
+                    this.pointMarkers.addTo(this.map);
+                    this.map.removeLayer(this.labelMarkers);
+                    this.showPoints = true;
+                }
+            }
         });
     }
 
