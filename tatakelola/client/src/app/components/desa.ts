@@ -42,8 +42,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.options = { center: latLng([-2.604236, 116.499023]), zoom: 5, layers: [LIGHT] };
-        this.labelMarkers = layerGroup();
-        this.pointMarkers = layerGroup();
+        this.labelMarkers = layerGroup([]);
+        this.pointMarkers = layerGroup([]);
         this.chartHelper = new ChartHelper();
     }
 
