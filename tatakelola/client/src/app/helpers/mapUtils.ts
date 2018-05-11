@@ -81,6 +81,9 @@ export class MapUtils {
     }
 
     static onEachFeature(feature, layer): void {
+        layer.on("click", function(){
+            console.log(feature.properties);
+        });
         for (let index in CONFIG) {
             let indicator = CONFIG[index];
             let elements = indicator.elements;

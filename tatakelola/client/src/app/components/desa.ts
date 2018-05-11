@@ -206,12 +206,26 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.activeDesa.activeGeoJson.addTo(this.map);
 
+        var uniqueIds = {};
+
         for (let i=0; i<this.activeDesa.layout.apbdes.length; i++) {
             let data = this.activeDesa.layout.apbdes[i];
             let feature = data[6];
 
             if (!feature['geometry'])
                 continue;
+
+            //continue if no amount
+            if (!data[7] || !parseFloat(data[7]))
+                continue;
+
+            if(!data[4] || !data[2])
+                continue;
+
+            var id = data[2]+"."+data[4][0]+"."+data[4][1];
+            if(uniqueIds[id])
+                continue;
+            uniqueIds[id] = true;
 
             let center = geoJSON(feature).getBounds().getCenter();
             let url = null;
@@ -509,6 +523,8 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         if (this.activeDesa.activeGeoJson)
             this.map.removeLayer(this.activeDesa.activeGeoJson);
+
+        this.activeDesa.activeGeoJson.addTo(this.map);
 
         for (let i=0; i<this.activeDesa.layout.highways.length; i++) {
             let feature = this.activeDesa.layout.highways[i];
