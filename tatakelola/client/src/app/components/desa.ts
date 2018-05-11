@@ -86,7 +86,7 @@ export class DesaComponent implements OnInit, OnDestroy {
                 let pointMarker = marker(center, {
                     icon: icon({ 
                         iconUrl: '/assets/images/titikdesa-01.png',
-                        iconSize: [20, 20],
+                        iconSize: [15, 15],
                     })
                 }).bindPopup(popupContent).openPopup();
 
@@ -168,6 +168,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.setActiveMenu(this.activeMenu);
         this.isLoadingData = false;
+        this._appRef.tick();
     }
 
     setActiveMenu(menu: string): boolean {
@@ -404,18 +405,26 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
 
                 let popupContent = '<strong>' + label + '</strong><br>';
-                let name = feature['name'] ? feature['name'] : 'Belum Terisi';
-                let capacity = feature['capacity'] ? feature['capacity'] + ' Orang' : 'Belum Terisi';
-                let address = feature['address'] ? feature['address'] : 'Belum Terisi';
+                let properties = feature.properties;
+                let name = properties['name'] ? properties['name'] : null;
+                let capacity = properties['capacity'] ? properties['capacity'] + ' Orang' : null;
+                let address = properties['address'] ? properties['address'] : null;
 
-                popupContent += '<span>Nama: ' + name + '<br> Kapasitas: ' + capacity + '<br>Alamat: ' + address +  '</span>';
+                popupContent += '<span>'
+                                + (name ? 'Nama: ' + name : '' ) 
+                                + ( capacity ? '<br> Kapasitas: ' + capacity : '') 
+                                + ( address ? '<br>Alamat: ' + address : '') 
+                                +  '</span>';
 
                 let schoolMarker = marker(center, {
                     icon: icon({ 
                         iconUrl: url,
                         iconSize: [20, 20]
                     })
-                }).addTo(this.map);
+                }).bindPopup(popupContent).addTo(this.map);
+                schoolMarker.on("click", function(){
+                    console.log(feature);
+                });
     
                 this.activeDesa.schoolMarkers.push(schoolMarker);
             }
@@ -575,6 +584,7 @@ export class DesaComponent implements OnInit, OnDestroy {
     reset(): void {
         if(!this.activeDesa)
             return;
+
         this.activeDesa.isPendidikanStatisticShown = false;
         this.activeDesa.isLegendShown = false;
         this.activeDesa.isPekerjaanStatisticShown = false;
@@ -591,6 +601,11 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     recenter(): boolean {
         this.map.flyTo(this.activeDesa.activeGeoJson.getBounds().getCenter(), 15);
+        this.reset();
+        
+        this.map.addLayer(this.activeDesa.activeGeoJson);
+        this.activeMenu = null;
+
         return false;
     }
 
