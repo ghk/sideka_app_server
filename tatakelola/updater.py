@@ -5,7 +5,7 @@ sys.path.append(moddir)
 
 from tatakelola import create_app, db
 from tatakelola import db
-from tatakelola.helpers import TatakelolaFetcher
+from tatakelola.helpers import TatakelolaFetcher, Generator
 from time import time
 
 app = create_app()
