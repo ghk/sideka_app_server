@@ -30,6 +30,7 @@ export class MapComponent implements OnInit, OnDestroy {
                 */
             ],
             zoom: 5,
+            attributionControl: false,
             center: L.latLng([-0.7893, 113.9213])
         }
     }
@@ -37,6 +38,7 @@ export class MapComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void { }
 
     onMapReady(map): void {
+        map.attributionControl = false;
         this.map = map;
     }
 }

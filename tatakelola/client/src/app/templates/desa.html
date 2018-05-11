@@ -30,7 +30,7 @@
       <button class="shide" (click)="sidebarCollapsed = !sidebarCollapsed" id="shide">Rincian ▾</button>
     </div>
 
-    <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed">
+    <div class="sidebar" id="sidebar" *ngIf="!sidebarCollapsed && !isLoadingData">
         <a href="#" (click)="setActiveMenu('apbdes')">
           <div class="side" [ngClass]="{'active': activeMenu === 'apbdes' }">
             <div class="icon">
@@ -188,5 +188,8 @@
       </div>
     </div>
 </div>
+
+<a *ngIf="baseLayer == 'map'" ng-click="changeBaseLayer('satellite')" class="leaflet-control-layers-toggle radar" href="#" title="Layers"> </a>
+<a *ngIf="baseLayer == 'satellite'" ng-click="changeBaseLayer('map')" class="leaflet-control-layers-toggle mapa" href="#" title="Layers"> </a>
 
 <progress-bar [isLoadingData]="isLoadingData"></progress-bar>
