@@ -81,6 +81,9 @@ export class MapUtils {
     }
 
     static onEachFeature(feature, layer): void {
+        layer.on("click", function(){
+            console.log(feature.properties);
+        });
         for (let index in CONFIG) {
             let indicator = CONFIG[index];
             let elements = indicator.elements;
@@ -101,9 +104,14 @@ export class MapUtils {
                 }
             }
 
+            var strokeWeight = 2;
+            if(feature.properties.landuse){
+                strokeWeight = 0;
+            }
+
             if (!matchedElement) { 
                 if (feature['indicator']) {
-                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
+                    let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0, strokeWeight: strokeWeight };
                     layer.setStyle(style);
                 }
                 continue;
@@ -111,7 +119,8 @@ export class MapUtils {
 
             if (matchedElement['style']) {
                 let style = MapUtils.setupStyle(matchedElement['style']);
-                style['weight'] = 2;
+                style['weight'] = strokeWeight;
+                style['stroke-weight'] = strokeWeight;
                 layer['setStyle'] ? layer['setStyle'](style) : null;
             }
 
@@ -119,6 +128,13 @@ export class MapUtils {
                 let style = { color: 'rgb(255,165,0)', fill: 'rgb(255, 165, 0)', fillOpacity: 1, weight: 0 };
                 layer.setStyle(style);
             }
+        }
+
+        var text = feature.properties.crop;
+        if(!text)
+            text = feature.properties.trees;
+        if(text){
+            layer.bindPopup("<span>"+text+"</span>");
         }
     }
 }

@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-import { tileLayer, Map, MapOptions, latLng, control, GeoJSON, geoJSON, divIcon, marker, icon, LatLng, Layer } from 'leaflet';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ApplicationRef } from '@angular/core';
+import { tileLayer, Map, MapOptions, latLng, control, GeoJSON, geoJSON, divIcon, marker, icon, LatLng, Layer, LayerGroup, layerGroup, Control, DomUtil } from 'leaflet';
 import { ActivatedRoute } from '@angular/router';
 import { DataService } from '../services/data';
 import { Location } from '@angular/common';
@@ -10,9 +10,9 @@ import { length as GeoJsonLength } from '@turf/turf';
 import geoJSONArea from '@mapbox/geojson-area';
 import { ChartHelper } from '../helpers/chartHelper';
 
-const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+const MAP = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
 const SATELLITE = tileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A');
-const LIGHT = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
+//const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
 @Component({
     selector: 'st-desa',
@@ -21,6 +21,7 @@ const LIGHT = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x
 export class DesaComponent implements OnInit, OnDestroy {
     activeDesa: DesaInstance;
     activeMenu: string;
+    baseLayer = "map";
     nextDesa: DesaInstance;
     prevDesa: DesaInstance;
 
@@ -32,15 +33,17 @@ export class DesaComponent implements OnInit, OnDestroy {
     isLoadingData: boolean;
     loadingMessage: string;
 
+    showPoints = true;
     labelMarkers: any[];
     pointMarkers: any[];
 
     constructor(private _router: ActivatedRoute, 
                 private _dataService: DataService, 
-                private _location: Location) {}
+                private _location: Location,
+                private _appRef: ApplicationRef) {}
 
     ngOnInit(): void {
-        this.options = { center: latLng([-2.604236, 116.499023]), zoom: 5, layers: [LIGHT] };
+        this.options = { center: latLng([-2.604236, 116.499023]), zoom: 5, layers: [] };
         this.labelMarkers = [];
         this.pointMarkers = [];
         this.chartHelper = new ChartHelper();
@@ -66,17 +69,34 @@ export class DesaComponent implements OnInit, OnDestroy {
                 instance.regionName = layer['feature']['properties']['regionName'];
                 this.desaInstances.push(instance);
 
+
+                let labelMarker = marker(geoJSON(layer['feature']).getBounds().getCenter(), {
+                    icon: divIcon({
+                        className: 'label', 
+                        html: '<span style="color: black; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;">' + layer['feature']['properties']['regionName'] + ' </span>',
+                        iconSize: [30, 30]
+                    })
+                });
+
+                this.labelMarkers.push(labelMarker);
+
                 let center = geoJSON(layer['feature']).getBounds().getCenter();
                 let popupContent = '<strong>' + layer['feature']['properties']['regionName'] + '</strong>';
-    
+
                 let pointMarker = marker(center, {
                     icon: icon({ 
                         iconUrl: '/assets/images/titikdesa-01.png',
-                        iconSize: [20, 20],
+                        iconSize: [15, 15],
                     })
-                }).addTo(this.map).bindPopup(popupContent).openPopup();
+                }).bindPopup(popupContent).openPopup();
+
+                this.pointMarkers.push(pointMarker);
             } 
+
         });
+
+        this.setDesaLabels();
+        this.setDesaPoints();
 
         this.desaInstances.sort((a, b) => {
             if (a.regionId < b.regionId)
@@ -99,19 +119,37 @@ export class DesaComponent implements OnInit, OnDestroy {
             this.setActiveDesa(desa)
         });
 
-        this.activeDesa = this.desaInstances.filter(e => e.regionId === regionId)[0];
-        this.setActiveDesa(this.activeDesa);
+        this.isLoadingData = false;
+        let desa = this.desaInstances.filter(e => e.regionId === regionId)[0];
+        this.setActiveDesa(desa);
+
+        MAP.addTo(this.map);
+    }
+
+    toggleBaseLayer(){
+        this.baseLayer = this.baseLayer === "map" ? "satellite" : "map";
+        if(this.baseLayer == "map"){
+            this.map.removeLayer(SATELLITE);
+            MAP.addTo(this.map);
+        } else {
+            this.map.removeLayer(MAP);
+            SATELLITE.addTo(this.map);
+        }
     }
 
     async setActiveDesa(desa: DesaInstance) {
+        if(this.isLoadingData || this.activeDesa === desa){
+            return;
+        }
         this.isLoadingData = true;
 
-        if (this.activeDesa.activeGeoJson)
+        if (this.activeDesa && this.activeDesa.activeGeoJson)
             this.map.removeLayer(this.activeDesa.activeGeoJson);
         
         this.reset();
         this.activeDesa = desa;
         this.setNextPrev();
+        this._appRef.tick();
 
         if (!this.activeDesa.layout) {
             let layout = await this._dataService.getLayoutByRegion(this.activeDesa.regionId, null).toPromise();
@@ -130,6 +168,7 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.setActiveMenu(this.activeMenu);
         this.isLoadingData = false;
+        this._appRef.tick();
     }
 
     setActiveMenu(menu: string): boolean {
@@ -167,12 +206,26 @@ export class DesaComponent implements OnInit, OnDestroy {
 
         this.activeDesa.activeGeoJson.addTo(this.map);
 
+        var uniqueIds = {};
+
         for (let i=0; i<this.activeDesa.layout.apbdes.length; i++) {
             let data = this.activeDesa.layout.apbdes[i];
             let feature = data[6];
 
             if (!feature['geometry'])
                 continue;
+
+            //continue if no amount
+            if (!data[7] || !parseFloat(data[7]))
+                continue;
+
+            if(!data[4] || !data[2])
+                continue;
+
+            var id = data[2]+"."+data[4][0]+"."+data[4][1];
+            if(uniqueIds[id])
+                continue;
+            uniqueIds[id] = true;
 
             let center = geoJSON(feature).getBounds().getCenter();
             let url = null;
@@ -366,18 +419,26 @@ export class DesaComponent implements OnInit, OnDestroy {
                 }
 
                 let popupContent = '<strong>' + label + '</strong><br>';
-                let name = feature['name'] ? feature['name'] : 'Belum Terisi';
-                let capacity = feature['capacity'] ? feature['capacity'] + ' Orang' : 'Belum Terisi';
-                let address = feature['address'] ? feature['address'] : 'Belum Terisi';
+                let properties = feature.properties;
+                let name = properties['name'] ? properties['name'] : null;
+                let capacity = properties['capacity'] ? properties['capacity'] + ' Orang' : null;
+                let address = properties['address'] ? properties['address'] : null;
 
-                popupContent += '<span>Nama: ' + name + '<br> Kapasitas: ' + capacity + '<br>Alamat: ' + address +  '</span>';
+                popupContent += '<span>'
+                                + (name ? 'Nama: ' + name : '' ) 
+                                + ( capacity ? '<br> Kapasitas: ' + capacity : '') 
+                                + ( address ? '<br>Alamat: ' + address : '') 
+                                +  '</span>';
 
                 let schoolMarker = marker(center, {
                     icon: icon({ 
                         iconUrl: url,
                         iconSize: [20, 20]
                     })
-                }).addTo(this.map);
+                }).bindPopup(popupContent).addTo(this.map);
+                schoolMarker.on("click", function(){
+                    console.log(feature);
+                });
     
                 this.activeDesa.schoolMarkers.push(schoolMarker);
             }
@@ -463,6 +524,8 @@ export class DesaComponent implements OnInit, OnDestroy {
         if (this.activeDesa.activeGeoJson)
             this.map.removeLayer(this.activeDesa.activeGeoJson);
 
+        this.activeDesa.activeGeoJson.addTo(this.map);
+
         for (let i=0; i<this.activeDesa.layout.highways.length; i++) {
             let feature = this.activeDesa.layout.highways[i];
             let center = MapUtils.calculateCenterOfLineStrings(feature.geometry.coordinates);
@@ -513,50 +576,12 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     setDesaLabels(): void {
-        for (let i=0; i<this.labelMarkers.length; i++) {
-            this.map.removeLayer(this.labelMarkers[i]);
-        }
-
-        for (let i=0; i<this.pointMarkers.length; i++) {
-            this.map.removeLayer(this.pointMarkers[i]);
-        }
-
-        this.labelMarkers = [];
-
         this.geojsonBoundary.eachLayer(layer => {
-           let labelMarker = marker(geoJSON(layer['feature']).getBounds().getCenter(), {
-                icon: divIcon({
-                    className: 'label', 
-                    html: '<span style="color: blue;">' + layer['feature']['properties']['regionName'] + ' </span>',
-                    iconSize: [30, 30]
-                  })
-            }).addTo(this.map);
-
-            this.labelMarkers.push(labelMarker);
         })
     }
 
     setDesaPoints(): void {
-        for (let i=0; i<this.pointMarkers.length; i++) {
-            this.map.removeLayer(this.pointMarkers[i]);
-        }
-
-        for (let i=0; i<this.labelMarkers.length; i++) {
-            this.map.removeLayer(this.labelMarkers[i]);
-        }
-
         this.geojsonBoundary.eachLayer(layer => {
-            let center = geoJSON(layer['feature']).getBounds().getCenter();
-            let popupContent = '<strong>' + layer['feature']['properties']['regionName'] + '</strong>';
-
-            let pointMarker = marker(center, {
-                icon: icon({ 
-                    iconUrl: '/assets/images/titikdesa-01.png',
-                    iconSize: [20, 20],
-                })
-            }).addTo(this.map).bindPopup(popupContent).openPopup();
-
-           this.pointMarkers.push(pointMarker);
         })
     }
 
@@ -573,6 +598,9 @@ export class DesaComponent implements OnInit, OnDestroy {
     }
 
     reset(): void {
+        if(!this.activeDesa)
+            return;
+
         this.activeDesa.isPendidikanStatisticShown = false;
         this.activeDesa.isLegendShown = false;
         this.activeDesa.isPekerjaanStatisticShown = false;
@@ -589,13 +617,43 @@ export class DesaComponent implements OnInit, OnDestroy {
 
     recenter(): boolean {
         this.map.flyTo(this.activeDesa.activeGeoJson.getBounds().getCenter(), 15);
+        this.reset();
+        
+        this.map.addLayer(this.activeDesa.activeGeoJson);
+        this.activeMenu = null;
+
         return false;
     }
 
     onMapReady(map: Map) {
         this.map = map;
+        var that = this;
 
-        control.layers(null, {"OSM": OSM, "Satelit": SATELLITE, "Light": LIGHT}, {'position': 'bottomleft'}).addTo(this.map);
+        (<any> document.getElementsByClassName( 'leaflet-control-attribution' )[0]).style.display = 'none';
+
+        //control.layers(null, {"Satelit": SATELLITE, "Light": LIGHT}, {'position': 'bottomRight'}).addTo(this.map);
+
+        var Watermark = Control.extend({
+            onAdd: function(map) {
+                var img = DomUtil.create('img');
+                img.onclick = function(){
+                    img["src"] = '/assets/images/'+that.baseLayer+'.png';
+                    that.toggleBaseLayer();
+                };
+        
+                img["src"] = '/assets/images/satellite.png';
+                img.style.width = '75px';
+                img.style.cursor = "pointer";
+        
+                return img;
+            },
+        
+            onRemove: function(map) {
+                // Nothing to do here
+            }
+        });
+        new Watermark({"position": "bottomright"}).addTo(this.map);
+        
 
         this._router.params.subscribe(
             params => {
@@ -603,14 +661,30 @@ export class DesaComponent implements OnInit, OnDestroy {
             } 
         );
 
+        for(var i = 0, len = this.labelMarkers.length; i < len; i ++){
+            this.pointMarkers[i].addTo(this.map);
+        }
+        this.showPoints = true;
+
         this.map.on('zoomend', e => {
             let zoom = e.target["_zoom"];
-
-            /*
-            if (zoom <= 6)
-                this.setDesaLabels();
-            else if (zoom >= 10)
-                this.setDesaPoints();*/
+            if (zoom >= 10){
+                if(this.showPoints){
+                    for(var i = 0, len = this.labelMarkers.length; i < len; i ++){
+                        this.map.removeLayer(this.pointMarkers[i]);
+                        this.labelMarkers[i].addTo(this.map);
+                    }
+                    this.showPoints = false;
+                }
+            } else {
+                if(!this.showPoints){
+                    for(var i = 0, len = this.labelMarkers.length; i < len; i ++){
+                        this.map.removeLayer(this.labelMarkers[i]);
+                        this.pointMarkers[i].addTo(this.map);
+                    }
+                    this.showPoints = true;
+                }
+            }
         });
     }
 

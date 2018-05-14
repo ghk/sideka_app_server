@@ -56,7 +56,7 @@ export class DesaInstance {
     setLanduseGeoJson() {
         this.landuseGeoJson = geoJSON(this.layout.landuses, {
             onEachFeature: MapUtils.onEachFeature,
-            style: (feature) => { return { color: "#aaa", weight: 1 } }
+            style: (feature) => { return { color: "#aaa", weight: 1, fillOpacity: 0.4 } }
         });
     }
 
