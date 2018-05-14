@@ -11,7 +11,7 @@ class SummaryRepository(BaseRepository):
     def get_by_region(self, region_id, page_sort_params=None):
         query = self.db.session.query(self.model)
         query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
-        return query.filter(self.model.fk_region_id == region_id).all()
+        return query.filter(self.model.fk_region_id == region_id).first()
 
     def get_all(self, page_sort_params=None):
         query = self.db.session.query(self.model)

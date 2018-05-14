@@ -6,10 +6,7 @@ sys.path.append(moddir)
 from tatakelola import create_app, db
 from tatakelola import db
 from tatakelola.helpers import TatakelolaFetcher, Generator
-<<<<<<< HEAD
 from tatakelola.repository import BoundaryRepository
-=======
->>>>>>> 0a66df83d2c3b51aee9c2613d3f56123359b63cf
 from time import time
 
 app = create_app()
@@ -53,7 +50,9 @@ def generate_all():
     db.session.add(boundary)
     db.session.add_all(layouts)
     db.session.add_all(summaries)
-    db.session.delete(prev_boundary)
+
+    if prev_boundary != None:
+        db.session.delete(prev_boundary)
 
     db.session.commit()
 

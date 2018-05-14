@@ -8,14 +8,14 @@ app = Blueprint('summary', __name__)
 summary_repository = SummaryRepository(db)
 
 @app.route('/summaries/count', methods=['GET'])
-def get_penduduks_count():
+def get_count_summaries():
     result = summary_repository.count()
     return jsonify(result)
 
 @app.route('/summaries/region/<string:region_id>', methods=['GET'])
 def get_summaries_by_region(region_id):
-    entities = summary_repository.get_by_region(region_id)
-    result = SummaryModelSchema(many=False).dump(entities)
+    entity = summary_repository.get_by_region(region_id)
+    result = SummaryModelSchema(many=False).dump(entity)
     return jsonify(result.data)
 
 @app.route('/summaries/supradesa/<string:supradesa_code>', methods=['GET'])
