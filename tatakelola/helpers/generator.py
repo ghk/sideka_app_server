@@ -69,10 +69,9 @@ class Generator:
         return summary
 
     @staticmethod
-    def generate_summaries():
+    def generate_summaries(supradesa_code='lokpri', year='2018'):
         result = []
-        regions = region_repository.all()
-        #regions = region_repository.get_pancamandala()
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
         
         for region in regions:
             summary_repository.delete_by_region(region.id)
@@ -81,50 +80,16 @@ class Generator:
             summary = Generator.generate_apbdes_summary_by_region(summary, region)
             summary = Generator.generate_geojson_summary_by_region(summary, region)
             summary.fk_region_id = region.id
+            summary.supradesa_code = supradesa_code
+            summary.year = year
             result.append(summary)
         return result
 
     @staticmethod
-    def generate_pekerjaan_statistics():
+    def generate_layouts(supradesa_code='lokpri', year='2018'):
         result = []
-        regions = region_repository.all()
-        #regions = region_repository.get_pancamandala()
-
-        for region in regions:
-            statistic_repository.delete_by_region(region.id)
-            statistic = Statistic()
-            penduduks = penduduk_repository.get_by_region(region.id)
-
-            statistic.fk_region_id = region.id
-            statistic.type = "pekerjaan"
-            statistic.data = StatisticTransformer.transform_pekerjaan_raw(penduduks)
-
-            result.append(statistic)
-        return result 
-
-    @staticmethod
-    def generate_pendidikan_statistics():
-        result = []
-        regions = region_repository.all()
-        #regions = region_repository.get_pancamandala()
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
         
-        for region in regions:
-            statistic_repository.delete_by_region(region.id)
-            statistic = Statistic()
-            penduduks = penduduk_repository.get_by_region(region.id)
-
-            statistic.fk_region_id = region.id
-            statistic.type = "pendidikan"
-            statistic.data = StatisticTransformer.transform_pendidikan_raw(penduduks)
-
-            result.append(statistic)
-        return result 
-
-    @staticmethod
-    def generate_layouts():
-        result = []
-        regions = region_repository.all()
-
         for region in regions:
             penduduks = penduduk_repository.get_by_region(region.id)
             geojsons = geojson_repository.get_by_region(region.id)
@@ -133,15 +98,18 @@ class Generator:
             layout = Layout()
             layout = LayoutTransformer.transform(layout, geojsons, penduduks)
             layout.fk_region_id = region.id
+            layout.year = year
             result.append(layout)
 
         return result
 
     @staticmethod
-    def generate_boundaries():
-        regions = region_repository.all()
-        boundary_repository.delete()
+    def generate_boundaries(supradesa_code='lokpri', year='2018'):
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        
         boundary = Boundary()
+        boundary.supradesa_code = supradesa_code
+        boundary.year = year
         boundary.data = []
 
         for region in regions:

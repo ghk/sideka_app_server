@@ -16,11 +16,18 @@ class RegionRepository:
         return self.db.session.query(self.model) \
             .filter(self.model.desa_id == desa_id) \
             .first()
-    
-    def get_pancamandala(self):
-        return self.db.session.query(self.model) \
-            .filter((self.model.id == '32.06.19.2009') | (self.model.id == '32.06.19.2010') | (self.model.id == '32.06.19.2011') | (self.model.id == '32.06.19.2007') | (self.model.id == '32.06.19.2006')).all()
 
+    def get_by_supradesa_code(self, supradesa_code, type=4, page_sort_params=None):
+        query = self.db.session.query(self.model)
+
+        if supradesa_code == 'lokpri':
+            query = query.filter(self.model.is_lokpri == True).filter(self.model.type == type)
+        else:
+            query = query.filter(self.model.id.like(supradesa_code + '%')).filter(self.model.type == type)
+        
+        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
+        return query.all()
+        
     def all(self, is_lokpri=True, page_sort_params=None):
         query = self.db.session.query(self.model) \
             .filter(self.model.is_lokpri == is_lokpri)

@@ -12,11 +12,13 @@ import * as urljoin from 'url-join';
 
 import 'rxjs/add/operator/catch';
 
+const SUPRADESA_CODE = 'lokpri';
+
 @Injectable()
 export class DataService {
 
   private _serverUrl: any;
-
+  
   constructor(
     private _http: ProgressHttp,
     private _sharedService: SharedService
@@ -26,53 +28,11 @@ export class DataService {
     });
   }
 
-  getRegions(query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'regions'),
-      query,
-      progressListener
-    );
-
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-      this._http,
-      'GET',
-      urljoin(this._serverUrl, 'regions', regionId),
-      query,
-      progressListener
-    );
-
-    return request
-      .map(res => res.json())
-      .catch(this.handleError)
-  }
-
-  getGeojsonsByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-        this._http,
-        'GET',
-        urljoin(this._serverUrl, 'geojsons/region', regionId),
-        query,
-        progressListener
-      );
-  
-      return request
-        .map(res => res.json())
-        .catch(this.handleError)
-  }
-
   getBoundaries(progressListener: any): Observable<any> {
     let request = RequestHelper.generateHttpRequest(
         this._http,
         'GET',
-        urljoin(this._serverUrl, 'boundary/all'),
+        urljoin(this._serverUrl, 'boundary/supradesa', SUPRADESA_CODE),
         {},
         progressListener
       );
@@ -96,20 +56,6 @@ export class DataService {
       .catch(this.handleError)
   }
 
-  getGeojsonByTypeAndRegion(type: string, regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(
-        this._http,
-        'GET',
-        urljoin(this._serverUrl, 'geojsons/type', type, 'region', regionId),
-        query,
-        progressListener
-      );
-  
-      return request
-        .map(res => res.json())
-        .catch(this.handleError)
-  }
-
   getSummariesByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
      let request = RequestHelper.generateHttpRequest(this._http, 
         'GET', 
@@ -121,56 +67,12 @@ export class DataService {
       return request.map(res => res.json()).catch(this.handleError);
   }
 
-  getStatisticByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(this._http, 
-       'GET', 
-       urljoin(this._serverUrl, 'statistics/region', regionId),
-       query,
-       progressListener
-     );
-
-     return request.map(res => res.json()).catch(this.handleError);
- }
-
-  getAllSummaries(progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(this._http, 
-      'GET', 
-      urljoin(this._serverUrl, 'summaries/get_all'),
-      {},
-      progressListener
-    );
-
-    return request.map(res => res.json()).catch(this.handleError);
-  }
-  
-  getRegionAvailableMaps( query: Query, progressListener: any): Observable<any> {
-    let request = RequestHelper.generateHttpRequest(this._http, 
-      'GET', 
-      urljoin(this._serverUrl, 'summaries/region_available_maps'),
-      query,
-      progressListener
-    );
-
-    return request.map(res => res.json()).catch(this.handleError);
-  }
-
   getSummaries(query: Query, progressListener: any): Observable<any> {
       let request = RequestHelper.generateHttpRequest(this._http, 
           'GET', 
-          urljoin(this._serverUrl, 'summaries'),
+          urljoin(this._serverUrl, 'summaries/supradesa', SUPRADESA_CODE),
           query,
           progressListener
-      );
-
-      return request.map(res => res.json()).catch(this.handleError);
-  }
-
-  getPenduduksByRegion(regionId: string, query: Query, progressListener: any): Observable<any> {
-     let request = RequestHelper.generateHttpRequest(this._http, 
-        'GET', 
-        urljoin(this._serverUrl, 'penduduks/region', regionId),
-        query,
-        progressListener
       );
 
       return request.map(res => res.json()).catch(this.handleError);

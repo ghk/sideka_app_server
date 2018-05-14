@@ -9,7 +9,7 @@ class SidekaDesaRepository(BaseRepository):
 
     def get_by_code(self, code):
         query = self.db.session.query(self.model)
-        return query.filter(self.model.kode == code and self.model.depth == 2).first()
+        return query.filter(self.model.kode == code).first()
         
     def get_by_prefix_code(self, code):
         query = self.db.session.query(self.model)

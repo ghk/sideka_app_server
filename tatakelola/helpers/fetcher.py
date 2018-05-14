@@ -151,8 +151,8 @@ class TatakelolaFetcher():
         apbdes_repository.add_all(apbdeses)
 
     @staticmethod
-    def fetch_geojsons():
-        regions = region_repository.all()
+    def fetch_geojsons(supradesa_code='lokpri'):
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_geojsons_by_region(region)
@@ -162,10 +162,8 @@ class TatakelolaFetcher():
                 traceback.print_exc()
 
     @staticmethod
-    def fetch_data():
-        regions = region_repository.all()
-        #regions = list()
-        #regions.append(region_repository.get_by_desa_id(3))
+    def fetch_data(supradesa_code='lokpri'):
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_data_by_region(region)
@@ -175,8 +173,8 @@ class TatakelolaFetcher():
                 traceback.print_exc()
 
     @staticmethod
-    def fetch_apbdes():
-        regions = region_repository.all()
+    def fetch_apbdes(supradesa_code='lokrpi'):
+        regions = region_repository.get_by_supradesa_code(supradesa_code)
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_apbdes_by_region(region)
@@ -184,14 +182,3 @@ class TatakelolaFetcher():
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logging.error(e.message)
                 traceback.print_exc()
-
-    # @staticmethod
-    # def fetch_mandalamekar():
-    #     region = region_repository.get('32.06.19.2009')
-    #     try:
-    #         TatakelolaFetcher.fetch_data_by_region(region)
-    #     except Exception as e:
-    #         logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
-    #         logger.error(e.message)
-    #         traceback.print_exc()
-        

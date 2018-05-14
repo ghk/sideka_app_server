@@ -120,7 +120,7 @@ export class DesaComponent implements OnInit, OnDestroy {
         
         if (!this.activeDesa.summary) {
             let summary = await this._dataService.getSummariesByRegion(this.activeDesa.regionId, {}, null).toPromise();
-            this.activeDesa.summary = summary[0];
+            this.activeDesa.summary = summary;
         }
  
         this.activeDesa.setActiveGeoJson();

@@ -6,8 +6,8 @@ from tatakelola.repository import BoundaryRepository
 app = Blueprint('boundary', __name__)
 boundary_repository = BoundaryRepository(db)
 
-@app.route('/boundary/all', methods=['GET'])
-def get_boundaries():
-    entities = boundary_repository.get()
+@app.route('/boundary/supradesa/<string:supradesa_code>', methods=['GET'])
+def get_by_supradesa_code(supradesa_code):
+    entities = boundary_repository.get_by_supradesa_code(supradesa_code)
     result = BoundaryModelSchema(many=False).dump(entities)
     return jsonify(result.data)

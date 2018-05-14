@@ -21,8 +21,27 @@ logger = logging.getLogger('tatakelola-kabupaten')
 
 class TatakelolaKabupatenFetcher():
     @staticmethod
+    def fetch_kabupatens(province_code):
+        kabupatens = sideka_all_desa_repository.get_by_prefix_depth(code, 2)
 
-    def fetch_desas(code):
+        for kabupaten in kabupatens:
+            region = region_repository.get(str(kabupaten.region_code).rstrip())
+
+            if (region is not None):
+                region_repository.delete(region.id)
+            
+            region = Region()
+
+            region.id = kabupaten.region_code
+            region.desa_id = None
+            region.name = kabupaten.region_name
+            region.domain = None
+            region.desa_id = None
+            region.type = 2
+            region_repository.add(region)
+    
+    @staticmethod
+    def fetch_desas_by_kabupaten(kabupaten_code):
         sd_desas = sideka_desa_repository.get_by_prefix_code(code)
 
         for sd_desa in sd_desas:
@@ -46,6 +65,52 @@ class TatakelolaKabupatenFetcher():
             region_repository.add(region)
 
     @staticmethod
+    def fetch_desas_by_province(province_code):
+        kabupatens = region_repository.get_all_by_kabupaten_code(province_code)
+
+        for kabupaten in kabupatens:
+            sd_desas = sideka_desa_repository.get_by_prefix_code(kabupaten.id)
+
+            for sd_desa in sd_desas:
+                if (sd_desa.kode is None or len(sd_desa.kode) == 0):
+                    continue
+
+                region = region_repository.get(str(sd_desa.kode).rstrip())
+
+                if (region is not None):
+                    region_repository.delete(region.id)
+                    
+                region = Region()
+
+                region.id = sd_desa.kode
+                region.desa_id = sd_desa.blog_id
+                region.name = sd_desa.desa
+                region.domain = sd_desa.domain
+                region.desa_id = sd_desa.blog_id
+                region.type = 4
+                region.is_lokpri = bool(sd_desa.is_lokpri)
+                region.fk_parent_id = kabupaten.id
+                region_repository.add(region)
+    
+    @staticmethod
+    def fetch_geojson_by_kabupaten(kabupaten_code):
+        regions = region_repository.get_all_by_kabupaten_code(kabupaten_code)
+        for region in regions:
+            try:
+                TatakelolaKabupatenFetcher.fetch_geojsons_by_region(region)
+            except Exception as e:
+                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
+                logger.error(e.message)
+                traceback.print_exc()
+    
+    @staticmethod
+    def fetch_geojson_by_province(province_code):
+        kabupatens = region_repository.get_all_by_kabupaten_code(province_code)
+
+        for kabupaten in kabupatens:
+            TatakelolaKabupatenFetcher.fetch_geojson_by_kabupaten(kabupaten.id)
+
+    @staticmethod
     def fetch_geojsons_by_region(region):
         geojson_repository.delete_by_region(region.id)
 
@@ -56,6 +121,7 @@ class TatakelolaKabupatenFetcher():
 
         contents = PemetaanContentTransformer.transform(sd_content.content)
         for content in contents:
+
             data = GeojsonTransformer.transform(contents[content])
             geo = Geojson()
             geo.type = content
@@ -64,15 +130,22 @@ class TatakelolaKabupatenFetcher():
             geojson_repository.add(geo)
 
     @staticmethod
-    def fetch_geojsons(code):
-        regions = region_repository.get_all_by_kabupaten_code(code)
+    def fetch_data_by_kabupaten(kabupaten_code):
+        regions = region_repository.get_all_by_kabupaten_code(kabupaten_code)
+
         for region in regions:
             try:
-                TatakelolaKabupatenFetcher.fetch_geojsons_by_region(region)
+                TatakelolaKabupatenFetcher.fetch_data_by_region(region)
             except Exception as e:
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()
+                
+    @staticmethod
+    def fetch_data_by_province(province_code):
+        kabupatens = region_repository.get_all_by_kabupaten_code(province_code)
+        for kabupaten in kabupatens:
+            TatakelolaKabupatenFetcher.fetch_data_by_kabupaten(kabupaten.id)
 
     @staticmethod
     def fetch_data_by_region(region):
@@ -145,16 +218,21 @@ class TatakelolaKabupatenFetcher():
         penduduk_repository.bulk_add_all(penduduks)
 
     @staticmethod
-    def fetch_data(code):
-        regions = region_repository.get_all_by_kabupaten_code(code)
-
+    def fetch_apbdes_by_kabupaten(kabupaten_code):
+        regions = region_repository.get_all_by_kabupaten_code(kabupaten_code)
         for region in regions:
             try:
-                TatakelolaKabupatenFetcher.fetch_data_by_region(region)
+                TatakelolaKabupatenFetcher.fetch_apbdes_by_region(region)
             except Exception as e:
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
-                logger.error(e.message)
+                logging.error(e.message)
                 traceback.print_exc()
+
+    @staticmethod
+    def fetch_apbdes_by_province(province_code):
+        kabupatens = region_repository.get_all_by_kabupaten_code(province_code)
+        for kabupaten in kabupatens:
+            TatakelolaKabupatenFetcher.fetch_apbdes_by_kabupaten(kabupaten.id)
 
     @staticmethod
     def fetch_apbdes_by_region(region):
@@ -177,14 +255,3 @@ class TatakelolaKabupatenFetcher():
             apbdeses.append(apbdes)
 
         apbdes_repository.add_all(apbdeses)
-
-    @staticmethod
-    def fetch_apbdes(code):
-        regions = region_repository.get_all_by_kabupaten_code(code)
-        for region in regions:
-            try:
-                TatakelolaKabupatenFetcher.fetch_apbdes_by_region(region)
-            except Exception as e:
-                logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
-                logging.error(e.message)
-                traceback.print_exc()

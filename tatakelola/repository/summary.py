@@ -20,6 +20,13 @@ class SummaryRepository(BaseRepository):
             .order_by(self.model.fk_region_id) \
             .all()
 
+    def get_by_supraadesa_code(self, supradesa_code='lokpri', page_sort_params=None):
+        query = self.db.session.query(self.model)
+        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
+        return query.filter(self.model.supradesa_code == supradesa_code) \
+            .order_by(self.model.fk_region_id) \
+            .all()
+
     def delete_by_region(self, region_id):
         self.db.session.query(self.model) \
             .filter(self.model.fk_region_id == region_id) \

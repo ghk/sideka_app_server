@@ -8,8 +8,11 @@ class BoundaryRepository(BaseRepository):
         self.db = db
         self.model = Boundary
     
-    def get(self, kabupaten_code):
-       return self.db.session.query(self.model).filter(self.model.kabupaten_code == kabupaten_code).first()
+    def get(self, code):
+       return self.db.session.query(self.model).filter(self.model.code == code).first()
 
+    def delete_by_code(self, code):
+        return self.db.session.query(self.model).filter(self.model.code == code).delete()
+        
     def delete(self):
         self.db.session.query(self.model).delete()

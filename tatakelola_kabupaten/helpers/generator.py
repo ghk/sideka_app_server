@@ -13,9 +13,9 @@ boundary_repository = BoundaryRepository(db)
 
 class Generator:
     @staticmethod
-    def generate_summaries(code):
+    def generate_summaries_by_kabupaten(kabupaten_code):
         result = []
-        regions = region_repository.get_all_by_kabupaten_code(code)
+        regions = region_repository.get_all_by_code(kabupaten_code)
 
         for region in regions:
             summary_repository.delete_by_region(region.id)
@@ -26,6 +26,93 @@ class Generator:
             summary.fk_region_id = region.id
             result.append(summary)
         return result
+
+    @staticmethod
+    def generate_summaries_by_province(province_code):
+        kabupatens = region_repository.get_all_by_code(province_code)
+        result = []
+
+        for kabupaten in kabupatens:
+            summaries = Generator.generate_summaries_by_kabupaten(kabupaten.id)
+            result.append(summaries)
+
+        return result
+
+    staticmethod
+    def generate_layouts_by_kabupaten(kabupaten_code):
+        result = []
+        regions = region_repository.get_all_by_kabupaten_code(kabupaten_code)
+
+        for region in regions:
+            penduduks = penduduk_repository.get_by_region(region.id)
+            geojsons = geojson_repository.get_by_region(region.id)
+
+            layout_repository.delete_by_region(region.id)
+            layout = Layout()
+            layout = LayoutTransformer.transform(layout, geojsons, penduduks)
+            layout.fk_region_id = region.id
+            result.append(layout)
+
+        return result
+
+    @staticmethod
+    def generate_layouts_by_province(province_code):
+        result = []
+        kabupatens = region_repository.get_all_by_code(province_code)
+        
+        for kabupaten in kabupatens:
+            layout = Generator.generate_layout_by_kabupaten(kabupaten.id)
+            result.append(layout)
+
+        return result
+
+    @staticmethod
+    def generate_boundaries_by_kabupaten(kabupaten_code):
+        regions = region_repository.get_all_by_kabupaten_code(kabupaten_code)
+        boundary_repository.delete()
+        boundary = Boundary()
+        boundary.data = []
+        boundary.code = kabupaten_code
+        boundary.type = 2
+        
+        for region in regions:
+            geojsons = geojson_repository.get_by_region(region.id)
+            boundary_data = filter(lambda x:x.type == "boundary", geojsons)
+        
+            if len(boundary_data) > 0:
+                for feature in boundary_data[0].data["features"]:
+                    if feature["geometry"]["type"] == "Polygon":
+                        feature["properties"]["regionId"] = region.id
+                        feature["properties"]["regionName"] = region.name
+                        boundary.data.append(feature)
+
+        return boundary
+
+    @staticmethod
+    def generate_boundaries_by_province(province_code):
+        kabupatens = region_repository.get_all_by_kabupaten_code(province_code)
+
+        boundary_repository.delete_by_code(province_code)
+        boundary = Boundary()
+        boundary.data = []
+        boundary.code = province_code
+        boundary.type = 1
+
+        for kabupaten in kabupatens:
+            regions = region_repository.get_all_by_kabupaten_code(kabupaten.id)
+
+            for region in regions:
+                geojsons = geojson_repository.get_by_region(region.id)
+                boundary_data = filter(lambda x:x.type == "boundary", geojsons)
+            
+                if len(boundary_data) > 0:
+                    for feature in boundary_data[0].data["features"]:
+                        if feature["geometry"]["type"] == "Polygon":
+                            feature["properties"]["regionId"] = region.id
+                            feature["properties"]["regionName"] = region.name
+                            boundary.data.append(feature)
+
+        return boundary
 
     @staticmethod
     def generate_penduduk_summary_by_region(summary, region):
@@ -81,41 +168,3 @@ class Generator:
         if transportations is not None:
             summary = SummaryGeojsonTransformer.transform(summary, transportations.data, 'network_transportation')
         return summary
-
-    @staticmethod
-    def generate_layouts(code):
-        result = []
-        regions = region_repository.get_all_by_kabupaten_code(code)
-
-        for region in regions:
-            penduduks = penduduk_repository.get_by_region(region.id)
-            geojsons = geojson_repository.get_by_region(region.id)
-
-            layout_repository.delete_by_region(region.id)
-            layout = Layout()
-            layout = LayoutTransformer.transform(layout, geojsons, penduduks)
-            layout.fk_region_id = region.id
-            result.append(layout)
-
-        return result
-
-    @staticmethod
-    def generate_boundaries(code):
-        regions = region_repository.get_all_by_kabupaten_code(code)
-        boundary_repository.delete()
-        boundary = Boundary()
-        boundary.data = []
-        boundary.kabupaten_code = code
-        
-        for region in regions:
-            geojsons = geojson_repository.get_by_region(region.id)
-            boundary_data = filter(lambda x:x.type == "boundary", geojsons)
-        
-            if len(boundary_data) > 0:
-                for feature in boundary_data[0].data["features"]:
-                    if feature["geometry"]["type"] == "Polygon":
-                        feature["properties"]["regionId"] = region.id
-                        feature["properties"]["regionName"] = region.name
-                        boundary.data.append(feature)
-
-        return boundary

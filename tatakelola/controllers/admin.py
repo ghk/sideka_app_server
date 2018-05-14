@@ -20,7 +20,6 @@ def fetch_desa_ids():
     current_app.logger.info('Fetch Siskeudes Desa Id Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
-
 @app.route('/admin/fetch/all', methods=['GET'])
 def fetch_all():
     t0 = time()

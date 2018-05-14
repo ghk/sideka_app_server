@@ -47,11 +47,13 @@ class Summary(BaseModel):
     pemetaan_highway_other_length = db.Column(db.Integer, nullable=True)
     pemetaan_bridge_length = db.Column(db.Integer, nullable=True)
 
+    supradesa_code = db.Column(db.String, nullable=True)
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))
     region = db.relationship('Region', lazy='joined')
-
+   
     __table_args__ = (
         db.Index('summaries_ix_fk_region_id', 'fk_region_id'),
+        db.Index('summaries_ix_supradesa_code', 'supradesa_code', postgresql_using='btree')
     )
 
 

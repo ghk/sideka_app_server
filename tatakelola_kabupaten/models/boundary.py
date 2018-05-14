@@ -8,12 +8,14 @@ from sqlalchemy.dialects.postgresql import JSONB
 class Boundary(BaseModel):
     __tablename__ = 'boundaries'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    kabupaten_code = db.Column(db.String)
+    code = db.Column(db.String)
     data = db.Column(JSONB)
+    type = db.Column(db.Integer)
+
 
     __table_args__ = (
         db.Index('bound_ix_data', 'data', postgresql_using='gin'),
-        db.Index('bound_ix_kabupaten_code', 'kabupaten_code', postgresql_using='gin'),
+        db.Index('bound_ix_code', 'code', postgresql_using='btree'),
     )
 
 
