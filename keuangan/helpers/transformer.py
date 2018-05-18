@@ -264,6 +264,7 @@ class SiskeudesLikelihoodTransformer:
             tokens.append(word.strip())
 
         return tokens
+
     @staticmethod
     def process(text, documents):
         token = SiskeudesLikelihoodTransformer.tokenize(text)
@@ -323,7 +324,7 @@ class SiskeudesLikelihoodTransformer:
     @staticmethod
     def normalize():
         documents = SiskeudesLikelihoodTransformer.create_documents()
-        docs = pandas.read_sql("select fk_region_id, uraian, percentage from view_learn_kegiatan order by fk_region_id", db.session.connection())
+        docs = pandas.read_sql("select fk_region_id, year, uraian, percentage from view_learn_kegiatan order by fk_region_id", db.session.connection())
         docs['uraian'].fillna(0, inplace=True)
         d = []
         for idx, doc in enumerate(docs['uraian']):
@@ -339,7 +340,7 @@ class SiskeudesLikelihoodTransformer:
         # Filter Data
         df = d[d.percentage >= 0.005]
         df = df.reset_index(drop=True)
-        data = pandas.pivot_table(df, index=["fk_region_id"], values=["percentage"], columns=["normalized_uraian"])
+        data = pandas.pivot_table(df, index=["year" , "fk_region_id"], values=["percentage"], columns=["normalized_uraian"])
 
         # Fill missing data
         data = data.fillna(0)
@@ -348,44 +349,53 @@ class SiskeudesLikelihoodTransformer:
         distances = pdist(data.values, metric='euclidean')
         distances_matrix = squareform(distances)
 
+        #prepare Data Frame for Distance Matrix
         table = pandas.DataFrame(distances_matrix)
-        table['fk_regions'] = data.index.tolist()
+        table['year'] = data.index.get_level_values('year')
+        table = table[['year'] + table.columns[:-1].tolist()]
+        table['fk_regions'] = data.index.get_level_values('fk_region_id')
         table = table[['fk_regions'] + table.columns[:-1].tolist()]
 
         # Prepare for result matrix
         fk_regions = numpy.array(table['fk_regions'])
-        distances = numpy.array(table)
+        years = numpy.array(table['years'])
+        tables = table.drop('year' , 1)
+        distances = numpy.array(tables)
 
         # Transform Matrix
         rank_desas = []
         for idx_1, dis_1 in enumerate(distances):
             for idx_2, dis_2 in enumerate(dis_1):
                 region_distances = [dis_1[0]]
+                year1 = years[idx_1]
+                region_distances.append(year1)
                 if idx_1 == idx_2:
                     continue
                 ref_fk_region = fk_regions[idx_2 - 1]
                 region_distances.append(ref_fk_region)
+                year2 = years[idx_2 - 1]
+                region_distances.append(year2)
                 region_distances.append(dis_2)
                 # print region_distances
                 rank_desas.append(region_distances)
 
         rank_table = pandas.DataFrame(rank_desas)
-        rank_table.columns = ["id_desa", "id_likelihood", "euclidean_distances"]
+        rank_table.columns = ["id_desa", "year" , "id_likelihood" , "year" , "euclidean_distances"]
 
         # Sort result
-        rank_desas = sorted(rank_desas, key=lambda x: (x[0], x[2]))
+        rank_desas = sorted(rank_desas, key=lambda x: (x[0], x[4]))
         split = lambda rank_desas, n=len(data): [rank_desas[i:i + n] for i in range(0, len(rank_desas), n)]
         rank_desas_splitted = split(rank_desas)
 
         likelihood_table = []
 
         for desa in rank_desas_splitted:
-            desa = [x for x in desa if x[2] != 0]
+            desa = [x for x in desa if x[4] != 0]
             likelihood_table.append(desa[0:5])
 
         zipped = numpy.concatenate(likelihood_table)
         likelihood_table = pandas.DataFrame(zipped)
-        likelihood_table.columns = ["fk_region_id", "fk_region_likelihood_id", "euclidean_score"]
+        likelihood_table.columns = ["fk_region_id", "year" , "fk_region_likelihood_id" , "year" , "euclidean_score"]
 
         # Add column rank
         rank = [1, 2, 3, 4, 5]
