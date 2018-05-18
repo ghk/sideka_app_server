@@ -264,8 +264,11 @@ class ParsePemetaanData:
                          elif feature['geometry']['type'] == 'Polygon':
                             summary.pemetaan_highway_other_length = 0
                  else:
-                     summary.pemetaan_highway_other_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
-                     
+                    if feature['geometry']['type'] == 'LineString':
+                        summary.pemetaan_highway_other_length += GeoJsonUtils.calculate_length(feature['geometry']['coordinates'])
+                    elif feature['geometry']['type'] == 'Polygon':
+                        summary.pemetaan_highway_other_length = 0
+
         return summary
 
 class GeoJsonUtils:
