@@ -67,7 +67,10 @@ for c in contents:
 		db.commit()
 	except Exception as e:
 		traceback.print_exc()
-		cur.execute("update sd_contents set opendata_push_error = %s where id = %s", (str(e), c["id"]))
+		err = str(e)
+		if len(err) > 200:
+		    err = err[:200]
+		cur.execute("update sd_contents set opendata_push_error = %s where id = %s", (err, c["id"]))
 		db.commit()
 
 db.close()

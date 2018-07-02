@@ -1,5 +1,6 @@
 import simplejson as json
 import pandas
+import json as js
 import numpy
 from keuangan import db
 from scipy.spatial.distance import pdist, squareform
@@ -8,10 +9,10 @@ from keuangan.models import BudgetRecapitulation, ProgressTimeline, ProgressReca
 class ContentTransformer:
     @staticmethod
     def transform(content):
-        serialized_content = json.loads(content)
+        print content['columns']
+        serialized_content = content
+        result = {}       
         columns = {}
-        result = {}
-
         for column in serialized_content['columns'].keys():
             columns[column] = serialized_content['columns'][column]
             result[column] = []
@@ -358,7 +359,7 @@ class SiskeudesLikelihoodTransformer:
 
         # Prepare for result matrix
         fk_regions = numpy.array(table['fk_regions'])
-        years = numpy.array(table['years'])
+        years = numpy.array(table['year'])
         tables = table.drop('year' , 1)
         distances = numpy.array(tables)
 
