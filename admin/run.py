@@ -213,6 +213,19 @@ def get_json_content_v2(id, type='data'):
 
     return jsonify(json_content)
 
+@app.route('/content/delete', methods=["GET"])
+@login_required
+def delete_json_content():
+    sheet = request.args.get("sheet", "0")
+    query = db.session.query(SdContent)
+    id = request.args.get("id")
+    print id
+    db.session.query(SdContent) \
+        .filter(SdContent.id == id) \
+        .delete()
+    db.session.commit()
+    return redirect('/contents/v2')
+
 
 @app.route('/statics/<path:path>')
 def send_statics(path):
