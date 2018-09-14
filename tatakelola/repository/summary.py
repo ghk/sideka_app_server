@@ -26,7 +26,7 @@ class SummaryRepository(BaseRepository):
         return query.order_by(self.model.supradesa_code == supradesa_code) \
             .all()
 
-    def get_by_region_prefix(self, prefix, page_sort_params=None)
+    def get_by_region_prefix(self, prefix, page_sort_params=None):
         query = self.db.session.query(self.model)
         query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
 

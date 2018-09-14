@@ -13,7 +13,7 @@ class BoundaryRepository(BaseRepository):
 
     def get_by_supradesa_code(self, supradesa_code='lokpri'):
        return self.db.session.query(self.model).filter(self.model.supradesa_code == supradesa_code).first()
-
+    
     def delete(self):
         self.db.session.query(self.model).delete()
 
