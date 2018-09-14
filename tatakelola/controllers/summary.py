@@ -23,3 +23,9 @@ def get_by_supradesa_code(supradesa_code):
     entities = summary_repository.get_by_supraadesa_code(supradesa_code)
     result = SummaryModelSchema(many=True).dump(entities)
     return jsonify(result.data)
+
+@app.route('/summaries/prefix/<string:prefix>', methods=['GET'])
+def get_by_region_prefix(prefix):
+    entities = summary_repository.get_by_region_prefix(prefix)
+    result = SummaryModelSchema(many=True).dump(entities)
+    return jsonify(result.data)

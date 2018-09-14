@@ -13,7 +13,7 @@ app = create_app()
 db.app=app
 db.init_app(app)
 
-supradesa_code = 'lokpri'
+supradesa_code = '18.05'
 boundary_repository = BoundaryRepository(db)
 
 if len(sys.argv) > 1:
