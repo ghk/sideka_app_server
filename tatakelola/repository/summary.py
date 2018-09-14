@@ -30,9 +30,7 @@ class SummaryRepository(BaseRepository):
         query = self.db.session.query(self.model)
         query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
 
-        return query.filter(self.model.fk_region_id.like('%' + prefix + '%')) \ 
-            .order_by(self.model.fk_region_id) \
-            .all()
+        return query.filter(self.model.fk_region_id.like('%' + prefix + '%')).order_by(self.model.fk_region_id).all()
 
     def delete_by_region(self, region_id):
         self.db.session.query(self.model) \
