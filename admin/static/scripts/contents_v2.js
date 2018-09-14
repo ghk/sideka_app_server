@@ -174,6 +174,13 @@ $("#filter-form").submit(function () {
   return false;
 });
 
+$("#filter-form input").keypress(function(e){
+  if(e.which == 13){
+    filter();
+    return false;
+  }
+})
+
 $("#filter-form select").change(function () {
   filter();
 });

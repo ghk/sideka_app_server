@@ -96,7 +96,8 @@ class Generator:
             ('01', 'Penyelengaraan Pemerintahan Desa', False),
             ('02', 'Pelaksanaan Pembangunan Desa', False),
             ('03', 'Pembinaan Kemasyarakatan', False),
-            ('04', 'Pemberdayaan Masyarakat', False)
+            ('04', 'Pemberdayaan Masyarakat', False),
+            ('05', 'Bidang Tidak Terduga', False)
         ]
 
         for budget_type in budget_types:

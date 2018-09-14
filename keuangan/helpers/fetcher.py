@@ -43,6 +43,7 @@ class SiskeudesFetcher:
         sd_contents = sideka_content_repository.get_latest_content('penerimaan', year)
         for sd_content in sd_contents:
             contents = ContentTransformer.transform(sd_content.content)
+            print 'desa id', sd_content.desa_id
             if not ('tbp' in contents):
                 logger.warning('Desa id: {0} does not have tbp'.format(sd_content.desa_id))
                 continue
@@ -171,6 +172,7 @@ class SiskeudesFetcher:
             try:
                 SiskeudesFetcher.fetch_spps_by_region_and_year(region, year)
             except Exception as e:
+                print "Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id)
                 logger.error("Region: {0}<{1}><{2}>".format(region.name, region.id, region.desa_id))
                 logger.error(e.message)
                 traceback.print_exc()

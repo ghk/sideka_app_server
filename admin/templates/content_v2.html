@@ -9,8 +9,8 @@
 	</style>
 
     <div class="flex-item">
-    <a class="btn btn-default" href="/api/contents/v2/{{id}}">View JSON</a> 
-    <a class="btn btn-danger" href="contents/delete?id={{id}}">Delete Content</a> 
+        <a class="btn btn-default" href="/api/contents/v2/{{id}}">View JSON</a> 
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#myModal">Delete Content</button>
     </div>
     <div style="flex: 1; padding: 15px;">
         <table class="table table-striped" style="background-color: rgba(255,255,255,0.8);">
@@ -46,5 +46,25 @@
             </tbody>
         </table>
     </div>
-	
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog modal-confirm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="icon-box">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </div>				
+                    <h4 class="modal-title">Apakah anda yakin?</h4>	
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah anda yakin akan menghapus konten json ini?, data akan permanen dihapus dari sistem.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Cancel</button>
+                    <a href="/content/delete?id={{id}}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>     
+    <script src="/static/scripts/content_v2.js"></script>
 {% endblock %}
