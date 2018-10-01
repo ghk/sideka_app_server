@@ -11,3 +11,9 @@ def get_layouts_by_region(region_id):
     entities = layout_repository.get_by_region(region_id)
     result = LayoutModelSchema(many=False).dump(entities)
     return jsonify(result.data)
+
+@app.route('/layout/prefix/<string:prefix>', methods=['GET'])
+def get_by_region_prefix(prefix):
+    entities = layout_repository.get_by_region_prefix(prefix)
+    result = LayoutModelSchema(many=True).dump(entities)
+    return jsonify(result.data)
