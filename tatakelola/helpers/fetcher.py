@@ -83,48 +83,50 @@ class TatakelolaFetcher():
         penduduks = []
 
         for d in contents['penduduk']:
-            penduduk = Penduduk()
-            penduduk.id = d['id']
-            penduduk.nik = d['nik']
-            penduduk.nama_penduduk = d['nama_penduduk']
-            penduduk.jenis_kelamin = d['jenis_kelamin']
-            penduduk.tempat_lahir = d['tempat_lahir']
+            try:
+                penduduk = Penduduk()
+                penduduk.id = d['id']
+                penduduk.nik = d['nik']
+                penduduk.nama_penduduk = d['nama_penduduk']
+                penduduk.jenis_kelamin = d['jenis_kelamin']
+                penduduk.tempat_lahir = d['tempat_lahir']
 
-            if d['tanggal_lahir'] != None:
-                penduduk.tanggal_lahir = datetime.strptime(d['tanggal_lahir'], '%d/%m/%Y') 
+                if d['tanggal_lahir'] != None:
+                    penduduk.tanggal_lahir = datetime.strptime(d['tanggal_lahir'], '%d/%m/%Y') 
 
-            penduduk.status_kawin = d['status_kawin']
-            penduduk.agama = d['agama']
-            penduduk.golongan_darah = d['golongan_darah']
-            penduduk.kewarganegaraan = d['kewarganegaraan']
-            penduduk.no_kk = d['no_kk']
-            penduduk.nama_ayah = d['nama_ayah']
-            penduduk.nama_ibu = d['nama_ibu']
-            penduduk.hubungan_keluarga = d['hubungan_keluarga']
-            penduduk.nama_dusun = d['nama_dusun']
-            penduduk.rw = d['rw']
-            penduduk.rt = d['rt']
-            penduduk.alamat_jalan = d['alamat_jalan']
-            penduduk.no_telepon = d['no_telepon']
-            penduduk.email = d['email']
-            penduduk.no_akta = d['no_akta']
-            penduduk.no_kitas = d['no_kitas']
-            penduduk.no_paspor = d['no_paspor']
-            penduduk.pendidikan = d['pendidikan']
-            penduduk.pekerjaan = d['pekerjaan']
-            penduduk.etnis_suku = d['etnis_suku']
-            penduduk.status_tinggal = d['status_tinggal']
-            penduduk.akseptor_kb = d['akseptor_kb']
-            penduduk.cacat_fisik = d['cacat_fisik']
-            penduduk.cacat_mental = d['cacat_mental']
-            penduduk.wajib_pajak = d['wajib_pajak']
-            penduduk.lembaga_pemerintahan = d['lembaga_pemerintahan']
-            penduduk.lembaga_kemasyarakatan = d['lembaga_kemasyarakatan']
-            penduduk.lembaga_ekonomi = d['lembaga_ekonomi']
-            penduduk.fk_region_id = region.id
-            penduduk.region = region
-            penduduks.append(penduduk)
-       
+                penduduk.status_kawin = d['status_kawin']
+                penduduk.agama = d['agama']
+                penduduk.golongan_darah = d['golongan_darah']
+                penduduk.kewarganegaraan = d['kewarganegaraan']
+                penduduk.no_kk = d['no_kk']
+                penduduk.nama_ayah = d['nama_ayah']
+                penduduk.nama_ibu = d['nama_ibu']
+                penduduk.hubungan_keluarga = d['hubungan_keluarga']
+                penduduk.nama_dusun = d['nama_dusun']
+                penduduk.rw = d['rw']
+                penduduk.rt = d['rt']
+                penduduk.alamat_jalan = d['alamat_jalan']
+                penduduk.no_telepon = d['no_telepon']
+                penduduk.email = d['email']
+                penduduk.no_akta = d['no_akta']
+                penduduk.no_kitas = d['no_kitas']
+                penduduk.no_paspor = d['no_paspor']
+                penduduk.pendidikan = d['pendidikan']
+                penduduk.pekerjaan = d['pekerjaan']
+                penduduk.etnis_suku = d['etnis_suku']
+                penduduk.status_tinggal = d['status_tinggal']
+                penduduk.akseptor_kb = d['akseptor_kb']
+                penduduk.cacat_fisik = d['cacat_fisik']
+                penduduk.cacat_mental = d['cacat_mental']
+                penduduk.wajib_pajak = d['wajib_pajak']
+                penduduk.lembaga_pemerintahan = d['lembaga_pemerintahan']
+                penduduk.lembaga_kemasyarakatan = d['lembaga_kemasyarakatan']
+                penduduk.lembaga_ekonomi = d['lembaga_ekonomi']
+                penduduk.fk_region_id = region.id
+                penduduk.region = region
+                penduduks.append(penduduk)
+            except:
+                continue
         #penduduks = PendudukModelSchema(many=True).load(contents['penduduk'])
         
         #for penduduk in penduduks.data:
