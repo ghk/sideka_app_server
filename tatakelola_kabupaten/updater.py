@@ -51,8 +51,8 @@ def generate_jateng():
     db.session.commit()
    
 with app.app_context():
-    fetch_jateng()
-    generate_jateng()
+    #fetch_jateng()
+    #generate_jateng()
     
     #fetch_all()
     #generate_all()

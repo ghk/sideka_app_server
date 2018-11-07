@@ -13,7 +13,7 @@ import { ChartHelper } from '../helpers/chartHelper';
 const MAP = tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png');
 const SATELLITE = tileLayer('https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiZ2hrIiwiYSI6ImUxYmUxZDU3MTllY2ZkMGQ3OTAwNTg1MmNlMWUyYWIyIn0.qZKc1XfW236NeD0qAKBf9A');
 //const OSM = tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
+ 
 @Component({
     selector: 'st-desa',
     templateUrl: '../templates/desa.html'

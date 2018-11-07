@@ -2,7 +2,6 @@ from base import BaseRepository
 from tatakelola.helpers import QueryHelper
 from tatakelola.models import Layout
 
-
 class LayoutRepository(BaseRepository):
     def __init__(self, db):
         self.db = db

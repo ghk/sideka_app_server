@@ -27,6 +27,16 @@ pendidikan_groups = {
     'Tamat S-3/sederajat']
 }
 
+penduduk_range = {
+    "0_15": [0, 15],
+    "15_25": [15, 25],
+    "25_35": [25, 35],
+    "35_45": [35, 45],
+    "45_55": [45, 55],
+    "55_65": [55, 65],
+    "65": [65, 100]
+}
+
 class ContentTransformer:
     @staticmethod
     def transform(content):
@@ -76,7 +86,6 @@ class PemetaanContentTransformer:
 
         return result
 
-
 class GeojsonTransformer:
     @staticmethod
     def transform(data):
@@ -88,7 +97,6 @@ class GeojsonTransformer:
         result = geojson.FeatureCollection(features)
         
         return result
-
 
 class SummaryPendudukTransformer:
     @staticmethod
@@ -340,11 +348,52 @@ class StatisticTransformer:
             
         return result
 
+    @staticmethod
+    def transform_penduduk_productivity_raw(penduduks): 
+       result = []
+       today = date.today()
+       
+       for key in penduduk_range.iterkeys():
+          bounds = penduduk_range[key]
+          range = create_range(bounds[0], bounds[1])
+          total_male = 0
+          total_female = 0
+          total_unknown = 0
+
+          for penduduk in penduduks:
+              age = today.year - penduduk.tanggal_lahir.year
+            
+              if age in range:
+                  if penduduk.jenis_kelamin == "Laki-Laki":
+                      total_male += 1
+                  elif penduduk.jenis_kelamin == "Perempuan":
+                      total_female += 1
+               
+              if age in range and penduduk.jenis_kelamin == "Laki-Laki":
+                  total_male += 1
+              elif age in range and penduduk.jenis_kelamin == "Laki-Laki":
+                  total_female += 1
+              else:
+                  total_unknown += 1
+                  
+        result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "key": key })
+        result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "key": key})
+        result.append({"jenis_kelamin": "Tidak Diketahui", "jumlah": total_unknown, "key": key})
+
+       return result
+    
+    def create_range(from, to):
+        result = []
+        for i in range(from, to):
+            result.append(i)
+
+        return result
 class LayoutTransformer:
     @staticmethod
     def transform(layout, geoJsons, penduduks):
         pekerjaan_statistic_raw = StatisticTransformer.transform_pekerjaan_raw(penduduks)
         pendidikan_statistic_raw = StatisticTransformer.transform_pendidikan_raw(penduduks)
+        penduduk_statistic_raw = StatisticTransformer.transform_penduduk_productivity_raw(penduduks)
 
         apbdes_features = filter(lambda x: x.type == 'log_pembangunan', geoJsons)
         landuse_features = filter(lambda x: x.type == 'landuse', geoJsons)
@@ -387,8 +436,8 @@ class LayoutTransformer:
                             layout.data["houses"].append(feature)
 
         
-        layout.data["properties"] = {"statistics": []}
-        layout.data["properties"]["statistics"] = {"pekerjaan": pekerjaan_statistic_raw, "pendidikan": pendidikan_statistic_raw}
+        layout.data["properties"] = {"statistics": {}}
+        layout.data["properties"]["statistics"] = {"pekerjaan": pekerjaan_statistic_raw, "pendidikan": pendidikan_statistic_raw, "penduduk": penduduk_statistic_raw}
 
         return layout 
 

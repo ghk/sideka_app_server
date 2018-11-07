@@ -42,10 +42,10 @@ class Summary(BaseModel):
     pemetaan_school_sma = db.Column(db.Integer, nullable=True)
     pemetaan_school_pt = db.Column(db.Integer, nullable=True)
 
-    pemetaan_highway_asphalt_length = db.Column(db.Integer, nullable=True)
-    pemetaan_highway_concrete_length = db.Column(db.Integer, nullable=True)
-    pemetaan_highway_other_length = db.Column(db.Integer, nullable=True)
-    pemetaan_bridge_length = db.Column(db.Integer, nullable=True)
+    pemetaan_highway_asphalt_length = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_highway_concrete_length = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_highway_other_length = db.Column(db.DECIMAL, nullable=True)
+    pemetaan_bridge_length = db.Column(db.DECIMAL, nullable=True)
 
     supradesa_code = db.Column(db.String, nullable=True)
     fk_region_id = db.Column(db.String, db.ForeignKey('regions.id'))

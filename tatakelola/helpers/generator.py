@@ -16,6 +16,9 @@ class Generator:
     @staticmethod
     def generate_penduduk_summary_by_region(summary, region):
         penduduks = penduduk_repository.get_by_region(region.id)
+        print(region.name)
+        print(len(penduduks))
+        
         summary = SummaryPendudukTransformer.transform(summary, penduduks)
         summary.fk_region_id = region.id
         return summary
@@ -63,7 +66,7 @@ class Generator:
         if landuse is not None:
             summary = SummaryGeojsonTransformer.transform(summary, landuse.data, 'landuse')
         if facilities is not None:
-            sumamry = SummaryGeojsonTransformer.transform(summary, facilities.data, 'facilities_infrastructures')
+            summary = SummaryGeojsonTransformer.transform(summary, facilities.data, 'facilities_infrastructures')
         if transportations is not None:
             summary = SummaryGeojsonTransformer.transform(summary, transportations.data, 'network_transportation')
         return summary
@@ -71,7 +74,12 @@ class Generator:
     @staticmethod
     def generate_summaries(supradesa_code='lokpri', year='2018'):
         result = []
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
         
         for region in regions:
             summary_repository.delete_by_region(region.id)
@@ -88,7 +96,12 @@ class Generator:
     @staticmethod
     def generate_layouts(supradesa_code='lokpri', year='2018'):
         result = []
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
         
         for region in regions:
             penduduks = penduduk_repository.get_by_region(region.id)
@@ -105,7 +118,12 @@ class Generator:
 
     @staticmethod
     def generate_boundaries(supradesa_code='lokpri', year='2018'):
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
         
         boundary = Boundary()
         boundary.supradesa_code = supradesa_code

@@ -22,6 +22,7 @@ class TatakelolaFetcher():
     def fetch_desas():
         sd_desas = sideka_desa_repository.all()
         for sd_desa in sd_desas:
+            
             if (sd_desa.kode is None or len(sd_desa.kode) == 0):
                 continue
 
@@ -40,6 +41,8 @@ class TatakelolaFetcher():
     def fetch_geojsons_by_region(region):
         geojson_repository.delete_by_region(region.id)
 
+        regionName = region.name
+        print(regionName)
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('pemetaan', None, region.desa_id)
         if (sd_content is None):
             logger.warning('Region: {0}<{1}><{2}> does not have geojsons'.format(region.name, region.id, region.desa_id))
@@ -87,7 +90,7 @@ class TatakelolaFetcher():
             penduduk.jenis_kelamin = d['jenis_kelamin']
             penduduk.tempat_lahir = d['tempat_lahir']
 
-            if penduduk.tanggal_lahir != None:
+            if d['tanggal_lahir'] != None:
                 penduduk.tanggal_lahir = datetime.strptime(d['tanggal_lahir'], '%d/%m/%Y') 
 
             penduduk.status_kawin = d['status_kawin']
@@ -152,7 +155,13 @@ class TatakelolaFetcher():
 
     @staticmethod
     def fetch_geojsons(supradesa_code='lokpri'):
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
+
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_geojsons_by_region(region)
@@ -163,7 +172,13 @@ class TatakelolaFetcher():
 
     @staticmethod
     def fetch_data(supradesa_code='lokpri'):
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
+
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_data_by_region(region)
@@ -174,7 +189,13 @@ class TatakelolaFetcher():
 
     @staticmethod
     def fetch_apbdes(supradesa_code='lokrpi'):
-        regions = region_repository.get_by_supradesa_code(supradesa_code)
+        regions = []
+
+        if (supradesa_code == "all"):
+            regions = region_repository.all()
+        else:
+            regions = region_repository.get_by_supradesa_code(supradesa_code)
+
         for region in regions:
             try:
                 TatakelolaFetcher.fetch_apbdes_by_region(region)

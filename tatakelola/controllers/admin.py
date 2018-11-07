@@ -23,25 +23,21 @@ def fetch_desa_ids():
 @app.route('/admin/fetch/all', methods=['GET'])
 def fetch_all():
     t0 = time()
-    TatakelolaFetcher.fetch_desas()
-    TatakelolaFetcher.fetch_geojsons()
-    TatakelolaFetcher.fetch_data()
-    TatakelolaFetcher.fetch_apbdes()
+    #TatakelolaFetcher.fetch_desas()
+    #TatakelolaFetcher.fetch_geojsons('18.05')
+    TatakelolaFetcher.fetch_data('18.05')
+    #TatakelolaFetcher.fetch_apbdes('18.05')
     db.session.commit()
-    current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
+    #current_app.logger.info('Fetch Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
 
 @app.route('/admin/generate/all', methods=['GET'])
 def generate_all():
     t0 = time()
-    summaries = Generator.generate_summaries()
-    pekerjaan = Generator.generate_pekerjaan_statistics()
-    pendidikan = Generator.generate_pendidikan_statistics()
+    summaries = Generator.generate_summaries('18.05')
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(summaries)
-    db.session.add_all(pekerjaan)
-    db.session.add_all(pendidikan)
     db.session.commit()
     current_app.logger.info('Generate Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
@@ -49,7 +45,7 @@ def generate_all():
 @app.route('/admin/generate/layouts', methods=['GET'])
 def generate_layouts():
     t0 = time()
-    layouts = Generator.generate_layouts()
+    layouts = Generator.generate_layouts('18.05')
 
     db.session.add_all(layouts)
     db.session.commit()
@@ -59,7 +55,7 @@ def generate_layouts():
 @app.route('/admin/generate/boundaries', methods=['GET'])
 def generate_boundaries():
     t0 = time()
-    boundary = Generator.generate_boundaries()
+    boundary = Generator.generate_boundaries('18.05')
 
     db.session.add(boundary)
     db.session.commit()

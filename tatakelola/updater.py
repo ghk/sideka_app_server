@@ -13,7 +13,7 @@ app = create_app()
 db.app=app
 db.init_app(app)
 
-supradesa_code = '18.05'
+supradesa_code = 'all'
 boundary_repository = BoundaryRepository(db)
 
 if len(sys.argv) > 1:
@@ -52,7 +52,7 @@ def generate_all():
     db.session.add_all(summaries)
 
     if prev_boundary != None:
-        db.session.delete(prev_boundary)
+       db.session.delete(prev_boundary)
 
     db.session.commit()
 

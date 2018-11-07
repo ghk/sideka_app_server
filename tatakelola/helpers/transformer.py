@@ -6,6 +6,7 @@ import math
 from math import pi, cos, sqrt
 from tatakelola.models import Summary, PendudukReference
 from area import area
+from datetime import date
 
 logger = logging.getLogger('tatakelola')
 
@@ -25,6 +26,16 @@ pendidikan_groups = {
     "Tamat PT": ['Tamat D-1/sederajat', 'Tamat D-2/sederajat', 'Tamat D-3/sederajat', 'Tamat D-4/sederajat',
     'Tamat S-1/sederajat', 'Sedang S-2/sederajat', 'Tamat S-2/sederajat', 'Sedang S-3/sederajat',
     'Tamat S-3/sederajat']
+}
+
+penduduk_range = {
+    "0_15": [0, 15],
+    "15_25": [15, 25],
+    "25_35": [25, 35],
+    "35_45": [35, 45],
+    "45_55": [45, 55],
+    "55_65": [55, 65],
+    "65": [65, 100]
 }
 
 class ContentTransformer:
@@ -109,7 +120,6 @@ class SummaryPendudukTransformer:
         
         ref = PendudukReference()
         for penduduk in penduduks:
-
             if penduduk.jenis_kelamin == 'Laki-Laki':
                 summary.penduduk_sex_male += 1
             elif penduduk.jenis_kelamin == 'Perempuan':
@@ -173,6 +183,10 @@ class SummaryGeojsonTransformer:
 class ParsePemetaanData:
     @staticmethod
     def parse(features, type, summary):
+        farmland_trees = []
+        orchard_orchards = []
+        forest_trees = []
+        
         for feature in features:
             if feature.has_key('properties') == False or feature['geometry'] == None:
                 if type == 'network_transportation' and feature['geometry'] != None:
@@ -345,11 +359,55 @@ class StatisticTransformer:
             
         return result
 
+    @staticmethod
+    def transform_penduduk_productivity_raw(penduduks): 
+       result = []
+       today = date.today()
+       
+       for key in penduduk_range.iterkeys():
+           bounds = penduduk_range[key]
+           range = StatisticTransformer.create_range(bounds[0], bounds[1])
+           total_male = 0
+           total_female = 0
+           total_unknown = 0
+
+           for penduduk in penduduks:
+              print(penduduk.nama_penduduk)
+              print(penduduk.tanggal_lahir)
+
+              if penduduk.tanggal_lahir is None:
+                  continue
+
+              age = today.year - penduduk.tanggal_lahir.year
+            
+              if age in range:
+                  if penduduk.jenis_kelamin == "Laki-Laki":
+                     total_male += 1
+                  elif penduduk.jenis_kelamin == "Perempuan":
+                     total_female += 1
+                  else:
+                     total_unknown += 1
+
+           result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "key": key })
+           result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "key": key})
+           result.append({"jenis_kelamin": "Tidak Diketahui", "jumlah": total_unknown, "key": key })
+
+       return result
+
+    @staticmethod
+    def create_range(lower, upper):
+        result = []
+        for i in range(lower, upper):
+            result.append(i)
+
+        return result
+
 class LayoutTransformer:
     @staticmethod
     def transform(layout, geoJsons, penduduks):
         pekerjaan_statistic_raw = StatisticTransformer.transform_pekerjaan_raw(penduduks)
         pendidikan_statistic_raw = StatisticTransformer.transform_pendidikan_raw(penduduks)
+        penduduk_statistic_raw = StatisticTransformer.transform_penduduk_productivity_raw(penduduks)
 
         apbdes_features = filter(lambda x: x.type == 'log_pembangunan', geoJsons)
         landuse_features = filter(lambda x: x.type == 'landuse', geoJsons)
@@ -393,8 +451,7 @@ class LayoutTransformer:
 
         
         layout.data["properties"] = {"statistics": []}
-        layout.data["properties"]["statistics"] = {"pekerjaan": pekerjaan_statistic_raw, "pendidikan": pendidikan_statistic_raw}
-
+        layout.data["properties"]["statistics"] = {"pekerjaan": pekerjaan_statistic_raw, "pendidikan": pendidikan_statistic_raw, "penduduk": penduduk_statistic_raw}
         return layout 
 
 
