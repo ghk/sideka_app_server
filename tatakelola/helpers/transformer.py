@@ -437,9 +437,12 @@ class LayoutTransformer:
 
         if len(building_features) > 0:
             for feature in building_features[0].data["features"]:
-
-                if feature["geometry"]["type"] == "Polygon":
-                    layout.data["base"].append(feature)
+                if feature == None:
+                    continue
+                    
+                if feature.has_key("geometry"):
+                    if feature["geometry"]["type"] == "Polygon":
+                        layout.data["base"].append(feature)
 
                 if feature.has_key("properties"):
                     if feature["properties"].has_key("amenity"):
