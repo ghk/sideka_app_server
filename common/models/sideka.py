@@ -103,10 +103,22 @@ class SdSupradesa(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
 
-
 class SdSupradesaSchema(ma.ModelSchema):
     class Meta:
         model = SdSupradesa
+
+class SdPostScores(db.Model):
+    __tablename__ = 'sd_post_scores'
+    __bind_key__ = 'sideka'
+    blog_id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    post_id = db.Column(db.Integer, primary_key=True, autoincrement=False)
+    post_date = db.Column(db.TIMESTAMP(timezone=False), default=datetime.utcnow)
+    score_value = db.Column(db.Float)
+    score = db.Column(db.Text)
+
+class SdPostScoresSchema(ma.ModelSchema):
+    class Meta:
+        model = SdPostScores
 
 class json_length(FunctionElement):
     name = 'json_length'

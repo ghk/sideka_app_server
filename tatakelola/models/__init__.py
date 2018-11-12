@@ -9,4 +9,4 @@ from summary import Summary, SummaryModelSchema
 from statistic import Statistic, StatisticModelSchema
 from layout import Layout, LayoutModelSchema
 from boundary import Boundary, BoundaryModelSchema
-from common.models import SdContent, SdContentSchema, SdDesa, SdDesaSchema
+from common.models import SdContent, SdContentSchema, SdDesa, SdDesaSchema, SdPostScores, SdPostScoresSchema

@@ -31,7 +31,7 @@ def create_app():
     app.register_blueprint(StatisticController)
     app.register_blueprint(LayoutController)
     app.register_blueprint(BoundaryController)
-
+    app.register_blueprint(PostController)
     db.init_app(app)
     ma.init_app(app)
     CORS(app)

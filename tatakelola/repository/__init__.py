@@ -10,3 +10,4 @@ from summary import SummaryRepository
 from statistic import StatisticRepository
 from layout import LayoutRepository
 from boundary import BoundaryRepository
+from post import PostRepository
