@@ -365,33 +365,34 @@ class StatisticTransformer:
        today = date.today()
        
        for key in penduduk_range.iterkeys():
-           bounds = penduduk_range[key]
-           range = StatisticTransformer.create_range(bounds[0], bounds[1])
-           total_male = 0
-           total_female = 0
-           total_unknown = 0
+           try:
+                bounds = penduduk_range[key]
+                range = StatisticTransformer.create_range(bounds[0], bounds[1])
+                total_male = 0
+                total_female = 0
+                total_unknown = 0
 
-           for penduduk in penduduks:
-              print(penduduk.nama_penduduk)
-              print(penduduk.tanggal_lahir)
+                for penduduk in penduduks:
+                    if penduduk.tanggal_lahir is None:
+                        continue
 
-              if penduduk.tanggal_lahir is None:
-                  continue
+                    age = today.year - penduduk.tanggal_lahir.year
+                    
+                    if age in range:
+                        if penduduk.jenis_kelamin == "Laki-Laki":
+                            total_male += 1
+                        elif penduduk.jenis_kelamin == "Perempuan":
+                            total_female += 1
+                        else:
+                            total_unknown += 1
 
-              age = today.year - penduduk.tanggal_lahir.year
-            
-              if age in range:
-                  if penduduk.jenis_kelamin == "Laki-Laki":
-                     total_male += 1
-                  elif penduduk.jenis_kelamin == "Perempuan":
-                     total_female += 1
-                  else:
-                     total_unknown += 1
+                result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "key": key })
+                result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "key": key})
+                result.append({"jenis_kelamin": "Tidak Diketahui", "jumlah": total_unknown, "key": key })
 
-           result.append({"jenis_kelamin": "Laki-Laki", "jumlah": total_male, "key": key })
-           result.append({"jenis_kelamin": "Perempuan", "jumlah": total_female, "key": key})
-           result.append({"jenis_kelamin": "Tidak Diketahui", "jumlah": total_unknown, "key": key })
-
+           except:
+               continue
+               
        return result
 
     @staticmethod

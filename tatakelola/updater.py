@@ -13,7 +13,7 @@ app = create_app()
 db.app=app
 db.init_app(app)
 
-supradesa_code = 'all'
+supradesa_code = 'lokpri'
 boundary_repository = BoundaryRepository(db)
 
 if len(sys.argv) > 1:
@@ -57,5 +57,5 @@ def generate_all():
     db.session.commit()
 
 if __name__ == '__main__':
-    fetch_all()
+    #fetch_all()
     generate_all()
