@@ -41,13 +41,13 @@ def generate_all(year):
     srs = Generator.generate_budget_recapitulations_by_year(year)
 
     #print "Generating %s likehoods..." % year
-    sls = Generator.generate_siskeudes_likelihood_by_year(year)
+    #sls = Generator.generate_siskeudes_likelihood_by_year(year)
 
     # TODO: Improve speed by using bulk_save_objects
     db.session.add_all(prs)
     db.session.add_all(pts)
     db.session.add_all(srs)
-    db.session.add_all(sls)
+    #db.session.add_all(sls)
     db.session.commit()
 
 if __name__ == '__main__':

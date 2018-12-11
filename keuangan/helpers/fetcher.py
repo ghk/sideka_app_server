@@ -43,7 +43,6 @@ class SiskeudesFetcher:
         sd_contents = sideka_content_repository.get_latest_content('penerimaan', year)
         for sd_content in sd_contents:
             contents = ContentTransformer.transform(sd_content.content)
-            print 'desa id', sd_content.desa_id
             if not ('tbp' in contents):
                 logger.warning('Desa id: {0} does not have tbp'.format(sd_content.desa_id))
                 continue
@@ -74,7 +73,6 @@ class SiskeudesFetcher:
         siskeudes_kegiatan_repository.delete_by_region_and_year(region.id, year)
 
         desa_id = int(region.siskeudes_code[:2])*100 + int(region.siskeudes_code[3:5])
-        print "%s - %s" % (desa_id, region.siskeudes_code)
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, desa_id)
         if (sd_content is None):
             logger.warning(
@@ -112,7 +110,6 @@ class SiskeudesFetcher:
         siskeudes_penerimaan_rinci_repository.delete_by_region_and_year(region.id, year)
 
         desa_id = int(region.siskeudes_code[:2])*100 + int(region.siskeudes_code[3:5])
-        print "%s - %s" % (desa_id, region.siskeudes_code)
 
         sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, desa_id)
         if (sd_content is None):

@@ -135,10 +135,8 @@ class ProgressRecapitulationTransformer:
         budgeted_revenue_pak = 0
 
         for rinci in penerimaan_rincis:
-            sumber_dana = str(rinci.sumber_dana).strip()
-            if sumber_dana == 'DDS' or sumber_dana == 'ADD' or sumber_dana == 'PBH':
-                if rinci.nilai is not None:
-                    pr.transferred_revenue += rinci.nilai
+            if rinci.nilai is not None:
+                pr.transferred_revenue += rinci.nilai
 
         for rinci in spp_rincis:
             if rinci.nilai is not None:

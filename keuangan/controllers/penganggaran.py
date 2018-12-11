@@ -38,5 +38,6 @@ def get_siskeudes_penganggarans_by_region_and_year(region_id, year):
 @app.route('/siskeudes/penganggarans/region/<string:region_id>/year/<string:year>/spending', methods=['GET'])
 @cache.cached(timeout=1800, query_string=True)
 def get_siskeudes_penganggarans_total_spending_by_region_and_year(region_id, year):
-    result = siskeudes_penganggaran_repository.get_total_spending_by_region_and_year(region_id, year, False)
+    kabupaten = None if region_id != "0" else "33.25"
+    result = siskeudes_penganggaran_repository.get_total_spending_by_region_and_year(region_id, year, kabupaten)
     return jsonify(result)

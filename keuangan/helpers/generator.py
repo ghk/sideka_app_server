@@ -53,10 +53,8 @@ class Generator:
         result = []
         regions = region_repository.all(is_lokpri=False, is_siskeudes_code=True)
         for region in regions:
-            print "%s - %s" % (region.id, region.name)
             pr = Generator.generate_progress_recapitulation_by_region_and_year(region, year)
             result.append(pr)
-        print len(result)
         return result
 
     @staticmethod

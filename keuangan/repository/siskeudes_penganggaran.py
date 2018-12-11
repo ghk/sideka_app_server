@@ -9,22 +9,23 @@ class SiskeudesPenganggaranRepository(BaseRepository, BaseRegionRepository, Base
         self.model = SiskeudesPenganggaran
 
 
-    def get_total_spending_by_region_and_year(self, region_id, year, is_lokpri=True):
+    def get_total_spending_by_region_and_year(self, region_id, year, kabupaten):
         query = self.db.session.query(self.model)
 
-        if is_lokpri:
+        if kabupaten is not None:
             region = aliased(Region)
             query = query.join(region, self.model.region)
-            query = query.filter(region.is_lokpri == True)
+            query = query.filter(region.id.like(kabupaten+".%"))
 
         query = query.filter(self.model.kode_rekening == '5').filter(self.model.year == year)
 
-        if region_id != '0':
-            query = query.filter(self.model.fk_region_id == region_id)
+        #if region_id != '0':
+            #query = query.filter(self.model.fk_region_id == region_id)
 
         total = 0
         total_pak = 0
         entities = query.all()
+        print len(entities)
 
         for entity in entities:
             if entity.anggaran is not None:

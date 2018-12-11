@@ -63,7 +63,8 @@ export class ProgressRevenueChartComponent implements OnInit, OnDestroy {
                             return value.toLocaleString('id-ID') + '%';
                         else
                             return value.toLocaleString('id-ID');
-                    }
+                    },
+                    suggestedMax: 100
                 }
             }]
         },
@@ -126,7 +127,6 @@ export class ProgressRevenueChartComponent implements OnInit, OnDestroy {
 
         budgetRecapitulations.forEach(br => {
             budgetTypes.forEach(bt => {
-                console.log(br.fk_region_id);
                 if (bt.id !== br.fk_type_id)
                     return;
                 if (bt.code === 'DDS')

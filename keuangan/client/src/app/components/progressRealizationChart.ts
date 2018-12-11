@@ -59,7 +59,8 @@ export class ProgressRealizationChartComponent implements OnInit, OnDestroy {
                             return value.toLocaleString('id-ID') + '%';
                         else
                             return value.toLocaleString('id-ID');
-                    }
+                    },
+                    suggestedMax: 100
                 }
             }]
         },
@@ -114,6 +115,7 @@ export class ProgressRealizationChartComponent implements OnInit, OnDestroy {
     transformData(data: number[], total: number, isPercentage: boolean): void {        
         var currentValue = 0;       
         data.forEach((datum, index) => {
+            //console.log(datum, total, datum / total * 100);
             if (datum) {
                 if (isPercentage)
                     data[index] = datum / total * 100;

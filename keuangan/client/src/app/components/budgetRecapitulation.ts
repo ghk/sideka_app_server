@@ -139,7 +139,6 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
             });                  
         });
 
-        console.log(entities);
         let result = [];        
         Object.keys(entities).forEach(key => {
             //if (entities[key].total == 0) {
