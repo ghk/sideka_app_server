@@ -4,6 +4,7 @@ from logging.handlers import RotatingFileHandler
 from keuangan import create_app
 
 app = create_app()
+#app.config["APPLICATION_ROOT"] = "/api"
 
 if __name__ == "__main__":
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')

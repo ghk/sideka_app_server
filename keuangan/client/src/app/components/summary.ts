@@ -47,7 +47,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
                 })            
         });
 
-        this.year = '2017';
+        this.year = '2018';
 
         let regionSubscription = this._sharedService.getRegion().subscribe(region => {
             this.progress = null;

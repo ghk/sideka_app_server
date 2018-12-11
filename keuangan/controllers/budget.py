@@ -26,11 +26,11 @@ def get_budget_types():
 def get_budget_recapitulations_by_year(year):
     page_sort_params = QueryHelper.get_page_sort_params_from_request(request)
 
-    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
+    kabupaten = request.args.get('kabupaten', default="33.25", type=str)
     region_id = request.args.get('region_id', default=None, type=str)
     entities = None
-    if region_id is None:
-        entities = budget_recapitulation_repository.all_by_year(year, is_lokpri, page_sort_params)
+    if kabupaten is not None:
+        entities = budget_recapitulation_repository.all_by_kabupaten(year, kabupaten, page_sort_params)
     else:
         entities = budget_recapitulation_repository.get_by_region_and_year(region_id, year, page_sort_params)
 

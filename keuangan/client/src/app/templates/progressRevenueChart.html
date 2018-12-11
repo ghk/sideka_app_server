@@ -10,7 +10,7 @@
       <option [ngValue]="false">TOTAL</option>
       <option [ngValue]="true">PERSENTASE</option>
     </select>
-    Penyaluran {{ region?.name }}
+    Penyaluran {{region?.id == 0 ? 'se-Kabupaten' : region?.name}}
   </div>
   <br />
   <div>

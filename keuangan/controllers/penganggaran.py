@@ -38,6 +38,5 @@ def get_siskeudes_penganggarans_by_region_and_year(region_id, year):
 @app.route('/siskeudes/penganggarans/region/<string:region_id>/year/<string:year>/spending', methods=['GET'])
 @cache.cached(timeout=1800, query_string=True)
 def get_siskeudes_penganggarans_total_spending_by_region_and_year(region_id, year):
-    is_lokpri = request.args.get('is_lokpri', default=True, type=bool)
-    result = siskeudes_penganggaran_repository.get_total_spending_by_region_and_year(region_id, year, is_lokpri)
+    result = siskeudes_penganggaran_repository.get_total_spending_by_region_and_year(region_id, year, False)
     return jsonify(result)

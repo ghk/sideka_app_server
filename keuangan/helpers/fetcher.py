@@ -73,10 +73,12 @@ class SiskeudesFetcher:
         siskeudes_penganggaran_repository.delete_by_region_and_year(region.id, year)
         siskeudes_kegiatan_repository.delete_by_region_and_year(region.id, year)
 
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, region.desa_id)
+        desa_id = int(region.siskeudes_code[:2])*100 + int(region.siskeudes_code[3:5])
+        print "%s - %s" % (desa_id, region.siskeudes_code)
+        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penganggaran', year, desa_id)
         if (sd_content is None):
             logger.warning(
-                'Region: {0}<{1}><{2}> does not have anggaran'.format(region.name, region.id, region.desa_id))
+                'Region: {0}<{1}><{2}> does not have anggaran'.format(region.name, region.id, desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -109,9 +111,12 @@ class SiskeudesFetcher:
         siskeudes_penerimaan_repository.delete_by_region_and_year(region.id, year)
         siskeudes_penerimaan_rinci_repository.delete_by_region_and_year(region.id, year)
 
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, region.desa_id)
+        desa_id = int(region.siskeudes_code[:2])*100 + int(region.siskeudes_code[3:5])
+        print "%s - %s" % (desa_id, region.siskeudes_code)
+
+        sd_content = sideka_content_repository.get_latest_content_by_desa_id('penerimaan', year, desa_id)
         if (sd_content is None):
-            logger.info('Region: {0}<{1}><{2}> does not have penerimaan'.format(region.name, region.id, region.desa_id))
+            logger.info('Region: {0}<{1}><{2}> does not have penerimaan'.format(region.name, region.id, desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)
@@ -128,9 +133,10 @@ class SiskeudesFetcher:
         siskeudes_spp_bukti_repository.delete_by_region_and_year(region.id, year)
         siskeudes_spp_rinci_repository.delete_by_region_and_year(region.id, year)
 
-        sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, region.desa_id)
+        desa_id = int(region.siskeudes_code[:2])*100 + int(region.siskeudes_code[3:5])
+        sd_content = sideka_content_repository.get_latest_content_by_desa_id('spp', year, desa_id)
         if (sd_content is None):
-            logger.info('Region: {0}<{1}><{2}> does not have spp'.format(region.name, region.id, region.desa_id))
+            logger.info('Region: {0}<{1}><{2}> does not have spp'.format(region.name, region.id, desa_id))
             return
 
         contents = ContentTransformer.transform(sd_content.content)

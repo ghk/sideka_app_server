@@ -4,8 +4,8 @@
             <ul class="nav front-numbers">
                 <li>
                     <span class="number">{{ region?.name }}
-                        <span style="font-size:24px;"> - {{ region | regionType:2 }}</span>
-                        <a href="region?.domain" style="font-size:14px;">Web Desa</a>
+                        <span style="font-size:24px;"> - {{ region | regionType:3 }}</span>
+                        <a *ngIf="region?.domain" href="http://{{region?.domain}}" style="font-size:14px;">Web Desa</a>
                     </span>
                 </li>
             </ul>

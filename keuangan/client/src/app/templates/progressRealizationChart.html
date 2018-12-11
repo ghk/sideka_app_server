@@ -10,7 +10,7 @@
       <option [ngValue]="false">TOTAL</option>
       <option [ngValue]="true">PERSENTASE</option>
     </select>
-    <a routerLink="/budget/region/{{region?.id}}">Realisasi {{ region?.name }}</a>
+    <a routerLink="/budget/region/{{region?.id}}">Realisasi {{region?.id == 0 ? 'se-Kabupaten' : region?.name}}</a>
   </div>
   <br />
   <div>

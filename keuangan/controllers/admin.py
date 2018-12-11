@@ -20,7 +20,7 @@ def fetch_desas():
 @app.route('/admin/fetch/siskeudes_codes', methods=['GET'])
 def fetch_siskeudes_codes():
     t0 = time()
-    SiskeudesFetcher.fetch_siskeudes_codes()
+    #SiskeudesFetcher.fetch_siskeudes_codes()
     db.session.commit()
     current_app.logger.info('Fetch Siskeudes Code Total Time: ' + str(time() - t0) + ' seconds')
     return jsonify({'success': True})
@@ -31,7 +31,7 @@ def fetch_all(year):
     t0 = time()
 
     SiskeudesFetcher.fetch_desas()
-    SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
+    #SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
     SiskeudesFetcher.fetch_penerimaans_by_year(year)
     SiskeudesFetcher.fetch_penganggarans_by_year(year)
     SiskeudesFetcher.fetch_spps_by_year(year)

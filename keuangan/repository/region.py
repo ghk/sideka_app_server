@@ -18,6 +18,9 @@ class RegionRepository(BaseRepository):
 
         if (is_lokpri):
             query = query.filter(self.model.is_lokpri == True)
+        else:
+            query = query.filter(self.model.id.like('33.25.%'))
+
 
         if (is_siskeudes_code):
             query = query.filter(self.model.siskeudes_code.isnot(None))

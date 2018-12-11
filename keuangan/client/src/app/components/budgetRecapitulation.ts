@@ -64,7 +64,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        this.year = '2017';
+        this.year = '2018';
 
         let budgetTypeSubscription = this._budgetType.subscribe(x => { this.getBudgetTypes(); })
         let budgetTypesSubscription = this._budgetTypes.subscribe(x => { this.transformData(); });
@@ -139,11 +139,12 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
             });                  
         });
 
+        console.log(entities);
         let result = [];        
         Object.keys(entities).forEach(key => {
-            if (entities[key].total == 0) {
-                delete entities[key];
-            } else {
+            //if (entities[key].total == 0) {
+                //delete entities[key];
+            //} else {
                 Object.keys(entities[key].data).forEach(dataKey => {
                     entities[key].barPercent[dataKey] = this.getBarPercent(entities[key].data[dataKey], entities[key].total);                    
                 })
@@ -154,7 +155,7 @@ export class BudgetRecapitulationComponent implements OnInit, OnDestroy {
                     'barPercent': entities[key]['barPercent']
                 };
                 result.push(data);
-            };
+            //};
         })
         
         this.entities = result;

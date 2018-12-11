@@ -36,7 +36,7 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        let year = '2017'
+        let year = '2018'
 
         let query: Query = {
             sort: 'region.id'
@@ -49,9 +49,9 @@ export class ProgressRecapitulationComponent implements OnInit, OnDestroy {
                 for (let i = this.entities.length - 1; i >= 0; i--) {
                     if (this.entities[i].budgeted_revenue === 0 &&
                         this.entities[i].transferred_revenue === 0 &&
-                        this.entities[i].realized_spending === 0)
-                        this.entities.splice(i, 1);                  
-                    else {
+                        this.entities[i].realized_spending === 0) {
+                        //this.entities.splice(i, 1);                  
+                    } else {
                         this.total.budgetedRevenue += this.entities[i].budgeted_revenue;
                         this.total.transferredRevenue += this.entities[i].transferred_revenue;
                         this.total.realizedSpending += this.entities[i].realized_spending;  

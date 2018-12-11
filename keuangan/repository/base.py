@@ -43,6 +43,19 @@ class BaseRegionRepository:
 
         return query.all()
 
+    def all_by_kabupaten(self, year, kabupaten, page_sort_params=None):
+        query = self.db.session.query(self.model)
+
+
+        region = aliased(Region)
+        query = query.outerjoin(region, self.model.region)
+        query = query.filter(region.id.like(kabupaten+".%"))
+
+        query = query.filter(self.model.year == year)
+        query = QueryHelper.build_page_sort_query(query, self.model, page_sort_params)
+
+        return query.all()
+
     def count_by_year(self, year, is_lokpri=True):
         query = self.db.session.query(self.model)
 
@@ -50,6 +63,18 @@ class BaseRegionRepository:
             region = aliased(Region)
             query = query.outerjoin(region, self.model.region)
             query = query.filter(region.is_lokpri == True)
+
+        query = query.filter(self.model.year == year)
+
+        return query.count()
+
+    def count_by_kabupaten(self, year, is_lokpri=True):
+        query = self.db.session.query(self.model)
+
+        region = aliased(Region)
+        query = query.outerjoin(region, self.model.region)
+        query = query.filter(region.id.like(kabupaten+".%"))
+
 
         query = query.filter(self.model.year == year)
 

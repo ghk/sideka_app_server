@@ -33,7 +33,7 @@
                   <span [hidden]="!order.startsWith('-')">▼</span>
                 </ng-container>
               </th>
-              <th (click)="sort('region.id')" style="cursor: pointer;">Kabupaten
+              <th (click)="sort('region.id')" style="cursor: pointer;">Kecamatan
                 <ng-container *ngIf="order.includes('region.id')">
                   <span [hidden]="order.startsWith('-')">▲</span>
                   <span [hidden]="!order.startsWith('-')">▼</span>
@@ -67,7 +67,7 @@
                 </a>
               </td>
               <td>
-                <span>{{ entity.region | regionType:2 }}</span>
+                <span>{{ entity.region | regionType:3 }}</span>
               </td>
               <td class="money">
                 <div style="float:right;">{{ entity.budgeted_revenue | number:'3.0-0' }}</div>

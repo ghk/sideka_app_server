@@ -14,10 +14,10 @@ db.init_app(app)
 
 def fetch_all(year):
     print "Fetching desa..."
-    SiskeudesFetcher.fetch_desas()
+    #SiskeudesFetcher.fetch_desas()
 
-    print "Fetching %s siskeudes codes..." % year
-    SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
+    #print "Fetching %s siskeudes codes..." % year
+    #SiskeudesFetcher.fetch_siskeudes_codes_by_year(year)
 
     print "Fetching %s penerimaans..." % year
     SiskeudesFetcher.fetch_penerimaans_by_year(year)
@@ -40,7 +40,7 @@ def generate_all(year):
     print "Generating %s budget recapitulations..." % year
     srs = Generator.generate_budget_recapitulations_by_year(year)
 
-    print "Generating %s likehoods..." % year
+    #print "Generating %s likehoods..." % year
     sls = Generator.generate_siskeudes_likelihood_by_year(year)
 
     # TODO: Improve speed by using bulk_save_objects
@@ -51,7 +51,7 @@ def generate_all(year):
     db.session.commit()
 
 if __name__ == '__main__':
-    fetch_all("2017")
-    generate_all("2017")
+    #fetch_all("2017")
+    #generate_all("2017")
     fetch_all("2018")
     generate_all("2018")
